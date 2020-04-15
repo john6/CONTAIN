@@ -7,8 +7,8 @@ class Level
 {
 protected:
 	int m_lvl_num;
-	std::vector<Entity> lvlBoundaries;
-	std::vector<Entity> lvlEntites;
+	std::vector<RigidBody> lvlBoundaries;
+	std::vector<RigidBody> lvlEntites;
 	int enemiesRemaining;
 	float gameSpeedPerMill;
 	float playerSpeed;
@@ -20,7 +20,7 @@ public:
 	~Level();
 
 	int GetLvlNum();
-	std::vector<Entity> GetLvlBoundaries();
-	std::vector<Entity> GetLvlEntites();
+	std::vector<RigidBody> GetLvlBoundaries();
+	std::vector<RigidBody>* GetLvlEntites();
 };
 

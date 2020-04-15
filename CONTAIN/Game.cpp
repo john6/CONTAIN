@@ -7,16 +7,20 @@ Game::Game(RESOURCES* i_resources, DIFFICULTY i_difficulty)
 	font = resources->GetFont();
 	numLvls = 3;
 	currLvl = 0;
+	timeToComplete = 10000000000000.0f;
+	playState = GENERAL_GAMEPLAY;
 }
 
  
 Game::~Game()
 {
+	//I DONT KNOW WHY THE DESTRUCTOR IS GETTING CALLED, GOOD THING MY DELETE IS SAFE AMIRITE
+	DeleteLevels();
 }
 
-GAME_STATE Game::Update(float microSeconds) {
+GAME_STATE Game::Update(float i_microSeconds) {
 	timeElapsed = std::chrono::duration_cast<std::chrono::seconds>(hiResTime::now() - beginTime);
-	float millisecLag = abs(microSeconds / MICROSECONDS_TO_MILLISECONDS);
+	float millisecLag = abs(i_microSeconds / MICROSECONDS_TO_MILLISECONDS);
 	PollKeys(millisecLag);
 	if (timeElapsed.count() >= timeToComplete) {
 		return LOSE;
@@ -34,21 +38,43 @@ GAME_STATE Game::Update(float microSeconds) {
 	UpdateHUD();
 }
 
-GAME_STATE Game::UpdateGeneral(float stepSize) {
+GAME_STATE Game::UpdateGeneral(float i_stepSize) {
 	//player movement
 	//other object movement
 	//collisions
 	//BreakObject Bounce
 	//delete objects
+	//levels[currLvl]->GetLvlBoundaries();
+	//levels[currLvl]->GetLvlEntites();
+	UpdateLvlEntities(levels[currLvl]->GetLvlEntites(), i_stepSize);
 	return IN_GAME;
 }
+
+GAME_STATE  Game::UpdateLvlEntities(std::vector<RigidBody>* i_lvlEnts, float i_stepSize) {
+
+	for (int i = 0; i < i_lvlEnts->size(); ++i) {
+		RigidBody* entPtr  = &i_lvlEnts->at(i);
+		Physics::MoveEntity(entPtr, i_stepSize);
+	}
+	for (int i = 0; i < i_lvlEnts->size(); ++i) {
+		for (int j = 0; j < i_lvlEnts->size(); ++j) {
+			RigidBody* entPtri = &i_lvlEnts->at(i);
+			RigidBody* entPtrj = &i_lvlEnts->at(j);
+			if (entPtri != entPtrj) {
+				Physics::TestCollision(entPtri, entPtrj);
+			}
+		}
+	}
+	return IN_GAME;
+}
+
 
 void Game::UpdateHUD() {
 
 }
 
-void Game::PollKeys(float stepSize) {
-	float paddleStep = gameSpeedPerMill * stepSize;
+void Game::PollKeys(float i_stepSize) {
+	float paddleStep = gameSpeedPerMill * i_stepSize;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) {
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
@@ -59,23 +85,22 @@ void Game::PollKeys(float stepSize) {
 	}
 }
 
-void Game::Render(sf::RenderWindow* window) {
-	//SHOULD TRANFER ALL ENTITES TO "Render.cpp"
+void Game::Render(sf::RenderWindow* i_window, float i_elapsedMilliseconds) {
+	GameRenderer::Render(i_window, i_elapsedMilliseconds, levels[currLvl]->GetLvlEntites());
 }
 
 void Game::GenerateLevels(DIFFICULTY i_diff) {
 	DeleteLevels();
-	Level* lvlOne = new Level(0, i_diff);
-	Level* lvlTwo = new Level(0, i_diff);
-	Level* lvlThree = new Level(0, i_diff);
-	levels.insert(levels.begin(), lvlOne);
-	levels.insert(levels.begin() + 1, lvlTwo);
-	levels.insert(levels.begin() + 2, lvlThree);
+	for (int i = 0; i < numLvls; ++i) {
+		Level* lvl = new Level(i, i_diff);
+		levels.push_back(lvl);
+	}
 }
 
 void Game::DeleteLevels() {
-	for (int i = 0; i < numLvls; i++) {
-		delete &levels[i];
+	int size = levels.size();
+	for (int i = 0; i < size; ++i) {
+		delete levels[i];
 	}
 	levels.clear();
 }

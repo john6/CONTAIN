@@ -8,9 +8,12 @@
 #include "Game.h"
 #include "Menu.h"
 
+//NEED TO ADD CLAMPING
+//NEED TO ADD LERP I GUESS
+
 int main()
 {
-	sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "BREAKOUT");
+	sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "CONTAIN");
 
 	int currLvl;
 	RESOURCES resources = RESOURCES();
@@ -35,11 +38,11 @@ int main()
 			switch (state) {
 			case MENU: {
 				sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
-				state = menu.Update((float)UPDATE_INTERVAL.count(), &window, mousePosition);
+				state = menu.Update(static_cast<float>(lag.count()), &window, mousePosition);
 				break;
 			}
 			case IN_GAME: {
-				state = game->Update((float)UPDATE_INTERVAL.count());
+				state = game->Update(static_cast<float>(lag.count()));
 				break;
 			}
 			case WIN: {
@@ -58,14 +61,16 @@ int main()
 				break;
 			}
 			}
+			//Set a max for lag if I wanna clamp
 			lag -= UPDATE_INTERVAL;
 		}
 		if (state == IN_GAME) {
 			//std::cout << "render game\n";
-			game->Render(&window);
+			game->Render(&window, static_cast<float>(lag.count()));
 		}
 		else {
 			//std::cout << "render menu\n";
+			//In order to make linear interpolation work I gotta have the physics data from the last frame handy
 			menu.Render(&window);
 		}
 	}

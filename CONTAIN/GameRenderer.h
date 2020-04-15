@@ -9,10 +9,8 @@ private:
 	sf::Vector2f screenDimensions;
 
 public:
-	GameRenderer(sf::Vector2f i_screenDimensions, sf::RenderWindow* i_window);
+	GameRenderer();
 	~GameRenderer();
 
-	static void Render(float i_elapsedMilliseconds, std::vector<Entity> i_entityList);
-
-	static sf::RectangleShape CreateDrawableEntity(Entity i_entity);
+	static void Render(sf::RenderWindow* i_window, float i_elapsedMilliseconds, std::vector<RigidBody>* i_entityList);
 };

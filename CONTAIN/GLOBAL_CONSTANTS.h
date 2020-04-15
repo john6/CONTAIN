@@ -1,12 +1,14 @@
 #pragma once
 
 #include <chrono>
+#include <Eigen/Dense>
+#include <SFML/Graphics.hpp>
 
 //https://www.fluentcpp.com/2019/07/23/how-to-define-a-global-constant-in-cpp/
 //according to this article I should be adding extern here but that means I have to define these variables elsewhere also because I dont use CPP17
 
 //WINDOW RESOLUTION
-const int SCREEN_WIDTH = 900;
+const int SCREEN_WIDTH = 1800;
 const int SCREEN_HEIGHT = 900;
 
 //GAME RESOLUTION
@@ -55,8 +57,15 @@ const float SECONDS_TO_WIN_HARD = 135.0f;
 enum GAME_STATE { MENU, START_GAME, IN_GAME, EXIT_GAME, WIN, LOSE };
 enum MOUSE_STATE { UP, DOWN };
 enum DIFFICULTY { EASY, MEDIUM, HARD };
+enum ENTITY_TYPE { WALL, DOOR, ENEMY, PLAYER, PROJECTILE};
 
 //TIME STUFF
 typedef std::chrono::high_resolution_clock               hiResTime;
 typedef std::chrono::microseconds                        microSec;
 typedef std::chrono::high_resolution_clock::time_point   hiRes_time_point;
+
+
+//EIGEN STUFF
+//Using a typedef jus to remove one level of namespace might be a little gratuitous but everyone keeps telling me namespaces are bad sooo
+typedef Eigen::Vector2f Vector2f;
+typedef Eigen::Matrix<float, 2, 2> Matrix2f;

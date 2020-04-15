@@ -6,6 +6,7 @@
 #include <SFML/Audio.hpp>
 #include "GLOBAL_CONSTANTS.h"
 #include "RESOURCES.h"
+#include "Physics.h"
 #include "GameRenderer.h"
 #include "HeadsUpDisplay.h"
 #include "Level.h"
@@ -21,7 +22,7 @@ private:
 	PLAY_STATE playState;
 	sf::Font font;
 	int currLvl;
-	int numLvls;
+	int numLvls;  //Not being used yet
 	std::vector<Level*> levels;
 	HeadsUpDisplay HUD;
 	int livesRemaining;
@@ -34,6 +35,7 @@ private:
 	float timeToComplete;
 
 	GAME_STATE UpdateGeneral(float i_stepSize);
+	GAME_STATE UpdateLvlEntities(std::vector<RigidBody>* i_lvlEnts, float i_stepSize);
 	void UpdateHUD();
 	void PollKeys(float i_stepSize);
 	void DeleteLevels();
@@ -44,7 +46,7 @@ public:
 
 	GAME_STATE Update(float i_microSeconds);
 
-	void Render(sf::RenderWindow* window);
+	void Render(sf::RenderWindow* i_window, float i_elapsedMilliseconds);
 
 	void GenerateLevels(DIFFICULTY i_diff);
 

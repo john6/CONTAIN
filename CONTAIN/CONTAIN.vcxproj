@@ -20,6 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Button.cpp" />
+    <ClCompile Include="Circle.cpp" />
+    <ClCompile Include="CollisionData.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="GameRenderer.cpp" />
     <ClCompile Include="HeadsUpDisplay.cpp" />
@@ -27,11 +29,18 @@
     <ClCompile Include="LevelGenerator.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="MassData.cpp" />
     <ClCompile Include="Menu.cpp" />
+    <ClCompile Include="Physics.cpp" />
+    <ClCompile Include="Rectangle.cpp" />
     <ClCompile Include="RESOURCES.cpp" />
+    <ClCompile Include="Shape.cpp" />
+    <ClCompile Include="Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Button.h" />
+    <ClInclude Include="Circle.h" />
+    <ClInclude Include="CollisionData.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="GameRenderer.h" />
     <ClInclude Include="GLOBAL_CONSTANTS.h" />
@@ -39,12 +48,14 @@
     <ClInclude Include="Level.h" />
     <ClInclude Include="LevelGenerator.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="MassData.h" />
     <ClInclude Include="Menu.h" />
+    <ClInclude Include="Physics.h" />
+    <ClInclude Include="Rectangle.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="RESOURCES.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Font Include="kongtext.ttf" />
+    <ClInclude Include="Shape.h" />
+    <ClInclude Include="Transform.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="BreakoutJR.rc" />
@@ -107,7 +118,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\John Russell\gameDev\SFML\SFML-2.5.1\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\John Russell\gameDev\include\eigen;C:\Users\John Russell\gameDev\SFML\SFML-2.5.1\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>SFML_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -131,7 +142,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\John Russell\gameDev\SFML\SFML-2.5.1\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\John Russell\gameDev\include\eigen;C:\Users\John Russell\gameDev\SFML\SFML-2.5.1\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>SFML_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
