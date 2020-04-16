@@ -47,7 +47,8 @@ namespace UnitTest
 		//	std::shared_ptr<Circle> testCircle2 = std::make_shared<Circle>(60.0f);
 		//	Entity testCircleEnt1 = Entity(testCircle1);
 		//	Entity testCircleEnt2 = Entity(testCircle2);
-		//	testCircleEnt1.GetTransform()->SetPosition(Vector2f(0, 0));
+		//	testCircleEnt1.GetTransform()->Set
+		(Vector2f(0, 0));
 		//	testCircleEnt2.GetTransform()->SetPosition(Vector2f(0, 0));
 		//	//Assert::IsTrue(Physics::TestCollision(&testCircleEnt1, &testCircleEnt2));
 		//}

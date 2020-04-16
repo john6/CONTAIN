@@ -20,7 +20,7 @@ Game::~Game()
 
 GAME_STATE Game::Update(float i_microSeconds) {
 	timeElapsed = std::chrono::duration_cast<std::chrono::seconds>(hiResTime::now() - beginTime);
-	float millisecLag = abs(i_microSeconds / MICROSECONDS_TO_MILLISECONDS);
+	float millisecLag = abs(i_microSeconds / MICROSECS_TO_MILLISECS);
 	PollKeys(millisecLag);
 	if (timeElapsed.count() >= timeToComplete) {
 		return LOSE;
@@ -53,18 +53,22 @@ GAME_STATE Game::UpdateGeneral(float i_stepSize) {
 GAME_STATE  Game::UpdateLvlEntities(std::vector<RigidBody>* i_lvlEnts, float i_stepSize) {
 
 	for (int i = 0; i < i_lvlEnts->size(); ++i) {
-		RigidBody* entPtr  = &i_lvlEnts->at(i);
-		Physics::MoveEntity(entPtr, i_stepSize);
-	}
-	for (int i = 0; i < i_lvlEnts->size(); ++i) {
 		for (int j = 0; j < i_lvlEnts->size(); ++j) {
 			RigidBody* entPtri = &i_lvlEnts->at(i);
 			RigidBody* entPtrj = &i_lvlEnts->at(j);
 			if (entPtri != entPtrj) {
-				Physics::TestCollision(entPtri, entPtrj);
+				Physics::CheckCollision(entPtri, entPtrj);
 			}
 		}
 	}
+
+	for (int i = 0; i < i_lvlEnts->size(); ++i) {
+		RigidBody* entPtr = &i_lvlEnts->at(i);
+		entPtr->IntegrateForces();
+		entPtr->IntegrateVelocity(i_stepSize);
+	}
+
+
 	return IN_GAME;
 }
 

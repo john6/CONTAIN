@@ -1,5 +1,4 @@
-#pragma once
-#include "Entity.h"
+#include "RigidBody.h"
 #include "GLOBAL_CONSTANTS.h"
 
 class CollisionData

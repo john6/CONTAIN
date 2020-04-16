@@ -22,7 +22,7 @@
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="Circle.cpp" />
     <ClCompile Include="CollisionData.cpp" />
-    <ClCompile Include="Entity.cpp" />
+    <ClCompile Include="RigidBody.cpp" />
     <ClCompile Include="GameRenderer.cpp" />
     <ClCompile Include="HeadsUpDisplay.cpp" />
     <ClCompile Include="Level.cpp" />
@@ -41,7 +41,7 @@
     <ClInclude Include="Button.h" />
     <ClInclude Include="Circle.h" />
     <ClInclude Include="CollisionData.h" />
-    <ClInclude Include="Entity.h" />
+    <ClInclude Include="RigidBody.h" />
     <ClInclude Include="GameRenderer.h" />
     <ClInclude Include="GLOBAL_CONSTANTS.h" />
     <ClInclude Include="HeadsUpDisplay.h" />
