@@ -1,3 +1,4 @@
+#pragma once
 #include "RigidBody.h"
 #include "GLOBAL_CONSTANTS.h"
 
@@ -9,7 +10,8 @@ public:
 
 	RigidBody* entPtr1;
 	RigidBody* entPtr2;
-	float penetration;
 	Vector2f normal;
+	float penetration;
+	std::vector<Vector2f> contactPoints;
 };
 

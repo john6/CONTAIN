@@ -82,10 +82,10 @@ std::vector<Vector2f> RigidBody::GetFaceRectNormals()
 	std::vector<Vector2f> worldPoints = SwitchCoordsToWorldSpace(objectPoints);
 	std::vector<Vector2f> faceNormals;
 	if (shape->GetShapeType() == Shape::ShapeType::Rectangle) {
-		faceNormals.push_back(Vector2f(worldPoints[2] - worldPoints[0]).unitOrthogonal()); 	//top face normal
-		faceNormals.push_back(Vector2f(worldPoints[0] - worldPoints[1]).unitOrthogonal()); 	//left face normal
+		faceNormals.push_back(Vector2f(worldPoints[1] - worldPoints[0]).unitOrthogonal()); 	//top face normal
+		faceNormals.push_back(Vector2f(worldPoints[2] - worldPoints[1]).unitOrthogonal()); 	//left face normal
 		faceNormals.push_back(Vector2f(worldPoints[3] - worldPoints[2]).unitOrthogonal()); 	//right face normal
-		faceNormals.push_back(Vector2f(worldPoints[1] - worldPoints[3]).unitOrthogonal()); 	//bottom face normal
+		faceNormals.push_back(Vector2f(worldPoints[0] - worldPoints[3]).unitOrthogonal()); 	//bottom face normal
 	}
 	else if (shape->GetShapeType() == Shape::ShapeType::Circle) {
 		//Do nothing this should return an empty list representing the infinite/nonexistent face normals of a circle
@@ -98,21 +98,40 @@ Vector2f RigidBody::GetVelocity()
 	return velocity;
 }
 
-void RigidBody::ApplyImpulse(Vector2f i_imp) 
-{ 
-	force  = force + (i_imp * massData.GetMassInv()); 
+float RigidBody::GetAngularVelocity()
+{
+	return angularVelocity;
 }
 
-void RigidBody::ApplyRotationalImpulse(float i_imp) { torque += i_imp; }
+void RigidBody::SetVelocity(Vector2f i_vel) { velocity = i_vel; }
+
+void RigidBody::SetAngularVelocity(float i_vel) { angularVelocity = i_vel; }
+
+void RigidBody::SetOrientation(float i_orient) { transform.orientation = i_orient; }
+
+void RigidBody::ApplyImpulse(Vector2f i_imp, Vector2f contactP) 
+{ 
+	//force  += i_imp * massData.GetMassInv(); 
+	//torque += Math::CrossProdScalar(contactP, i_imp) * massData.GetInertiaInv();
+	velocity += i_imp * massData.GetMassInv();
+	angularVelocity += Math::CrossProdScalar(contactP, i_imp) * massData.GetInertiaInv();
+}
+
+//void RigidBody::ApplyRotationalImpulse(float i_imp) { torque += i_imp; }
 
 void RigidBody::IntegrateForces()
 {
-	velocity += force;
-	transform.orientation += torque;
+	/*
+	THe problem with this is that when half the collisions have been calculated I can't see when shpaes are already seperating. 
+	This shouldn't techically be an issue because I shouldn't be calculating a bounce between teh same two objects twice.
+	The only time it could come into play is when multiple things hit each other simultanouesly. It could affect the direction bounces.
+	Gonna just apply impulse and integrate in one step for now.*/
+	//velocity += force;
+	//angularVelocity += torque;
 	//velocity *= GLOBAL_DECELERATION_LINEAR;
 	//transform.orientation *= GLOBAL_DECELERATION_ANGULAR;
-	force = Vector2f(0.0f, 0.0f);
-	torque = 0.0f;
+	//force = Vector2f(0.0f, 0.0f);
+	//torque = 0.0f;
 }
 
 void RigidBody::IntegrateVelocity(float i_deltaTime)

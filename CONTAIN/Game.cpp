@@ -6,7 +6,7 @@ Game::Game(RESOURCES* i_resources, DIFFICULTY i_difficulty)
 	beginTime = std::chrono::high_resolution_clock::now();
 	font = resources->GetFont();
 	numLvls = 3;
-	currLvl = 0;
+	currLvl = 1;
 	timeToComplete = 10000000000000.0f;
 	playState = GENERAL_GAMEPLAY;
 }
@@ -64,7 +64,7 @@ GAME_STATE  Game::UpdateLvlEntities(std::vector<RigidBody>* i_lvlEnts, float i_s
 
 	for (int i = 0; i < i_lvlEnts->size(); ++i) {
 		RigidBody* entPtr = &i_lvlEnts->at(i);
-		entPtr->IntegrateForces();
+		//entPtr->IntegrateForces();
 		entPtr->IntegrateVelocity(i_stepSize);
 	}
 

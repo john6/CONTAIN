@@ -3,7 +3,6 @@ Notes:
 	Origin of object space is the center
 */
 
-
 #pragma once
 #include "GLOBAL_CONSTANTS.h"
 #include "Shape.h"
@@ -11,6 +10,7 @@ Notes:
 #include "Rectangle.h"
 #include "Transform.h"
 #include "MassData.h"
+#include "Math.h"
 
 class RigidBody
 {
@@ -44,10 +44,13 @@ public:
 	std::vector<Vector2f> GetVertexCoords();
 	std::vector<Vector2f> GetFaceRectNormals();
 	Vector2f GetVelocity();
+	float GetAngularVelocity();
+	void SetVelocity(Vector2f i_vel);
+	void SetAngularVelocity(float i_vel);
+	void SetOrientation(float i_orient);
 
-
-	void ApplyImpulse(Vector2f i_imp);
-	void ApplyRotationalImpulse(float i_imp);
+	void ApplyImpulse(Vector2f i_imp, Vector2f contactP);
+	//void ApplyRotationalImpulse(float i_imp);
 	void IntegrateForces();
 	void IntegrateVelocity(float i_deltaTime);
 

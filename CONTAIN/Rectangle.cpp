@@ -43,8 +43,8 @@ std::vector<Vector2f> Rectangle::GetPoints()
 	float halfHeight = height / 2.0f;
 	std::vector<Vector2f> pointVector = std::vector<Vector2f>();
 	pointVector.push_back(Vector2f(-halfWidth, halfHeight)); //top left corner
-	pointVector.push_back(Vector2f(-halfWidth, -halfHeight)); //bottom left corner
 	pointVector.push_back(Vector2f(halfWidth, halfHeight)); //top right corner
-	pointVector.push_back(Vector2f(halfWidth, -halfHeight)); // bottom right corner
+	pointVector.push_back(Vector2f(halfWidth, -halfHeight)); //bottom right corner
+	pointVector.push_back(Vector2f(-halfWidth, -halfHeight)); //bottom left corner
 	return pointVector;
 }

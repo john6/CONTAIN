@@ -25,10 +25,12 @@ Level::Level(int i_lvlNum, DIFFICULTY i_diff)
 	switch (i_lvlNum) {
 		case 0: {
 			////IMMOBILE Circle CIRCLE
-			//std::shared_ptr<Circle> circleShape1 = std::make_shared<Circle>(150.0f);
-			//RigidBody immobileCenterCircle = RigidBody(circleShape1);
-			//immobileCenterCircle.transform.position = Vector2f(COURT_WIDTH / 2, COURT_HEIGHT / 2);
-			//lvlEntites.push_back(immobileCenterCircle);
+			std::shared_ptr<Circle> circleShape1 = std::make_shared<Circle>(200.0f);
+			RigidBody immobileCenterCircle = RigidBody(circleShape1);
+			immobileCenterCircle.massData.SetMass(5.0f);
+			immobileCenterCircle.massData.SetInertia(5.0f);
+			immobileCenterCircle.transform.position = Vector2f(COURT_WIDTH / 2, COURT_HEIGHT / 2);
+			lvlEntites.push_back(immobileCenterCircle);
 
 			////LEFT MOVING CIRCLE
 			//std::shared_ptr<Circle> circleShape2 = std::make_shared<Circle>(150.0f);
@@ -39,12 +41,15 @@ Level::Level(int i_lvlNum, DIFFICULTY i_diff)
 			//lvlEntites.push_back(leftMovingCircle);
 
 			////RIGHT MOVING CIRCLE
-			//std::shared_ptr<Circle> circleShape3 = std::make_shared<Circle>(150.0f);
-			//RigidBody rightMovingCircle = RigidBody(circleShape3);
-			//rightMovingCircle.transform.position = Vector2f(0.0f, COURT_HEIGHT / 2);
-			//rightMovingCircle.massData.SetMass(1.0f);
+			std::shared_ptr<Circle> circleShape3 = std::make_shared<Circle>(150.0f);
+			RigidBody rightMovingCircle = RigidBody(circleShape3);
+			rightMovingCircle.transform.position = Vector2f(0.0f, COURT_HEIGHT / 2);
+			rightMovingCircle.massData.SetMass(1.0f);
+			rightMovingCircle.massData.SetInertia(1.0f);
 			//rightMovingCircle.ApplyImpulse(Vector2f(20.0f, 0.0f));
-			//lvlEntites.push_back(rightMovingCircle);
+			rightMovingCircle.SetVelocity(Vector2f(20.0f, 0.0f));
+			rightMovingCircle.SetAngularVelocity(0.5f);
+			lvlEntites.push_back(rightMovingCircle);
 
 			////DOWN MOVING CIRCLE
 			//std::shared_ptr<Circle> circleShape4 = std::make_shared<Circle>(150.0f);
@@ -63,15 +68,86 @@ Level::Level(int i_lvlNum, DIFFICULTY i_diff)
 			//lvlEntites.push_back(upMovingCircle);
 
 
-
-
-			//IMMOBILE SQUARE CENTER
-			std::shared_ptr<Rectangle> centerSquareShape = std::make_shared<Rectangle>(300.0f, 300.0f);
+			break;
+		}
+		case 1: {
+			//MOBILE SQUARE CENTER
+			std::shared_ptr<Rectangle> centerSquareShape = std::make_shared<Rectangle>(200.0f, 800.0f);
 			RigidBody immobileCenterSquare = RigidBody(centerSquareShape);
-			immobileCenterSquare.transform.position = Vector2f(COURT_WIDTH/2, COURT_HEIGHT/2);
+			immobileCenterSquare.transform.position = Vector2f(COURT_WIDTH / 2, COURT_HEIGHT / 2);
+			immobileCenterSquare.massData.SetMass(10.0f);
+			immobileCenterSquare.massData.SetInertia(10.0f);
+			//immobileCenterSquare.ApplyRotationalImpulse(0.03f);
 			lvlEntites.push_back(immobileCenterSquare);
 
-			////LEFT MOVING SQAURE
+			//////LEFT MOVING SQAURE
+			std::shared_ptr<Rectangle> squarePointer2 = std::make_shared<Rectangle>(100.0f, 100.0f);
+			RigidBody rightMovingSquare = RigidBody(squarePointer2);
+			rightMovingSquare.transform.position = Vector2f(COURT_WIDTH, COURT_HEIGHT / 4);
+			rightMovingSquare.massData.SetMass(2.0f);
+			rightMovingSquare.massData.SetInertia(2.0f);
+			rightMovingSquare.SetVelocity(Vector2f(-20.0f, 0.0f));
+			rightMovingSquare.SetAngularVelocity(-0.5f);
+			//rightMovingSquare.ApplyImpulse(Vector2f(20.0f, 0.0f));
+			lvlEntites.push_back(rightMovingSquare);
+
+			////RIGHT MOVING SQAURE
+			//std::shared_ptr<Rectangle> squarePointer2 = std::make_shared<Rectangle>(100.0f, 100.0f);
+			//RigidBody rightMovingSquare = RigidBody(squarePointer2);
+			//rightMovingSquare.transform.position = Vector2f(0.0f, COURT_HEIGHT / 4);
+			//rightMovingSquare.massData.SetMass(2.0f);
+			//rightMovingSquare.massData.SetInertia(2.0f);
+			//rightMovingSquare.SetVelocity(Vector2f(20.0f, 0.0f));
+			//rightMovingSquare.SetAngularVelocity(-0.5f);
+			////rightMovingSquare.ApplyImpulse(Vector2f(20.0f, 0.0f));
+			//lvlEntites.push_back(rightMovingSquare);
+
+			////DOWN MOVING SQAURE
+			//std::shared_ptr<Rectangle> squarePointer3 = std::make_shared<Rectangle>(100.0f, 100.0f);
+			//RigidBody downMovingSquare = RigidBody(squarePointer3);
+			//downMovingSquare.transform.position = Vector2f(COURT_WIDTH / 2, 0.0f);
+			//downMovingSquare.massData.SetMass(1.0f);
+			//downMovingSquare.ApplyImpulse(Vector2f(0.0f, 20.0f));
+			//lvlEntites.push_back(downMovingSquare);
+
+			//////UP MOVING SQAURE
+			//std::shared_ptr<Rectangle> squarePointer4 = std::make_shared<Rectangle>(100.0f, 100.0f);
+			//RigidBody upMovingSquare = RigidBody(squarePointer4);
+			//upMovingSquare.transform.position = Vector2f(COURT_WIDTH / 2, COURT_HEIGHT);
+			//upMovingSquare.massData.SetMass(1.0f);
+			//upMovingSquare.massData.SetInertia(1.0f);
+			//upMovingSquare.ApplyImpulse(Vector2f(0.0f, -20.0f));
+			//lvlEntites.push_back(upMovingSquare);
+
+			//////DIAGONAL DOWN AND RIGHT MOVING SQUARE
+			//std::shared_ptr<Rectangle> squarePointer5 = std::make_shared<Rectangle>(100.0f, 100.0f);
+			//RigidBody downAndRightMovingSquare = RigidBody(squarePointer5);
+			//downAndRightMovingSquare.transform.position = Vector2f(0.0f, 0.0f);
+			//downAndRightMovingSquare.massData.SetMass(1.0f);
+			//downAndRightMovingSquare.ApplyImpulse(Vector2f(20.0f, 20.0f));
+			//lvlEntites.push_back(downAndRightMovingSquare);
+
+			//////DIAGONAL DOWN AND RIGHT MOVING SQUARE
+			//std::shared_ptr<Rectangle> squarePointer6 = std::make_shared<Rectangle>(100.0f, 100.0f);
+			//RigidBody upAndLeftMovingSquare = RigidBody(squarePointer6);
+			//upAndLeftMovingSquare.transform.position = Vector2f(COURT_WIDTH, COURT_HEIGHT);
+			//upAndLeftMovingSquare.massData.SetMass(1.0f);
+			//immobileCenterSquare.massData.SetInertia(1.0f);
+			////upAndLeftMovingSquare.ApplyImpulse(Vector2f(-20.0f, -20.0f));
+			//lvlEntites.push_back(upAndLeftMovingSquare);
+			break;
+		}
+		case 2: {
+			//HEAVY RECTANGLE CENTER
+			std::shared_ptr<Rectangle> centerSquareShape = std::make_shared<Rectangle>(200.0f, 800.0f);
+			RigidBody immobileCenterSquare = RigidBody(centerSquareShape);
+			immobileCenterSquare.transform.position = Vector2f(COURT_WIDTH / 2, COURT_HEIGHT / 2);
+			immobileCenterSquare.massData.SetMass(10.0f);
+			immobileCenterSquare.massData.SetInertia(10.0f);
+			//immobileCenterSquare.ApplyRotationalImpulse(0.03f);
+			lvlEntites.push_back(immobileCenterSquare);
+
+			//////LEFT MOVING SQAURE
 			//std::shared_ptr<Rectangle> squarePointer1 = std::make_shared<Rectangle>(100.0f, 100.0f);
 			//RigidBody leftMovingSquare = RigidBody(squarePointer1);
 			//leftMovingSquare.transform.position = Vector2f(COURT_WIDTH, COURT_HEIGHT / 2);
@@ -79,7 +155,7 @@ Level::Level(int i_lvlNum, DIFFICULTY i_diff)
 			//leftMovingSquare.ApplyImpulse(Vector2f(-20.0f, 0.0f));
 			//lvlEntites.push_back(leftMovingSquare);
 
-			////RIGHT MOVING SQAURE
+			//////RIGHT MOVING SQAURE
 			//std::shared_ptr<Rectangle> squarePointer2 = std::make_shared<Rectangle>(100.0f, 100.0f);
 			//RigidBody rightMovingSquare = RigidBody(squarePointer2);
 			//rightMovingSquare.transform.position = Vector2f(0.0f, COURT_HEIGHT / 2);
@@ -87,30 +163,50 @@ Level::Level(int i_lvlNum, DIFFICULTY i_diff)
 			//rightMovingSquare.ApplyImpulse(Vector2f(20.0f, 0.0f));
 			//lvlEntites.push_back(rightMovingSquare);
 
-			//DOWN MOVING SQAURE
-			std::shared_ptr<Rectangle> squarePointer3 = std::make_shared<Rectangle>(100.0f, 100.0f);
-			RigidBody downMovingSquare = RigidBody(squarePointer3);
-			downMovingSquare.transform.position = Vector2f(COURT_WIDTH / 2, 0.0f);
-			downMovingSquare.massData.SetMass(1.0f);
-			downMovingSquare.ApplyImpulse(Vector2f(0.0f, 20.0f));
-			lvlEntites.push_back(downMovingSquare);
+			////DOWN MOVING SQAURE
+			//std::shared_ptr<Rectangle> squarePointer3 = std::make_shared<Rectangle>(100.0f, 100.0f);
+			//RigidBody downMovingSquare = RigidBody(squarePointer3);
+			//downMovingSquare.transform.position = Vector2f(COURT_WIDTH / 2, 0.0f);
+			//downMovingSquare.massData.SetMass(1.0f);
+			//downMovingSquare.ApplyImpulse(Vector2f(0.0f, 20.0f));
+			//lvlEntites.push_back(downMovingSquare);
 
-			////UP MOVING SQAURE
+			//////UP MOVING SQAURE
 			//std::shared_ptr<Rectangle> squarePointer4 = std::make_shared<Rectangle>(100.0f, 100.0f);
 			//RigidBody upMovingSquare = RigidBody(squarePointer4);
 			//upMovingSquare.transform.position = Vector2f(COURT_WIDTH / 2, COURT_HEIGHT);
 			//upMovingSquare.massData.SetMass(1.0f);
+			//upMovingSquare.massData.SetInertia(1.0f);
 			//upMovingSquare.ApplyImpulse(Vector2f(0.0f, -20.0f));
 			//lvlEntites.push_back(upMovingSquare);
 
-			break;
-		}
-		case 1: {
-			//do stuff
-			break;
-		}
-		case 2: {
-			//do stuff
+			//////DIAGONAL DOWN AND RIGHT MOVING SQUARE
+			//std::shared_ptr<Rectangle> squarePointer5 = std::make_shared<Rectangle>(100.0f, 100.0f);
+			//RigidBody downAndRightMovingSquare = RigidBody(squarePointer5);
+			//downAndRightMovingSquare.transform.position = Vector2f(0.0f, 0.0f);
+			//downAndRightMovingSquare.massData.SetMass(1.0f);
+			//downAndRightMovingSquare.ApplyImpulse(Vector2f(20.0f, 20.0f));
+			//lvlEntites.push_back(downAndRightMovingSquare);
+
+			//////DIAGONAL DOWN AND RIGHT MOVING SQUARE
+			//std::shared_ptr<Rectangle> squarePointer6 = std::make_shared<Rectangle>(100.0f, 100.0f);
+			//RigidBody upAndLeftMovingSquare = RigidBody(squarePointer6);
+			//upAndLeftMovingSquare.transform.position = Vector2f(COURT_WIDTH, COURT_HEIGHT);
+			//upAndLeftMovingSquare.massData.SetMass(1.0f);
+			//immobileCenterSquare.massData.SetInertia(1.0f);
+			////upAndLeftMovingSquare.ApplyImpulse(Vector2f(-20.0f, -20.0f));
+			//lvlEntites.push_back(upAndLeftMovingSquare);
+
+			////RIGHT MOVING CIRCLE
+			std::shared_ptr<Circle> circleShape3 = std::make_shared<Circle>(150.0f);
+			RigidBody rightMovingCircle = RigidBody(circleShape3);
+			rightMovingCircle.transform.position = Vector2f(0.0f, COURT_HEIGHT / 4);
+			rightMovingCircle.massData.SetMass(1.0f);
+			rightMovingCircle.massData.SetInertia(1.0f);
+			//rightMovingCircle.ApplyImpulse(Vector2f(20.0f, 0.0f));
+			rightMovingCircle.SetVelocity(Vector2f(20.0f, 0.0f));
+			//rightMovingCircle.SetAngularVelocity(0.5f);
+			lvlEntites.push_back(rightMovingCircle);
 			break;
 		}
 	}
