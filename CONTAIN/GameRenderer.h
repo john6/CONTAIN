@@ -12,5 +12,5 @@ public:
 	GameRenderer();
 	~GameRenderer();
 
-	static void Render(sf::RenderWindow* i_window, float i_elapsedMilliseconds, std::vector<RigidBody>* i_entityList);
+	static void Render(sf::RenderWindow* i_window, float i_lerp_fraction, std::vector<RigidBody>* i_entityList);
 };

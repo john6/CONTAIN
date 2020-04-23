@@ -78,8 +78,6 @@ int Physics::Clip(Vector2f normal, float c, std::vector<Vector2f>* face)
 	return sp;
 }
 
-
-
 std::vector<float> Physics::FindAxisLeastPenetration(RigidBody* i_entA, RigidBody* i_entB)
 {
 	std::vector<Vector2f> verticesA = i_entA->GetVertexCoords();
@@ -102,55 +100,59 @@ std::vector<float> Physics::FindAxisLeastPenetration(RigidBody* i_entA, RigidBod
 
 bool Physics::ResolveCircleToCircleCollision(CollisionData* i_data)
 {
-	std::shared_ptr<Circle> circlePtr1 = std::dynamic_pointer_cast<Circle>(i_data->entPtr1->GetShape());
-	std::shared_ptr<Circle> circlePtr2 = std::dynamic_pointer_cast<Circle>(i_data->entPtr2->GetShape());
+	RigidBody* bodyA = i_data->bodyA;
+	RigidBody* bodyB = i_data->bodyB;
+	std::shared_ptr<Circle> circlePtrA = std::dynamic_pointer_cast<Circle>(bodyA->shape);
+	std::shared_ptr<Circle> circlePtrB = std::dynamic_pointer_cast<Circle>(bodyB->shape);
 
-///////////////
+	float combinedRad = (circlePtrA->radius + circlePtrB->radius);
+	float radSqr = pow(combinedRad, 2);
+	Vector2f collisionNorm = bodyB->transform.pos - bodyA->transform.pos;
 
-////////////////////////IDK HOW THIS IS GONNA WORK OUT
-	Vector2f e1CenterPt = i_data->entPtr1->transform.position;
-	Vector2f e2CenterPt = i_data->entPtr2->transform.position;
+	if (radSqr < collisionNorm.squaredNorm()) { return false; }
 
-	float combinedRadius = (circlePtr1->GetRadius() + circlePtr2->GetRadius());
-	float rSqaured = pow(combinedRadius, 2);
-	Vector2f collisionNormal = e2CenterPt - e1CenterPt;
+	/////////////////////////////////////////
 
-	if (rSqaured < collisionNormal.squaredNorm()) {
-		//i_data->normal = collisionNormal.normalized();
-		return false;
-	}
 
-	float distance = sqrt(collisionNormal.squaredNorm());
+	/////////YOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 
-	if (distance == 0.0f) {
-		i_data->penetration = circlePtr1->GetRadius();
-		i_data->normal = Vector2f(1.0f, 0.0f);
-		i_data->contactPoints.push_back(e1CenterPt);
+
+
+
+
+
+
+	///////////////////////////////////////////////////
+	float dist = sqrt(collisionNorm.squaredNorm());
+
+	if (dist == 0.0f) {
+		i_data->pen = circlePtrA->radius;
+		i_data->norm = Vector2f(1.0f, 0.0f);
+		i_data->contactPoints.push_back(bodyA->transform.pos);
 		return true;
 	}
 	else {
-		collisionNormal = collisionNormal / distance; //we already calculated sqrt
-		i_data->normal = collisionNormal;
-		i_data->penetration = combinedRadius - distance;
-		i_data->contactPoints.push_back((collisionNormal * circlePtr1->GetRadius()) + e1CenterPt);
+		collisionNorm = collisionNorm / dist; //we already calculated sqrt
+		i_data->norm = collisionNorm;
+		i_data->pen = combinedRad - dist;
+		i_data->contactPoints.push_back((collisionNorm * circlePtrA->radius) + bodyA->transform.pos);
 		return true;
 	}
 }
 
 bool Physics::ResolveRectToCircleCollision(CollisionData* i_data)
 {  //Entity 1 is rectangle and entity 2 is circle
-	RigidBody* rectEnt = i_data->entPtr1;
-	RigidBody* circleEnt = i_data->entPtr2;
-	//std::shared_ptr<Rectangle> rectPtr = std::dynamic_pointer_cast<Rectangle>(i_data->entPtr1->GetShape());
-	std::shared_ptr<Circle> circlePtr = std::dynamic_pointer_cast<Circle>(i_data->entPtr2->GetShape());
+	RigidBody* rectBod = i_data->bodyA;
+	RigidBody* circleBod = i_data->bodyB;
+	std::shared_ptr<Circle> circlePtr = std::dynamic_pointer_cast<Circle>(circleBod->shape);
 
 	float maxSeperation = -std::numeric_limits<float>::max();
 	int collisionFaceIndex = -1;
-	std::vector<Vector2f> rectVertices = rectEnt->GetVertexCoords();
-	std::vector<Vector2f> normals = rectEnt->GetFaceRectNormals();
+	std::vector<Vector2f> rectVertices = rectBod->GetVertexCoords();
+	std::vector<Vector2f> normals = rectBod->GetFaceRectNormals();
 	for (int i = 0; i < normals.size(); ++i) {
-		float currSeperation = normals[i].dot(circleEnt->transform.position - rectVertices[i]);
-		if (currSeperation > circlePtr->GetRadius()) {
+		float currSeperation = normals[i].dot(circleBod->transform.pos - rectVertices[i]);
+		if (currSeperation > circlePtr->radius) {
 			return false;
 		}
 		if (currSeperation > maxSeperation) {
@@ -163,54 +165,51 @@ bool Physics::ResolveRectToCircleCollision(CollisionData* i_data)
 	Vector2f rectVert2 = rectVertices[(collisionFaceIndex + 1) % rectVertices.size()];
 
 	if (maxSeperation < 0) {
-		//The tutorial applied a transition but I think it was to just get everythig in world space so Im gonna leave it
-		i_data->normal = (normals[collisionFaceIndex]);
-		i_data->penetration = circlePtr->GetRadius();
-		i_data->contactPoints.push_back((normals[collisionFaceIndex] * circlePtr->GetRadius()) + circleEnt->transform.position);
-		std::cout << "COLLISION";
+		i_data->norm = -(normals[collisionFaceIndex]);
+		i_data->pen = circlePtr->radius;
+		i_data->contactPoints.push_back((i_data->norm * circlePtr->radius) + circleBod->transform.pos);
 		return true;
 	}
 
-	//Rest of code it to determine veroni region 
-	float dotProd1 = (circleEnt->transform.position - rectVert1).dot(rectVert2 - rectVert1);
-	float dotProd2 = (circleEnt->transform.position - rectVert2).dot(rectVert1 - rectVert2);
-	i_data->penetration = circlePtr->GetRadius() - maxSeperation;
+	//Rest of code to determine veroni region 
+	float dotProd1 = (circleBod->transform.pos - rectVert1).dot(rectVert2 - rectVert1);
+	float dotProd2 = (circleBod->transform.pos - rectVert2).dot(rectVert1 - rectVert2);
+	i_data->pen = circlePtr->radius - maxSeperation;
 
 	// Circle center lies beyond face region, past V1
 	if (dotProd1 <= 0.0f) {
-		if ((circleEnt->transform.position - rectVert1).squaredNorm() > pow(circlePtr->GetRadius(), 2)) { return false; }
-		Vector2f veroniNormal = rectVert1 - circleEnt->transform.position;
+		if ((circleBod->transform.pos - rectVert1).squaredNorm() > pow(circlePtr->radius, 2)) { return false; }
+		Vector2f veroniNormal = rectVert1 - circleBod->transform.pos;
 		veroniNormal.normalize();
-		i_data->normal = veroniNormal;
-		i_data->contactPoints.push_back(rectVert1 + rectEnt->transform.position);
+		i_data->norm = veroniNormal;
+		i_data->contactPoints.push_back(rectVert1 + rectBod->transform.pos);
 	}
 	// Circle center lies beyond face region, past V2
 	else if (dotProd2 <= 0.0f) {
-		if ((circleEnt->transform.position - rectVert2).squaredNorm() > pow(circlePtr->GetRadius(), 2)) { return false; }
+		if ((circleBod->transform.pos - rectVert2).squaredNorm() > pow(circlePtr->radius, 2)) { return false; }
 		//ignorign some more stuff that I think is just translation to world space which Ive already done
-		Vector2f veroniNormal = rectVert2 - circleEnt->transform.position;
+		Vector2f veroniNormal = rectVert2 - circleBod->transform.pos;
 		veroniNormal.normalize();
-		i_data->normal = veroniNormal;
-		i_data->contactPoints.push_back(rectVert2 + rectEnt->transform.position);
+		i_data->norm = veroniNormal;
+		i_data->contactPoints.push_back(rectVert2 + rectBod->transform.pos);
 	}
 	// Circle center is within face region
 	else {
 		Vector2f normal = normals[collisionFaceIndex];
-		if ((circleEnt->transform.position - rectVert1).dot(normal) > circlePtr->GetRadius()) { return false; }
+		if ((circleBod->transform.pos - rectVert1).dot(normal) > circlePtr->radius) { return false; }
 		//normal = -normal;
-		i_data->normal = normal;
-		i_data->contactPoints.push_back((normals[collisionFaceIndex] * circlePtr->GetRadius()) + circleEnt->transform.position);
+		i_data->norm = -normal;
+		i_data->contactPoints.push_back((i_data->norm * circlePtr->radius) + circleBod->transform.pos);
 	}
-	std::cout << "COLLISION";
 	return true;
 }
 
 bool Physics::ResolveRectToRectCollision(CollisionData* i_data) {
-	std::vector<float> penetrationA = FindAxisLeastPenetration(i_data->entPtr1, i_data->entPtr2);
+	std::vector<float> penetrationA = FindAxisLeastPenetration(i_data->bodyA, i_data->bodyB);
 	if (penetrationA[0] > 0.0f) {
 		return false;
 	}
-	std::vector<float> penetrationB = FindAxisLeastPenetration(i_data->entPtr2, i_data->entPtr1);
+	std::vector<float> penetrationB = FindAxisLeastPenetration(i_data->bodyB, i_data->bodyA);
 	if (penetrationB[0] > 0.0f) {
 		return false;
 	}
@@ -220,15 +219,15 @@ bool Physics::ResolveRectToRectCollision(CollisionData* i_data) {
 	RigidBody* refEnt;
 	RigidBody* incidentEnt;
 
-	if (penetrationA > penetrationB) {
-		refEnt = i_data->entPtr1;
-		incidentEnt = i_data->entPtr1;
+	if (penetrationA[0] >= penetrationB[0]) {
+		refEnt = i_data->bodyA;
+		incidentEnt = i_data->bodyB;
 		refIndex = penetrationA[1];
 		flip = false;
 	}
 	else {
-		refEnt = i_data->entPtr2;
-		incidentEnt = i_data->entPtr1;
+		refEnt = i_data->bodyB;
+		incidentEnt = i_data->bodyA;
 		refIndex = penetrationB[1];
 		flip = true;
 	}
@@ -239,11 +238,9 @@ bool Physics::ResolveRectToRectCollision(CollisionData* i_data) {
 	Vector2f refEntV1 = refVerts[refIndex];
 	Vector2f refEntV2 = refVerts[(refIndex + 1) % refVerts.size()];
 
-	//ignoring local to world transition
-
 	Vector2f refSidePlaneNormal = refEntV2 - refEntV1;
 	refSidePlaneNormal.normalize();
-	//need to orthogonalize, not sure if this will be in the right direction, will flip this negative if shit sucks
+
 	Vector2f refFaceNormal = refSidePlaneNormal.unitOrthogonal();
 
 	float refC = refFaceNormal.dot(refEntV1);
@@ -253,139 +250,181 @@ bool Physics::ResolveRectToRectCollision(CollisionData* i_data) {
 	if (Clip(-refSidePlaneNormal, refNegSide, &incidentFaceVerts) < 2) { return false; }
 	if (Clip(refSidePlaneNormal, refNegSide, &incidentFaceVerts) < 2) { return false; }
 
-	i_data->normal = flip ? -refFaceNormal : refFaceNormal;
+	i_data->norm = flip ? -refFaceNormal : refFaceNormal;
 
 	float seperation = refFaceNormal.dot(incidentFaceVerts[0]) - refC;
 
 	int contactPoints = 0;
 	if (seperation <= 0.0f) {
 		i_data->contactPoints.push_back(incidentFaceVerts[0]);
-		i_data->penetration = -seperation;
+		i_data->pen = -seperation;
 		++contactPoints;
 	}
 	else {
-		i_data->penetration = 0;
+		i_data->pen = 0;
 	}
-
-
+	//why is this checking the same shit
 	seperation = refFaceNormal.dot(incidentFaceVerts[1]) - refC;
 	if (seperation <= 0.0f) {
 		i_data->contactPoints.push_back(incidentFaceVerts[1]);
 		++contactPoints;
-		i_data->penetration -= seperation;
-		i_data->penetration /= contactPoints;
+		i_data->pen -= seperation;
+		i_data->pen /= contactPoints;
 	}
 
-	std::cout << "COLLISION";
 	return true;
-	//the rest of the tutorial involves clipping and I dont need that until I start using friction, gonna just stop here
-	//TODO: finish this when I start using friction
-	//FROM TUTE because idk what this equation is used for 
-	// ax + by = c
-	// c is distance from origin
 }
 
-void Physics::CheckCollision(RigidBody * i_ent1, RigidBody * i_ent2)
+std::function<void(void)> Physics::SaveImpulse(RigidBody* body, Vector2f a1, Vector2f a2)
 {
-	CollisionData collisionData = CollisionData();
-	collisionData.entPtr1 = i_ent1;
-	collisionData.entPtr2 = i_ent2;
-	Shape::ShapeType shape1 = collisionData.entPtr1->GetShape()->GetShapeType();
-	Shape::ShapeType shape2 = collisionData.entPtr2->GetShape()->GetShapeType();
+	return [=]() { body->ApplyImpulse(a1, a2); }; // Capture arguments by value, except body as pointer
+}
+
+bool Physics::CheckCollision(CollisionData* i_collision)
+{
+	Shape::ShapeType shape1 = i_collision->bodyA->shape->GetType();
+	Shape::ShapeType shape2 = i_collision->bodyB->shape->GetType();
 	bool collisionOccured = false;
 	if ((shape1 == Shape::Circle) && (shape2 == Shape::Circle))
 	{
-		collisionOccured = ResolveCircleToCircleCollision(&collisionData);
+		collisionOccured = ResolveCircleToCircleCollision(i_collision);
 	}
 	else if ((shape1 == Shape::Rectangle) && (shape2 == Shape::Rectangle))
 	{
-		collisionOccured = ResolveRectToRectCollision(&collisionData);
+		collisionOccured = ResolveRectToRectCollision(i_collision);
 	}
 	else if ((shape1 == Shape::Rectangle) && (shape2 == Shape::Circle))
 	{
-		collisionOccured = ResolveRectToCircleCollision(&collisionData);
+		collisionOccured = ResolveRectToCircleCollision(i_collision);
+		RigidBody* temp = i_collision->bodyA;
+		i_collision->bodyA = i_collision->bodyB;
+		i_collision->bodyB = temp;
 	}
 	else if ((shape1 == Shape::Circle) && (shape2 == Shape::Rectangle))
 	{
-		collisionData.entPtr1 = i_ent2;
-		collisionData.entPtr2 = i_ent1;
-		collisionOccured = ResolveRectToCircleCollision(&collisionData);
+		RigidBody* temp = i_collision->bodyA;
+		i_collision->bodyA = i_collision->bodyB;
+		i_collision->bodyB = temp;
+		/*collisionOccured = ResolveCircleToRectCollision(i_collision);*/
+		collisionOccured = ResolveRectToCircleCollision(i_collision);
+		temp = i_collision->bodyA;
+		i_collision->bodyA = i_collision->bodyB;
+		i_collision->bodyB = temp;
 	}
-	if (collisionOccured) {
-		CreateCollisionImpulse(&collisionData);
-	}
-	return;
+	return collisionOccured;
+}
+
+void Physics::InfiniteMassCorrection(CollisionData * i_data)
+{
+	i_data->bodyA->vel = Vector2f(0.0f, 0.0f);
+	i_data->bodyB->vel = Vector2f(0.0f, 0.0f);
+
 }
 
 void Physics::PositionalCorrection(CollisionData * i_data)
 {
-	//to do I guess
+	if ((i_data->bodyA->massD.GetMass() + i_data->bodyB->massD.GetMass()) == 0.0f) {
+		//Vector2f correction = std::max(i_data->pen - PENETRATION_ALLOWANCE, 0.0f) / 0.5f * i_data->norm * PENETRATION_CORRECTION;
+		//i_data->bodyA->transform.pos = i_data->bodyA->transform.pos - (0.5f * correction);
+		//i_data->bodyB->transform.pos = i_data->bodyB->transform.pos + (0.5f * correction);
+		//Not gonna do anything to correct infinite mass objects touching each other
+		return;
+	}
+	else {
+		Vector2f correction = std::max(i_data->pen - PENETRATION_ALLOWANCE, 0.0f) /
+			(i_data->bodyA->massD.GetMassInv() + i_data->bodyB->massD.GetMassInv()) * i_data->norm * PENETRATION_CORRECTION;
+
+		i_data->bodyA->transform.pos = i_data->bodyA->transform.pos - (correction * i_data->bodyA->massD.GetMassInv());
+		i_data->bodyB->transform.pos = i_data->bodyB->transform.pos + (correction * i_data->bodyB->massD.GetMassInv());
+	}
 }
 
 void Physics::CreateCollisionImpulse(CollisionData* i_data) {
-	RigidBody* bodyA = i_data->entPtr1;
-	RigidBody* bodyB = i_data->entPtr2;
+	RigidBody* bodyA = i_data->bodyA;
+	RigidBody* bodyB = i_data->bodyB;
+	float statFric = bodyA->mat.statFrict * bodyB->mat.statFrict;
+	float dynaFric = bodyA->mat.dynaFrict * bodyB->mat.dynaFrict;
 
+	if (!bodyA->massD.GetMassInv() && !bodyB->massD.GetMassInv()) {
+		InfiniteMassCorrection(i_data);
+		return;
+	}
+
+	std::vector<std::function<void(void)>> impulseCalls;
 
 	for (Vector2f contactPoint : i_data->contactPoints) {
 
-		Vector2f contactPointA = contactPoint - bodyA->transform.position;
-		Vector2f contactPointB = contactPoint - bodyB->transform.position;
+		Vector2f contactPtA = contactPoint - bodyA->transform.pos;
+		Vector2f contactPtB = contactPoint - bodyB->transform.pos;
+		Vector2f bodyBAngVelAtContactP = Math::FloatVectCross(bodyB->GetInstAngVel(), contactPtB);
+		Vector2f bodyAAngVelAtContactP =Math::FloatVectCross(bodyA->GetInstAngVel(), contactPtA);
+		Vector2f relativeVelocity = (bodyB->GetInstVel() + bodyBAngVelAtContactP) - (bodyA->GetInstVel() - bodyAAngVelAtContactP);
 
-		//Vector2f relativeVelocity = i_data->entPtr2->GetVelocity() - i_data->entPtr1->GetVelocity();
-		Vector2f relativeVelocity = (bodyB->GetVelocity() + Math::FloatVectCross(bodyB->GetAngularVelocity(), contactPointB)) -
-			                        (bodyA->GetVelocity() - Math::FloatVectCross(bodyA->GetAngularVelocity(), contactPointA));
+		float  contactRelVel = relativeVelocity.dot(i_data->norm);
+		if (contactRelVel > 0) { 
+			continue; 
+		}
 
-		float  contactRelativeVel = relativeVelocity.dot(i_data->normal);
-		if (contactRelativeVel > 0) { return; }
-		//defaulting restitution to .1 for now
+		float crossA = Math::CrossProdScalar(contactPtA, i_data->norm);
+		float crossB = Math::CrossProdScalar(contactPtB, i_data->norm);
 
-		float crossA = Math::CrossProdScalar(contactPointA, i_data->normal);
-		float crossB = Math::CrossProdScalar(contactPointB, i_data->normal);
+		float invMassSum = bodyA->massD.GetMassInv() + bodyB->massD.GetMassInv() +
+						   (pow(crossA, 2) * bodyA->massD.GetInertInv()) +
+						   (pow(crossB, 2) * bodyB->massD.GetInertInv());
 
-		float invMassSum = bodyA->massData.GetMassInv() + 
-			bodyB->massData.GetMassInv() +
-			(pow(crossA, 2) * bodyA->massData.GetInertiaInv()) +
-			(pow(crossB, 2) * bodyB->massData.GetInertiaInv());
+		float impulseScalar = -(1.0f + std::max(bodyA->mat.rest, bodyB->mat.rest)) * contactRelVel;
+		impulseScalar /= invMassSum;
+		impulseScalar /= i_data->contactPoints.size();
 
-		float impulseScalar = -1.1f * contactRelativeVel;
-		impulseScalar = invMassSum == 0 ? 0 : (impulseScalar / invMassSum);
-		impulseScalar = impulseScalar / i_data->contactPoints.size();
+		Vector2f impulse = i_data->norm * impulseScalar;
 
-		Vector2f impulse = i_data->normal * impulseScalar;
-		bodyA->ApplyImpulse(-impulse, contactPointA);
-		bodyB->ApplyImpulse(impulse, contactPointB);
 
-		//Friction impulse
-		//the tutorial seems to completely recalculate the relative velocity here idk why, I thik its a mistake
-		Vector2f tan = relativeVelocity - (i_data->normal * relativeVelocity.dot(i_data->normal));
+		//bodyA->ApplyImpulse(-impulse, contactPtA);
+		//bodyB->ApplyImpulse(impulse, contactPtB);
+		impulseCalls.push_back(SaveImpulse(bodyA, -impulse, contactPtA));
+		impulseCalls.push_back(SaveImpulse(bodyB, impulse, contactPtB));
+
+
+
+		relativeVelocity = (bodyB->GetInstVel() + Math::FloatVectCross(bodyB->GetInstAngVel(), contactPtB)) -
+						   (bodyA->GetInstVel() - Math::FloatVectCross(bodyA->GetInstAngVel(), contactPtA));
+
+		Vector2f tan = relativeVelocity - (i_data->norm * relativeVelocity.dot(i_data->norm));
 		tan.normalize();
-		//calculate tangent magnitude
 		float tanMag = -relativeVelocity.dot(tan);
-		tanMag = invMassSum == 0 ? 0 : ((tanMag / invMassSum) / i_data->contactPoints.size());
+		tanMag /= invMassSum;
+		tanMag /= i_data->contactPoints.size();
+
 		//dont apply tiny friction impulses or else stuff will just bounce around forever
-		if (abs(tanMag) < 0.05f) { return;  }
-		//Coulumbs law: Im gonna approxiamte the materials for my objects until I wanna deal with it
-		//dynamic friction = 0.2f, static friction = 0.4f
+		if (abs(tanMag) < 0.05f) { 
+			continue;
+		}
+
+		//Coulumbs law:
 		Vector2f tangentImpulse;
-		if (abs(tanMag) < impulseScalar * 0.4f) {
-			tangentImpulse = tan * tanMag;
+		if (abs(tanMag) < impulseScalar * statFric) { tangentImpulse = tan * tanMag; }
+		else { tangentImpulse = tan * -impulseScalar * dynaFric; }
+
+		//bodyA->ApplyImpulse(tangentImpulse, contactPtA);
+		//bodyB->ApplyImpulse(-tangentImpulse, contactPtB);
+
+		if (bodyA->shape->GetType() == Shape::Circle) {
+			impulseCalls.push_back(SaveImpulse(bodyA, tangentImpulse, contactPtA));
 		}
 		else {
-			tangentImpulse = tan * -impulseScalar * 0.2f;
+			impulseCalls.push_back(SaveImpulse(bodyA, -tangentImpulse, contactPtA));
 		}
-		bodyA->ApplyImpulse(-tangentImpulse, contactPointA);
-		bodyA->ApplyImpulse(tangentImpulse, contactPointB);
-		//float j = -1.1f * VelocityAlongNormal;
-		///float inverseMassSum = (i_data->entPtr1->massData.GetMassInv() + i_data->entPtr2->massData.GetMassInv());
-		//float impulseScalar = inverseMassSum == 0 ? 0 : (j / inverseMassSum);
-		//Vector2f impulse = impulseScalar * i_data->normal;
-		//i_data->entPtr1->ApplyImpulse(-impulse);
-		//i_data->entPtr2->ApplyImpulse(impulse);
+		if (bodyB->shape->GetType() == Shape::Circle) {
+			impulseCalls.push_back(SaveImpulse(bodyB, -tangentImpulse, contactPtB));
+		}
+		else {
+			impulseCalls.push_back(SaveImpulse(bodyB, tangentImpulse, contactPtB));
+		}
 	}
 
+	for (std::function<void(void)> impulseCall : impulseCalls) {
+		impulseCall();
+	}
 
 	return;
-
-
 }

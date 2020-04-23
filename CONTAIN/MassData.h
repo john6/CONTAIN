@@ -16,7 +16,7 @@ public:
 	void SetInertia(float i_inertia);
 	float GetMass();
 	float GetMassInv();
-	float GetIntertia();
-	float GetInertiaInv();
+	float GetIntert();
+	float GetInertInv();
 };
 

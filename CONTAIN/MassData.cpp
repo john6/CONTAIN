@@ -32,6 +32,6 @@ float MassData::GetMass() { return mass; }
 
 float MassData::GetMassInv() { return massInv; }
 
-float MassData::GetIntertia() { return inertia; }
+float MassData::GetIntert() { return inertia; }
 
-float MassData::GetInertiaInv() { return inertiaInv; }
+float MassData::GetInertInv() { return inertiaInv; }

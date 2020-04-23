@@ -12,9 +12,9 @@ HeadsUpDisplay::HeadsUpDisplay(RESOURCES* i_resources) : resources{ i_resources 
 	timeRemainingText.setCharacterSize(20);
 	livesRemainingText.setCharacterSize(15);
 
-	lvlNumText.setPosition(sf::Vector2f(HORIZONTAL_MARGIN, 5.0f));
-	timeRemainingText.setPosition(sf::Vector2f(HORIZONTAL_MARGIN, 25.0f));
-	livesRemainingText.setPosition(sf::Vector2f(HORIZONTAL_MARGIN + (COURT_WIDTH / 2), 5.0f));
+	lvlNumText.setPosition(sf::Vector2f(HOR_MARGIN, 5.0f));
+	timeRemainingText.setPosition(sf::Vector2f(HOR_MARGIN, 25.0f));
+	livesRemainingText.setPosition(sf::Vector2f(HOR_MARGIN + (COURT_WIDTH / 2), 5.0f));
 
 	lvlNumText.setFillColor(sf::Color::White);
 	timeRemainingText.setFillColor(sf::Color::White);

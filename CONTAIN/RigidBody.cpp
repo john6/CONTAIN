@@ -1,29 +1,35 @@
 #include "RigidBody.h"
 
-RigidBody::RigidBody(std::shared_ptr<Shape> i_shape) :
-	shape{ i_shape }, transform(), massData(),
-	velocity{Vector2f(0.0f ,0.0f)}, force{Vector2f(0.0f ,0.0f)},
-	angularVelocity{0.0f}, torque{0.0f}
+RigidBody::RigidBody(std::shared_ptr<Shape> i_shape, Material i_material) :
+	shape{ i_shape }, mat{ i_material }, transform(), massD(),
+	vel{Vector2f(0.0f ,0.0f)}, force{Vector2f(0.0f ,0.0f)},
+	angVel{0.0f}, torq{0.0f}
 {
+	SetMassData();
 }
 
 RigidBody::~RigidBody()
 {
 }
 
-//void RigidBody::SetShape(std::shared_ptr<Shape> i_shape) { shape = i_shape; }
-
-Vector2f RigidBody::GetCenterPoint() {
-	return  transform.position;
+void RigidBody::SetMassData()
+{
+	float area = shape->GetArea();
+	float inertiaCoeff = shape->GetInertiaCoeff();
+	float mass = area * mat.dens;
+	massD.SetMass(mass);
+	massD.SetInertia(mass * inertiaCoeff);
 }
 
-std::shared_ptr<Shape> RigidBody::GetShape() { return shape; }
+std::unique_ptr<sf::Shape> RigidBody::CreateDrawable(float i_lerp_fraction) {
+	//for linear interpolation this will now use the previous position and orientation
+	Vector2f lerpPos = (1.0f - i_lerp_fraction) * transform.prevPos + i_lerp_fraction * transform.pos;
+	float lerpOrient = (1.0f - i_lerp_fraction) * transform.prevOrient + i_lerp_fraction * transform.orient;
 
-std::unique_ptr<sf::Shape> RigidBody::CreateDrawable() {
 	std::unique_ptr<sf::Shape> drawShape = shape->GetSFMLRepr();
 	drawShape->setOrigin(sf::Vector2f(shape->GetSFMLOriginOffset()(0), shape->GetSFMLOriginOffset()(1)));
-	drawShape->setPosition(transform.position(0), transform.position(1));
-	drawShape->setRotation((transform.orientation*180.0f)/PI);
+	drawShape->setPosition(lerpPos(0), lerpPos(1));
+	drawShape->setRotation((lerpOrient*180.0f)/PI);
 	drawShape->setFillColor(sf::Color::White); //TODO: Colors
 	return drawShape;
 }
@@ -31,30 +37,32 @@ std::unique_ptr<sf::Shape> RigidBody::CreateDrawable() {
 std::vector<Vector2f> RigidBody::SwitchCoordsToWorldSpace(std::vector<Vector2f> i_objectSpaceCoords)
 {
 	std::vector<Vector2f> worldSpaceCoords;
-	Eigen::Rotation2D<float> rotation(transform.orientation);
+	Eigen::Rotation2D<float> rotation(transform.orient);
 	Matrix2f rotationMatrix = rotation.toRotationMatrix();
 	for (Vector2f objectSpaceCoord : i_objectSpaceCoords) {
-		Vector2f worldSpacePoint = transform.position + (rotationMatrix * objectSpaceCoord);
+		Vector2f worldSpacePoint = transform.pos + (rotationMatrix * objectSpaceCoord);
 		worldSpaceCoords.push_back(worldSpacePoint);
 	}
 	return worldSpaceCoords;
 }
 
-sf::VertexArray RigidBody::CreatOrientationLine() { 
+sf::VertexArray RigidBody::CreatOrientationLine(float i_lerp_fraction) {
+	Vector2f lerpPos = (1.0f - i_lerp_fraction) * transform.prevPos + i_lerp_fraction * transform.pos;
+	float lerpOrient = (1.0f - i_lerp_fraction) * transform.prevOrient + i_lerp_fraction * transform.orient;
 	sf::VertexArray lines = sf::VertexArray(sf::LinesStrip, 2);
-	sf::Vector2f position1 = sf::Vector2f(transform.position(0), transform.position(1)); //WHAT THE HELL 
-	Eigen::Rotation2D<float> rotation(transform.orientation);
+	sf::Vector2f position1 = sf::Vector2f(lerpPos(0), lerpPos(1));
+	Eigen::Rotation2D<float> rotation(lerpOrient);
 	Vector2f edgeOffsetFromCenter = Vector2f(shape->GetDistToEdge(), 0.0f);
 	Matrix2f rotationMatrix = rotation.toRotationMatrix();
 	Vector2f edgeoffSetRotated = rotationMatrix * edgeOffsetFromCenter;
-	Vector2f edgePoint = transform.position + edgeoffSetRotated;
+	Vector2f edgePoint = transform.pos + edgeoffSetRotated;
 	sf::Vector2f edgePointSFML = sf::Vector2f(edgePoint(0), edgePoint(1));
 	lines[0] = sf::Vertex(position1, sf::Color::Red);
 	lines[1] = sf::Vertex(edgePointSFML, sf::Color::Red);
 	return lines;
 }
 
-std::vector<sf::CircleShape> RigidBody::CreateStructurePoints()
+std::vector<sf::CircleShape> RigidBody::CreateStructurePoints(float i_lerp_fraction)
 {
 	std::vector<Vector2f> worldPoints = GetVertexCoords();
 	std::vector<sf::CircleShape> drawables;
@@ -81,61 +89,50 @@ std::vector<Vector2f> RigidBody::GetFaceRectNormals()
 	std::vector<Vector2f> objectPoints = shape->GetPoints();
 	std::vector<Vector2f> worldPoints = SwitchCoordsToWorldSpace(objectPoints);
 	std::vector<Vector2f> faceNormals;
-	if (shape->GetShapeType() == Shape::ShapeType::Rectangle) {
+	if (shape->GetType() == Shape::ShapeType::Rectangle) {
 		faceNormals.push_back(Vector2f(worldPoints[1] - worldPoints[0]).unitOrthogonal()); 	//top face normal
 		faceNormals.push_back(Vector2f(worldPoints[2] - worldPoints[1]).unitOrthogonal()); 	//left face normal
 		faceNormals.push_back(Vector2f(worldPoints[3] - worldPoints[2]).unitOrthogonal()); 	//right face normal
 		faceNormals.push_back(Vector2f(worldPoints[0] - worldPoints[3]).unitOrthogonal()); 	//bottom face normal
 	}
-	else if (shape->GetShapeType() == Shape::ShapeType::Circle) {
+	else if (shape->GetType() == Shape::ShapeType::Circle) {
 		//Do nothing this should return an empty list representing the infinite/nonexistent face normals of a circle
 	}
 	return faceNormals;
 }
 
-Vector2f RigidBody::GetVelocity()
+Vector2f RigidBody::GetInstVel()
 {
-	return velocity;
+	return vel + force;
 }
 
-float RigidBody::GetAngularVelocity()
+float RigidBody::GetInstAngVel()
 {
-	return angularVelocity;
+	return angVel + torq;
 }
-
-void RigidBody::SetVelocity(Vector2f i_vel) { velocity = i_vel; }
-
-void RigidBody::SetAngularVelocity(float i_vel) { angularVelocity = i_vel; }
-
-void RigidBody::SetOrientation(float i_orient) { transform.orientation = i_orient; }
 
 void RigidBody::ApplyImpulse(Vector2f i_imp, Vector2f contactP) 
 { 
-	//force  += i_imp * massData.GetMassInv(); 
-	//torque += Math::CrossProdScalar(contactP, i_imp) * massData.GetInertiaInv();
-	velocity += i_imp * massData.GetMassInv();
-	angularVelocity += Math::CrossProdScalar(contactP, i_imp) * massData.GetInertiaInv();
+	force  += i_imp * massD.GetMassInv(); 
+	torq += Math::CrossProdScalar(contactP, i_imp) * massD.GetInertInv();
 }
-
-//void RigidBody::ApplyRotationalImpulse(float i_imp) { torque += i_imp; }
 
 void RigidBody::IntegrateForces()
 {
-	/*
-	THe problem with this is that when half the collisions have been calculated I can't see when shpaes are already seperating. 
-	This shouldn't techically be an issue because I shouldn't be calculating a bounce between teh same two objects twice.
-	The only time it could come into play is when multiple things hit each other simultanouesly. It could affect the direction bounces.
-	Gonna just apply impulse and integrate in one step for now.*/
-	//velocity += force;
-	//angularVelocity += torque;
+	vel += force;
+	angVel += torq;
+	vel += GRAVITY_COEFFICIENT * massD.GetMassInv();
 	//velocity *= GLOBAL_DECELERATION_LINEAR;
 	//transform.orientation *= GLOBAL_DECELERATION_ANGULAR;
-	//force = Vector2f(0.0f, 0.0f);
-	//torque = 0.0f;
+	force = Vector2f(0.0f, 0.0f);
+	torq = 0.0f;
 }
 
 void RigidBody::IntegrateVelocity(float i_deltaTime)
 {
-	transform.position += velocity * massData.GetMassInv() * (i_deltaTime / AVG_MILLISEC_PER_UPDATE);
-	transform.orientation += angularVelocity * massData.GetInertiaInv() * (i_deltaTime / AVG_MILLISEC_PER_UPDATE);
+	transform.prevPos = transform.pos;
+	transform.prevOrient = transform.orient;
+
+	transform.pos += vel * (i_deltaTime / AVG_MILLISEC_PER_UPDATE);
+	transform.orient += angVel * (i_deltaTime / AVG_MILLISEC_PER_UPDATE);
 }

@@ -7,6 +7,11 @@
 //https://www.fluentcpp.com/2019/07/23/how-to-define-a-global-constant-in-cpp/
 //according to this article I should be adding extern here but that means I have to define these variables elsewhere also because I dont use CPP17
 
+//EIGEN STUFF
+//Using a typedef jus to remove one level of namespace might be a little gratuitous but everyone keeps telling me namespaces are bad sooo
+typedef Eigen::Vector2f Vector2f;
+typedef Eigen::Matrix<float, 2, 2> Matrix2f;
+
 //WINDOW RESOLUTION
 const int SCREEN_WIDTH = 1800;
 const int SCREEN_HEIGHT = 900;
@@ -14,16 +19,24 @@ const int SCREEN_HEIGHT = 900;
 //GAME RESOLUTION
 const float COURT_WIDTH = static_cast<float>(SCREEN_WIDTH * 8 / 9);
 const float COURT_HEIGHT = static_cast<float>(SCREEN_HEIGHT * 8 / 9);
-const float HORIZONTAL_MARGIN = static_cast<float>(SCREEN_WIDTH / 9);
-const float VERTICLE_MARGIN = static_cast<float>(SCREEN_HEIGHT / 9);
+const float HOR_MARGIN = static_cast<float>(SCREEN_WIDTH / 9);         //horizontal margin
+const float VERT_MARGIN = static_cast<float>(SCREEN_HEIGHT / 9);       //vertical margin
 
 //GENERAL GAME SETTINGS
 const float WALL_THICKNESS = 15.0f;
 const float MICROSECS_TO_MILLISECS = 1000.0f;
 const float MAX_ROTATION_DEGREES = 45;
+const float AVG_MILLISEC_PER_UPDATE = 10.0f;
+const float RADIAN_ADJUST = 50.0f;
+
+
+//PHYSICS CONSTANTS
+const Vector2f GRAVITY_COEFFICIENT = Vector2f(0.0f, 400.0f);
 const float GLOBAL_DECELERATION_LINEAR = 0.9995f;
 const float GLOBAL_DECELERATION_ANGULAR = 0.999995f;
-const float AVG_MILLISEC_PER_UPDATE = 100.0f;
+const float PENETRATION_ALLOWANCE = 0.05f;
+const float PENETRATION_CORRECTION = 0.4f;
+
 
 //TRIG CONSTANTS
 const float DEGREE_RIGHT = 0.0f;
@@ -66,9 +79,3 @@ enum ENTITY_TYPE { WALL, DOOR, ENEMY, PLAYER, PROJECTILE};
 typedef std::chrono::high_resolution_clock               hiResTime;
 typedef std::chrono::microseconds                        microSec;
 typedef std::chrono::high_resolution_clock::time_point   hiRes_time_point;
-
-
-//EIGEN STUFF
-//Using a typedef jus to remove one level of namespace might be a little gratuitous but everyone keeps telling me namespaces are bad sooo
-typedef Eigen::Vector2f Vector2f;
-typedef Eigen::Matrix<float, 2, 2> Matrix2f;

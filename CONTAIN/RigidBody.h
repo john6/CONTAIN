@@ -1,6 +1,6 @@
 /*
 Notes:
-	Origin of object space is the center
+Origin of object space is the center
 */
 
 #pragma once
@@ -10,52 +10,39 @@ Notes:
 #include "Rectangle.h"
 #include "Transform.h"
 #include "MassData.h"
+#include "Material.h"
 #include "Math.h"
+
 
 class RigidBody
 {
-private:
-	std::shared_ptr<Shape> shape;
-
-	Vector2f velocity;
-	Vector2f force;
-	float angularVelocity;
-	float torque;
-	//TODO: friction
-	//Material material;
-
-	std::vector<Vector2f> SwitchCoordsToWorldSpace(std::vector<Vector2f> i_objectSpaceCoords);
-	//"Center point" should now just be the transform.position
-	Vector2f GetCenterPoint();
-
-
 public:
-	int layer;
-	Transform transform;
-	MassData massData;
-
-
-	RigidBody(std::shared_ptr<Shape> i_shape);
+	RigidBody(std::shared_ptr<Shape> i_shape, Material i_material = Material());
 	~RigidBody();
 
-	//void SetShape(std::shared_ptr<Shape> i_shape);
+	std::shared_ptr<Shape> shape;
+	Transform transform;
+	MassData massD;
+	Material mat;
+	Vector2f vel;
+	Vector2f force;
+	float angVel;
+	float torq;
+	int layer;
 
-	std::shared_ptr<Shape> GetShape();
+	std::vector<Vector2f> SwitchCoordsToWorldSpace(std::vector<Vector2f> i_objectSpaceCoords);
 	std::vector<Vector2f> GetVertexCoords();
 	std::vector<Vector2f> GetFaceRectNormals();
-	Vector2f GetVelocity();
-	float GetAngularVelocity();
-	void SetVelocity(Vector2f i_vel);
-	void SetAngularVelocity(float i_vel);
-	void SetOrientation(float i_orient);
+	Vector2f GetInstVel();
+	float GetInstAngVel();
+	void SetMassData();
 
 	void ApplyImpulse(Vector2f i_imp, Vector2f contactP);
-	//void ApplyRotationalImpulse(float i_imp);
 	void IntegrateForces();
 	void IntegrateVelocity(float i_deltaTime);
 
 	//SFML drawing functions
-	std::unique_ptr<sf::Shape> CreateDrawable();
-	sf::VertexArray CreatOrientationLine();
-	std::vector<sf::CircleShape> CreateStructurePoints();
+	std::unique_ptr<sf::Shape> CreateDrawable(float i_lerp_fraction);
+	sf::VertexArray CreatOrientationLine(float i_lerp_fraction);
+	std::vector<sf::CircleShape> CreateStructurePoints(float i_lerp_fraction);
 };

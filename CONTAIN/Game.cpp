@@ -5,16 +5,14 @@ Game::Game(RESOURCES* i_resources, DIFFICULTY i_difficulty)
 {
 	beginTime = std::chrono::high_resolution_clock::now();
 	font = resources->GetFont();
-	numLvls = 3;
-	currLvl = 1;
-	timeToComplete = 10000000000000.0f;
+	numLvls = 9;
+	currLvl = 7;
+	timeToComplete = 999999999.0f;
 	playState = GENERAL_GAMEPLAY;
 }
 
- 
 Game::~Game()
 {
-	//I DONT KNOW WHY THE DESTRUCTOR IS GETTING CALLED, GOOD THING MY DELETE IS SAFE AMIRITE
 	DeleteLevels();
 }
 
@@ -51,23 +49,32 @@ GAME_STATE Game::UpdateGeneral(float i_stepSize) {
 }
 
 GAME_STATE  Game::UpdateLvlEntities(std::vector<RigidBody>* i_lvlEnts, float i_stepSize) {
-
+	std::vector<CollisionData> collisions;
 	for (int i = 0; i < i_lvlEnts->size(); ++i) {
-		for (int j = 0; j < i_lvlEnts->size(); ++j) {
+		for (int j = i + 1; j < i_lvlEnts->size(); ++j) {
 			RigidBody* entPtri = &i_lvlEnts->at(i);
 			RigidBody* entPtrj = &i_lvlEnts->at(j);
-			if (entPtri != entPtrj) {
-				Physics::CheckCollision(entPtri, entPtrj);
-			}
+			CollisionData collisionData = CollisionData();
+			collisionData.bodyA = &i_lvlEnts->at(i);
+			collisionData.bodyB = &i_lvlEnts->at(j);
+			bool collided = Physics::CheckCollision(&collisionData);
+			if (collided) { collisions.push_back(collisionData); }
 		}
+	}
+
+	for (CollisionData collision : collisions) {
+		Physics::CreateCollisionImpulse(&collision);
 	}
 
 	for (int i = 0; i < i_lvlEnts->size(); ++i) {
 		RigidBody* entPtr = &i_lvlEnts->at(i);
-		//entPtr->IntegrateForces();
+		entPtr->IntegrateForces();
 		entPtr->IntegrateVelocity(i_stepSize);
 	}
 
+	for (CollisionData collision : collisions) {
+		Physics::PositionalCorrection(&collision);
+	}
 
 	return IN_GAME;
 }

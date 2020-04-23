@@ -4,19 +4,19 @@
 
 RESOURCES::RESOURCES()
 {
-	if (!m_bufferRegularBeep.loadFromFile("Sounds/RegularBeep.wav")) {
+	if (!m_bufferRegularBeep.loadFromFile("Sounds/RegularBeep.wavASDASDASDASD")) {
 		std::cerr << "error loading RegularBeep \n";
 	}
-	if (!m_bufferNegativeBeep.loadFromFile("Sounds/NegativeBeep.wav")) {
+	if (!m_bufferNegativeBeep.loadFromFile("Sounds/NegativeBeep.wavASDASDASDASD")) {
 		std::cerr << "error loading NegativeBeep \n";
 	}
-	if (!m_bufferOctaveBeep.loadFromFile("Sounds/OctaveBeep.wav")) {
+	if (!m_bufferOctaveBeep.loadFromFile("Sounds/OctaveBeep.wavASDASDASD")) {
 		std::cerr << "error loading OctaveBeep \n";
 	}
-	if (!m_buffer8BitExplosion.loadFromFile("Sounds/8BitExplosion.wav")) {
+	if (!m_buffer8BitExplosion.loadFromFile("Sounds/8BitExplosion.wavASDASDASDASD")) {
 		std::cerr << "error loading 8BitExplosion \n";
 	}
-	if (!m_bufferUpwardChromaticBeep.loadFromFile("Sounds/UpwardChromaticBeep.wav")) {
+	if (!m_bufferUpwardChromaticBeep.loadFromFile("Sounds/UpwardChromaticBeep.wavASDASDASDASD")) {
 		std::cerr << "error loading UpwardChromaticBeep \n";
 	}
 	if (!m_font.loadFromFile("Font/kongtext.ttf")) {

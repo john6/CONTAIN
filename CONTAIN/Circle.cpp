@@ -8,15 +8,8 @@ Circle::~Circle()
 {
 }
 
-void Circle::SetRadius(float i_radius) { radius = i_radius; }
-
-float Circle::GetRadius() { return radius; }
-
 Vector2f Circle::GetSFMLOriginOffset()
-{
-	//not sure if I should replace this, SFML doesnt really use the radius as the center offset, but my math does 
-	//IDK for now
-	float adjacent = sqrt(pow(radius, 2)/ 2.0f);
+{ //the origin offset is the distance from the corner of the circles bounding box to the center
 	return Vector2f(radius, radius);
 }
 
@@ -28,7 +21,7 @@ std::unique_ptr<sf::Shape> Circle::GetSFMLRepr()
 	return shapePtr;
 }
 
-Shape::ShapeType Circle::GetShapeType()
+Shape::ShapeType Circle::GetType()
 {
 	return ShapeType::Circle;
 }
@@ -42,6 +35,16 @@ std::vector<Vector2f> Circle::GetPoints()
 	std::vector<Vector2f> points;
 	points.push_back(Vector2f(0.0f, 0.0f));
 	return points;
+}
+
+float Circle::GetArea()
+{
+	return PI * radius * radius;
+}
+
+float Circle::GetInertiaCoeff()
+{
+	return  0.5f * radius * radius;
 }
 
 std::vector<Vector2f> GetPoints() {

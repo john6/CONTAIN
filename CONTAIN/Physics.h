@@ -21,15 +21,21 @@ private:
 
 	static bool ResolveRectToCircleCollision(CollisionData* i_data);
 
+	static bool ResolveCircleToRectCollision(CollisionData* i_data);
+
 	static bool ResolveRectToRectCollision(CollisionData* i_data);
 
-	static void CreateCollisionImpulse(CollisionData* i_data);
+	static std::function<void(void)> SaveImpulse(RigidBody* body, Vector2f a1, Vector2f a2);
 
 public:
 	Physics();
 	~Physics();
 
-	static void CheckCollision(RigidBody * i_ent1, RigidBody * i_ent2);
+	static bool CheckCollision(CollisionData* i_collision);
+
+	static void CreateCollisionImpulse(CollisionData* i_data);
+
+	static void InfiniteMassCorrection(CollisionData* i_data);
 
 	static void PositionalCorrection(CollisionData* i_data);
 
