@@ -6,6 +6,8 @@ RigidBody::RigidBody(std::shared_ptr<Shape> i_shape, Material i_material) :
 	angVel{0.0f}, torq{0.0f}
 {
 	SetMassData();
+	objVerts = shape->GetPoints();
+	UpdateVertsAndNorms();
 }
 
 RigidBody::~RigidBody()
@@ -30,17 +32,50 @@ std::unique_ptr<sf::Shape> RigidBody::CreateDrawable(float i_lerp_fraction) {
 	drawShape->setOrigin(sf::Vector2f(shape->GetSFMLOriginOffset()(0), shape->GetSFMLOriginOffset()(1)));
 	drawShape->setPosition(lerpPos(0), lerpPos(1));
 	drawShape->setRotation((lerpOrient*180.0f)/PI);
-	drawShape->setFillColor(sf::Color::White); //TODO: Colors
+	drawShape->setOutlineColor(sf::Color::White);
+	drawShape->setOutlineThickness(3.0f);          //setOutlineColor(sf::Color::White);
+	drawShape->setFillColor(sf::Color::Black); //TODO: Colors
 	return drawShape;
 }
 
-std::vector<Vector2f> RigidBody::SwitchCoordsToWorldSpace(std::vector<Vector2f> i_objectSpaceCoords)
+std::vector<Vector2f> RigidBody::RotatePoints(std::vector<Vector2f> i_axisAlignedCoords)
 {
-	std::vector<Vector2f> worldSpaceCoords;
 	Eigen::Rotation2D<float> rotation(transform.orient);
 	Matrix2f rotationMatrix = rotation.toRotationMatrix();
-	for (Vector2f objectSpaceCoord : i_objectSpaceCoords) {
-		Vector2f worldSpacePoint = transform.pos + (rotationMatrix * objectSpaceCoord);
+	for (int i = 0; i < i_axisAlignedCoords.size(); ++i) {
+		i_axisAlignedCoords[i] = rotationMatrix * i_axisAlignedCoords[i];
+	}
+	return i_axisAlignedCoords;
+}
+
+void RigidBody::UpdateVertsAndNorms()
+{
+	worldVerts = vertsToWorldSpace(objVerts);
+	UpdateFaceNorms();
+}
+
+void RigidBody::UpdateFaceNorms()
+{
+	std::vector<Vector2f> faceNormals;
+	if (shape->GetType() == Shape::ShapeType::Rectangle) {
+		std::vector<Vector2f> rotatedPoints = RotatePoints(objVerts);
+		faceNormals.push_back(Vector2f(rotatedPoints[1] - rotatedPoints[0]).unitOrthogonal()); 	//top face normal
+		faceNormals.push_back(Vector2f(rotatedPoints[2] - rotatedPoints[1]).unitOrthogonal()); 	//left face normal
+		faceNormals.push_back(Vector2f(rotatedPoints[3] - rotatedPoints[2]).unitOrthogonal()); 	//right face normal
+		faceNormals.push_back(Vector2f(rotatedPoints[0] - rotatedPoints[3]).unitOrthogonal()); 	//bottom face normal
+	}
+	else if (shape->GetType() == Shape::ShapeType::Circle) {
+		//Do nothing this should return an empty list representing the infinite/nonexistent face normals of a circle
+	}
+	faceNorms = faceNormals;
+}
+
+std::vector<Vector2f> RigidBody::vertsToWorldSpace(std::vector<Vector2f> i_objectSpaceCoords)
+{
+	std::vector<Vector2f> worldSpaceCoords;
+	std::vector<Vector2f> rotatedPoints = RotatePoints(i_objectSpaceCoords);
+	for (Vector2f rotatedCoord : rotatedPoints) {
+		Vector2f worldSpacePoint = transform.pos + rotatedCoord;
 		worldSpaceCoords.push_back(worldSpacePoint);
 	}
 	return worldSpaceCoords;
@@ -64,7 +99,7 @@ sf::VertexArray RigidBody::CreatOrientationLine(float i_lerp_fraction) {
 
 std::vector<sf::CircleShape> RigidBody::CreateStructurePoints(float i_lerp_fraction)
 {
-	std::vector<Vector2f> worldPoints = GetVertexCoords();
+	std::vector<Vector2f> worldPoints = GetVertCords();
 	std::vector<sf::CircleShape> drawables;
 	for (Vector2f point : worldPoints) {
 		sf::CircleShape pointRepr(3.0f);
@@ -78,27 +113,13 @@ std::vector<sf::CircleShape> RigidBody::CreateStructurePoints(float i_lerp_fract
 	return drawables;
 }
 
-std::vector<Vector2f> RigidBody::GetVertexCoords() {
-	std::vector<Vector2f> objectPoints = shape->GetPoints();
-	std::vector<Vector2f> worldPoints = SwitchCoordsToWorldSpace(objectPoints);
-	return worldPoints;
+std::vector<Vector2f> RigidBody::GetVertCords() {
+	return worldVerts;
 }
 
-std::vector<Vector2f> RigidBody::GetFaceRectNormals()
-{ //ONLY WORKS ON RECTANGLES, gets all normals facing out
-	std::vector<Vector2f> objectPoints = shape->GetPoints();
-	std::vector<Vector2f> worldPoints = SwitchCoordsToWorldSpace(objectPoints);
-	std::vector<Vector2f> faceNormals;
-	if (shape->GetType() == Shape::ShapeType::Rectangle) {
-		faceNormals.push_back(Vector2f(worldPoints[1] - worldPoints[0]).unitOrthogonal()); 	//top face normal
-		faceNormals.push_back(Vector2f(worldPoints[2] - worldPoints[1]).unitOrthogonal()); 	//left face normal
-		faceNormals.push_back(Vector2f(worldPoints[3] - worldPoints[2]).unitOrthogonal()); 	//right face normal
-		faceNormals.push_back(Vector2f(worldPoints[0] - worldPoints[3]).unitOrthogonal()); 	//bottom face normal
-	}
-	else if (shape->GetType() == Shape::ShapeType::Circle) {
-		//Do nothing this should return an empty list representing the infinite/nonexistent face normals of a circle
-	}
-	return faceNormals;
+std::vector<Vector2f> RigidBody::GetFaceNorms()
+{ 
+	return faceNorms;
 }
 
 Vector2f RigidBody::GetInstVel()
@@ -114,16 +135,28 @@ float RigidBody::GetInstAngVel()
 void RigidBody::ApplyImpulse(Vector2f i_imp, Vector2f contactP) 
 { 
 	force  += i_imp * massD.GetMassInv(); 
-	torq += Math::CrossProdScalar(contactP, i_imp) * massD.GetInertInv();
+	torq += Math::CrossProdScalar(contactP, i_imp) * massD.GetInertInv() * ANGULAR_VELOCITY_ADJUSTMENT;
+}
+
+void RigidBody::AdjustPosition(Vector2f i_adjustment)
+{
+	transform.pos += i_adjustment;
+	UpdateVertsAndNorms();
+}
+
+void RigidBody::ResetPosition(Vector2f i_newPos)
+{
+	transform.pos = i_newPos;
+	UpdateVertsAndNorms();
 }
 
 void RigidBody::IntegrateForces()
 {
 	vel += force;
 	angVel += torq;
-	vel += GRAVITY_COEFFICIENT * massD.GetMassInv();
-	//velocity *= GLOBAL_DECELERATION_LINEAR;
-	//transform.orientation *= GLOBAL_DECELERATION_ANGULAR;
+	//vel += GRAVITY_COEFFICIENT * massD.GetMassInv();
+	vel *= GLOBAL_DECELERATION_LINEAR;
+	angVel *= GLOBAL_DECELERATION_ANGULAR;
 	force = Vector2f(0.0f, 0.0f);
 	torq = 0.0f;
 }
@@ -135,4 +168,5 @@ void RigidBody::IntegrateVelocity(float i_deltaTime)
 
 	transform.pos += vel * (i_deltaTime / AVG_MILLISEC_PER_UPDATE);
 	transform.orient += angVel * (i_deltaTime / AVG_MILLISEC_PER_UPDATE);
+	UpdateVertsAndNorms();
 }

@@ -1,14 +1,16 @@
 #pragma once
 #include <vector>
 #include "GLOBAL_CONSTANTS.h"
+#include "Entity.h"
 #include "RigidBody.h"
 
 class Level
 {
 protected:
 	int m_lvl_num;
-	std::vector<RigidBody> lvlBoundaries;
-	std::vector<RigidBody> lvlEntites;
+
+	std::vector<Entity > lvlBoundaries;
+	std::vector<Entity> lvlEntites;
 	int enemiesRemaining;
 	float gameSpeedPerMill;
 	float playerSpeed;
@@ -20,7 +22,9 @@ public:
 	~Level();
 
 	int GetLvlNum();
-	std::vector<RigidBody> GetLvlBoundaries();
-	std::vector<RigidBody>* GetLvlEntites();
+	std::vector<Entity> GetLvlBoundaries();
+	std::vector<Entity>* GetLvlEntites();
+
+	void AddEntityToLevel(Entity i_ent);
 };
 

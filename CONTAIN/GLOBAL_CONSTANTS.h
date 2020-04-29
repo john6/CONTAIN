@@ -19,24 +19,24 @@ const int SCREEN_HEIGHT = 900;
 //GAME RESOLUTION
 const float COURT_WIDTH = static_cast<float>(SCREEN_WIDTH * 8 / 9);
 const float COURT_HEIGHT = static_cast<float>(SCREEN_HEIGHT * 8 / 9);
-const float HOR_MARGIN = static_cast<float>(SCREEN_WIDTH / 9);         //horizontal margin
-const float VERT_MARGIN = static_cast<float>(SCREEN_HEIGHT / 9);       //vertical margin
+const float HOR_MARGIN = static_cast<float>(SCREEN_WIDTH / 18);         //horizontal margin
+const float VERT_MARGIN = static_cast<float>(SCREEN_HEIGHT / 18);       //vertical margin
 
 //GENERAL GAME SETTINGS
-const float WALL_THICKNESS = 15.0f;
+const float WALL_THICKNESS = 100.0f;
 const float MICROSECS_TO_MILLISECS = 1000.0f;
 const float MAX_ROTATION_DEGREES = 45;
 const float AVG_MILLISEC_PER_UPDATE = 10.0f;
 const float RADIAN_ADJUST = 50.0f;
-
+const float PROJECTILE_RADIUS = 10.0f;
 
 //PHYSICS CONSTANTS
-const Vector2f GRAVITY_COEFFICIENT = Vector2f(0.0f, 400.0f);
-const float GLOBAL_DECELERATION_LINEAR = 0.9995f;
-const float GLOBAL_DECELERATION_ANGULAR = 0.999995f;
+const Vector2f GRAVITY_COEFFICIENT = Vector2f(0.0f, 100.0f);
+const float GLOBAL_DECELERATION_LINEAR = 0.99f;
+const float GLOBAL_DECELERATION_ANGULAR = 0.99f;
 const float PENETRATION_ALLOWANCE = 0.05f;
 const float PENETRATION_CORRECTION = 0.4f;
-
+const float ANGULAR_VELOCITY_ADJUSTMENT = 0.7f;
 
 //TRIG CONSTANTS
 const float DEGREE_RIGHT = 0.0f;
@@ -48,6 +48,11 @@ const float RADIAN_RIGHT = 0.0f;
 const float RADIAN_UP = PI / 2.0f;
 const float RADIAN_LEFT = PI;
 const float RADIAN_DOWN = 3.0f * PI / 2.0f;
+const Vector2f UP(0.0f, 1.0f);
+const Vector2f DOWN(0.0f, -1.0f);
+const Vector2f LEFT(-1.0f, 0.0f);
+const Vector2f RIGHT(1.0f, 0.0f);
+const Vector2f NULL_VECTOR(0.0f, 0.0f);
 
 //MENU SETTINGS
 const float BUTTON_WIDTH = SCREEN_WIDTH / 3;
@@ -71,7 +76,7 @@ const float LEVEL_TIME_LIMIT_HARD = 135.0f;
 
 //ENUMS
 enum GAME_STATE { MENU, START_GAME, IN_GAME, EXIT_GAME, WIN, LOSE };
-enum MOUSE_STATE { UP, DOWN };
+enum MOUSE_STATE { MOUSE_UP, MOUSE_DOWN };
 enum DIFFICULTY { EASY, MEDIUM, HARD };
 enum ENTITY_TYPE { WALL, DOOR, ENEMY, PLAYER, PROJECTILE};
 

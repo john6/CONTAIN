@@ -21,6 +21,9 @@ public:
 	~RigidBody();
 
 	std::shared_ptr<Shape> shape;
+	std::vector<Vector2f> objVerts;
+	std::vector<Vector2f> worldVerts;
+	std::vector<Vector2f> faceNorms;
 	Transform transform;
 	MassData massD;
 	Material mat;
@@ -30,14 +33,20 @@ public:
 	float torq;
 	int layer;
 
-	std::vector<Vector2f> SwitchCoordsToWorldSpace(std::vector<Vector2f> i_objectSpaceCoords);
-	std::vector<Vector2f> GetVertexCoords();
-	std::vector<Vector2f> GetFaceRectNormals();
+
+	std::vector<Vector2f> RotatePoints(std::vector<Vector2f> i_axisAlignedCoords);
+	std::vector<Vector2f> vertsToWorldSpace(std::vector<Vector2f> i_objectSpaceCoords);
+	void UpdateVertsAndNorms();
+	void UpdateFaceNorms();
+	std::vector<Vector2f> GetVertCords();
+	std::vector<Vector2f> GetFaceNorms();
 	Vector2f GetInstVel();
 	float GetInstAngVel();
 	void SetMassData();
 
 	void ApplyImpulse(Vector2f i_imp, Vector2f contactP);
+	void AdjustPosition(Vector2f);
+	void ResetPosition(Vector2f);
 	void IntegrateForces();
 	void IntegrateVelocity(float i_deltaTime);
 

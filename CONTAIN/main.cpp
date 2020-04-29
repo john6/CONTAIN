@@ -8,8 +8,7 @@
 #include "Game.h"
 #include "Menu.h"
 
-//NEED TO ADD CLAMPING
-//NEED TO ADD LERP I GUESS
+//TODO: Cotnact points should be in local space I think, I never convert them
 
 int main()
 {
@@ -18,12 +17,12 @@ int main()
 	int currLvl;
 	RESOURCES resources;
 	DIFFICULTY difficulty = MEDIUM;
-	Game* game = &Game(&resources);
+	Game game = Game(&resources);
 	Menu menu(&resources);
 	GAME_STATE state = MENU;
 
 	hiRes_time_point currTime = hiResTime::now();
-	const microSec UPDATE_INTERVAL(30000);
+	const microSec UPDATE_INTERVAL(16666);   //16666.66 microseconds == 60 updates per second
 	microSec lag(0);
 
 	while (window.isOpen())
@@ -42,7 +41,8 @@ int main()
 				break;
 			}
 			case IN_GAME: {
-				state = game->Update(static_cast<float>(lag.count()));
+				sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+				state = game.Update(static_cast<float>(lag.count()), &window, mousePosition);
 				break;
 			}
 			case WIN: {
@@ -56,7 +56,7 @@ int main()
 			case START_GAME: {
 				currLvl = 0;
 				difficulty = menu.GetDifficulty();
-				game->GenerateLevels(difficulty);
+				game.GenerateLevels(difficulty);
 				state = IN_GAME;
 				break;
 			}
@@ -70,7 +70,7 @@ int main()
 		}
 		if (state == IN_GAME) {
 			float percentUpdateElapsed = static_cast<float>(lag.count()) / static_cast<float>(UPDATE_INTERVAL.count());
-			game->Render(&window, percentUpdateElapsed);
+			game.Render(&window, percentUpdateElapsed);
 		}
 		else {
 			menu.Render(&window);

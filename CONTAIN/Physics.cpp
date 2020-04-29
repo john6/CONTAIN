@@ -30,9 +30,9 @@ Vector2f Physics::GetMaxProjection(Vector2f i_dir, std::vector<Vector2f> i_verti
 
 std::vector<Vector2f> Physics::FindIncidentFace(RigidBody * i_refEnt, RigidBody * i_incidentEnt, int i_refIndex)
 {
-	Vector2f referenceNormal = i_refEnt->GetFaceRectNormals()[i_refIndex];
-	std::vector<Vector2f> incidentVerts = i_incidentEnt->GetVertexCoords();
-	std::vector<Vector2f> incidentNormals = i_incidentEnt->GetFaceRectNormals();
+	Vector2f referenceNormal = i_refEnt->GetFaceNorms()[i_refIndex];
+	std::vector<Vector2f> incidentVerts = i_incidentEnt->GetVertCords();
+	std::vector<Vector2f> incidentNormals = i_incidentEnt->GetFaceNorms();
 	//ignoring world to model space stuff right here
 	int incidentFaceIndex = -1;
 	float minProjection = std::numeric_limits<float>::max();
@@ -80,9 +80,9 @@ int Physics::Clip(Vector2f normal, float c, std::vector<Vector2f>* face)
 
 std::vector<float> Physics::FindAxisLeastPenetration(RigidBody* i_entA, RigidBody* i_entB)
 {
-	std::vector<Vector2f> verticesA = i_entA->GetVertexCoords();
-	std::vector<Vector2f> verticesB = i_entB->GetVertexCoords();
-	std::vector<Vector2f> normalsA = i_entA->GetFaceRectNormals();
+	std::vector<Vector2f> verticesA = i_entA->GetVertCords();
+	std::vector<Vector2f> verticesB = i_entB->GetVertCords();
+	std::vector<Vector2f> normalsA = i_entA->GetFaceNorms();
 	float maxPenetrationDist = -std::numeric_limits<float>::max();
 	float maxPenetrationVert = -1;
 	for (int i = 0; i < verticesA.size(); ++i) {
@@ -148,8 +148,8 @@ bool Physics::ResolveRectToCircleCollision(CollisionData* i_data)
 
 	float maxSeperation = -std::numeric_limits<float>::max();
 	int collisionFaceIndex = -1;
-	std::vector<Vector2f> rectVertices = rectBod->GetVertexCoords();
-	std::vector<Vector2f> normals = rectBod->GetFaceRectNormals();
+	std::vector<Vector2f> rectVertices = rectBod->GetVertCords();
+	std::vector<Vector2f> normals = rectBod->GetFaceNorms();
 	for (int i = 0; i < normals.size(); ++i) {
 		float currSeperation = normals[i].dot(circleBod->transform.pos - rectVertices[i]);
 		if (currSeperation > circlePtr->radius) {
@@ -233,7 +233,7 @@ bool Physics::ResolveRectToRectCollision(CollisionData* i_data) {
 	}
 
 	std::vector<Vector2f> incidentFaceVerts = FindIncidentFace(refEnt, incidentEnt, refIndex);
-	std::vector<Vector2f> refVerts = refEnt->GetVertexCoords();
+	std::vector<Vector2f> refVerts = refEnt->GetVertCords();
 
 	Vector2f refEntV1 = refVerts[refIndex];
 	Vector2f refEntV2 = refVerts[(refIndex + 1) % refVerts.size()];
@@ -248,7 +248,7 @@ bool Physics::ResolveRectToRectCollision(CollisionData* i_data) {
 	float refPosSide = refSidePlaneNormal.dot(refEntV2);
 
 	if (Clip(-refSidePlaneNormal, refNegSide, &incidentFaceVerts) < 2) { return false; }
-	if (Clip(refSidePlaneNormal, refNegSide, &incidentFaceVerts) < 2) { return false; }
+	if (Clip(refSidePlaneNormal, refPosSide, &incidentFaceVerts) < 2) { return false; }
 
 	i_data->norm = flip ? -refFaceNormal : refFaceNormal;
 
@@ -318,7 +318,6 @@ void Physics::InfiniteMassCorrection(CollisionData * i_data)
 {
 	i_data->bodyA->vel = Vector2f(0.0f, 0.0f);
 	i_data->bodyB->vel = Vector2f(0.0f, 0.0f);
-
 }
 
 void Physics::PositionalCorrection(CollisionData * i_data)
@@ -334,8 +333,8 @@ void Physics::PositionalCorrection(CollisionData * i_data)
 		Vector2f correction = std::max(i_data->pen - PENETRATION_ALLOWANCE, 0.0f) /
 			(i_data->bodyA->massD.GetMassInv() + i_data->bodyB->massD.GetMassInv()) * i_data->norm * PENETRATION_CORRECTION;
 
-		i_data->bodyA->transform.pos = i_data->bodyA->transform.pos - (correction * i_data->bodyA->massD.GetMassInv());
-		i_data->bodyB->transform.pos = i_data->bodyB->transform.pos + (correction * i_data->bodyB->massD.GetMassInv());
+		i_data->bodyA->AdjustPosition(-correction * i_data->bodyA->massD.GetMassInv());
+		i_data->bodyB->AdjustPosition(correction * i_data->bodyB->massD.GetMassInv());
 	}
 }
 
@@ -378,13 +377,10 @@ void Physics::CreateCollisionImpulse(CollisionData* i_data) {
 
 		Vector2f impulse = i_data->norm * impulseScalar;
 
-
-		//bodyA->ApplyImpulse(-impulse, contactPtA);
-		//bodyB->ApplyImpulse(impulse, contactPtB);
 		impulseCalls.push_back(SaveImpulse(bodyA, -impulse, contactPtA));
 		impulseCalls.push_back(SaveImpulse(bodyB, impulse, contactPtB));
-
-
+		//bodyA->ApplyImpulse(-impulse, contactPtA);
+		//bodyB->ApplyImpulse(impulse, contactPtB);
 
 		relativeVelocity = (bodyB->GetInstVel() + Math::FloatVectCross(bodyB->GetInstAngVel(), contactPtB)) -
 						   (bodyA->GetInstVel() - Math::FloatVectCross(bodyA->GetInstAngVel(), contactPtA));
@@ -405,20 +401,21 @@ void Physics::CreateCollisionImpulse(CollisionData* i_data) {
 		if (abs(tanMag) < impulseScalar * statFric) { tangentImpulse = tan * tanMag; }
 		else { tangentImpulse = tan * -impulseScalar * dynaFric; }
 
-		//bodyA->ApplyImpulse(tangentImpulse, contactPtA);
-		//bodyB->ApplyImpulse(-tangentImpulse, contactPtB);
-
 		if (bodyA->shape->GetType() == Shape::Circle) {
 			impulseCalls.push_back(SaveImpulse(bodyA, tangentImpulse, contactPtA));
+			//bodyA->ApplyImpulse(tangentImpulse, contactPtA);
 		}
 		else {
 			impulseCalls.push_back(SaveImpulse(bodyA, -tangentImpulse, contactPtA));
+			//bodyA->ApplyImpulse(-tangentImpulse, contactPtA);
 		}
 		if (bodyB->shape->GetType() == Shape::Circle) {
 			impulseCalls.push_back(SaveImpulse(bodyB, -tangentImpulse, contactPtB));
+			//bodyB->ApplyImpulse(-tangentImpulse, contactPtB);
 		}
 		else {
 			impulseCalls.push_back(SaveImpulse(bodyB, tangentImpulse, contactPtB));
+			//bodyB->ApplyImpulse(-tangentImpulse, contactPtB);
 		}
 	}
 

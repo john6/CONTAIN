@@ -1,6 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "RigidBody.h"
+#include "Entity.h"
 
 class GameRenderer
 {
@@ -12,5 +12,5 @@ public:
 	GameRenderer();
 	~GameRenderer();
 
-	static void Render(sf::RenderWindow* i_window, float i_lerp_fraction, std::vector<RigidBody>* i_entityList);
+	static void Render(sf::RenderWindow* i_window, float i_lerp_fraction, std::vector<Entity>* i_entityList, Entity playerChar);
 };

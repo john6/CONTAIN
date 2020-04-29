@@ -103,10 +103,10 @@ void  Menu::UpdateButtonTriplet(DIFFICULTY i_difficultySelected) {
 	}
 }
 
-GAME_STATE Menu::Update(float millisecs, sf::RenderWindow* window, sf::Vector2i mousePosition) {
-	PollButtonTriplet(mousePosition);
-	bool playButtonPressed = PollInput(mousePosition, &playButton);
-	bool exitButtonPressed = PollInput(mousePosition, &exitButton);
+GAME_STATE Menu::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vector2i i_mousePos) {
+	PollButtonTriplet(i_mousePos);
+	bool playButtonPressed = PollInput(i_mousePos, &playButton);
+	bool exitButtonPressed = PollInput(i_mousePos, &exitButton);
 
 	if (playButtonPressed) {
 		resources->PlaySound(RESOURCES::OCTAVE_BEEP);
