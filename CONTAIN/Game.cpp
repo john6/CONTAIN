@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "QuadTree.h"
 
 Game::Game(RESOURCES* i_resources, DIFFICULTY i_difficulty)
 	: resources {i_resources} , HUD {HeadsUpDisplay(i_resources)}
@@ -8,7 +9,8 @@ Game::Game(RESOURCES* i_resources, DIFFICULTY i_difficulty)
 	//RigidBody rb(shape);
 	//Entity ent(rb);
 	playerChar = Entity();
-	playerChar.rb.ResetPosition(Vector2f(1000.0f, 230.0f));
+	playerChar.rb.ResetPosition(Vector2f(100, 500.0f));
+	playerChar.rb.transform.orient = 1.0f;
 	beginTime = std::chrono::high_resolution_clock::now();
 	font = resources->GetFont();
 	numLvls = 9;
@@ -59,50 +61,84 @@ GAME_STATE Game::UpdateGeneral(float i_stepSize, sf::Vector2i i_mousePos) {
 	return IN_GAME;
 }
 
-GAME_STATE  Game::UpdateLvlEntities(std::vector<Entity>* i_lvlEnts, float i_stepSize) {
+GAME_STATE  Game::UpdateLvlEntities(std::list<Entity>* i_lvlEnts, float i_stepSize) {
 	std::vector<CollisionData> collisions;
 
-	for (int i = 0; i < i_lvlEnts->size(); ++i) {
-			RigidBody* entPtri = &i_lvlEnts->at(i).rb;
-			CollisionData collisionData = CollisionData();
-			collisionData.bodyA = &playerChar.rb;
-			collisionData.bodyB = entPtri;
-			bool collided = Physics::CheckCollision(&collisionData);
-			if (collided) { collisions.push_back(collisionData); }
+
+	/// WITHOUT QUADTREE
+
+	//for (auto iter = i_lvlEnts->begin(); iter != i_lvlEnts->end(); ++iter) {
+	//	RigidBody* entPtri = &iter->rb;
+	//	CollisionData collisionData = CollisionData();
+	//	collisionData.bodyA = &playerChar.rb;
+	//	collisionData.bodyB = entPtri;
+	//	bool collided = Physics::CheckCollision(&collisionData);
+	//	if (collided) { collisions.push_back(collisionData); }
+	//}
+
+	//for (auto iter1 = i_lvlEnts->begin(); iter1 != i_lvlEnts->end(); ++iter1) {
+	//	for (auto iter2 = std::next(iter1); iter2 != i_lvlEnts->end(); ++iter2) {
+	//		RigidBody* entPtri = &iter1->rb;
+	//		RigidBody* entPtrj = &iter2->rb;
+	//		CollisionData collisionData = CollisionData();
+	//		collisionData.bodyA = entPtri;
+	//		collisionData.bodyB = entPtrj;
+	//		bool collided = Physics::CheckCollision(&collisionData);
+	//		if (collided) { collisions.push_back(collisionData); }
+	//	}
+	//}
+
+	/// WITH QUADTREE 
+
+	QuadTree qTree = QuadTree(0, Vector2f(0.0f, 0.0f), SCREEN_WIDTH, SCREEN_HEIGHT);
+
+	for (auto iter1 = i_lvlEnts->begin(); iter1 != i_lvlEnts->end(); ++iter1) {
+		qTree.Insert(&(*iter1));
 	}
 
-	for (int i = 0; i < i_lvlEnts->size(); ++i) {
-		for (int j = i + 1; j < i_lvlEnts->size(); ++j) {
-			RigidBody* entPtri = &i_lvlEnts->at(i).rb;
-			RigidBody* entPtrj = &i_lvlEnts->at(j).rb;
+	std::vector<Entity*> playerCollisions = qTree.GetSectorEntities(&playerChar);
+	for (Entity* collidedWith : playerCollisions) {
+		RigidBody* entPtrA = &playerChar.rb;
+		RigidBody* entPtrB = &collidedWith->rb;
+		CollisionData collisionData = CollisionData();
+		collisionData.bodyA = entPtrA;
+		collisionData.bodyB = entPtrB;
+		bool collided = Physics::CheckCollision(&collisionData);
+		if (collided) { collisions.push_back(collisionData); }
+	}
+
+	for (auto iter1 = i_lvlEnts->begin(); iter1 != i_lvlEnts->end(); ++iter1) {
+		std::vector<Entity*> collisionsWithEnt = qTree.GetSectorEntities(&(*iter1));
+		for (Entity* collidedWith : collisionsWithEnt) {
+			RigidBody* entPtrA = &(*iter1).rb;
+			RigidBody* entPtrB = &collidedWith->rb;
 			CollisionData collisionData = CollisionData();
-			collisionData.bodyA = entPtri;
-			collisionData.bodyB = entPtrj;
+			collisionData.bodyA = entPtrA;
+			collisionData.bodyB = entPtrB;
 			bool collided = Physics::CheckCollision(&collisionData);
 			if (collided) { collisions.push_back(collisionData); }
 		}
 	}
 
+	///END OF QUADSTUFF
+
+
 	for (CollisionData collision : collisions) {
 		Physics::CreateCollisionImpulse(&collision);
 	}
 
-
-
 	playerChar.rb.IntegrateForces();
 	playerChar.rb.IntegrateVelocity(i_stepSize);
 
-	for (int i = 0; i < i_lvlEnts->size(); ++i) {
-		RigidBody* entPtr = &i_lvlEnts->at(i).rb;
+	for (auto iter = i_lvlEnts->begin(); iter != i_lvlEnts->end(); ++iter) {
+		RigidBody* entPtr = &iter->rb;
 		entPtr->IntegrateForces();
 		entPtr->IntegrateVelocity(i_stepSize);
 	}
 
-
 	for (CollisionData collision : collisions) {
 		Physics::PositionalCorrection(&collision);
 	}
-
 
 	return IN_GAME;
 }
@@ -112,7 +148,12 @@ void Game::UpdateHUD() {
 }
 
 void Game::Render(sf::RenderWindow* i_window, float i_elapsedMilliseconds) {
-	GameRenderer::Render(i_window, i_elapsedMilliseconds, levels[currLvl]->GetLvlEntites(), playerChar);
+	QuadTree qTree = QuadTree(0, Vector2f(0.0f, 0.0f), SCREEN_WIDTH, SCREEN_HEIGHT);
+	auto i_lvlEnts = levels[currLvl]->GetLvlEntites();
+	for (auto iter1 = i_lvlEnts->begin(); iter1 != i_lvlEnts->end(); ++iter1) {
+		qTree.Insert(&(*iter1));
+	}
+	GameRenderer::Render(i_window, i_elapsedMilliseconds, levels[currLvl]->GetLvlEntites(), playerChar, qTree.GetDrawableSectionLines());
 }
 
 void Game::GenerateLevels(DIFFICULTY i_diff) {
@@ -150,11 +191,11 @@ void Game::PollKeys(float i_step, sf::Vector2i i_mousePos)
 		Entity projectile = Entity(projBody);
 		projectile.rb.ResetPosition(playerChar.rb.transform.pos);
 		projectile.rb.AdjustPosition(projectileDir * 100.0f);
-		projectile.rb.ApplyImpulse(projectileDir * 5000.0f, NULL_VECTOR);
+		projectile.rb.ApplyImpulse(projectileDir * 2000.0f, NULL_VECTOR);
 		levels[currLvl]->AddEntityToLevel(projectile);
 	}
-	//if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q)) {
-	//}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q)) {
+	}
 }
 
 void Game::DeleteLevels() {

@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <list>
 #include "Entity.h"
 
 class GameRenderer
@@ -12,5 +13,6 @@ public:
 	GameRenderer();
 	~GameRenderer();
 
-	static void Render(sf::RenderWindow* i_window, float i_lerp_fraction, std::vector<Entity>* i_entityList, Entity playerChar);
+	static void Render(sf::RenderWindow* i_window, float i_lerp_fraction, std::list<Entity>* i_entityList, Entity playerChar, std::vector<sf::VertexArray> i_sections);
+
 };

@@ -25,6 +25,7 @@
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Math.cpp" />
+    <ClCompile Include="QuadTree.cpp" />
     <ClCompile Include="RigidBody.cpp" />
     <ClCompile Include="GameRenderer.cpp" />
     <ClCompile Include="HeadsUpDisplay.cpp" />
@@ -47,6 +48,7 @@
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Math.h" />
+    <ClInclude Include="QuadTree.h" />
     <ClInclude Include="RigidBody.h" />
     <ClInclude Include="GameRenderer.h" />
     <ClInclude Include="GLOBAL_CONSTANTS.h" />

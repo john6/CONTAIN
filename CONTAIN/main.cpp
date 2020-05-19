@@ -8,7 +8,7 @@
 #include "Game.h"
 #include "Menu.h"
 
-//TODO: Cotnact points should be in local space I think, I never convert them
+//TODO: Contact points should be in local space I think, I never convert them
 
 int main()
 {
@@ -22,7 +22,7 @@ int main()
 	GAME_STATE state = MENU;
 
 	hiRes_time_point currTime = hiResTime::now();
-	const microSec UPDATE_INTERVAL(16666);   //16666.66 microseconds == 60 updates per second
+	const microSec UPDATE_INTERVAL(30000);   //16666.66 microseconds ~~ 16 milliseconds == 60 updates per second
 	microSec lag(0);
 
 	while (window.isOpen())
@@ -33,6 +33,10 @@ int main()
 		microSec currInterval = std::chrono::duration_cast<microSec>(newTime - currTime);
 		currTime = newTime;
 		lag += currInterval;
+		//Set a max for lag if I wanna clamp
+		if (lag > UPDATE_INTERVAL * (2)) {
+			lag = UPDATE_INTERVAL * (2);
+		}
 		while (lag >= UPDATE_INTERVAL) {
 			switch (state) {
 			case MENU: {
@@ -42,7 +46,12 @@ int main()
 			}
 			case IN_GAME: {
 				sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+				hiRes_time_point beforePhysicsUpdate = hiResTime::now();
 				state = game.Update(static_cast<float>(lag.count()), &window, mousePosition);
+				hiRes_time_point afterPhysicsUpdate = hiResTime::now();
+				microSec currInterval = std::chrono::duration_cast<microSec>(afterPhysicsUpdate - beforePhysicsUpdate);
+				std::string str = "Physics update took " + std::to_string(currInterval.count()) + " microseconds \n";
+				std::cout << str;
 				break;
 			}
 			case WIN: {
@@ -61,16 +70,16 @@ int main()
 				break;
 			}
 			}
-			//Set a max for lag if I wanna clamp
-			if (lag > UPDATE_INTERVAL * (2)) {
-				lag = UPDATE_INTERVAL * (2);
-			}
-
 			lag -= UPDATE_INTERVAL;
 		}
 		if (state == IN_GAME) {
 			float percentUpdateElapsed = static_cast<float>(lag.count()) / static_cast<float>(UPDATE_INTERVAL.count());
+			hiRes_time_point beforePhysicsUpdate = hiResTime::now();
 			game.Render(&window, percentUpdateElapsed);
+			hiRes_time_point afterPhysicsUpdate = hiResTime::now();
+			microSec currInterval = std::chrono::duration_cast<microSec>(afterPhysicsUpdate - beforePhysicsUpdate);
+			std::string str = "Render took " + std::to_string(currInterval.count()) + " microseconds \n \n";
+			std::cout << str;
 		}
 		else {
 			menu.Render(&window);

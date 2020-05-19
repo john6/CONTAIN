@@ -40,7 +40,7 @@ private:
 	float timeToComplete;
 
 	GAME_STATE UpdateGeneral(float i_stepSize, sf::Vector2i i_mousePos);
-	GAME_STATE UpdateLvlEntities(std::vector<Entity>* i_lvlEnts, float i_stepSize);
+	GAME_STATE UpdateLvlEntities(std::list<Entity>* i_lvlEnts, float i_stepSize);
 	void UpdateHUD();
 	void PollKeys(float i_step, sf::Vector2i i_mousePos);
 	void DeleteLevels();

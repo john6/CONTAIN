@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <list>
 #include "GLOBAL_CONSTANTS.h"
 #include "Entity.h"
 #include "RigidBody.h"
@@ -9,8 +10,8 @@ class Level
 protected:
 	int m_lvl_num;
 
-	std::vector<Entity > lvlBoundaries;
-	std::vector<Entity> lvlEntites;
+	std::list<Entity> lvlBoundaries;
+	std::list<Entity> lvlEntites;
 	int enemiesRemaining;
 	float gameSpeedPerMill;
 	float playerSpeed;
@@ -22,8 +23,8 @@ public:
 	~Level();
 
 	int GetLvlNum();
-	std::vector<Entity> GetLvlBoundaries();
-	std::vector<Entity>* GetLvlEntites();
+	std::list<Entity> GetLvlBoundaries();
+	std::list<Entity>* GetLvlEntites();
 
 	void AddEntityToLevel(Entity i_ent);
 };
