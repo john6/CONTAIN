@@ -305,7 +305,6 @@ bool Physics::CheckCollision(CollisionData* i_collision)
 		RigidBody* temp = i_collision->bodyA;
 		i_collision->bodyA = i_collision->bodyB;
 		i_collision->bodyB = temp;
-		/*collisionOccured = ResolveCircleToRectCollision(i_collision);*/
 		collisionOccured = ResolveRectToCircleCollision(i_collision);
 		temp = i_collision->bodyA;
 		i_collision->bodyA = i_collision->bodyB;

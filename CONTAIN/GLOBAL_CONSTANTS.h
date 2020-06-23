@@ -36,7 +36,7 @@ const float GLOBAL_DECELERATION_LINEAR = 0.999f;
 const float GLOBAL_DECELERATION_ANGULAR = 0.999f;
 const float PENETRATION_ALLOWANCE = 0.05f;
 const float PENETRATION_CORRECTION = 0.4f;
-const float ANGULAR_VELOCITY_ADJUSTMENT = 0.7f;
+const float ANGULAR_VELOCITY_ADJUSTMENT = 0.1f; //IDK where my angular velocity is getting so fucking jacked
 
 //TRIG CONSTANTS
 const float DEGREE_RIGHT = 0.0f;

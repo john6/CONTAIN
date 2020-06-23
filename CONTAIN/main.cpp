@@ -11,7 +11,15 @@
 //TODO: Contact points should be in local space I think, I never convert them
 
 int main()
-{
+{/*
+	if (__cplusplus == 201703L) std::cout << "C++17\n";
+	else if (__cplusplus == 201402L) std::cout << "C++14\n";
+	else if (__cplusplus == 201103L) std::cout << "C++11\n";
+	else if (__cplusplus == 199711L) std::cout << "C++98\n";
+	else std::cout << "pre-standard C++\n";*/
+
+
+
 	sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "CONTAIN");
 
 	int currLvl;
@@ -22,7 +30,7 @@ int main()
 	GAME_STATE state = MENU;
 
 	hiRes_time_point currTime = hiResTime::now();
-	const microSec UPDATE_INTERVAL(30000);   //16666.66 microseconds ~~ 16 milliseconds == 60 updates per second
+	const microSec UPDATE_INTERVAL(16666);   //16666.66 microseconds ~~ 16 milliseconds == 60 updates per second
 	microSec lag(0);
 
 	while (window.isOpen())

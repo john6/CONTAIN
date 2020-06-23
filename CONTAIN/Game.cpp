@@ -1,5 +1,6 @@
 #include "Game.h"
 #include "QuadTree.h"
+#include <execution>
 
 Game::Game(RESOURCES* i_resources, DIFFICULTY i_difficulty)
 	: resources {i_resources} , HUD {HeadsUpDisplay(i_resources)}
@@ -62,41 +63,89 @@ GAME_STATE Game::UpdateGeneral(float i_stepSize, sf::Vector2i i_mousePos) {
 }
 
 GAME_STATE  Game::UpdateLvlEntities(std::list<Entity>* i_lvlEnts, float i_stepSize) {
-	std::vector<CollisionData> collisions;
+	/*
+	CURRENT STATE OF PHYSICS UPDATE EFFICIENCY
+	regular: 47-40 ms avg
+	parallel: 14-18 ms avg
+	quadtree only: 49-52
+	parallel & quadtree: 30-25 ms avg
 
+	I think parallel is best is because my quadtree's insert function is not paralellizable
+	*/
 
-	/// WITHOUT QUADTREE
+	//std::vector<CollisionData> collisions;
+	concurrency::concurrent_vector<CollisionData> collisions;
 
-	//for (auto iter = i_lvlEnts->begin(); iter != i_lvlEnts->end(); ++iter) {
-	//	RigidBody* entPtri = &iter->rb;
-	//	CollisionData collisionData = CollisionData();
-	//	collisionData.bodyA = &playerChar.rb;
-	//	collisionData.bodyB = entPtri;
-	//	bool collided = Physics::CheckCollision(&collisionData);
-	//	if (collided) { collisions.push_back(collisionData); }
-	//}
+	//PARALLEL WITHOUT QUAD
 
-	//for (auto iter1 = i_lvlEnts->begin(); iter1 != i_lvlEnts->end(); ++iter1) {
-	//	for (auto iter2 = std::next(iter1); iter2 != i_lvlEnts->end(); ++iter2) {
-	//		RigidBody* entPtri = &iter1->rb;
-	//		RigidBody* entPtrj = &iter2->rb;
-	//		CollisionData collisionData = CollisionData();
-	//		collisionData.bodyA = entPtri;
-	//		collisionData.bodyB = entPtrj;
-	//		bool collided = Physics::CheckCollision(&collisionData);
-	//		if (collided) { collisions.push_back(collisionData); }
-	//	}
-	//}
+	std::vector<int> idk;
+	for (int i = 0; i < i_lvlEnts->size(); i++) {
+		idk.push_back(i);
+	}
 
-	/// WITH QUADTREE 
+	std::vector<RigidBody*> rbPVect;
 
-	QuadTree qTree = QuadTree(0, Vector2f(0.0f, 0.0f), SCREEN_WIDTH, SCREEN_HEIGHT);
+	for (auto iter = i_lvlEnts->begin(); iter != i_lvlEnts->end(); ++iter) {
+		RigidBody* rbPtri = &iter->rb;
+		rbPVect.push_back(rbPtri);
+	}
+
+	std::for_each(std::execution::par, idk.begin(), idk.end(), [&](int index) {
+		RigidBody* entPtri = rbPVect[index];
+		CollisionData collisionData = CollisionData();
+		collisionData.bodyA = &playerChar.rb;
+		collisionData.bodyB = entPtri;
+		bool collided = Physics::CheckCollision(&collisionData);
+		if (collided) { collisions.push_back(collisionData); }
+	});
+
+	std::for_each(std::execution::par, idk.begin(), idk.end(), [&](int index) {
+		for (int j = index+1; j<idk.size(); ++j) {
+			RigidBody* entPtri = rbPVect[index];
+			RigidBody* entPtrj = rbPVect[j];
+			CollisionData collisionData = CollisionData();
+			collisionData.bodyA = entPtri;
+			collisionData.bodyB = entPtrj;
+			bool collided = Physics::CheckCollision(&collisionData);
+			if (collided) { collisions.push_back(collisionData); }
+		}
+	});
+
+	/// WITHOUT QUADTREE NOT PARALLEL
+/*	for (auto iter = i_lvlEnts->begin(); iter != i_lvlEnts->end(); ++iter) {
+		RigidBody* entPtri = &iter->rb;
+		CollisionData collisionData = CollisionData();
+		collisionData.bodyA = &playerChar.rb;
+		collisionData.bodyB = entPtri;
+		bool collided = Physics::CheckCollision(&collisionData);
+		if (collided) { collisions.push_back(collisionData); }
+	}
+
+	for (auto iter1 = i_lvlEnts->begin(); iter1 != i_lvlEnts->end(); ++iter1) {
+		for (auto iter2 = std::next(iter1); iter2 != i_lvlEnts->end(); ++iter2) {
+			RigidBody* entPtri = &iter1->rb;
+			RigidBody* entPtrj = &iter2->rb;
+			CollisionData collisionData = CollisionData();
+			collisionData.bodyA = entPtri;
+			collisionData.bodyB = entPtrj;
+			bool collided = Physics::CheckCollision(&collisionData);
+			if (collided) { collisions.push_back(collisionData); }
+		}
+	}
+	*/
+
+	/// WITH QUADTREE NOT PARALLEL 
+
+/*	QuadTree qTree = QuadTree(0, Vector2f(0.0f, 0.0f), SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	for (auto iter1 = i_lvlEnts->begin(); iter1 != i_lvlEnts->end(); ++iter1) {
 		qTree.Insert(&(*iter1));
 	}
 
+
+
 	std::vector<Entity*> playerCollisions = qTree.GetSectorEntities(&playerChar);
+
 	for (Entity* collidedWith : playerCollisions) {
 		RigidBody* entPtrA = &playerChar.rb;
 		RigidBody* entPtrB = &collidedWith->rb;
@@ -119,9 +168,61 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<Entity>* i_lvlEnts, float i_stepSi
 			if (collided) { collisions.push_back(collisionData); }
 		}
 	}
+	*/
+
+	/// PARALLEL WITH QUADTREE
+
+/*	std::vector<int> idk;
+	for (int i = 0; i < i_lvlEnts->size(); i++) {
+		idk.push_back(i);
+	}
+
+	std::vector<Entity*> entPVect;
+
+	for (auto iter = i_lvlEnts->begin(); iter != i_lvlEnts->end(); ++iter) {
+		Entity* rbPtri = &*iter;
+		entPVect.push_back(rbPtri);
+	}
+
+	QuadTree qTree = QuadTree(0, Vector2f(0.0f, 0.0f), SCREEN_WIDTH, SCREEN_HEIGHT);
+
+	//std::for_each(std::execution::par, idk.begin(), idk.end(), [&](int index) {
+	//	qTree.Insert(entPVect[index]);
+	//});
+
+
+
+	for (auto iter1 = i_lvlEnts->begin(); iter1 != i_lvlEnts->end(); ++iter1) {
+		qTree.Insert(&(*iter1));
+	}
+
+	std::vector<Entity*> playerCollisions = qTree.GetSectorEntities(&playerChar);
+
+	std::for_each(std::execution::par, idk.begin(), idk.end(), [&](int index) {
+		RigidBody* entPtrA = &playerChar.rb;
+		RigidBody* entPtrB = &entPVect[index]->rb;
+		CollisionData collisionData = CollisionData();
+		collisionData.bodyA = entPtrA;
+		collisionData.bodyB = entPtrB;
+		bool collided = Physics::CheckCollision(&collisionData);
+		if (collided) { collisions.push_back(collisionData); }
+	});
+
+	std::for_each(std::execution::par, idk.begin(), idk.end(), [&](int index) {
+		std::vector<Entity*> collisionsWithEnt = qTree.GetSectorEntities(entPVect[index]);
+		for (Entity* collidedWith : collisionsWithEnt) {
+			RigidBody* entPtrA = &entPVect[index]->rb;
+			RigidBody* entPtrB = &collidedWith->rb;
+			CollisionData collisionData = CollisionData();
+			collisionData.bodyA = entPtrA;
+			collisionData.bodyB = entPtrB;
+			bool collided = Physics::CheckCollision(&collisionData);
+			if (collided) { collisions.push_back(collisionData); }
+		}
+	});
+	*/
 
 	///END OF QUADSTUFF
-
 
 	for (CollisionData collision : collisions) {
 		Physics::CreateCollisionImpulse(&collision);
@@ -148,12 +249,21 @@ void Game::UpdateHUD() {
 }
 
 void Game::Render(sf::RenderWindow* i_window, float i_elapsedMilliseconds) {
-	QuadTree qTree = QuadTree(0, Vector2f(0.0f, 0.0f), SCREEN_WIDTH, SCREEN_HEIGHT);
+	QuadTree qTree = QuadTree(0, Vector2f(0.0f, 0.0f), SCREEN_WIDTH, SCREEN_HEIGHT);/*
 	auto i_lvlEnts = levels[currLvl]->GetLvlEntites();
 	for (auto iter1 = i_lvlEnts->begin(); iter1 != i_lvlEnts->end(); ++iter1) {
 		qTree.Insert(&(*iter1));
-	}
+	}*/
 	GameRenderer::Render(i_window, i_elapsedMilliseconds, levels[currLvl]->GetLvlEntites(), playerChar, qTree.GetDrawableSectionLines());
+}
+
+void Game::TestCollision(RigidBody * rbA, RigidBody * rbB, std::vector<CollisionData>* collisionList)
+{
+	CollisionData collisionData = CollisionData();
+	collisionData.bodyA = rbA;
+	collisionData.bodyB = rbB;
+	bool collided = Physics::CheckCollision(&collisionData);
+	if (collided) { collisionList->push_back(collisionData); }
 }
 
 void Game::GenerateLevels(DIFFICULTY i_diff) {

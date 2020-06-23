@@ -3,6 +3,9 @@
 #include <iostream>
 #include <algorithm>
 #include <chrono>
+#include <thread>
+#include <execution>
+#include <concurrent_vector.h>
 #include <SFML/Audio.hpp>
 #include "GLOBAL_CONSTANTS.h"
 #include "RESOURCES.h"
@@ -54,6 +57,10 @@ public:
 	GAME_STATE Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vector2i i_mousePos);
 
 	void Render(sf::RenderWindow* i_window, float i_elapsedMilliseconds);
+
+	void TestCollisionsInList();
+
+	void TestCollision(RigidBody* rbA, RigidBody* rbB, std::vector<CollisionData>* collisionList);
 
 	void GenerateLevels(DIFFICULTY i_diff);
 

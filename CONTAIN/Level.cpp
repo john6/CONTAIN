@@ -63,7 +63,7 @@ Level::Level(int i_lvlNum, DIFFICULTY i_diff)
 
 
 
-		int numCubes = 1;
+		int numCubes = 5;
 		float offset = 60.0f;
 		std::vector<Vector2f> quadrantCoords;
 		quadrantCoords.push_back(Vector2f(0.0f, 0.0f));
@@ -185,7 +185,7 @@ Level::Level(int i_lvlNum, DIFFICULTY i_diff)
 		//at high speeds it can be less than that
 
 
-		int numCircles = 4;
+		int numCircles = 10;
 		for (int i = 0; i < numCircles; ++i) {
 			std::shared_ptr<Shape> projectileShape = std::make_shared<Circle>(40);
 			Material HeavyBall = Material(0.9f, 0.95f, 0.5f, 0.25f);
