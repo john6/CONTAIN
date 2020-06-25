@@ -14,7 +14,7 @@
 #include "HeadsUpDisplay.h"
 #include "Level.h"
 #include "LevelGenerator.h"
-
+#include "Entity.h"
 
 enum PLAY_STATE { GENERAL_GAMEPLAY, WON_LEVEL, DEAD };
 
@@ -25,6 +25,7 @@ private:
 	PLAY_STATE playState;
 	sf::Font font;
 	int currLvl;
+	int currSector;
 	int numLvls;  //Not being used yet
 	std::vector<Level*> levels;
 	HeadsUpDisplay HUD;
@@ -32,7 +33,6 @@ private:
 	int enemiesRemaining;
 	float gameSpeedPerMill;
 	float playerSpeed;
-
 
 	hiRes_time_point lastShotFired;
 	microSec timeSinceFired;
@@ -43,13 +43,13 @@ private:
 	float timeToComplete;
 
 	GAME_STATE UpdateGeneral(float i_stepSize, sf::Vector2i i_mousePos);
-	GAME_STATE UpdateLvlEntities(std::list<Entity>* i_lvlEnts, float i_stepSize);
+	GAME_STATE UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnts, float i_stepSize);
 	void UpdateHUD();
 	void PollKeys(float i_step, sf::Vector2i i_mousePos);
 	void DeleteLevels();
 
 public:
-	Entity playerChar;
+	std::shared_ptr<Entity> playerChar;
 
 	Game(RESOURCES* i_resources, DIFFICULTY i_difficulty = MEDIUM);
 	~Game();
@@ -60,7 +60,7 @@ public:
 
 	void TestCollisionsInList();
 
-	void TestCollision(RigidBody* rbA, RigidBody* rbB, std::vector<CollisionData>* collisionList);
+	void TestCollision(std::shared_ptr<Entity> entA, std::shared_ptr<Entity> entB, std::vector<CollisionData>* collisionList);
 
 	void GenerateLevels(DIFFICULTY i_diff);
 

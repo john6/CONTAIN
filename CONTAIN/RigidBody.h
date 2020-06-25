@@ -49,9 +49,12 @@ public:
 	void ResetPosition(Vector2f);
 	void IntegrateForces();
 	void IntegrateVelocity(float i_deltaTime);
+	Vector2f GetLerpPosition(float i_lerp_fraction);
+	float GetLerpOrient(float i_lerp_fraction);
+
 
 	//SFML drawing functions
-	std::unique_ptr<sf::Shape> CreateDrawable(float i_lerp_fraction);
+	/*std::unique_ptr<sf::Shape> CreateDrawable(float i_lerp_fraction);*/
 	sf::VertexArray CreatOrientationLine(float i_lerp_fraction);
 	std::vector<sf::CircleShape> CreateStructurePoints(float i_lerp_fraction);
 };

@@ -6,16 +6,19 @@ Game::Game(RESOURCES* i_resources, DIFFICULTY i_difficulty)
 	: resources {i_resources} , HUD {HeadsUpDisplay(i_resources)}
 	
 {
-	//std::shared_ptr<Shape> shape = std::make_shared<Rectangle>(100.0f, 100.0f);
-	//RigidBody rb(shape);
+	std::shared_ptr<Shape> shape = std::make_shared<Rectangle>(100.0f, 100.0f);
+	Material Wood = Material(0.3f, 0.2f, 0.5f, 0.25f);
+	RigidBody rb(shape, Wood);
 	//Entity ent(rb);
-	playerChar = Entity();
-	playerChar.rb.ResetPosition(Vector2f(100, 500.0f));
-	playerChar.rb.transform.orient = 1.0f;
+	//I can not use "make_shared" with the entity type or else memory will have an issue with it
+	playerChar = std::make_shared<PlayerChar>(PlayerChar(rb));
+	playerChar->rb.ResetPosition(Vector2f(500, 500.0f));
+	playerChar->rb.transform.orient = 1.0f;
 	beginTime = std::chrono::high_resolution_clock::now();
 	font = resources->GetFont();
 	numLvls = 9;
 	currLvl = 0;
+	currSector = 0;
 	timeToComplete = 999999999.0f;
 	playState = GENERAL_GAMEPLAY;
 	const microSec UPDATE_INTERVAL(16666);
@@ -62,7 +65,7 @@ GAME_STATE Game::UpdateGeneral(float i_stepSize, sf::Vector2i i_mousePos) {
 	return IN_GAME;
 }
 
-GAME_STATE  Game::UpdateLvlEntities(std::list<Entity>* i_lvlEnts, float i_stepSize) {
+GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnts, float i_stepSize) {
 	/*
 	CURRENT STATE OF PHYSICS UPDATE EFFICIENCY
 	regular: 47-40 ms avg
@@ -78,36 +81,40 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<Entity>* i_lvlEnts, float i_stepSi
 
 	//PARALLEL WITHOUT QUAD
 
-	std::vector<int> idk;
+	std::vector<int> parallelVect;
 	for (int i = 0; i < i_lvlEnts->size(); i++) {
-		idk.push_back(i);
+		parallelVect.push_back(i);
 	}
 
-	std::vector<RigidBody*> rbPVect;
+	std::vector<std::shared_ptr<Entity>> entPVect;
 
 	for (auto iter = i_lvlEnts->begin(); iter != i_lvlEnts->end(); ++iter) {
-		RigidBody* rbPtri = &iter->rb;
-		rbPVect.push_back(rbPtri);
+		std::shared_ptr<Entity> entPtr = iter._Ptr->_Myval;
+		entPVect.push_back(entPtr);
 	}
 
-	std::for_each(std::execution::par, idk.begin(), idk.end(), [&](int index) {
-		RigidBody* entPtri = rbPVect[index];
+	std::for_each(std::execution::par, parallelVect.begin(), parallelVect.end(), [&](int index) {
+		std::shared_ptr<Entity> entPtri = entPVect[index];
 		CollisionData collisionData = CollisionData();
-		collisionData.bodyA = &playerChar.rb;
-		collisionData.bodyB = entPtri;
+		collisionData.entA = playerChar;
+		collisionData.entB = entPtri;
 		bool collided = Physics::CheckCollision(&collisionData);
 		if (collided) { collisions.push_back(collisionData); }
 	});
 
-	std::for_each(std::execution::par, idk.begin(), idk.end(), [&](int index) {
-		for (int j = index+1; j<idk.size(); ++j) {
-			RigidBody* entPtri = rbPVect[index];
-			RigidBody* entPtrj = rbPVect[j];
+	std::for_each(std::execution::par, parallelVect.begin(), parallelVect.end(), [&](int index) {
+		for (int j = index+1; j<parallelVect.size(); ++j) {
+			std::shared_ptr<Entity> entPtri = entPVect[index];
+			std::shared_ptr<Entity> entPtrj = entPVect[j];
 			CollisionData collisionData = CollisionData();
-			collisionData.bodyA = entPtri;
-			collisionData.bodyB = entPtrj;
+			collisionData.entA = entPtri;
+			collisionData.entB = entPtrj;
 			bool collided = Physics::CheckCollision(&collisionData);
-			if (collided) { collisions.push_back(collisionData); }
+			if (collided) { 
+				entPtri->CollideWith(*entPtrj);
+				entPtrj->CollideWith(*entPtri);
+				collisions.push_back(collisionData); 
+			}
 		}
 	});
 
@@ -228,18 +235,20 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<Entity>* i_lvlEnts, float i_stepSi
 		Physics::CreateCollisionImpulse(&collision);
 	}
 
-	playerChar.rb.IntegrateForces();
-	playerChar.rb.IntegrateVelocity(i_stepSize);
+	playerChar->rb.IntegrateForces();
+	playerChar->rb.IntegrateVelocity(i_stepSize);
 
 	for (auto iter = i_lvlEnts->begin(); iter != i_lvlEnts->end(); ++iter) {
-		RigidBody* entPtr = &iter->rb;
-		entPtr->IntegrateForces();
-		entPtr->IntegrateVelocity(i_stepSize);
+		std::shared_ptr<Entity> entPtr = iter._Ptr->_Myval;
+		entPtr->rb.IntegrateForces();
+		entPtr->rb.IntegrateVelocity(i_stepSize);
 	}
 
 	for (CollisionData collision : collisions) {
 		Physics::PositionalCorrection(&collision);
 	}
+
+	levels[currLvl]->RemoveDestroyedEntities();
 
 	return IN_GAME;
 }
@@ -254,14 +263,14 @@ void Game::Render(sf::RenderWindow* i_window, float i_elapsedMilliseconds) {
 	for (auto iter1 = i_lvlEnts->begin(); iter1 != i_lvlEnts->end(); ++iter1) {
 		qTree.Insert(&(*iter1));
 	}*/
-	GameRenderer::Render(i_window, i_elapsedMilliseconds, levels[currLvl]->GetLvlEntites(), playerChar, qTree.GetDrawableSectionLines());
+	GameRenderer::Render(i_window, i_elapsedMilliseconds, levels[currLvl]->GetLvlEntites(), playerChar.get(), qTree.GetDrawableSectionLines());
 }
 
-void Game::TestCollision(RigidBody * rbA, RigidBody * rbB, std::vector<CollisionData>* collisionList)
+void Game::TestCollision(std::shared_ptr<Entity> entA, std::shared_ptr<Entity> entB, std::vector<CollisionData>* collisionList)
 {
 	CollisionData collisionData = CollisionData();
-	collisionData.bodyA = rbA;
-	collisionData.bodyB = rbB;
+	collisionData.entA = entA;
+	collisionData.entB = entB;
 	bool collided = Physics::CheckCollision(&collisionData);
 	if (collided) { collisionList->push_back(collisionData); }
 }
@@ -278,31 +287,31 @@ void Game::PollKeys(float i_step, sf::Vector2i i_mousePos)
 {
 	float shipSpeed = 40 * i_step;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) {
-		playerChar.rb.ApplyImpulse(DOWN * shipSpeed, NULL_VECTOR);
+		playerChar->rb.ApplyImpulse(DOWN * shipSpeed, NULL_VECTOR);
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) {
-		playerChar.rb.ApplyImpulse(LEFT * shipSpeed, NULL_VECTOR);
+		playerChar->rb.ApplyImpulse(LEFT * shipSpeed, NULL_VECTOR);
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) {
-		playerChar.rb.ApplyImpulse(UP * shipSpeed, NULL_VECTOR);
+		playerChar->rb.ApplyImpulse(UP * shipSpeed, NULL_VECTOR);
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
-		playerChar.rb.ApplyImpulse(RIGHT * shipSpeed, NULL_VECTOR);
+		playerChar->rb.ApplyImpulse(RIGHT * shipSpeed, NULL_VECTOR);
 	}
 	timeSinceFired = std::chrono::duration_cast<std::chrono::seconds>(hiResTime::now() - lastShotFired);
 	if ((sf::Mouse::isButtonPressed(sf::Mouse::Left))  &&
 		(timeSinceFired.count() >= shipRateOfFire)) {
 		lastShotFired = hiResTime::now();
-		Vector2f projectileDir = Vector2f(i_mousePos.x, i_mousePos.y) - playerChar.rb.transform.pos;
+		Vector2f projectileDir = Vector2f(i_mousePos.x, i_mousePos.y) - playerChar->rb.transform.pos;
 		projectileDir.normalize();
 		std::shared_ptr<Shape> projectileShape = std::make_shared<Circle>(PROJECTILE_RADIUS);
 		Material HeavyBall = Material(0.9f, 0.95f, 0.5f, 0.25f);
 		RigidBody projBody = RigidBody(projectileShape, HeavyBall);
-		Entity projectile = Entity(projBody);
-		projectile.rb.ResetPosition(playerChar.rb.transform.pos);
-		projectile.rb.AdjustPosition(projectileDir * 100.0f);
-		projectile.rb.ApplyImpulse(projectileDir * 2000.0f, NULL_VECTOR);
-		levels[currLvl]->AddEntityToLevel(projectile);
+		projBody.ResetPosition(playerChar->rb.transform.pos);
+		projBody.AdjustPosition(projectileDir * 100.0f);
+		projBody.ApplyImpulse(projectileDir * 2000.0f, NULL_VECTOR);
+		std::shared_ptr<Entity> projectile = std::make_shared<Projectile>(projBody);
+		levels[currLvl]->AddEntPtrToLevel(projectile);
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q)) {
 	}

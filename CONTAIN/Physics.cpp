@@ -100,8 +100,8 @@ std::vector<float> Physics::FindAxisLeastPenetration(RigidBody* i_entA, RigidBod
 
 bool Physics::ResolveCircleToCircleCollision(CollisionData* i_data)
 {
-	RigidBody* bodyA = i_data->bodyA;
-	RigidBody* bodyB = i_data->bodyB;
+	RigidBody* bodyA = &i_data->entA->rb;
+	RigidBody* bodyB = &i_data->entA->rb;
 	std::shared_ptr<Circle> circlePtrA = std::dynamic_pointer_cast<Circle>(bodyA->shape);
 	std::shared_ptr<Circle> circlePtrB = std::dynamic_pointer_cast<Circle>(bodyB->shape);
 
@@ -142,8 +142,8 @@ bool Physics::ResolveCircleToCircleCollision(CollisionData* i_data)
 
 bool Physics::ResolveRectToCircleCollision(CollisionData* i_data)
 {  //Entity 1 is rectangle and entity 2 is circle
-	RigidBody* rectBod = i_data->bodyA;
-	RigidBody* circleBod = i_data->bodyB;
+	RigidBody* rectBod = &i_data->entA->rb;
+	RigidBody* circleBod = &i_data->entB->rb;
 	std::shared_ptr<Circle> circlePtr = std::dynamic_pointer_cast<Circle>(circleBod->shape);
 
 	float maxSeperation = -std::numeric_limits<float>::max();
@@ -205,11 +205,11 @@ bool Physics::ResolveRectToCircleCollision(CollisionData* i_data)
 }
 
 bool Physics::ResolveRectToRectCollision(CollisionData* i_data) {
-	std::vector<float> penetrationA = FindAxisLeastPenetration(i_data->bodyA, i_data->bodyB);
+	std::vector<float> penetrationA = FindAxisLeastPenetration(&i_data->entA->rb, &i_data->entB->rb);
 	if (penetrationA[0] > 0.0f) {
 		return false;
 	}
-	std::vector<float> penetrationB = FindAxisLeastPenetration(i_data->bodyB, i_data->bodyA);
+	std::vector<float> penetrationB = FindAxisLeastPenetration(&i_data->entB->rb, &i_data->entA->rb);
 	if (penetrationB[0] > 0.0f) {
 		return false;
 	}
@@ -220,14 +220,14 @@ bool Physics::ResolveRectToRectCollision(CollisionData* i_data) {
 	RigidBody* incidentEnt;
 
 	if (penetrationA[0] >= penetrationB[0]) {
-		refEnt = i_data->bodyA;
-		incidentEnt = i_data->bodyB;
+		refEnt = &i_data->entA->rb;
+		incidentEnt = &i_data->entB->rb;
 		refIndex = penetrationA[1];
 		flip = false;
 	}
 	else {
-		refEnt = i_data->bodyB;
-		incidentEnt = i_data->bodyA;
+		refEnt = &i_data->entB->rb;
+		incidentEnt = &i_data->entA->rb;
 		refIndex = penetrationB[1];
 		flip = true;
 	}
@@ -282,8 +282,8 @@ std::function<void(void)> Physics::SaveImpulse(RigidBody* body, Vector2f a1, Vec
 
 bool Physics::CheckCollision(CollisionData* i_collision)
 {
-	Shape::ShapeType shape1 = i_collision->bodyA->shape->GetType();
-	Shape::ShapeType shape2 = i_collision->bodyB->shape->GetType();
+	Shape::ShapeType shape1 = i_collision->entA->rb.shape->GetType();
+	Shape::ShapeType shape2 = i_collision->entB->rb.shape->GetType();
 	bool collisionOccured = false;
 	if ((shape1 == Shape::Circle) && (shape2 == Shape::Circle))
 	{
@@ -296,32 +296,32 @@ bool Physics::CheckCollision(CollisionData* i_collision)
 	else if ((shape1 == Shape::Rectangle) && (shape2 == Shape::Circle))
 	{
 		collisionOccured = ResolveRectToCircleCollision(i_collision);
-		RigidBody* temp = i_collision->bodyA;
-		i_collision->bodyA = i_collision->bodyB;
-		i_collision->bodyB = temp;
+		std::shared_ptr<Entity> temp = i_collision->entA;
+		i_collision->entA = i_collision->entB;
+		i_collision->entB = temp;
 	}
 	else if ((shape1 == Shape::Circle) && (shape2 == Shape::Rectangle))
 	{
-		RigidBody* temp = i_collision->bodyA;
-		i_collision->bodyA = i_collision->bodyB;
-		i_collision->bodyB = temp;
+		std::shared_ptr<Entity> temp = i_collision->entA;
+		i_collision->entA = i_collision->entB;
+		i_collision->entB = temp;
 		collisionOccured = ResolveRectToCircleCollision(i_collision);
-		temp = i_collision->bodyA;
-		i_collision->bodyA = i_collision->bodyB;
-		i_collision->bodyB = temp;
+		temp = i_collision->entA;
+		i_collision->entA = i_collision->entB;
+		i_collision->entB = temp;
 	}
 	return collisionOccured;
 }
 
 void Physics::InfiniteMassCorrection(CollisionData * i_data)
 {
-	i_data->bodyA->vel = Vector2f(0.0f, 0.0f);
-	i_data->bodyB->vel = Vector2f(0.0f, 0.0f);
+	i_data->entA->rb.vel = Vector2f(0.0f, 0.0f);
+	i_data->entB->rb.vel = Vector2f(0.0f, 0.0f);
 }
 
 void Physics::PositionalCorrection(CollisionData * i_data)
 {
-	if ((i_data->bodyA->massD.GetMass() + i_data->bodyB->massD.GetMass()) == 0.0f) {
+	if ((i_data->entA->rb.massD.GetMass() + i_data->entB->rb.massD.GetMass()) == 0.0f) {
 		//Vector2f correction = std::max(i_data->pen - PENETRATION_ALLOWANCE, 0.0f) / 0.5f * i_data->norm * PENETRATION_CORRECTION;
 		//i_data->bodyA->transform.pos = i_data->bodyA->transform.pos - (0.5f * correction);
 		//i_data->bodyB->transform.pos = i_data->bodyB->transform.pos + (0.5f * correction);
@@ -330,16 +330,16 @@ void Physics::PositionalCorrection(CollisionData * i_data)
 	}
 	else {
 		Vector2f correction = std::max(i_data->pen - PENETRATION_ALLOWANCE, 0.0f) /
-			(i_data->bodyA->massD.GetMassInv() + i_data->bodyB->massD.GetMassInv()) * i_data->norm * PENETRATION_CORRECTION;
+			(i_data->entA->rb.massD.GetMassInv() + i_data->entB->rb.massD.GetMassInv()) * i_data->norm * PENETRATION_CORRECTION;
 
-		i_data->bodyA->AdjustPosition(-correction * i_data->bodyA->massD.GetMassInv());
-		i_data->bodyB->AdjustPosition(correction * i_data->bodyB->massD.GetMassInv());
+		i_data->entA->rb.AdjustPosition(-correction * i_data->entA->rb.massD.GetMassInv());
+		i_data->entB->rb.AdjustPosition(correction * i_data->entB->rb.massD.GetMassInv());
 	}
 }
 
 void Physics::CreateCollisionImpulse(CollisionData* i_data) {
-	RigidBody* bodyA = i_data->bodyA;
-	RigidBody* bodyB = i_data->bodyB;
+	RigidBody* bodyA = &i_data->entA->rb;
+	RigidBody* bodyB = &i_data->entB->rb;
 	float statFric = bodyA->mat.statFrict * bodyB->mat.statFrict;
 	float dynaFric = bodyA->mat.dynaFrict * bodyB->mat.dynaFrict;
 

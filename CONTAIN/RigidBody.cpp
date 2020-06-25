@@ -23,20 +23,19 @@ void RigidBody::SetMassData()
 	massD.SetInertia(mass * inertiaCoeff);
 }
 
-std::unique_ptr<sf::Shape> RigidBody::CreateDrawable(float i_lerp_fraction) {
-	//for linear interpolation this will now use the previous position and orientation
-	Vector2f lerpPos = (1.0f - i_lerp_fraction) * transform.prevPos + i_lerp_fraction * transform.pos;
-	float lerpOrient = (1.0f - i_lerp_fraction) * transform.prevOrient + i_lerp_fraction * transform.orient;
-
-	std::unique_ptr<sf::Shape> drawShape = shape->GetSFMLRepr();
-	drawShape->setOrigin(sf::Vector2f(shape->GetSFMLOriginOffset()(0), shape->GetSFMLOriginOffset()(1)));
-	drawShape->setPosition(lerpPos(0), lerpPos(1));
-	drawShape->setRotation((lerpOrient*180.0f)/PI);
-	drawShape->setOutlineColor(sf::Color::White);
-	drawShape->setOutlineThickness(3.0f);          //setOutlineColor(sf::Color::White);
-	drawShape->setFillColor(sf::Color::Black); //TODO: Colors
-	return drawShape;
-}
+//std::unique_ptr<sf::Shape> RigidBody::CreateDrawable(float i_lerp_fraction) {
+//	//for linear interpolation this will now use the previous position and orientation
+//	Vector2f lerpPos = GetLerpPosition(i_lerp_fraction);
+//	float lerpOrient = GetLerpOrient(i_lerp_fraction);
+//	std::unique_ptr<sf::Shape> drawShape = shape->GetSFMLRepr();
+//	drawShape->setOrigin(sf::Vector2f(shape->GetSFMLOriginOffset()(0), shape->GetSFMLOriginOffset()(1)));
+//	drawShape->setPosition(lerpPos(0), lerpPos(1));
+//	drawShape->setRotation((lerpOrient*180.0f)/PI);
+//	drawShape->setOutlineColor(sf::Color::White);
+//	drawShape->setOutlineThickness(3.0f);          //setOutlineColor(sf::Color::White);
+//	drawShape->setFillColor(sf::Color::Black); //TODO: Colors
+//	return drawShape;
+//}
 
 std::vector<Vector2f> RigidBody::RotatePoints(std::vector<Vector2f> i_axisAlignedCoords)
 {
@@ -82,8 +81,8 @@ std::vector<Vector2f> RigidBody::vertsToWorldSpace(std::vector<Vector2f> i_objec
 }
 
 sf::VertexArray RigidBody::CreatOrientationLine(float i_lerp_fraction) {
-	Vector2f lerpPos = (1.0f - i_lerp_fraction) * transform.prevPos + i_lerp_fraction * transform.pos;
-	float lerpOrient = (1.0f - i_lerp_fraction) * transform.prevOrient + i_lerp_fraction * transform.orient;
+	Vector2f lerpPos = GetLerpPosition(i_lerp_fraction);
+	float lerpOrient = GetLerpOrient(i_lerp_fraction);
 	sf::VertexArray lines = sf::VertexArray(sf::LinesStrip, 2);
 	sf::Vector2f position1 = sf::Vector2f(lerpPos(0), lerpPos(1));
 	Eigen::Rotation2D<float> rotation(lerpOrient);
@@ -169,4 +168,14 @@ void RigidBody::IntegrateVelocity(float i_deltaTime)
 	transform.pos += vel * (i_deltaTime / AVG_MILLISEC_PER_UPDATE);
 	transform.orient += angVel * (i_deltaTime / AVG_MILLISEC_PER_UPDATE);
 	UpdateVertsAndNorms();
+}
+
+Vector2f RigidBody::GetLerpPosition(float i_lerp_fraction)
+{
+	return (1.0f - i_lerp_fraction) * transform.prevPos + i_lerp_fraction * transform.pos;
+}
+
+float RigidBody::GetLerpOrient(float i_lerp_fraction)
+{
+	return (1.0f - i_lerp_fraction) * transform.prevOrient + i_lerp_fraction * transform.orient;
 }

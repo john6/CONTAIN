@@ -10,8 +10,8 @@ class Level
 protected:
 	int m_lvl_num;
 
-	std::list<Entity> lvlBoundaries;
-	std::list<Entity> lvlEntites;
+	//std::list<Entity*> lvlBoundaries;
+	std::list<std::shared_ptr<Entity>> lvlEntities;
 	int enemiesRemaining;
 	float gameSpeedPerMill;
 	float playerSpeed;
@@ -23,9 +23,17 @@ public:
 	~Level();
 
 	int GetLvlNum();
-	std::list<Entity> GetLvlBoundaries();
-	std::list<Entity>* GetLvlEntites();
+	//std::list<Entity> GetLvlBoundaries();
+	std::list<std::shared_ptr<Entity>>* GetLvlEntites();
 
-	void AddEntityToLevel(Entity i_ent);
+	//void AddEntityToLevel(Entity i_ent);
+
+	void AddEntPtrToLevel(std::shared_ptr<Entity> i_entPtr);
+
+	void AddEnemyCubeToLevel(int i_numCubes);
+	void AddEnemyCircleToLevel(int i_numCircs);
+
+	void AddWallsToLevel();
+
+	void RemoveDestroyedEntities();
 };
-
