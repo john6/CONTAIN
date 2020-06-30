@@ -1,39 +1,40 @@
 #pragma once
 #include <vector>
-#include <list>
 #include "GLOBAL_CONSTANTS.h"
 #include "Entity.h"
 #include "RigidBody.h"
+#include "Sector.h"
 
 class Level
 {
 protected:
-	int m_lvl_num;
+	//Sector map will simply hold an int representing the index for the vector of sectors
+	std::vector<std::vector<int>> sectorMap;
+	//Sector vect owns all sectors
+	std::vector<std::shared_ptr<Sector>> sectorVect;
+	//the origin is the center coordinates of the map
 
-	//std::list<Entity*> lvlBoundaries;
-	std::list<std::shared_ptr<Entity>> lvlEntities;
-	int enemiesRemaining;
-	float gameSpeedPerMill;
-	float playerSpeed;
-	float timeToComplete;
-	microSec timeElapsed;
+	int numSectors;
+	int dimSize;
 
 public:
-	Level(int i_levelNum, DIFFICULTY i_diff);
+	int m_lvl_num;
+	MapCoord origin;
+
+	Level(int i_levelNum, DIFFICULTY i_diff, std::shared_ptr<Entity> i_charPtr);
 	~Level();
 
-	int GetLvlNum();
-	//std::list<Entity> GetLvlBoundaries();
-	std::list<std::shared_ptr<Entity>>* GetLvlEntites();
+	std::shared_ptr<Entity> charPtr;
 
-	//void AddEntityToLevel(Entity i_ent);
+	std::shared_ptr<Sector> GetSector(MapCoord i_coord);
 
-	void AddEntPtrToLevel(std::shared_ptr<Entity> i_entPtr);
+	void GenerateSector(int i_sectX, int i_sectY, int i_numCube, int i_numCirc);
 
-	void AddEnemyCubeToLevel(int i_numCubes);
-	void AddEnemyCircleToLevel(int i_numCircs);
+	void ConnectSectors(int i_sectX1, int i_sectY1, int i_sectX2, int i_sectY2);
 
-	void AddWallsToLevel();
+	Material GetMaterial(MATERIAL_TYPE mat);
 
-	void RemoveDestroyedEntities();
+
+private:
+
 };

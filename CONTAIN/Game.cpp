@@ -2,30 +2,23 @@
 #include "QuadTree.h"
 #include <execution>
 
-Game::Game(RESOURCES* i_resources, DIFFICULTY i_difficulty)
-	: resources {i_resources} , HUD {HeadsUpDisplay(i_resources)}
-	
+Game::Game(sf::RenderWindow* i_window, RESOURCES* i_resources, DIFFICULTY i_difficulty)
+	: renderWindow{ i_window }, resources {i_resources}, HUD{ HeadsUpDisplay(i_resources) }
 {
 	std::shared_ptr<Shape> shape = std::make_shared<Rectangle>(100.0f, 100.0f);
 	Material Wood = Material(0.3f, 0.2f, 0.5f, 0.25f);
 	RigidBody rb(shape, Wood);
 	//Entity ent(rb);
 	//I can not use "make_shared" with the entity type or else memory will have an issue with it
-	playerChar = std::make_shared<PlayerChar>(PlayerChar(rb));
-	playerChar->rb.ResetPosition(Vector2f(500, 500.0f));
+	playerChar = std::make_shared<PlayerChar>(PlayerChar(rb, Vector2f(500, 500.0f), this));
 	playerChar->rb.transform.orient = 1.0f;
 	beginTime = std::chrono::high_resolution_clock::now();
 	font = resources->GetFont();
-	numLvls = 9;
-	currLvl = 0;
-	currSector = 0;
+	numLvls = 1;
+	this->currLvl = 0;
 	timeToComplete = 999999999.0f;
 	playState = GENERAL_GAMEPLAY;
 	const microSec UPDATE_INTERVAL(16666);
-
-
-	hiRes_time_point lastShotFired = std::chrono::high_resolution_clock::now();
-	shipRateOfFire = 1.0f;
 }
 
 Game::~Game()
@@ -54,14 +47,16 @@ GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vecto
 }
 
 GAME_STATE Game::UpdateGeneral(float i_stepSize, sf::Vector2i i_mousePos) {
-	PollKeys(i_stepSize, i_mousePos);
+	//PollKeys(i_stepSize, i_mousePos);
+
 	//other object movement
 	//collisions
 	//BreakObject Bounce
 	//delete objects
 	//levels[currLvl]->GetLvlBoundaries();
 	//levels[currLvl]->GetLvlEntites();
-	UpdateLvlEntities(levels[currLvl]->GetLvlEntites(), i_stepSize);
+
+	UpdateLvlEntities(levels[currLvl]->GetSector(currSector)->GetSectorEntities(), i_stepSize);
 	return IN_GAME;
 }
 
@@ -75,6 +70,17 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnt
 
 	I think parallel is best is because my quadtree's insert function is not paralellizable
 	*/
+
+
+	playerChar->Update(i_stepSize);
+
+	auto iter = i_lvlEnts->begin();
+	while (iter != i_lvlEnts->end()) {
+		iter._Ptr->_Myval->Update(i_stepSize);
+		iter++;
+	}
+
+
 
 	//std::vector<CollisionData> collisions;
 	concurrency::concurrent_vector<CollisionData> collisions;
@@ -99,7 +105,8 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnt
 		collisionData.entA = playerChar;
 		collisionData.entB = entPtri;
 		bool collided = Physics::CheckCollision(&collisionData);
-		if (collided) { collisions.push_back(collisionData); }
+		if (collided) {
+			collisions.push_back(collisionData); }
 	});
 
 	std::for_each(std::execution::par, parallelVect.begin(), parallelVect.end(), [&](int index) {
@@ -110,9 +117,7 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnt
 			collisionData.entA = entPtri;
 			collisionData.entB = entPtrj;
 			bool collided = Physics::CheckCollision(&collisionData);
-			if (collided) { 
-				entPtri->CollideWith(*entPtrj);
-				entPtrj->CollideWith(*entPtri);
+			if (collided) {
 				collisions.push_back(collisionData); 
 			}
 		}
@@ -232,6 +237,8 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnt
 	///END OF QUADSTUFF
 
 	for (CollisionData collision : collisions) {
+		collision.entA->CollideWith(*collision.entB);
+		collision.entB->CollideWith(*collision.entA);
 		Physics::CreateCollisionImpulse(&collision);
 	}
 
@@ -248,7 +255,7 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnt
 		Physics::PositionalCorrection(&collision);
 	}
 
-	levels[currLvl]->RemoveDestroyedEntities();
+	levels[currLvl]->GetSector(currSector)->RemoveDestroyedEntities();
 
 	return IN_GAME;
 }
@@ -257,13 +264,14 @@ void Game::UpdateHUD() {
 
 }
 
-void Game::Render(sf::RenderWindow* i_window, float i_elapsedMilliseconds) {
+void Game::Render(float i_elapsedMilliseconds) {
 	QuadTree qTree = QuadTree(0, Vector2f(0.0f, 0.0f), SCREEN_WIDTH, SCREEN_HEIGHT);/*
 	auto i_lvlEnts = levels[currLvl]->GetLvlEntites();
 	for (auto iter1 = i_lvlEnts->begin(); iter1 != i_lvlEnts->end(); ++iter1) {
 		qTree.Insert(&(*iter1));
 	}*/
-	GameRenderer::Render(i_window, i_elapsedMilliseconds, levels[currLvl]->GetLvlEntites(), playerChar.get(), qTree.GetDrawableSectionLines());
+	GameRenderer::Render(renderWindow, i_elapsedMilliseconds, levels[currLvl]->GetSector(currSector)->GetSectorEntities(),
+						 playerChar.get(), qTree.GetDrawableSectionLines());
 }
 
 void Game::TestCollision(std::shared_ptr<Entity> entA, std::shared_ptr<Entity> entB, std::vector<CollisionData>* collisionList)
@@ -278,43 +286,12 @@ void Game::TestCollision(std::shared_ptr<Entity> entA, std::shared_ptr<Entity> e
 void Game::GenerateLevels(DIFFICULTY i_diff) {
 	DeleteLevels();
 	for (int i = 0; i < numLvls; ++i) {
-		Level* lvl = new Level(i, i_diff);
+		//std::unique_ptr<Level> lvl = std::make_unique<Level>(i, i_diff);
+		Level* lvl = new Level(i, i_diff, playerChar);
 		levels.push_back(lvl);
 	}
-}
 
-void Game::PollKeys(float i_step, sf::Vector2i i_mousePos)
-{
-	float shipSpeed = 40 * i_step;
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) {
-		playerChar->rb.ApplyImpulse(DOWN * shipSpeed, NULL_VECTOR);
-	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) {
-		playerChar->rb.ApplyImpulse(LEFT * shipSpeed, NULL_VECTOR);
-	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) {
-		playerChar->rb.ApplyImpulse(UP * shipSpeed, NULL_VECTOR);
-	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
-		playerChar->rb.ApplyImpulse(RIGHT * shipSpeed, NULL_VECTOR);
-	}
-	timeSinceFired = std::chrono::duration_cast<std::chrono::seconds>(hiResTime::now() - lastShotFired);
-	if ((sf::Mouse::isButtonPressed(sf::Mouse::Left))  &&
-		(timeSinceFired.count() >= shipRateOfFire)) {
-		lastShotFired = hiResTime::now();
-		Vector2f projectileDir = Vector2f(i_mousePos.x, i_mousePos.y) - playerChar->rb.transform.pos;
-		projectileDir.normalize();
-		std::shared_ptr<Shape> projectileShape = std::make_shared<Circle>(PROJECTILE_RADIUS);
-		Material HeavyBall = Material(0.9f, 0.95f, 0.5f, 0.25f);
-		RigidBody projBody = RigidBody(projectileShape, HeavyBall);
-		projBody.ResetPosition(playerChar->rb.transform.pos);
-		projBody.AdjustPosition(projectileDir * 100.0f);
-		projBody.ApplyImpulse(projectileDir * 2000.0f, NULL_VECTOR);
-		std::shared_ptr<Entity> projectile = std::make_shared<Projectile>(projBody);
-		levels[currLvl]->AddEntPtrToLevel(projectile);
-	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q)) {
-	}
+	currSector = levels[0]->origin;
 }
 
 void Game::DeleteLevels() {
@@ -327,3 +304,18 @@ void Game::DeleteLevels() {
 
 const int Game::GetCurrLvl() { return currLvl;  }
 const int Game::GetNumLvls() { return numLvls;  }
+
+void Game::RequestTravelToSector(MapCoord i_destSect)
+{
+	currSector = i_destSect;
+}
+
+void Game::CreatePlayerChar()
+{
+}
+
+void Game::SpawnProjectile()
+{
+}
+
+

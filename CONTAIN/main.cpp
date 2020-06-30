@@ -25,7 +25,7 @@ int main()
 	int currLvl;
 	RESOURCES resources;
 	DIFFICULTY difficulty = MEDIUM;
-	Game game = Game(&resources);
+	Game globalGame = Game(&window, &resources);
 	Menu menu(&resources);
 	GAME_STATE state = MENU;
 
@@ -55,7 +55,7 @@ int main()
 			case IN_GAME: {
 				sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
 				hiRes_time_point beforePhysicsUpdate = hiResTime::now();
-				state = game.Update(static_cast<float>(lag.count()), &window, mousePosition);
+				state = globalGame.Update(static_cast<float>(lag.count()), &window, mousePosition);
 				hiRes_time_point afterPhysicsUpdate = hiResTime::now();
 				microSec currInterval = std::chrono::duration_cast<microSec>(afterPhysicsUpdate - beforePhysicsUpdate);
 				std::string str = "Physics update took " + std::to_string(currInterval.count()) + " microseconds \n";
@@ -73,7 +73,7 @@ int main()
 			case START_GAME: {
 				currLvl = 0;
 				difficulty = menu.GetDifficulty();
-				game.GenerateLevels(difficulty);
+				globalGame.GenerateLevels(difficulty);
 				state = IN_GAME;
 				break;
 			}
@@ -83,7 +83,7 @@ int main()
 		if (state == IN_GAME) {
 			float percentUpdateElapsed = static_cast<float>(lag.count()) / static_cast<float>(UPDATE_INTERVAL.count());
 			hiRes_time_point beforePhysicsUpdate = hiResTime::now();
-			game.Render(&window, percentUpdateElapsed);
+			globalGame.Render(percentUpdateElapsed);
 			hiRes_time_point afterPhysicsUpdate = hiResTime::now();
 			microSec currInterval = std::chrono::duration_cast<microSec>(afterPhysicsUpdate - beforePhysicsUpdate);
 			std::string str = "Render took " + std::to_string(currInterval.count()) + " microseconds \n \n";

@@ -11,6 +11,25 @@
 //Using a typedef jus to remove one level of namespace might be a little gratuitous but everyone keeps telling me namespaces are bad sooo
 typedef Eigen::Vector2f Vector2f;
 typedef Eigen::Matrix<float, 2, 2> Matrix2f;
+//https://stackoverflow.com/questions/612328/difference-between-struct-and-typedef-struct-in-c
+//This is an anonymous structure, mapCoord exists in typedef namespace but not tag namespace,
+//this means if I want to forward declare it I have to name it first, thats fine because 
+//GLOBAL CONSTANTS isnt gonna be forward delcared anywhere I dont think
+//apparently I cant use mapcoords in constructors fuuuck
+typedef struct MapCoord 
+{ 
+	MapCoord() {
+		x = -1;
+		y = -1;
+	}
+
+	MapCoord(int i_x, int i_y) {
+		x = i_x;
+		y = i_y;
+	}
+	int x;
+	int y; 
+} MapCoord;
 
 //WINDOW RESOLUTION
 const int SCREEN_WIDTH = 1800;
@@ -79,7 +98,7 @@ enum GAME_STATE { MENU, START_GAME, IN_GAME, EXIT_GAME, WIN, LOSE };
 enum MOUSE_STATE { MOUSE_UP, MOUSE_DOWN };
 enum DIFFICULTY { EASY, MEDIUM, HARD };
 enum ENTITY_TYPE { WALL, DOOR, ENEMY, PLAYER, PROJECTILE};
-
+enum MATERIAL_TYPE {ROCK, WOOD, METAL, BOUNCYBALL, SUPERBALL, PILLOW, STATIC, STATICVERYFRICTION, RUBBER, ICE};
 //TIME STUFF
 typedef std::chrono::high_resolution_clock               hiResTime;
 typedef std::chrono::microseconds                        microSec;

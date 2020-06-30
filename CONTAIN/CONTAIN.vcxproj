@@ -22,9 +22,11 @@
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="Circle.cpp" />
     <ClCompile Include="CollisionData.cpp" />
+    <ClCompile Include="EnemyAI.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Math.cpp" />
+    <ClCompile Include="PlayerController.cpp" />
     <ClCompile Include="QuadTree.cpp" />
     <ClCompile Include="RigidBody.cpp" />
     <ClCompile Include="GameRenderer.cpp" />
@@ -38,6 +40,7 @@
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="Rectangle.cpp" />
     <ClCompile Include="RESOURCES.cpp" />
+    <ClCompile Include="Sector.cpp" />
     <ClCompile Include="Shape.cpp" />
     <ClCompile Include="Transform.cpp" />
   </ItemGroup>
@@ -45,9 +48,11 @@
     <ClInclude Include="Button.h" />
     <ClInclude Include="Circle.h" />
     <ClInclude Include="CollisionData.h" />
+    <ClInclude Include="EnemyAI.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Math.h" />
+    <ClInclude Include="PlayerController.h" />
     <ClInclude Include="QuadTree.h" />
     <ClInclude Include="RigidBody.h" />
     <ClInclude Include="GameRenderer.h" />
@@ -62,6 +67,7 @@
     <ClInclude Include="Rectangle.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="RESOURCES.h" />
+    <ClInclude Include="Sector.h" />
     <ClInclude Include="Shape.h" />
     <ClInclude Include="Transform.h" />
   </ItemGroup>
