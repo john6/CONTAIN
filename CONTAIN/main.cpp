@@ -7,19 +7,13 @@
 #include "RESOURCES.h"
 #include "Game.h"
 #include "Menu.h"
+#include "YouWonMenu.h"
+#include "YouLostMenu.h"
 
 //TODO: Contact points should be in local space I think, I never convert them
 
 int main()
-{/*
-	if (__cplusplus == 201703L) std::cout << "C++17\n";
-	else if (__cplusplus == 201402L) std::cout << "C++14\n";
-	else if (__cplusplus == 201103L) std::cout << "C++11\n";
-	else if (__cplusplus == 199711L) std::cout << "C++98\n";
-	else std::cout << "pre-standard C++\n";*/
-
-
-
+{
 	sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "CONTAIN");
 
 	int currLvl;
@@ -27,7 +21,10 @@ int main()
 	DIFFICULTY difficulty = MEDIUM;
 	Game globalGame = Game(&window, &resources);
 	Menu menu(&resources);
+	YouWonMenu winMenu(&resources);
+	YouLostMenu lostMenu(&resources);
 	GAME_STATE state = MENU;
+	bool justSwitchedBackToMenu = false;
 
 	hiRes_time_point currTime = hiResTime::now();
 	const microSec UPDATE_INTERVAL(16666);   //16666.66 microseconds ~~ 16 milliseconds == 60 updates per second
@@ -49,6 +46,10 @@ int main()
 			switch (state) {
 			case MENU: {
 				sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+				if (justSwitchedBackToMenu) {
+					menu.ResetMenu();
+					justSwitchedBackToMenu = false;
+				}
 				state = menu.Update(static_cast<float>(lag.count()), &window, mousePosition);
 				break;
 			}
@@ -63,24 +64,37 @@ int main()
 				break;
 			}
 			case WIN: {
-				state = MENU;
+				sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+				state = winMenu.Update(static_cast<float>(lag.count()), &window, mousePosition);
+				if (state == MENU) {
+					justSwitchedBackToMenu = true;
+				}
 				break;
 			}
 			case LOSE: {
-				state = MENU;
+				sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+				state = lostMenu.Update(static_cast<float>(lag.count()), &window, mousePosition);
+				if (state == MENU) {
+					justSwitchedBackToMenu = true;
+				}
 				break;
 			}
 			case START_GAME: {
 				currLvl = 0;
+				globalGame.Restart();
 				difficulty = menu.GetDifficulty();
 				globalGame.GenerateLevels(difficulty);
 				state = IN_GAME;
 				break;
 			}
+			case EXIT_GAME: {
+				break;
+			}
 			}
 			lag -= UPDATE_INTERVAL;
 		}
-		if (state == IN_GAME) {
+		switch (state) {
+		case IN_GAME: {
 			float percentUpdateElapsed = static_cast<float>(lag.count()) / static_cast<float>(UPDATE_INTERVAL.count());
 			hiRes_time_point beforePhysicsUpdate = hiResTime::now();
 			globalGame.Render(percentUpdateElapsed);
@@ -88,9 +102,20 @@ int main()
 			microSec currInterval = std::chrono::duration_cast<microSec>(afterPhysicsUpdate - beforePhysicsUpdate);
 			std::string str = "Render took " + std::to_string(currInterval.count()) + " microseconds \n \n";
 			std::cout << str;
+			break;
 		}
-		else {
+		case MENU: {
 			menu.Render(&window);
+			break;
+		}
+		case WIN: {
+			winMenu.Render(&window);
+			break;
+		}
+		case LOSE: {
+			lostMenu.Render(&window);
+			break;
+		}
 		}
 	}
 	return 0;

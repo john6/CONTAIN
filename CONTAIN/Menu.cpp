@@ -11,7 +11,7 @@ Menu::Menu(RESOURCES* i_resources, DIFFICULTY i_defaultDiff) :
 	playButton.SetColors(sf::Color::Black, sf::Color::White, sf::Color(128, 128, 128));
 
 	sf::RectangleShape exitButtonRect(sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT));
-	exitButtonRect.setPosition(sf::Vector2f(400, 100));
+	exitButtonRect.setPosition(sf::Vector2f(BUTTON_WIDTH * 1.35f, 100));
 	exitButton = Button("Exit", exitButtonRect);
 	exitButton.SetColors(sf::Color::Black, sf::Color::White, sf::Color(128, 128, 128));
 
@@ -33,15 +33,13 @@ Menu::Menu(RESOURCES* i_resources, DIFFICULTY i_defaultDiff) :
 	hardButton.SetColors(sf::Color::Red, sf::Color::White, sf::Color(128, 128, 128));
 	hardButton.SetState(Button::UP);
 
-	shouldExit = false;
-	shouldStart = false;
 	currDifficulty = i_defaultDiff;
 	UpdateButtonTriplet(i_defaultDiff);
 
 	font = resources->GetFont();
 
 	instructions1.setFont(font);
-	instructions1.setString("Controls: \n'A' to move left,\n'D' to move right,\n'Q' to tilt left\n'E' to tilt right\n'W' to serve \n");
+	instructions1.setString("Controls: \n#WASD# to move,\n#Left Click# to shoot a basic basic projectile\n");
 	instructions1.setCharacterSize(25);
 	instructions1.setFillColor(sf::Color::White);
 	instructions1.setPosition(sf::Vector2f(100, 500));
@@ -52,6 +50,16 @@ Menu::~Menu()
 }
 
 DIFFICULTY Menu::GetDifficulty() { return currDifficulty; }
+
+void Menu::ResetMenu()
+{
+	playButton.SetState(Button::UP);
+	exitButton.SetState(Button::UP);
+	easyButton.SetState(Button::UP);
+	mediumButton.SetState(Button::UP);
+	hardButton.SetState(Button::UP);
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+}
 
 bool Menu::PollInput(sf::Vector2i mousePosition, Button* button, bool stickyButton) {
 	float halfWidth = (button->GetRect().getSize().x / 2);

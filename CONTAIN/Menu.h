@@ -7,12 +7,13 @@
 #include "RESOURCES.h"
 #include "GLOBAL_CONSTANTS.h"
 #include "Button.h"
+#include <thread>
+#include <chrono>
 
 
 class Menu
 {
 private:
-	RESOURCES* resources;
 	DIFFICULTY currDifficulty;
 	sf::Font font;
 	sf::Text instructions1;
@@ -21,8 +22,6 @@ private:
 	Button easyButton;
 	Button mediumButton;
 	Button hardButton;
-	bool shouldExit;
-	bool shouldStart;
 
 	bool PollInput(sf::Vector2i mousePosition, Button* button, bool stickyButton = false);
 
@@ -30,10 +29,14 @@ private:
 	void  UpdateButtonTriplet(DIFFICULTY i_difficultySelected);
 
 public:
+	RESOURCES* resources;
+
 	Menu(RESOURCES* i_resources, DIFFICULTY i_defaultDiff = MEDIUM);
 	~Menu();
 
 	DIFFICULTY GetDifficulty();
+
+	void ResetMenu();
 
 	GAME_STATE Update(float microSeconds, sf::RenderWindow* window, sf::Vector2i mousePosition);
 

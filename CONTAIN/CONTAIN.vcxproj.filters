@@ -87,6 +87,12 @@
     <ClCompile Include="Sector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="YouLostMenu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="YouWonMenu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameRenderer.h">
@@ -162,6 +168,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Sector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="YouLostMenu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="YouWonMenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

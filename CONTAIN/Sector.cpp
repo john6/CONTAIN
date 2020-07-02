@@ -59,17 +59,6 @@ void Sector::AddWallsToLevel()
 {
 	Material Static = Material(0.0f, 0.4f, 0.4f, 0.2f);
 
-	std::shared_ptr<Shape> vertRect2 = std::make_shared<Rectangle>(HOR_MARGIN, COURT_HEIGHT);
-	RigidBody leftWallBody = RigidBody(vertRect2, Static);
-	std::shared_ptr<Entity> leftWall = std::make_shared<Wall>(leftWallBody,
-		Vector2f((HOR_MARGIN / 2.0f), VERT_MARGIN + (COURT_HEIGHT / 2.0f)), this);
-	AddEntPtrToSector(leftWall);
-
-	std::shared_ptr<Shape> horRect1 = std::make_shared<Rectangle>(COURT_WIDTH, VERT_MARGIN);
-	RigidBody wallBody1 = RigidBody(horRect1, Static);
-	std::shared_ptr<Entity> upperWall = std::make_shared<Wall>(wallBody1,
-		Vector2f(HOR_MARGIN + (COURT_WIDTH / 2.0f), (VERT_MARGIN / 2.0f)), this);
-	lvlEntities.push_back(upperWall);
 
 	std::shared_ptr<Shape> vertRect1 = std::make_shared<Rectangle>(HOR_MARGIN, COURT_HEIGHT);
 	RigidBody rightWallBody = RigidBody(vertRect1, Static);
@@ -77,12 +66,35 @@ void Sector::AddWallsToLevel()
 		Vector2f(HOR_MARGIN + (COURT_WIDTH)+(HOR_MARGIN / 2.0f), VERT_MARGIN + (COURT_HEIGHT / 2.0f)), this);
 	lvlEntities.push_back(rightWall);
 
-	std::shared_ptr<Shape> horRect2 = std::make_shared<Rectangle>(COURT_WIDTH, VERT_MARGIN);
+	std::shared_ptr<Shape> vertRect2 = std::make_shared<Rectangle>(HOR_MARGIN, COURT_HEIGHT);
+	RigidBody leftWallBody = RigidBody(vertRect2, Static);
+	std::shared_ptr<Entity> leftWall = std::make_shared<Wall>(leftWallBody,
+		Vector2f((HOR_MARGIN / 2.0f), VERT_MARGIN + (COURT_HEIGHT / 2.0f)), this);
+	AddEntPtrToSector(leftWall);
+
+	std::shared_ptr<Shape> horRect1 = std::make_shared<Rectangle>(COURT_WIDTH + (HOR_MARGIN * 2), VERT_MARGIN);
+	RigidBody wallBody1 = RigidBody(horRect1, Static);
+	std::shared_ptr<Entity> upperWall = std::make_shared<Wall>(wallBody1,
+		Vector2f(HOR_MARGIN + (COURT_WIDTH / 2.0f), (VERT_MARGIN / 2.0f)), this);
+	lvlEntities.push_back(upperWall);
+
+
+	std::shared_ptr<Shape> horRect2 = std::make_shared<Rectangle>(COURT_WIDTH + (HOR_MARGIN * 2), VERT_MARGIN);
 	RigidBody lowerWallBody = RigidBody(horRect2, Static);
 	std::shared_ptr<Entity> lowerWall = std::make_shared<Wall>(lowerWallBody,
-		Vector2f(Vector2f(HOR_MARGIN + (COURT_WIDTH / 2.0f), (WALL_THICKNESS / 2.0f) + COURT_HEIGHT)), this);
+		Vector2f(Vector2f(HOR_MARGIN + (COURT_WIDTH / 2.0f), (VERT_MARGIN / 2.0f) + COURT_HEIGHT + VERT_MARGIN)), this);
 	lvlEntities.push_back(lowerWall);
 
+}
+
+void Sector::AddEndLevelObject()
+{
+	Material Static = Material(0.0f, 0.4f, 0.4f, 0.2f);
+	std::shared_ptr<Shape> square = std::make_shared<Rectangle>(100.0f, 100.0f);
+	RigidBody lowerWallBody = RigidBody(square, Static);
+	std::shared_ptr<Entity> lowerWall = std::make_shared<EndObject>(lowerWallBody,
+		Vector2f(Vector2f(HOR_MARGIN + (COURT_WIDTH / 2.0f), COURT_HEIGHT / 2.0)), this);
+	lvlEntities.push_back(lowerWall);
 }
 
 void Sector::RemoveDestroyedEntities() {
@@ -93,4 +105,10 @@ void Sector::RemoveDestroyedEntities() {
 		}
 		else { ++iter; }
 	}
+}
+
+void Sector::InitializeSector()
+{
+	AddWallsToLevel();
+	GenerateLevelCubes(1);
 }

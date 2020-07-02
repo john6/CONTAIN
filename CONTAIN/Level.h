@@ -5,11 +5,13 @@
 #include "RigidBody.h"
 #include "Sector.h"
 
+struct MapNode;
+
 class Level
 {
 protected:
 	//Sector map will simply hold an int representing the index for the vector of sectors
-	std::vector<std::vector<int>> sectorMap;
+	std::vector<std::vector<MapNode>> sectorMap;
 	//Sector vect owns all sectors
 	std::vector<std::shared_ptr<Sector>> sectorVect;
 	//the origin is the center coordinates of the map
@@ -19,7 +21,7 @@ protected:
 
 public:
 	int m_lvl_num;
-	MapCoord origin;
+	MapCoord originCoord;
 
 	Level(int i_levelNum, DIFFICULTY i_diff, std::shared_ptr<Entity> i_charPtr);
 	~Level();
@@ -32,9 +34,13 @@ public:
 
 	void ConnectSectors(int i_sectX1, int i_sectY1, int i_sectX2, int i_sectY2);
 
-	Material GetMaterial(MATERIAL_TYPE mat);
+	//Material GetMaterial(MATERIAL_TYPE mat);
 
+	void CreateSectorAtCoord(MapCoord i_coord);
 
-private:
+	void CreateOneWayDoor(MapCoord i_coordA, MapCoord i_coordB);
 
+	void CreateBidirectionalDoor(MapCoord i_coordA, MapCoord i_coordB);
+
+	void RandomPlaceEndLevelObject();
 };

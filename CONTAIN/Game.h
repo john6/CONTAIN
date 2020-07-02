@@ -16,7 +16,7 @@
 #include "LevelGenerator.h"
 #include "Entity.h"
 
-enum PLAY_STATE { GENERAL_GAMEPLAY, WON_LEVEL, DEAD };
+enum PLAY_STATE { GENERAL_GAMEPLAY, WON_LEVEL, DEAD, WON_GAME };
 
 class Game
 {
@@ -38,6 +38,8 @@ private:
 	GAME_STATE UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnts, float i_stepSize);
 	void UpdateHUD();
 	void DeleteLevels();
+	bool playerWon;
+
 
 public:
 	MapCoord currSector;
@@ -66,5 +68,9 @@ public:
 	void CreatePlayerChar();
 
 	void SpawnProjectile();
+
+	void RequestGoToNextLvl();
+
+	void Restart();
 };
 

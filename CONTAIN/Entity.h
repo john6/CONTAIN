@@ -6,6 +6,12 @@
 class Game;
 class Level;
 class Sector;
+class PlayerChar;
+class Projectile;
+class Enemy;
+class Door;
+class Wall;
+class EndObject;
 
 class Entity
 {
@@ -27,13 +33,25 @@ public:
 
 	const bool MarkedForDeath();
 
-	virtual void CollideWith(Entity& i_other) = 0;
+	void CollideWith(Entity& i_other);
 
-	virtual void Update(float i_stepSize) = 0;
+	virtual void Update(float i_stepSize);
 
-	virtual void Destroy() = 0;
+	virtual void Destroy();
 
 	std::unique_ptr<sf::Shape> CreateDrawable(float i_lerp_fraction);
+
+	virtual void CollideWithPlayer(PlayerChar* i_playerPtr);
+
+	virtual void CollideWithProjectile(Projectile* i_projPtr);
+
+	virtual void CollideWithEnemy(Enemy* i_enemyPtr);
+
+	virtual void CollideWithWall(Wall* i_wallPtr);
+
+	virtual void CollideWithDoor(Door* i_doorPtr);
+
+	virtual void CollideWithEndObject(EndObject* i_endPtr);
 };
 
 class PlayerChar :
@@ -55,8 +73,6 @@ public:
 	PlayerChar(RigidBody i_rb, Vector2f i_startPosition, Game* gamePtr);
 	~PlayerChar();
 
-	void CollideWith(Entity& i_other) override;
-
 	void Update(float i_stepSize) override;
 
 	void UpdateMovement(float i_stepSize);
@@ -65,7 +81,11 @@ public:
 
 	void TakeDamage(float i_dmg);
 
-	void Destroy() override;
+	float GetCurrHealth();
+
+	void CollideWithDoor(Door* i_doorPtr) override;
+
+	void CollideWithEndObject(EndObject* i_endPtr) override;
 };
 
 class Projectile :
@@ -78,11 +98,19 @@ public:
 	Projectile(RigidBody i_rb, Vector2f i_startPosition);
 	~Projectile();
 
-	void CollideWith(Entity& i_ent) override;
-
 	void Update(float i_stepSize) override;
 
 	void Destroy() override;
+
+	void CollideWithPlayer(PlayerChar* i_playerPtr) override;
+
+	void CollideWithProjectile(Projectile* i_projPtr) override;
+
+	void CollideWithEnemy(Enemy* i_enemyPtr) override;
+
+	void CollideWithWall(Wall* i_wallPtr) override;
+
+	void CollideWithDoor(Door* i_doorPtr) override;
 };
 
 class Enemy :
@@ -98,11 +126,32 @@ public:
 	Enemy(RigidBody i_rb, Vector2f i_startPosition, std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr);
 	~Enemy();
 
-	void CollideWith(Entity& i_other) override;
-
 	void Update(float i_stepSize) override;
 
 	void Destroy() override;
+
+	void CollideWithPlayer(PlayerChar* i_playerPtr) override;
+};
+
+class Door :
+	public Entity
+{
+private:
+	Sector* sectPtr;
+	Vector2f outPos;
+	MapCoord outCoord;
+
+public:
+	Door(RigidBody i_rb, Vector2f i_startPosition, Sector* i_sectPtr, MapCoord i_toSect, Vector2f i_outCoord);
+	~Door();
+
+	bool open;
+
+	const MapCoord GetOutCoord();
+
+	const Vector2f GetOutPos();
+
+	void Update(float i_stepSize) override;
 };
 
 class Wall :
@@ -114,35 +163,15 @@ private:
 public:
 	Wall(RigidBody i_rb, Vector2f i_startPosition, Sector* i_sectPtr);
 	~Wall();
-
-	void CollideWith(Entity& i_other) override;
-
-	void Update(float i_stepSize) override;
-
-	void Destroy() override;
 };
 
-class Door :
+class EndObject :
 	public Entity
 {
 private:
 	Sector* sectPtr;
- 	Vector2f outPos;
-	MapCoord outCoord;
 
 public:
-	Door(RigidBody i_rb, Vector2f i_startPosition, Sector* i_sectPtr, MapCoord i_toSect, Vector2f i_outCoord);
-	~Door();
-
-	bool open;
-
-	void CollideWith(Entity& i_other) override ;
-
-	const MapCoord GetOutCoord();
-
-	const Vector2f GetOutPos();
-
-	void Update(float i_stepSize) override;
-
-	void Destroy() override;
+	EndObject(RigidBody i_rb, Vector2f i_startPosition, Sector* i_sectPtr);
+	~EndObject();
 };

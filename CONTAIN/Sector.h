@@ -26,7 +26,11 @@ public:
 
 	void AddWallsToLevel();
 
+	void AddEndLevelObject();
+
 	void RemoveDestroyedEntities();
+
+	void InitializeSector();
 
 	Sector(std::shared_ptr<Entity> i_charPtr);
 	~Sector();

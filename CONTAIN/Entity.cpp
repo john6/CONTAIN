@@ -5,7 +5,7 @@
 #include "Level.h"
 #include "Sector.h"
 
-//Entity
+///////////////////////Entity///////////////////////
 Entity::Entity() :
 	rb { RigidBody(std::make_shared<Rectangle>(100.0f, 100.0f)) }
 {
@@ -32,6 +32,28 @@ const bool Entity::MarkedForDeath() {
 	return killMeNextLoop;
 }
 
+void Entity::CollideWith(Entity & i_other)
+{
+	if (auto player = dynamic_cast<PlayerChar*>(&i_other)) {
+		CollideWithPlayer(player);
+	}
+	else if (auto projectile = dynamic_cast<Projectile*>(&i_other)) {
+		CollideWithProjectile(projectile);
+	}
+	if (auto enemy = dynamic_cast<Enemy*>(&i_other)) {
+		CollideWithEnemy(enemy);
+	}
+	else if (auto wall = dynamic_cast<Wall*>(&i_other)) {
+		CollideWithWall(wall);
+	}
+	else if (auto door = dynamic_cast<Door*>(&i_other)) {
+		CollideWithDoor(door);
+	}
+	else if (auto endObjPtr= dynamic_cast<EndObject*>(&i_other)) {
+		CollideWithEndObject(endObjPtr);
+	}
+}
+
 std::unique_ptr<sf::Shape> Entity::CreateDrawable(float i_lerp_fraction)
 {
 	//for linear interpolation this will now use the previous position and orientation
@@ -47,12 +69,34 @@ std::unique_ptr<sf::Shape> Entity::CreateDrawable(float i_lerp_fraction)
 	return drawShape;
 }
 
+void Entity::CollideWithPlayer(PlayerChar* i_playerPtr) {}
+
+void Entity::CollideWithProjectile(Projectile * i_projPtr) {}
+
+void Entity::CollideWithEnemy(Enemy* i_enemyPtr) {}
+
+void Entity::CollideWithWall(Wall* i_wallPtr) {}
+
+void Entity::CollideWithDoor(Door* i_doorPtr) {}
+
+void Entity::CollideWithEndObject(EndObject * i_endPtr) {}
+
+void Entity::Destroy() {
+	killMeNextLoop = true;
+}
+
+void Entity::Update(float i_stepSize)
+{
+}
+
 Entity::~Entity()
 {
 }
 
-//PlayerChar class 
-PlayerChar::PlayerChar(RigidBody i_rb, Vector2f i_startPosition, Game* i_gamePtr) : Entity(i_rb, i_startPosition), gamePtr{ i_gamePtr }, pController{ PlayerController(i_gamePtr->renderWindow) }
+///////////////////////PlayerChar class ///////////////////////
+PlayerChar::PlayerChar(RigidBody i_rb, Vector2f i_startPosition, Game* i_gamePtr) :
+	Entity(i_rb, i_startPosition), gamePtr{ i_gamePtr },
+	pController{ PlayerController(i_gamePtr->renderWindow) }
 {
 	fillColor = sf::Color::Yellow;
 	outlineColor = sf::Color::Red;
@@ -61,33 +105,11 @@ PlayerChar::PlayerChar(RigidBody i_rb, Vector2f i_startPosition, Game* i_gamePtr
 	lastShotFired = std::chrono::high_resolution_clock::now();
 	lastDamageReceived = std::chrono::high_resolution_clock::now();
 	dmgRate = 1.0f;
-	health = 5;
+	health = 10;
 }
 
 PlayerChar::~PlayerChar()
 {
-}
-
-void PlayerChar::CollideWith(Entity& i_other) 
-{
-	if (auto enemy = dynamic_cast<PlayerChar*>(&i_other)) {
-
-	}
-	else if (auto projectile = dynamic_cast<Projectile*>(&i_other)) {
-
-	}
-	if (auto enemy = dynamic_cast<Enemy*>(&i_other)) {
-
-	}
-	else if (auto wall = dynamic_cast<Wall*>(&i_other)) {
-
-	}
-	else if (auto door = dynamic_cast<Door*>(&i_other)) {
-		if (door->open) {
-			gamePtr->RequestTravelToSector(door->GetOutCoord());
-			rb.ResetPosition(door->GetOutPos());
-		}
-	}
 }
 
 void PlayerChar::Update(float i_stepSize)
@@ -153,11 +175,25 @@ void PlayerChar::TakeDamage(float i_dmg)
 	}
 }
 
-void PlayerChar::Destroy() {
-	killMeNextLoop = true;
+float PlayerChar::GetCurrHealth()
+{
+	return health;
 }
 
-//Projectile Class 
+void PlayerChar::CollideWithDoor(Door * i_doorPtr)
+{
+	if (i_doorPtr->open) {
+		gamePtr->RequestTravelToSector(i_doorPtr->GetOutCoord());
+		rb.ResetPosition(i_doorPtr->GetOutPos());
+	}
+}
+
+void PlayerChar::CollideWithEndObject(EndObject * i_endPtr)
+{
+	gamePtr->RequestGoToNextLvl();
+}
+
+///////////////////////Projectile Class ///////////////////////
 
 Projectile::Projectile(RigidBody i_rb, Vector2f i_startPosition) :
 	Entity{ i_rb, i_startPosition}
@@ -166,29 +202,8 @@ Projectile::Projectile(RigidBody i_rb, Vector2f i_startPosition) :
 	outlineColor = sf::Color::White;
 }
 
-
 Projectile::~Projectile()
 {
-}
-
-void Projectile::CollideWith(Entity& i_other)
-{
-	if (auto player = dynamic_cast<PlayerChar*>(&i_other)) {
-		Destroy();
-	}
-	else if (auto projectile = dynamic_cast<Projectile*>(&i_other)) {
-		Destroy();
-	}
-	if (auto enemy = dynamic_cast<Enemy*>(&i_other)) {
-		Destroy();
-		enemy->Destroy();
-	}
-	else if (auto wall = dynamic_cast<Wall*>(&i_other)) {
-		Destroy();
-	}
-	else if (auto door = dynamic_cast<Door*>(&i_other)) {
-		Destroy();
-	}
 }
 
 void Projectile::Update(float i_stepSize)
@@ -199,7 +214,33 @@ void Projectile::Destroy() {
 	killMeNextLoop = true;
 }
 
-//Enemy Class
+void Projectile::CollideWithPlayer(PlayerChar * i_playerPtr)
+{
+	Destroy();
+}
+
+void Projectile::CollideWithProjectile(Projectile * i_projPtr)
+{
+	Destroy();
+}
+
+void Projectile::CollideWithEnemy(Enemy * i_enemyPtr)
+{
+	Destroy();
+	i_enemyPtr->Destroy();
+}
+
+void Projectile::CollideWithWall(Wall * i_wallPtr)
+{
+	Destroy();
+}
+
+void Projectile::CollideWithDoor(Door * i_doorPtr)
+{
+	Destroy();
+}
+
+///////////////////////Enemy Class///////////////////////
 
 Enemy::Enemy(RigidBody i_rb, Vector2f i_startPosition, std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr) :
 	Entity(i_rb, i_startPosition), charPtr { i_charPtr }, sectPtr{ i_sectPtr }
@@ -209,28 +250,8 @@ Enemy::Enemy(RigidBody i_rb, Vector2f i_startPosition, std::shared_ptr<Entity> i
 	speed = 15;
 }
 
-
 Enemy::~Enemy()
 {
-}
-
-void Enemy::CollideWith(Entity& i_other)
-{
-	if (auto player = dynamic_cast<PlayerChar*>(&i_other)) {
-		player->TakeDamage(1.0f);
-	}
-	else if (auto projectile = dynamic_cast<Projectile*>(&i_other)) {
-
-	}
-	else if (auto enemy = dynamic_cast<Enemy*>(&i_other)) {
-
-	}
-	else if (auto wall = dynamic_cast<Wall*>(&i_other)) {
-
-	}
-	else if (auto door = dynamic_cast<Door*>(&i_other)) {
-
-	}
 }
 
 void Enemy::Update(float i_stepSize)
@@ -246,8 +267,12 @@ void Enemy::Destroy() {
 	killMeNextLoop = true;
 }
 
-//Door class
+void Enemy::CollideWithPlayer(PlayerChar * i_playerPtr)
+{
+	i_playerPtr->TakeDamage(1.0f);
+}
 
+///////////////////////Door class///////////////////////
 Door::Door(RigidBody i_rb, Vector2f i_startPosition, Sector* i_sectPtr, MapCoord i_outSect, Vector2f i_outCoord) :
 	Entity(i_rb, i_startPosition), sectPtr{ i_sectPtr }, outCoord{ i_outSect }, outPos{ i_outCoord }
 {
@@ -258,25 +283,6 @@ Door::Door(RigidBody i_rb, Vector2f i_startPosition, Sector* i_sectPtr, MapCoord
 
 Door::~Door()
 {
-}
-
-void Door::CollideWith(Entity& i_other)
-{
-	if (auto enemy = dynamic_cast<PlayerChar*>(&i_other)) {
-
-	}
-	else if (auto projectile = dynamic_cast<Projectile*>(&i_other)) {
-
-	}
-	if (auto enemy = dynamic_cast<Enemy*>(&i_other)) {
-
-	}
-	else if (auto wall = dynamic_cast<Wall*>(&i_other)) {
-
-	}
-	else if (auto door = dynamic_cast<Door*>(&i_other)) {
-
-	}
 }
 
 const MapCoord Door::GetOutCoord()
@@ -297,48 +303,30 @@ void Door::Update(float i_stepSize)
 	}
 }
 
-void Door::Destroy() {
-	killMeNextLoop = true;
-}
-
-//Wall Class 
+///////////////////////Wall Class ///////////////////////
 
 Wall::Wall(RigidBody i_rb, Vector2f i_startPosition, Sector* i_sectPtr) :
 	Entity(i_rb, i_startPosition), sectPtr{ i_sectPtr }
 {
-	fillColor = sf::Color::White;
+	fillColor = sf::Color::Black;
 	outlineColor = sf::Color::White;
 }
-
 
 Wall::~Wall()
 {
 }
 
-void Wall::CollideWith(Entity& i_other)
+
+
+/////////////////////// End Object ///////////////////////
+
+EndObject::EndObject(RigidBody i_rb, Vector2f i_startPosition, Sector * i_sectPtr) :
+	Entity(i_rb, i_startPosition), sectPtr{ i_sectPtr }
 {
-	if (auto enemy = dynamic_cast<PlayerChar*>(&i_other)) {
-
-	}
-	else if (auto projectile = dynamic_cast<Projectile*>(&i_other)) {
-
-	}
-	if (auto enemy = dynamic_cast<Enemy*>(&i_other)) {
-
-	}
-	else if (auto wall = dynamic_cast<Wall*>(&i_other)) {
-
-	}
-	else if (auto door = dynamic_cast<Door*>(&i_other)) {
-
-	}
+	fillColor = sf::Color::Magenta;
+	outlineColor = sf::Color::Magenta;
 }
 
-void Wall::Update(float i_stepSize)
+EndObject::~EndObject()
 {
 }
-
-void Wall::Destroy() {
-	killMeNextLoop = true;
-}
-

@@ -21,7 +21,7 @@ Button::BUTTON_STATE Button::GetState() {
 
 void Button::SetText(std::string s) {
 	m_text.setString(s);
-	m_text.setCharacterSize(static_cast<int>(m_positionAndSize.getSize().x / 10.0f));
+	m_text.setCharacterSize(static_cast<int>(m_positionAndSize.getSize().x / 12.0f));
 	m_text.setOutlineThickness(1.0f);
 	m_text.setPosition(sf::Vector2f(m_positionAndSize.getPosition().x + (m_positionAndSize.getSize().x / 3.0f),
 		m_positionAndSize.getPosition().y + (m_positionAndSize.getSize().y / 3.0f)));

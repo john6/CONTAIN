@@ -36,10 +36,10 @@ const int SCREEN_WIDTH = 1800;
 const int SCREEN_HEIGHT = 900;
 
 //GAME RESOLUTION
-const float COURT_WIDTH = static_cast<float>(SCREEN_WIDTH * 8 / 9);
-const float COURT_HEIGHT = static_cast<float>(SCREEN_HEIGHT * 8 / 9);
-const float HOR_MARGIN = static_cast<float>(SCREEN_WIDTH / 18);         //horizontal margin
-const float VERT_MARGIN = static_cast<float>(SCREEN_HEIGHT / 18);       //vertical margin
+const float COURT_WIDTH = static_cast<float>(SCREEN_WIDTH * 9.0f / 10.0f);
+const float COURT_HEIGHT = static_cast<float>(SCREEN_HEIGHT * 9.0f / 10.0f);
+const float HOR_MARGIN = static_cast<float>(SCREEN_WIDTH / 20.0f);         //horizontal margin
+const float VERT_MARGIN = static_cast<float>(SCREEN_HEIGHT / 20.0f);       //vertical margin
 
 //GENERAL GAME SETTINGS
 const float WALL_THICKNESS = 100.0f;
