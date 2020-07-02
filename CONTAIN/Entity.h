@@ -69,6 +69,8 @@ private:
 	hiRes_time_point lastDamageReceived;
 
 public:
+	float weaponDelay;
+
 
 	PlayerChar(RigidBody i_rb, Vector2f i_startPosition, Game* gamePtr);
 	~PlayerChar();
@@ -78,6 +80,8 @@ public:
 	void UpdateMovement(float i_stepSize);
 
 	void UpdateHealth(float i_stepSize);
+
+	void AcceptWeaponInput(float i_stepSize);
 
 	void TakeDamage(float i_dmg);
 
@@ -174,4 +178,14 @@ private:
 public:
 	EndObject(RigidBody i_rb, Vector2f i_startPosition, Sector* i_sectPtr);
 	~EndObject();
+};
+
+class Blocker : public Entity 
+{
+private:
+	Sector* sectPtr;
+
+public:
+	Blocker(RigidBody i_rb, Vector2f i_startPosition);
+	~Blocker();
 };

@@ -12,6 +12,7 @@ Origin of object space is the center
 #include "MassData.h"
 #include "Material.h"
 #include "Math.h"
+#include <cmath>
 
 
 class RigidBody
@@ -47,6 +48,8 @@ public:
 	void ApplyImpulse(Vector2f i_imp, Vector2f contactP);
 	void AdjustPosition(Vector2f);
 	void ResetPosition(Vector2f);
+	void ResetOrientation(float i_orient);
+	void ResetOrientation(Vector2f i_dirVect);
 	void IntegrateForces();
 	void IntegrateVelocity(float i_deltaTime);
 	Vector2f GetLerpPosition(float i_lerp_fraction);

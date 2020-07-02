@@ -8,7 +8,8 @@ GameRenderer::~GameRenderer()
 {
 }
 
-void GameRenderer::Render(sf::RenderWindow* i_window, float i_lerp_fraction, std::list<std::shared_ptr<Entity>>* i_entityList, Entity* playerChar, std::vector<sf::VertexArray> i_sections) {
+void GameRenderer::Render(sf::RenderWindow* i_window, float i_lerp_fraction,
+	std::list<std::shared_ptr<Entity>>* i_entityList, Entity* playerChar, std::vector<sf::Drawable*> i_HUDelem) {
 	i_window->clear();
 	auto it = i_entityList->begin();
 	while (it != i_entityList->end()) {
@@ -21,9 +22,14 @@ void GameRenderer::Render(sf::RenderWindow* i_window, float i_lerp_fraction, std
 		it++;
 	}
 
-	for (sf::VertexArray section : i_sections) {
-		i_window->draw(section);
+	for (sf::Drawable* drawble : i_HUDelem) {
+		i_window->draw(*drawble);
 	}
+
+
+	//for (sf::VertexArray section : i_sections) {
+	//	i_window->draw(section);
+	//}
 
 	std::unique_ptr<sf::Shape> shape = playerChar->CreateDrawable(i_lerp_fraction);
 	shape->setOutlineColor(sf::Color::Red);

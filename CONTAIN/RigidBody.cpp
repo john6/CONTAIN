@@ -149,6 +149,16 @@ void RigidBody::ResetPosition(Vector2f i_newPos)
 	UpdateVertsAndNorms();
 }
 
+void RigidBody::ResetOrientation(float i_orient)
+{
+	transform.orient = i_orient;
+}
+
+void RigidBody::ResetOrientation(Vector2f i_dirVect)
+{
+	transform.orient = atan2(i_dirVect[1], i_dirVect[0]);
+}
+
 void RigidBody::IntegrateForces()
 {
 	vel += force;

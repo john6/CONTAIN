@@ -10,7 +10,7 @@ Game::Game(sf::RenderWindow* i_window, RESOURCES* i_resources, DIFFICULTY i_diff
 	RigidBody rb(shape, Wood);
 	//Entity ent(rb);
 	//I can not use "make_shared" with the entity type or else memory will have an issue with it
-	playerChar = std::make_shared<PlayerChar>(PlayerChar(rb, Vector2f(500, 500.0f), this));
+	playerChar = std::make_shared<PlayerChar>(PlayerChar(rb, Vector2f(400, 400.0), this));
 	playerChar->rb.transform.orient = 1.0f;
 	beginTime = std::chrono::high_resolution_clock::now();
 	font = resources->GetFont();
@@ -30,9 +30,12 @@ Game::~Game()
 GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vector2i i_mousePos) {
 	timeElapsed = std::chrono::duration_cast<std::chrono::seconds>(hiResTime::now() - beginTime);
 	float millisecLag = abs(i_microSecs / MICROSECS_TO_MILLISECS);
-	if (timeElapsed.count() >= timeToComplete) {
-		return LOSE;
-	}
+	float timeLeft = timeToComplete - timeElapsed.count();
+	int timeLeftSeconds = timeLeft / 1000000;
+	HUD.Update(currLvl, timeLeftSeconds, playerChar);
+	//if (timeLeft <= 0) {
+	//	return LOSE;
+	//}
 	switch (playState) {
 		case (GENERAL_GAMEPLAY): {
 			return UpdateGeneral(millisecLag, i_mousePos);
@@ -43,7 +46,6 @@ GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vecto
 			break;
 		}
 	}
-	UpdateHUD();
 }
 
 GAME_STATE Game::UpdateGeneral(float i_stepSize, sf::Vector2i i_mousePos) {
@@ -168,18 +170,15 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnt
 	return IN_GAME;
 }
 
-void Game::UpdateHUD() {
-
-}
-
 void Game::Render(float i_elapsedMilliseconds) {
-	QuadTree qTree = QuadTree(0, Vector2f(0.0f, 0.0f), SCREEN_WIDTH, SCREEN_HEIGHT);/*
-	auto i_lvlEnts = levels[currLvl]->GetLvlEntites();
-	for (auto iter1 = i_lvlEnts->begin(); iter1 != i_lvlEnts->end(); ++iter1) {
-		qTree.Insert(&(*iter1));
-	}*/
+	//QuadTree qTree = QuadTree(0, Vector2f(0.0f, 0.0f), SCREEN_WIDTH, SCREEN_HEIGHT);/*
+	//auto i_lvlEnts = levels[currLvl]->GetLvlEntites();
+	//for (auto iter1 = i_lvlEnts->begin(); iter1 != i_lvlEnts->end(); ++iter1) {
+	//	qTree.Insert(&(*iter1));
+	//}*/
 	GameRenderer::Render(renderWindow, i_elapsedMilliseconds, levels[currLvl]->GetSector(currSector)->GetSectorEntities(),
-						 playerChar.get(), qTree.GetDrawableSectionLines());
+						 playerChar.get(), HUD.GetDrawables());
+
 }
 
 void Game::TestCollision(std::shared_ptr<Entity> entA, std::shared_ptr<Entity> entB, std::vector<CollisionData>* collisionList)

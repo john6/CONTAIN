@@ -17,5 +17,6 @@ public:
 
 	std::vector<Input> PollKeys();
 
-	Eigen::Vector2f PollMouse();
+	Eigen::Vector2f LeftClick();
+	Eigen::Vector2f RightClick();
 };

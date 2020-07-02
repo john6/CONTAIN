@@ -106,6 +106,7 @@ PlayerChar::PlayerChar(RigidBody i_rb, Vector2f i_startPosition, Game* i_gamePtr
 	lastDamageReceived = std::chrono::high_resolution_clock::now();
 	dmgRate = 1.0f;
 	health = 10;
+	weaponDelay = shipRateOfFire;
 }
 
 PlayerChar::~PlayerChar()
@@ -116,6 +117,7 @@ void PlayerChar::Update(float i_stepSize)
 {
 	UpdateHealth(i_stepSize);
 	UpdateMovement(i_stepSize);
+	AcceptWeaponInput(i_stepSize);
 }
 
 void PlayerChar::UpdateMovement(float i_stepSize)
@@ -142,11 +144,23 @@ void PlayerChar::UpdateMovement(float i_stepSize)
 		}
 		}
 	}
-	Vector2f mousePos = pController.PollMouse();
-	auto timeSinceFired = std::chrono::duration_cast<std::chrono::seconds>(hiResTime::now() - lastShotFired);
-	if (!mousePos.isZero() && (timeSinceFired.count() >= shipRateOfFire)) {
+}
+
+void PlayerChar::UpdateHealth(float i_stepSize)
+{
+	if (health <= 0.0f) {
+		fillColor = sf::Color::Red;
+		outlineColor = sf::Color::Red;
+	}
+}
+
+void PlayerChar::AcceptWeaponInput(float i_stepSize)
+{
+	Vector2f leftMousePos = pController.LeftClick();
+	weaponDelay = shipRateOfFire - (std::chrono::duration_cast<std::chrono::seconds>(hiResTime::now() - lastShotFired)).count();
+	if (!leftMousePos.isZero() && (weaponDelay <= 0.0f)) {
 		lastShotFired = hiResTime::now();
-		Vector2f projectileDir = mousePos - rb.transform.pos;
+		Vector2f projectileDir = leftMousePos - rb.transform.pos;
 		projectileDir.normalize();
 		std::shared_ptr<Shape> projectileShape = std::make_shared<Circle>(PROJECTILE_RADIUS);
 		Material HeavyBall = Material(0.9f, 0.95f, 0.5f, 0.25f);
@@ -156,13 +170,21 @@ void PlayerChar::UpdateMovement(float i_stepSize)
 			rb.transform.pos + (projectileDir * 100.0f));
 		gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector)->AddEntPtrToSector(projectile);
 	}
-}
 
-void PlayerChar::UpdateHealth(float i_stepSize)
-{
-	if (health <= 0.0f) {
-		fillColor = sf::Color::Red;
-		outlineColor = sf::Color::Red;
+	Vector2f rightMousePos = pController.RightClick();
+	weaponDelay = shipRateOfFire - (std::chrono::duration_cast<std::chrono::seconds>(hiResTime::now() - lastShotFired)).count();
+	if (!rightMousePos.isZero() && (weaponDelay <= 0.0f)) {
+		lastShotFired = hiResTime::now();
+		Vector2f projectileDir = rightMousePos - rb.transform.pos;
+		projectileDir.normalize();
+		std::shared_ptr<Shape> projectileShape = std::make_shared<Rectangle>(40, 270);
+		Material HeavyBall = Material(0.9f, 0.95f, 0.5f, 0.25f);
+		RigidBody projBody = RigidBody(projectileShape, HeavyBall);
+		projBody.ApplyImpulse((projectileDir * 7000.0f), NULL_VECTOR);
+		projBody.ResetOrientation(projectileDir);
+		std::shared_ptr<Entity> projectile = std::make_shared<Blocker>(projBody,
+			rb.transform.pos + (projectileDir * 100.0f));
+		gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector)->AddEntPtrToSector(projectile);
 	}
 }
 
@@ -328,5 +350,19 @@ EndObject::EndObject(RigidBody i_rb, Vector2f i_startPosition, Sector * i_sectPt
 }
 
 EndObject::~EndObject()
+{
+}
+
+
+/////////////////////// Blocker ///////////////////////
+
+Blocker::Blocker(RigidBody i_rb, Vector2f i_startPosition) :
+Entity(i_rb, i_startPosition)
+{
+	fillColor = sf::Color::Green;
+	outlineColor = sf::Color::Green;
+}
+
+Blocker::~Blocker()
 {
 }

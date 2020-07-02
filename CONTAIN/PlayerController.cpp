@@ -29,9 +29,20 @@ std::vector<PlayerController::Input> PlayerController::PollKeys()
 	return in;
 }
 
-Vector2f PlayerController::PollMouse()
+Vector2f PlayerController::LeftClick()
 {
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+		sf::Vector2i mPos = sf::Mouse::getPosition(*rWindow);
+		return Eigen::Vector2f(mPos.x, mPos.y);
+	}
+	else {
+		return Eigen::Vector2f(0.0f, 0.0f);
+	}
+}
+
+Vector2f PlayerController::RightClick()
+{
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
 		sf::Vector2i mPos = sf::Mouse::getPosition(*rWindow);
 		return Eigen::Vector2f(mPos.x, mPos.y);
 	}
