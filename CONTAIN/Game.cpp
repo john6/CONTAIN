@@ -1,25 +1,10 @@
 #include "Game.h"
-#include "QuadTree.h"
-#include <execution>
 
 Game::Game(sf::RenderWindow* i_window, RESOURCES* i_resources, DIFFICULTY i_difficulty)
 	: renderWindow{ i_window }, resources {i_resources}, HUD{ HeadsUpDisplay(i_resources) }
 {
-	std::shared_ptr<Shape> shape = std::make_shared<Rectangle>(100.0f, 100.0f);
-	Material Wood = Material(0.3f, 0.2f, 0.5f, 0.25f);
-	RigidBody rb(shape, Wood);
-	//Entity ent(rb);
-	//I can not use "make_shared" with the entity type or else memory will have an issue with it
-	playerChar = std::make_shared<PlayerChar>(PlayerChar(rb, Vector2f(400, 400.0), this));
-	playerChar->rb.transform.orient = 1.0f;
-	beginTime = std::chrono::high_resolution_clock::now();
 	font = resources->GetFont();
-	numLvls = 3;
-	currLvl = 0;
-	timeToComplete = 999999999.0f;
-	playState = GENERAL_GAMEPLAY;
-	const microSec UPDATE_INTERVAL(16666);
-	playerWon = false;
+	InitGame(i_difficulty);
 }
 
 Game::~Game()
@@ -194,7 +179,7 @@ void Game::GenerateLevels(DIFFICULTY i_diff) {
 	DeleteLevels();
 	for (int i = 0; i < numLvls; ++i) {
 		//std::unique_ptr<Level> lvl = std::make_unique<Level>(i, i_diff);
-		Level* lvl = new Level(i, i_diff, playerChar);
+		Level* lvl = new Level(i, i_diff, playerChar, resources);
 		levels.push_back(lvl);
 	}
 	currSector = levels[currLvl]->originCoord;
@@ -229,22 +214,29 @@ void Game::RequestGoToNextLvl()
 	if (currLvl < numLvls - 1) {
 		++currLvl;
 		currSector = levels[currLvl]->originCoord;
+		dynamic_cast<PlayerChar*>(playerChar.get())->ResetHealth();
 	}
 	else {
 		playerWon = true;
 	}
 }
 
-void Game::Restart()
-{//prob shouldn't ever call before regenning the levels it could be fucked
-	currLvl = 0;
+void Game::InitGame(DIFFICULTY i_diff)
+{
 	std::shared_ptr<Shape> shape = std::make_shared<Rectangle>(100.0f, 100.0f);
-	Material Wood = Material(0.3f, 0.2f, 0.5f, 0.25f);
-	RigidBody rb(shape, Wood);
-	//Entity ent(rb);
-	//I can not use "make_shared" with the entity type or else memory will have an issue with it
-	playerChar = std::make_shared<PlayerChar>(PlayerChar(rb, Vector2f(500, 500.0f), this));
+	Material Metal = Material(1.2f, 0.05f, 0.4f, 0.2f);
+	RigidBody rb(shape, Metal);
+	int startingHealth = 5 * (3 - i_diff);
+	playerChar = std::make_shared<PlayerChar>(PlayerChar(rb, Vector2f(400, 400.0), this, startingHealth));
 	playerChar->rb.transform.orient = 1.0f;
+	beginTime = std::chrono::high_resolution_clock::now();
+	numLvls = 5;
+	currLvl = 0;
+	timeToComplete = 999999999.0f;
+	playState = GENERAL_GAMEPLAY;
+	const microSec UPDATE_INTERVAL(16666);
+	playerWon = false;
+	GenerateLevels(i_diff);
 }
 
 

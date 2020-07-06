@@ -101,7 +101,7 @@ std::vector<float> Physics::FindAxisLeastPenetration(RigidBody* i_entA, RigidBod
 bool Physics::ResolveCircleToCircleCollision(CollisionData* i_data)
 {
 	RigidBody* bodyA = &i_data->entA->rb;
-	RigidBody* bodyB = &i_data->entA->rb;
+	RigidBody* bodyB = &i_data->entB->rb;
 	std::shared_ptr<Circle> circlePtrA = std::dynamic_pointer_cast<Circle>(bodyA->shape);
 	std::shared_ptr<Circle> circlePtrB = std::dynamic_pointer_cast<Circle>(bodyB->shape);
 
@@ -115,7 +115,7 @@ bool Physics::ResolveCircleToCircleCollision(CollisionData* i_data)
 
 
 	/////////YOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-
+	// I no longer know what this yo refers to, I should write more specific comments
 
 
 

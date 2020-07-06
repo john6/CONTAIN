@@ -2,6 +2,7 @@
 #include <list>
 #include <vector>
 #include "GLOBAL_CONSTANTS.h"
+#include "RESOURCES.h"
 #include "Entity.h"
 #include "RigidBody.h"
 
@@ -26,16 +27,24 @@ public:
 
 	void AddWallsToLevel();
 
+	void AddPainfullWallsToLevel();
+
 	void AddEndLevelObject();
 
 	void RemoveDestroyedEntities();
 
+	void AddTerrain(int i_terrainType);
+
 	void InitializeSector();
 
-	Sector(std::shared_ptr<Entity> i_charPtr);
+	void PlaySound(int i_soundNum);
+
+	Sector(std::shared_ptr<Entity> i_charPtr, RESOURCES* i_resources);
 	~Sector();
 
 private:
+	RESOURCES* resources;
+
 	Sector(const Sector& that);
 	Sector& operator=(const Sector& that) = delete;
 };

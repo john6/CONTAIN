@@ -2,6 +2,7 @@
 #include "GLOBAL_CONSTANTS.h"
 #include "RigidBody.h"
 #include "PlayerController.h"
+#include <random>
 
 class Game;
 class Level;
@@ -12,6 +13,7 @@ class Enemy;
 class Door;
 class Wall;
 class EndObject;
+class PainWall;
 
 class Entity
 {
@@ -49,6 +51,8 @@ public:
 
 	virtual void CollideWithWall(Wall* i_wallPtr);
 
+	virtual void CollideWithPainWall(PainWall * i_painWallPtr);
+
 	virtual void CollideWithDoor(Door* i_doorPtr);
 
 	virtual void CollideWithEndObject(EndObject* i_endPtr);
@@ -58,13 +62,13 @@ class PlayerChar :
 	public Entity
 {
 private:
-	int health;
 	Game* gamePtr;
 	PlayerController pController;
 	hiRes_time_point lastShotFired;
-	int shipRateOfFire;
+	float shipRateOfFire;
 	float shipSpeed;
-
+	int maxHealth;
+	int health;
 	float dmgRate;
 	hiRes_time_point lastDamageReceived;
 
@@ -72,7 +76,7 @@ public:
 	float weaponDelay;
 
 
-	PlayerChar(RigidBody i_rb, Vector2f i_startPosition, Game* gamePtr);
+	PlayerChar(RigidBody i_rb, Vector2f i_startPosition, Game* gamePtr, int i_strtHealth);
 	~PlayerChar();
 
 	void Update(float i_stepSize) override;
@@ -81,11 +85,17 @@ public:
 
 	void UpdateHealth(float i_stepSize);
 
+	void ResetHealth();
+
+	void AddHealth(int i_healthUp);
+
 	void AcceptWeaponInput(float i_stepSize);
 
 	void TakeDamage(float i_dmg);
 
 	float GetCurrHealth();
+
+	void CollideWithPainWall(PainWall * i_painWallPtr) override;
 
 	void CollideWithDoor(Door* i_doorPtr) override;
 
@@ -114,6 +124,8 @@ public:
 
 	void CollideWithWall(Wall* i_wallPtr) override;
 
+	void CollideWithPainWall(PainWall * i_painWallPtr) override;
+
 	void CollideWithDoor(Door* i_doorPtr) override;
 };
 
@@ -133,6 +145,8 @@ public:
 	void Update(float i_stepSize) override;
 
 	void Destroy() override;
+
+	void CollideWithPainWall(PainWall * i_painWallPtr) override;
 
 	void CollideWithPlayer(PlayerChar* i_playerPtr) override;
 };
@@ -167,6 +181,17 @@ private:
 public:
 	Wall(RigidBody i_rb, Vector2f i_startPosition, Sector* i_sectPtr);
 	~Wall();
+};
+
+class PainWall :
+	public Entity
+{
+private:
+	Sector* sectPtr;
+
+public:
+	PainWall(RigidBody i_rb, Vector2f i_startPosition, Sector* i_sectPtr);
+	~PainWall();
 };
 
 class EndObject :

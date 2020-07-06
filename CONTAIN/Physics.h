@@ -41,4 +41,3 @@ public:
 
 	//static void TimeStepRigidBody(RigidBody* i_entity, float i_stepSize);
 };
-

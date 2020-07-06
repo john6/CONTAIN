@@ -2,8 +2,8 @@
 
 #include <SFML/Graphics.hpp>
 #include "RESOURCES.h"
-#include "Entity.h";
-#include "Level.h";
+#include "Entity.h"
+#include "Level.h"
 #include "GLOBAL_CONSTANTS.h"
 
 class HeadsUpDisplay

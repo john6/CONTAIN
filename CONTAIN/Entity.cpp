@@ -46,6 +46,9 @@ void Entity::CollideWith(Entity & i_other)
 	else if (auto wall = dynamic_cast<Wall*>(&i_other)) {
 		CollideWithWall(wall);
 	}
+	else if (auto painWall = dynamic_cast<PainWall*>(&i_other)) {
+		CollideWithPainWall(painWall);
+	}
 	else if (auto door = dynamic_cast<Door*>(&i_other)) {
 		CollideWithDoor(door);
 	}
@@ -77,6 +80,8 @@ void Entity::CollideWithEnemy(Enemy* i_enemyPtr) {}
 
 void Entity::CollideWithWall(Wall* i_wallPtr) {}
 
+void Entity::CollideWithPainWall(PainWall * i_painWallPtr) {}
+
 void Entity::CollideWithDoor(Door* i_doorPtr) {}
 
 void Entity::CollideWithEndObject(EndObject * i_endPtr) {}
@@ -94,18 +99,19 @@ Entity::~Entity()
 }
 
 ///////////////////////PlayerChar class ///////////////////////
-PlayerChar::PlayerChar(RigidBody i_rb, Vector2f i_startPosition, Game* i_gamePtr) :
+PlayerChar::PlayerChar(RigidBody i_rb, Vector2f i_startPosition, Game* i_gamePtr, int i_strtHealth) :
 	Entity(i_rb, i_startPosition), gamePtr{ i_gamePtr },
 	pController{ PlayerController(i_gamePtr->renderWindow) }
 {
 	fillColor = sf::Color::Yellow;
 	outlineColor = sf::Color::Red;
-	shipRateOfFire = 1;
-	shipSpeed = 40;
+	shipRateOfFire = 0.8f;
+	shipSpeed = 100;
 	lastShotFired = std::chrono::high_resolution_clock::now();
 	lastDamageReceived = std::chrono::high_resolution_clock::now();
 	dmgRate = 1.0f;
-	health = 10;
+	maxHealth = i_strtHealth;
+	health = maxHealth;
 	weaponDelay = shipRateOfFire;
 }
 
@@ -154,6 +160,16 @@ void PlayerChar::UpdateHealth(float i_stepSize)
 	}
 }
 
+void PlayerChar::ResetHealth()
+{
+	health = maxHealth;
+}
+
+void PlayerChar::AddHealth(int i_healthUp)
+{
+	health = std::max(health + i_healthUp, maxHealth);
+}
+
 void PlayerChar::AcceptWeaponInput(float i_stepSize)
 {
 	Vector2f leftMousePos = pController.LeftClick();
@@ -192,6 +208,7 @@ void PlayerChar::TakeDamage(float i_dmg)
 {
 	auto timeSinceDamaged = std::chrono::duration_cast<std::chrono::seconds>(hiResTime::now() - lastDamageReceived);
 	if (timeSinceDamaged.count() >= dmgRate) {
+		gamePtr->resources->PlaySound(1);
 		lastDamageReceived = hiResTime::now();
 		health -= i_dmg;
 	}
@@ -200,6 +217,11 @@ void PlayerChar::TakeDamage(float i_dmg)
 float PlayerChar::GetCurrHealth()
 {
 	return health;
+}
+
+void PlayerChar::CollideWithPainWall(PainWall * i_painWallPtr)
+{
+	TakeDamage(1.0f);
 }
 
 void PlayerChar::CollideWithDoor(Door * i_doorPtr)
@@ -257,6 +279,11 @@ void Projectile::CollideWithWall(Wall * i_wallPtr)
 	Destroy();
 }
 
+void Projectile::CollideWithPainWall(PainWall * i_painWallPtr)
+{
+	Destroy();
+}
+
 void Projectile::CollideWithDoor(Door * i_doorPtr)
 {
 	Destroy();
@@ -285,8 +312,14 @@ void Enemy::Update(float i_stepSize)
 }
 
 void Enemy::Destroy() {
+	sectPtr->PlaySound(0);
 	sectPtr->sectEnemyNum -= 1;
 	killMeNextLoop = true;
+}
+
+void Enemy::CollideWithPainWall(PainWall * i_painWallPtr)
+{
+	Destroy();
 }
 
 void Enemy::CollideWithPlayer(PlayerChar * i_playerPtr)
@@ -337,6 +370,20 @@ Wall::Wall(RigidBody i_rb, Vector2f i_startPosition, Sector* i_sectPtr) :
 Wall::~Wall()
 {
 }
+
+/////////////////////// Pain Wall Class ///////////////////////
+
+PainWall::PainWall(RigidBody i_rb, Vector2f i_startPosition, Sector* i_sectPtr) :
+	Entity(i_rb, i_startPosition), sectPtr{ i_sectPtr }
+{
+	fillColor = sf::Color::Red;
+	outlineColor = sf::Color::Yellow;
+}
+
+PainWall::~PainWall()
+{
+}
+
 
 
 

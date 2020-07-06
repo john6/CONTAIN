@@ -51,11 +51,11 @@ const float PROJECTILE_RADIUS = 10.0f;
 
 //PHYSICS CONSTANTS
 const Vector2f GRAVITY_COEFFICIENT = Vector2f(0.0f, 100.0f);
-const float GLOBAL_DECELERATION_LINEAR = 0.999f;
-const float GLOBAL_DECELERATION_ANGULAR = 0.999f;
+const float GLOBAL_DECELERATION_LINEAR = 0.001f;
+const float GLOBAL_DECELERATION_ANGULAR = 0.005f;
 const float PENETRATION_ALLOWANCE = 0.05f;
 const float PENETRATION_CORRECTION = 0.4f;
-const float ANGULAR_VELOCITY_ADJUSTMENT = 0.1f; //IDK where my angular velocity is getting so fucking jacked
+const float ANGULAR_VELOCITY_ADJUSTMENT = 0.15f; //IDK where my angular velocity is getting so fucking jacked
 
 //TRIG CONSTANTS
 const float DEGREE_RIGHT = 0.0f;

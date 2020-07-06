@@ -133,7 +133,8 @@ float RigidBody::GetInstAngVel()
 
 void RigidBody::ApplyImpulse(Vector2f i_imp, Vector2f contactP) 
 { 
-	force  += i_imp * massD.GetMassInv(); 
+	force  += i_imp * massD.GetMassInv();
+	float oo = Math::CrossProdScalar(contactP, i_imp);
 	torq += Math::CrossProdScalar(contactP, i_imp) * massD.GetInertInv() * ANGULAR_VELOCITY_ADJUSTMENT;
 }
 
@@ -164,8 +165,6 @@ void RigidBody::IntegrateForces()
 	vel += force;
 	angVel += torq;
 	//vel += GRAVITY_COEFFICIENT * massD.GetMassInv();
-	vel *= GLOBAL_DECELERATION_LINEAR;
-	angVel *= GLOBAL_DECELERATION_ANGULAR;
 	force = Vector2f(0.0f, 0.0f);
 	torq = 0.0f;
 }
@@ -178,6 +177,10 @@ void RigidBody::IntegrateVelocity(float i_deltaTime)
 	transform.pos += vel * (i_deltaTime / AVG_MILLISEC_PER_UPDATE);
 	transform.orient += angVel * (i_deltaTime / AVG_MILLISEC_PER_UPDATE);
 	UpdateVertsAndNorms();
+	//GLOBAL DECELERATION
+	vel = vel - (vel * GLOBAL_DECELERATION_LINEAR * (i_deltaTime / AVG_MILLISEC_PER_UPDATE));
+	angVel = angVel - (angVel * GLOBAL_DECELERATION_ANGULAR * (i_deltaTime / AVG_MILLISEC_PER_UPDATE));
+
 }
 
 Vector2f RigidBody::GetLerpPosition(float i_lerp_fraction)

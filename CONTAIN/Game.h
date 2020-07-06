@@ -3,7 +3,7 @@
 #include <iostream>
 #include <algorithm>
 #include <chrono>
-#include <thread>
+//#include <thread>
 #include <execution>
 #include <concurrent_vector.h>
 #include <SFML/Audio.hpp>
@@ -15,13 +15,13 @@
 #include "Level.h"
 #include "LevelGenerator.h"
 #include "Entity.h"
+#include "QuadTree.h"
 
 enum PLAY_STATE { GENERAL_GAMEPLAY, WON_LEVEL, DEAD, WON_GAME };
 
 class Game
 {
 private:
-	RESOURCES* resources;
 	PLAY_STATE playState;
 	sf::Font font;
 
@@ -36,12 +36,13 @@ private:
 
 	GAME_STATE UpdateGeneral(float i_stepSize, sf::Vector2i i_mousePos);
 	GAME_STATE UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnts, float i_stepSize);
-	void UpdateHUD();
 	void DeleteLevels();
 	bool playerWon;
 
 
 public:
+
+	RESOURCES* resources;
 	MapCoord currSector;
 	int currLvl;
 	sf::RenderWindow* renderWindow;
@@ -71,6 +72,6 @@ public:
 
 	void RequestGoToNextLvl();
 
-	void Restart();
+	void InitGame(DIFFICULTY i_diff);
 };
 
