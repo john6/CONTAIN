@@ -321,6 +321,10 @@ void Physics::InfiniteMassCorrection(CollisionData * i_data)
 
 void Physics::PositionalCorrection(CollisionData * i_data)
 {
+	if (i_data->entA->intangible || i_data->entB->intangible) { // these items have no impulse upon collision
+		return;
+	}
+
 	if ((i_data->entA->rb.massD.GetMass() + i_data->entB->rb.massD.GetMass()) == 0.0f) {
 		//Vector2f correction = std::max(i_data->pen - PENETRATION_ALLOWANCE, 0.0f) / 0.5f * i_data->norm * PENETRATION_CORRECTION;
 		//i_data->bodyA->transform.pos = i_data->bodyA->transform.pos - (0.5f * correction);
@@ -342,6 +346,10 @@ void Physics::CreateCollisionImpulse(CollisionData* i_data) {
 	RigidBody* bodyB = &i_data->entB->rb;
 	float statFric = bodyA->mat.statFrict * bodyB->mat.statFrict;
 	float dynaFric = bodyA->mat.dynaFrict * bodyB->mat.dynaFrict;
+
+	if (i_data->entA->intangible || i_data->entB->intangible) { // these items have no impulse upon collision
+		return;
+	}
 
 	if (!bodyA->massD.GetMassInv() && !bodyB->massD.GetMassInv()) {
 		InfiniteMassCorrection(i_data);
@@ -371,7 +379,7 @@ void Physics::CreateCollisionImpulse(CollisionData* i_data) {
 						   (pow(crossB, 2) * bodyB->massD.GetInertInv());
 
 		float impulseScalar = -(1.0f + std::max(bodyA->mat.rest, bodyB->mat.rest)) * contactRelVel;
-		impulseScalar /= invMassSum;
+		impulseScalar /= invMassSum; //this seems to be too high
 		impulseScalar /= i_data->contactPoints.size();
 
 		Vector2f impulse = i_data->norm * impulseScalar;

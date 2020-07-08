@@ -29,6 +29,8 @@ public:
 
 	void AddPainfullWallsToLevel();
 
+	void AddRandomPainWall(int i_index);
+
 	void AddEndLevelObject();
 
 	void RemoveDestroyedEntities();

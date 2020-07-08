@@ -1,7 +1,7 @@
 #include "RigidBody.h"
 
 RigidBody::RigidBody(std::shared_ptr<Shape> i_shape, Material i_material) :
-	shape{ i_shape }, mat{ i_material }, transform(), massD(),
+	shape{ i_shape }, mat{ i_material }, transform(), massD(), // TODO I think these default constructors would happen any way idk why they're here, dont wanna fuck with it while Im doing something else tho
 	vel{Vector2f(0.0f ,0.0f)}, force{Vector2f(0.0f ,0.0f)},
 	angVel{0.0f}, torq{0.0f}
 {
@@ -12,6 +12,21 @@ RigidBody::RigidBody(std::shared_ptr<Shape> i_shape, Material i_material) :
 
 RigidBody::~RigidBody()
 {
+}
+
+RigidBody::RigidBody(const RigidBody & i_rb)
+{
+	shape = i_rb.shape;
+	mat = i_rb.mat;
+	transform = i_rb.transform;
+	massD = i_rb.massD;
+	vel = i_rb.vel;
+	force = i_rb.force;
+	angVel = i_rb.angVel;
+	torq = i_rb.torq;
+	SetMassData(); //I think its safe if I just redo this after setting material and shape
+	objVerts = shape->GetPoints();
+	UpdateVertsAndNorms();
 }
 
 void RigidBody::SetMassData()
@@ -49,8 +64,10 @@ std::vector<Vector2f> RigidBody::RotatePoints(std::vector<Vector2f> i_axisAligne
 
 void RigidBody::UpdateVertsAndNorms()
 {
+	mtx.lock();
 	worldVerts = vertsToWorldSpace(objVerts);
 	UpdateFaceNorms();
+	mtx.unlock();
 }
 
 void RigidBody::UpdateFaceNorms()

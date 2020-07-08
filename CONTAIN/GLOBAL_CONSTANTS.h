@@ -48,6 +48,8 @@ const float MAX_ROTATION_DEGREES = 45;
 const float AVG_MILLISEC_PER_UPDATE = 10.0f;
 const float RADIAN_ADJUST = 50.0f;
 const float PROJECTILE_RADIUS = 10.0f;
+const float DOOR_WIDTH = 150.0f;
+const float DOOR_HEIGHT = 50.0f;
 
 //PHYSICS CONSTANTS
 const Vector2f GRAVITY_COEFFICIENT = Vector2f(0.0f, 100.0f);

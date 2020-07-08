@@ -4,7 +4,8 @@ Game::Game(sf::RenderWindow* i_window, RESOURCES* i_resources, DIFFICULTY i_diff
 	: renderWindow{ i_window }, resources {i_resources}, HUD{ HeadsUpDisplay(i_resources) }
 {
 	font = resources->GetFont();
-	InitGame(i_difficulty);
+	//InitGame(i_difficulty);
+	//loadTestLevel();
 }
 
 Game::~Game()
@@ -52,8 +53,15 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnt
 	quadtree only: 49-52
 	parallel & quadtree: 30-25 ms avg
 
+
+	fully parallelized
 	I think parallel is best is because my quadtree's insert function is not paralellizable
 	*/
+
+	/*
+	I think there might be double velocity or something going on. Gonna do some real lame checking
+
+	  */
 	playerChar->Update(i_stepSize);
 	auto iter = i_lvlEnts->begin();
 	while (iter != i_lvlEnts->end()) {
@@ -67,6 +75,7 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnt
 	for (int i = 0; i < i_lvlEnts->size(); i++) {
 		parallelVect.push_back(i);
 	}
+
 	std::vector<std::shared_ptr<Entity>> entPVect;
 	for (auto iter = i_lvlEnts->begin(); iter != i_lvlEnts->end(); ++iter) {
 		std::shared_ptr<Entity> entPtr = iter._Ptr->_Myval;
@@ -95,60 +104,40 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnt
 		}
 	});
 
-/// WITH QUADTREE NOT PARALLEL 
-/*	QuadTree qTree = QuadTree(0, Vector2f(0.0f, 0.0f), SCREEN_WIDTH, SCREEN_HEIGHT);
 
-	for (auto iter1 = i_lvlEnts->begin(); iter1 != i_lvlEnts->end(); ++iter1) {
-		qTree.Insert(&(*iter1));
+	std::vector<int> parCollisions;
+	for (int i = 0; i < collisions.size(); i++) {
+		parCollisions.push_back(i);
 	}
 
-
-
-	std::vector<Entity*> playerCollisions = qTree.GetSectorEntities(&playerChar);
-
-	for (Entity* collidedWith : playerCollisions) {
-		RigidBody* entPtrA = &playerChar.rb;
-		RigidBody* entPtrB = &collidedWith->rb;
-		CollisionData collisionData = CollisionData();
-		collisionData.bodyA = entPtrA;
-		collisionData.bodyB = entPtrB;
-		bool collided = Physics::CheckCollision(&collisionData);
-		if (collided) { collisions.push_back(collisionData); }
-	}
-
-	for (auto iter1 = i_lvlEnts->begin(); iter1 != i_lvlEnts->end(); ++iter1) {
-		std::vector<Entity*> collisionsWithEnt = qTree.GetSectorEntities(&(*iter1));
-		for (Entity* collidedWith : collisionsWithEnt) {
-			RigidBody* entPtrA = &(*iter1).rb;
-			RigidBody* entPtrB = &collidedWith->rb;
-			CollisionData collisionData = CollisionData();
-			collisionData.bodyA = entPtrA;
-			collisionData.bodyB = entPtrB;
-			bool collided = Physics::CheckCollision(&collisionData);
-			if (collided) { collisions.push_back(collisionData); }
-		}
-	}
-	*/
-///END OF QUADSTUFF
-
-	for (CollisionData collision : collisions) {
-		collision.entA->CollideWith(*collision.entB);
-		collision.entB->CollideWith(*collision.entA);
-		Physics::CreateCollisionImpulse(&collision);
-	}
+	std::for_each(std::execution::par, parCollisions.begin(), parCollisions.end(), [&](int index) {
+		collisions[index].entA->CollideWith(*collisions[index].entB);
+		collisions[index].entB->CollideWith(*collisions[index].entA);
+		Physics::CreateCollisionImpulse(&collisions[index]);
+	});
 
 	playerChar->rb.IntegrateForces();
 	playerChar->rb.IntegrateVelocity(i_stepSize);
+	std::cout << "i_stepSize: " << i_stepSize;
 
-	for (auto iter = i_lvlEnts->begin(); iter != i_lvlEnts->end(); ++iter) {
-		std::shared_ptr<Entity> entPtr = iter._Ptr->_Myval;
-		entPtr->rb.IntegrateForces();
-		entPtr->rb.IntegrateVelocity(i_stepSize);
-	}
+	std::for_each(std::execution::par, parallelVect.begin(), parallelVect.end(), [&](int index) {
+		entPVect[index]->rb.IntegrateForces();
+		entPVect[index]->rb.IntegrateVelocity(i_stepSize);
+	});
 
-	for (CollisionData collision : collisions) {
-		Physics::PositionalCorrection(&collision);
-	}
+	//for (auto iter = i_lvlEnts->begin(); iter != i_lvlEnts->end(); ++iter) {
+	//	std::shared_ptr<Entity> entPtr = iter._Ptr->_Myval;
+	//	entPtr->rb.IntegrateForces();
+	//	entPtr->rb.IntegrateVelocity(i_stepSize);
+	//}
+
+	std::for_each(std::execution::par, parCollisions.begin(), parCollisions.end(), [&](int index) {
+		Physics::PositionalCorrection(&collisions[index]);
+	});
+
+	//for (CollisionData collision : collisions) {
+	//	Physics::PositionalCorrection(&collision);
+	//}
 
 	levels[currLvl]->GetSector(currSector)->RemoveDestroyedEntities();
 
@@ -215,6 +204,7 @@ void Game::RequestGoToNextLvl()
 		++currLvl;
 		currSector = levels[currLvl]->originCoord;
 		dynamic_cast<PlayerChar*>(playerChar.get())->ResetHealth();
+		dynamic_cast<PlayerChar*>(playerChar.get())->specialAmmo = 3;
 	}
 	else {
 		playerWon = true;
@@ -237,6 +227,35 @@ void Game::InitGame(DIFFICULTY i_diff)
 	const microSec UPDATE_INTERVAL(16666);
 	playerWon = false;
 	GenerateLevels(i_diff);
+}
+
+void Game::loadTestLevel()
+{
+	//Test scenario for pain walls making things spiral out of control
+	//std::shared_ptr<Shape> shape = std::make_shared<Rectangle>(100.0f, 100.0f);
+	std::shared_ptr<Shape> shape = std::make_shared<Circle>(50.0f);
+	Material Metal = Material(1.2f, 0.05f, 0.4f, 0.2f);
+	RigidBody rb(shape, Metal);
+	int startingHealth = 999999;
+	playerChar = std::make_shared<PlayerChar>(PlayerChar(rb, Vector2f(200, 200.0), this, startingHealth));
+	playerChar->rb.transform.orient = 1.0f;
+	playerChar->rb.ApplyImpulse(Vector2f(0.0f, 160000.0f), Vector2f(0.0f, 0.0f));
+	beginTime = std::chrono::high_resolution_clock::now();
+	numLvls = 5;
+	currLvl = 0;
+	timeToComplete = 999999999.0f;
+	playState = GENERAL_GAMEPLAY;
+	const microSec UPDATE_INTERVAL(16666);
+	playerWon = false;
+	//generate levels test version
+	DeleteLevels();
+	for (int i = 0; i < numLvls; ++i) {
+		//std::unique_ptr<Level> lvl = std::make_unique<Level>(i, i_diff);
+		std::string str = "Test";
+		Level* lvl = new Level(str, playerChar ,resources);
+		levels.push_back(lvl);
+	}
+	currSector = levels[currLvl]->originCoord;
 }
 
 

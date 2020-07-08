@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <functional>
+#include "GLOBAL_CONSTANTS.h"
 
 class Button
 {
@@ -8,6 +9,7 @@ public:
 	enum BUTTON_STATE { UP, DOWN, HOVER };
 
 private:
+
 	sf::Text m_text;
 	sf::RectangleShape m_positionAndSize;
 	sf::Color m_colorUp;
@@ -29,6 +31,7 @@ public:
 	void SetPosition(sf::Vector2f position);
 	bool HandleInput(sf::Vector2f mousePosition, bool mouseState);
 	void SetColors(sf::Color colorUp, sf::Color colorDown, sf::Color colorHover);
+	void ResizeForText();
 	BUTTON_STATE GetState();
 	void SetState(BUTTON_STATE state);
 

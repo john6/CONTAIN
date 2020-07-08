@@ -14,5 +14,8 @@ public:
 
 	static float CrossProdScalar(Vector2f vectA, Vector2f vectB);
 
+	static float VectToAngle(Vector2f i_dirVect);
+
+	static Vector2f AngleToVect(float i_angle);
 };
 

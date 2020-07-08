@@ -20,6 +20,8 @@ int main()
 	//else if (__cplusplus == 199711L) std::cout << "C++98\n";
 	//else std::cout << "pre-standard C++\n";
 
+	//https://eigen.tuxfamily.org/dox//TopicMultiThreading.html
+	Eigen::initParallel();
 
 
 	sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "CONTAIN");
@@ -90,6 +92,7 @@ int main()
 			case START_GAME: {
 				currLvl = 0;
 				globalGame.InitGame(menu.GetDifficulty());
+				//globalGame.loadTestLevel();
 				state = IN_GAME;
 				break;
 			}

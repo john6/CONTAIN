@@ -19,4 +19,5 @@ public:
 
 	Eigen::Vector2f LeftClick();
 	Eigen::Vector2f RightClick();
+	bool ScrollClick();
 };

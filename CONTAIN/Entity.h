@@ -3,6 +3,7 @@
 #include "RigidBody.h"
 #include "PlayerController.h"
 #include <random>
+#include "Math.h"
 
 class Game;
 class Level;
@@ -14,6 +15,9 @@ class Door;
 class Wall;
 class EndObject;
 class PainWall;
+class PowerUp;
+class Blast;
+class CrazyBoi;
 
 class Entity
 {
@@ -27,6 +31,9 @@ protected:
 	bool killMeNextLoop;
 
 public:
+	bool intangible;
+	bool fixedPosition;
+
 	Entity();
 	Entity(RigidBody i_rb, Vector2f i_startPosition);
 	~Entity();
@@ -56,6 +63,10 @@ public:
 	virtual void CollideWithDoor(Door* i_doorPtr);
 
 	virtual void CollideWithEndObject(EndObject* i_endPtr);
+
+	virtual void CollideWithPowUp(PowerUp* i_powUpPtr);
+
+	virtual void CollideWithBlast(Blast* i_blastPtr);
 };
 
 class PlayerChar :
@@ -74,7 +85,8 @@ private:
 
 public:
 	float weaponDelay;
-
+	int specialAmmo;
+	bool scatterShot;
 
 	PlayerChar(RigidBody i_rb, Vector2f i_startPosition, Game* gamePtr, int i_strtHealth);
 	~PlayerChar();
@@ -100,6 +112,10 @@ public:
 	void CollideWithDoor(Door* i_doorPtr) override;
 
 	void CollideWithEndObject(EndObject* i_endPtr) override;
+
+	void CollideWithPowUp(PowerUp* i_powUpPtr) override;
+
+	void ScatterShot(Vector2f i_dir);
 };
 
 class Projectile :
@@ -138,6 +154,8 @@ private:
 public:
 	std::shared_ptr<Entity> charPtr;
 	float speed;
+	float stunSecs;
+
 
 	Enemy(RigidBody i_rb, Vector2f i_startPosition, std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr);
 	~Enemy();
@@ -149,6 +167,30 @@ public:
 	void CollideWithPainWall(PainWall * i_painWallPtr) override;
 
 	void CollideWithPlayer(PlayerChar* i_playerPtr) override;
+
+	void CollideWithBlast(Blast* i_blastPtr) override;
+
+	void Stun(float i_stunTime);
+};
+
+class CrazyBoi :
+	public Enemy
+{
+private:
+	Sector* sectPtr;
+	Vector2f currDir;
+	float sameDirTime;
+	float timeTillDirSwitch;
+
+public:
+	CrazyBoi(RigidBody i_rb, Vector2f i_startPosition, std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr);
+	~CrazyBoi();
+
+	Vector2f CreateRandomDir();
+
+	void Update(float i_stepSize) override;
+
+	void CollideWithPainWall(PainWall * i_painWallPtr) override;
 };
 
 class Door :
@@ -205,6 +247,21 @@ public:
 	~EndObject();
 };
 
+class PowerUp :
+	public Entity
+{
+private:
+	Sector* sectPtr;
+
+public:
+	int powType;
+
+	PowerUp(Sector * i_sectPtr, int i_powType, RigidBody i_rb, Vector2f i_startPosition);
+	~PowerUp();
+
+	void Update(float i_stepSize) override;
+};
+
 class Blocker : public Entity 
 {
 private:
@@ -213,4 +270,19 @@ private:
 public:
 	Blocker(RigidBody i_rb, Vector2f i_startPosition);
 	~Blocker();
+};
+
+class Blast : public Entity
+{
+private:
+	Sector* sectPtr;
+
+public:
+	int blastType;
+	float deathTimer;
+
+	Blast(Sector* i_sectPtr, int i_blastType, RigidBody i_rb, Vector2f i_startPosition);
+	~Blast();
+
+	void Update(float i_stepSize) override;
 };

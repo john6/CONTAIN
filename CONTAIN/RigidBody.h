@@ -4,6 +4,8 @@ Origin of object space is the center
 */
 
 #pragma once
+#include <thread>
+#include <mutex>
 #include "GLOBAL_CONSTANTS.h"
 #include "Shape.h"
 #include "Circle.h"
@@ -17,9 +19,13 @@ Origin of object space is the center
 
 class RigidBody
 {
+private:
+	std::mutex mtx;
+
 public:
 	RigidBody(std::shared_ptr<Shape> i_shape, Material i_material = Material());
 	~RigidBody();
+	RigidBody(const RigidBody &i_rb); //manual copy constructor because mutex is pissed
 
 	std::shared_ptr<Shape> shape;
 	std::vector<Vector2f> objVerts;

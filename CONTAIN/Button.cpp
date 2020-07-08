@@ -76,6 +76,11 @@ void Button::SetColors(sf::Color colorUp, sf::Color colorDown, sf::Color colorHo
 	SetColorsFromState();
 }
 
+void Button::ResizeForText()
+{
+	m_positionAndSize.setSize(sf::Vector2f(BUTTON_WIDTH + (BUTTON_WIDTH * (m_text.getString().getSize() * (1.0f/ 50.0f) )), BUTTON_HEIGHT));
+}
+
 void Button::SetState(BUTTON_STATE state) {
 	m_state = state;
 	SetColorsFromState();

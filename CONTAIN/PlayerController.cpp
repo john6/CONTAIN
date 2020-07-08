@@ -50,3 +50,13 @@ Vector2f PlayerController::RightClick()
 		return Eigen::Vector2f(0.0f, 0.0f);
 	}
 }
+
+bool PlayerController::ScrollClick()
+{
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Middle)) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}

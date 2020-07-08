@@ -54,7 +54,7 @@ void HeadsUpDisplay::Update(int i_lvlNum, int i_timeRemaining, std::shared_ptr<E
 
 	BasicWeaponCharge.setString(primWeapStr);
 
-	std::string secWeapStr = "SPECIAL WEAPON AMMO: 3";
+	std::string secWeapStr = "SPECIAL WEAPON AMMO: " + std::to_string((int)playerPtr->specialAmmo);
 	specialWeaponAmmo.setString(secWeapStr);
 }
 

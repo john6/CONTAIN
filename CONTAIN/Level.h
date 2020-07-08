@@ -25,6 +25,7 @@ public:
 	MapCoord originCoord;
 
 	Level(int i_levelNum, DIFFICULTY i_diff, std::shared_ptr<Entity> i_charPtr, RESOURCES* i_resources);
+	Level(std::string i_testStr, std::shared_ptr<Entity> i_charPtr, RESOURCES* i_resources);
 	~Level();
 
 	std::shared_ptr<Entity> charPtr;

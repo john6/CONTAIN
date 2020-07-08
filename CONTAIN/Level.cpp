@@ -116,8 +116,8 @@ Level::Level(int i_lvlNum, DIFFICULTY i_diff, std::shared_ptr<Entity> i_charPtr,
 				}
 				}
 				CreateSectorAtCoord(newCoord);
+				//GetSector(newCoord)->InitializeSector();
 				PopulateSectorAtCoord(newCoord, i_diff);
-				GetSector(newCoord)->InitializeSector();
 				CreateBidirectionalDoor(currCoord, newCoord);
 				fringe.push(newCoord);
 				++currDoor;
@@ -132,6 +132,31 @@ Level::Level(int i_lvlNum, DIFFICULTY i_diff, std::shared_ptr<Entity> i_charPtr,
 	//	sect->InitializeSector();
 	//}
 	RandomPlaceEndLevelObject();
+}
+
+Level::Level(std::string i_testStr, std::shared_ptr<Entity> i_charPtr, RESOURCES* i_resources) : charPtr{ i_charPtr }, resources{ i_resources }
+{
+	dimSize = 1;
+	numSectors = 1;
+
+	sectorMap = std::vector<std::vector<MapNode>>(dimSize, std::vector<MapNode>(dimSize, MapNode()));
+	originCoord = MapCoord(0, 0);
+	CreateSectorAtCoord(originCoord);
+	GetSector(originCoord)->AddPainfullWallsToLevel();
+	//GetSector(originCoord)->GenerateLevelCircles(1);
+	//GetSector(originCoord)->GenerateLevelCubes(9);
+	//GetSector(originCoord)->AddRandomPainWall(0);
+	//GetSector(originCoord)->AddRandomPainWall(1);
+	//GetSector(originCoord)->AddRandomPainWall(2);
+	//GetSector(originCoord)->AddRandomPainWall(3);
+	//GetSector(originCoord)->AddTerrain(0);
+	//GetSector(originCoord)->AddTerrain(1);
+	//GetSector(originCoord)->AddTerrain(2);
+	//GetSector(originCoord)->AddTerrain(3);
+	//GetSector(originCoord)->AddTerrain(4);
+	//GetSector(originCoord)->AddTerrain(5);
+	//GetSector(originCoord)->AddTerrain(6);
+	//GetSector(originCoord)->AddTerrain(7);
 }
 
 Level::~Level()
@@ -167,6 +192,7 @@ void Level::PopulateSectorAtCoord(MapCoord i_coord, int i_diff)
 	int randExtraRooms = extraRoomDist(genRoomSeed);
 	int numCubes = 1 + i_diff + randExtraRooms;
 	GetSector(i_coord)->GenerateLevelCubes(numCubes);
+	GetSector(i_coord)->GenerateLevelCircles(1);
 
 	std::discrete_distribution<> smallTerrainDist({ 40, 50, 5, 5 });
 	std::discrete_distribution<> BigTerrainDist({ 85, 10, 5 });
@@ -184,6 +210,19 @@ void Level::PopulateSectorAtCoord(MapCoord i_coord, int i_diff)
 		--bigTerrainCount;
 	}
 
+	std::random_device rdRoomSeed4;
+	std::mt19937 painWallSeed(rdRoomSeed4());
+	std::discrete_distribution<> painWallDist({ 50, 50});
+	int painWallCount = painWallDist(painWallSeed);
+	std::random_device rd6;  //Will be used to obtain a seed for the random number engine
+	std::mt19937 gen6(rd6()); //Standard mersenne_twister_engine seeded with rd()
+	std::uniform_int_distribution<> distrib07(0, 7); //both boundaries are inclusive
+
+	while (painWallCount > 0) {
+		int randPainWall = distrib07(gen6);
+		//GetSector(i_coord)->AddRandomPainWall(randPainWall);
+		--painWallCount;
+	}
 	//newSector->GenerateLevelCircles(1);
 }
 
@@ -200,9 +239,6 @@ void Level::CreateBidirectionalDoor(MapCoord i_coordA, MapCoord i_coordB)
 	int yDist = i_coordB.y - i_coordA.y;
 	int xDist = i_coordB.x - i_coordA.x;
 
-	float doorWidth = 150.0f;
-	float doorHeight = 50.0f;
-
 	std::shared_ptr<Shape>doorShapeA;
 	std::shared_ptr<Shape>doorShapeB;
 	Vector2f startPosA;
@@ -210,34 +246,34 @@ void Level::CreateBidirectionalDoor(MapCoord i_coordA, MapCoord i_coordB)
 	Vector2f outPosA;
 	Vector2f outPosB;
 	if (yDist == 1) { //UP
-		doorShapeA = std::make_shared<Rectangle>(doorWidth, doorHeight);
-		doorShapeB = std::make_shared<Rectangle>(doorWidth, doorHeight);
-		startPosA = Vector2f(horizontalMiddle, VERT_MARGIN  + COURT_HEIGHT + (doorHeight * ( 1.0f / 2.0f)));
-		startPosB = Vector2f(horizontalMiddle, VERT_MARGIN - (doorHeight * (1.0f / 2.0f)));
+		doorShapeA = std::make_shared<Rectangle>(DOOR_WIDTH, DOOR_HEIGHT);
+		doorShapeB = std::make_shared<Rectangle>(DOOR_WIDTH, DOOR_HEIGHT);
+		startPosA = Vector2f(horizontalMiddle, VERT_MARGIN  + COURT_HEIGHT + (DOOR_HEIGHT * ( 1.0f / 2.0f)));
+		startPosB = Vector2f(horizontalMiddle, VERT_MARGIN - (DOOR_HEIGHT * (1.0f / 2.0f)));
 		outPosA = Vector2f(horizontalMiddle, VERT_MARGIN + doorOutPadding);
 		outPosB = Vector2f(horizontalMiddle, VERT_MARGIN + COURT_HEIGHT - doorOutPadding);
 	}
 	else if (yDist == -1) { //DOWN
-		doorShapeA = std::make_shared<Rectangle>(doorWidth, doorHeight);
-		doorShapeB = std::make_shared<Rectangle>(doorWidth, doorHeight);
-		startPosA = Vector2f(horizontalMiddle, VERT_MARGIN - (doorHeight * (1.0f / 2.0f)));
-		startPosB = Vector2f(horizontalMiddle, VERT_MARGIN + COURT_HEIGHT + (doorHeight * (1.0f / 2.0f)));
+		doorShapeA = std::make_shared<Rectangle>(DOOR_WIDTH, DOOR_HEIGHT);
+		doorShapeB = std::make_shared<Rectangle>(DOOR_WIDTH, DOOR_HEIGHT);
+		startPosA = Vector2f(horizontalMiddle, VERT_MARGIN - (DOOR_HEIGHT * (1.0f / 2.0f)));
+		startPosB = Vector2f(horizontalMiddle, VERT_MARGIN + COURT_HEIGHT + (DOOR_HEIGHT * (1.0f / 2.0f)));
 		outPosA = Vector2f(horizontalMiddle, VERT_MARGIN + COURT_HEIGHT - doorOutPadding);
 		outPosB = Vector2f(horizontalMiddle, VERT_MARGIN + doorOutPadding);
 	}
 	else if (xDist == -1) { //LEFT
-		doorShapeA = std::make_shared<Rectangle>(doorHeight, doorWidth);
-		doorShapeB = std::make_shared<Rectangle>(doorHeight, doorWidth);
-		startPosA = Vector2f(HOR_MARGIN - (doorHeight * (1.0f / 2.0f)), verticleMiddle);
-		startPosB = Vector2f(HOR_MARGIN + COURT_WIDTH + (doorHeight * (1.0f / 2.0f)), verticleMiddle);
+		doorShapeA = std::make_shared<Rectangle>(DOOR_HEIGHT, DOOR_WIDTH);
+		doorShapeB = std::make_shared<Rectangle>(DOOR_HEIGHT, DOOR_WIDTH);
+		startPosA = Vector2f(HOR_MARGIN - (DOOR_HEIGHT * (1.0f / 2.0f)), verticleMiddle);
+		startPosB = Vector2f(HOR_MARGIN + COURT_WIDTH + (DOOR_HEIGHT * (1.0f / 2.0f)), verticleMiddle);
 		outPosA = Vector2f(COURT_WIDTH + HOR_MARGIN - doorOutPadding, verticleMiddle);
 		outPosB = Vector2f(HOR_MARGIN + doorOutPadding, verticleMiddle);
 	}
 	else if (xDist == 1) { //RIGHT
-		doorShapeA = std::make_shared<Rectangle>(doorHeight, doorWidth);
-		doorShapeB = std::make_shared<Rectangle>(doorHeight, doorWidth);
-		startPosA = Vector2f(HOR_MARGIN + COURT_WIDTH + (doorHeight * (1.0f / 2.0f)), verticleMiddle);
-		startPosB = Vector2f(HOR_MARGIN - (doorHeight * (1.0f / 2.0f)), verticleMiddle);
+		doorShapeA = std::make_shared<Rectangle>(DOOR_HEIGHT, DOOR_WIDTH);
+		doorShapeB = std::make_shared<Rectangle>(DOOR_HEIGHT, DOOR_WIDTH);
+		startPosA = Vector2f(HOR_MARGIN + COURT_WIDTH + (DOOR_HEIGHT * (1.0f / 2.0f)), verticleMiddle);
+		startPosB = Vector2f(HOR_MARGIN - (DOOR_HEIGHT * (1.0f / 2.0f)), verticleMiddle);
 		outPosA = Vector2f(HOR_MARGIN + doorOutPadding, verticleMiddle);
 		outPosB = Vector2f(COURT_WIDTH + HOR_MARGIN - doorOutPadding, verticleMiddle);
 	}

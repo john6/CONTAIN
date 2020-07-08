@@ -34,6 +34,7 @@ sf::Font RESOURCES::GetFont() {
 }
 
 void RESOURCES::PlaySound(int soundNum) {
+	mtx.lock();
 	switch (soundNum) {
 	case (REGULAR_BEEP): {
 		m_sound.setBuffer(m_bufferRegularBeep);
@@ -64,4 +65,5 @@ void RESOURCES::PlaySound(int soundNum) {
 		std::cerr << "soundNum not found \n";
 	}
 	}
+	mtx.unlock();
 }

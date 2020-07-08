@@ -73,5 +73,7 @@ public:
 	void RequestGoToNextLvl();
 
 	void InitGame(DIFFICULTY i_diff);
+
+	void loadTestLevel(); 
 };
 
