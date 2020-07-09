@@ -46,8 +46,8 @@ void Sector::GenerateLevelCubes(int i_numCubes)
 			Material Rock = Material(0.6f, 0.1f, 0.6f, 0.3f);
 			RigidBody projBody = RigidBody(shape, Rock);
 			int zoneIndex = i % (cornerZones.size());
-			Vector2f spawnLocation(cornerZones[zoneIndex][0] + (cornerZoneWidth / i_numCubes), cornerZones[zoneIndex][1] + (cornerZoneHeight / i_numCubes));
-			std::shared_ptr<Entity> ent = std::make_shared<Enemy>(projBody, spawnLocation, playerChar, this);
+			Vector2f spawnPos(cornerZones[zoneIndex][0] + (cornerZoneWidth / i_numCubes), cornerZones[zoneIndex][1] + (cornerZoneHeight / i_numCubes));
+			std::shared_ptr<Entity> ent = std::make_shared<Enemy>(playerChar, this, spawnPos, projBody);
 			lvlEntities.push_back(ent);
 			sectEnemyNum += 1;
 		}
@@ -79,8 +79,8 @@ void Sector::GenerateLevelCircles(int i_numCircs)
 		Material Rock = Material(0.6f, 0.1f, 0.6f, 0.3f);
 		RigidBody projBody = RigidBody(shape, Rock);
 		int zoneIndex = i % (cornerZones.size());
-		Vector2f spawnLocation(cornerZones[zoneIndex][0] + (cornerZoneWidth / i_numCircs), cornerZones[zoneIndex][1] + (cornerZoneHeight / i_numCircs));
-		std::shared_ptr<Entity> ent = std::make_shared<CrazyBoi>(projBody, spawnLocation, playerChar, this);
+		Vector2f spawnPos(cornerZones[zoneIndex][0] + (cornerZoneWidth / i_numCircs), cornerZones[zoneIndex][1] + (cornerZoneHeight / i_numCircs));
+		std::shared_ptr<Entity> ent = std::make_shared<CrazyBoi>(playerChar, this, spawnPos, projBody);
 		lvlEntities.push_back(ent);
 		sectEnemyNum += 1;
 	}
@@ -93,27 +93,27 @@ void Sector::AddWallsToLevel()
 
 	std::shared_ptr<Shape> vertRect1 = std::make_shared<Rectangle>(HOR_MARGIN, COURT_HEIGHT);
 	RigidBody rightWallBody = RigidBody(vertRect1, Static);
-	std::shared_ptr<Entity> rightWall = std::make_shared<Wall>(rightWallBody,
-		Vector2f(HOR_MARGIN + (COURT_WIDTH)+(HOR_MARGIN / 2.0f), VERT_MARGIN + (COURT_HEIGHT / 2.0f)), this);
+	std::shared_ptr<Entity> rightWall = std::make_shared<Wall>(
+		Vector2f(HOR_MARGIN + (COURT_WIDTH)+(HOR_MARGIN / 2.0f), VERT_MARGIN + (COURT_HEIGHT / 2.0f)), this, rightWallBody);
 	lvlEntities.push_back(rightWall);
 
 	std::shared_ptr<Shape> vertRect2 = std::make_shared<Rectangle>(HOR_MARGIN, COURT_HEIGHT);
 	RigidBody leftWallBody = RigidBody(vertRect2, Static);
-	std::shared_ptr<Entity> leftWall = std::make_shared<Wall>(leftWallBody,
-		Vector2f((HOR_MARGIN / 2.0f), VERT_MARGIN + (COURT_HEIGHT / 2.0f)), this);
+	std::shared_ptr<Entity> leftWall = std::make_shared<Wall>(
+		Vector2f((HOR_MARGIN / 2.0f), VERT_MARGIN + (COURT_HEIGHT / 2.0f)), this, leftWallBody);
 	AddEntPtrToSector(leftWall);
 
 	std::shared_ptr<Shape> horRect1 = std::make_shared<Rectangle>(COURT_WIDTH + (HOR_MARGIN * 2), VERT_MARGIN);
 	RigidBody wallBody1 = RigidBody(horRect1, Static);
-	std::shared_ptr<Entity> upperWall = std::make_shared<Wall>(wallBody1,
-		Vector2f(HOR_MARGIN + (COURT_WIDTH / 2.0f), (VERT_MARGIN / 2.0f)), this);
+	std::shared_ptr<Entity> upperWall = std::make_shared<Wall>(
+		Vector2f(HOR_MARGIN + (COURT_WIDTH / 2.0f), (VERT_MARGIN / 2.0f)), this, wallBody1);
 	lvlEntities.push_back(upperWall);
 
 
 	std::shared_ptr<Shape> horRect2 = std::make_shared<Rectangle>(COURT_WIDTH + (HOR_MARGIN * 2), VERT_MARGIN);
 	RigidBody lowerWallBody = RigidBody(horRect2, Static);
-	std::shared_ptr<Entity> lowerWall = std::make_shared<Wall>(lowerWallBody,
-		Vector2f(Vector2f(HOR_MARGIN + (COURT_WIDTH / 2.0f), (VERT_MARGIN / 2.0f) + COURT_HEIGHT + VERT_MARGIN)), this);
+	std::shared_ptr<Entity> lowerWall = std::make_shared<Wall>(
+		Vector2f(Vector2f(HOR_MARGIN + (COURT_WIDTH / 2.0f), (VERT_MARGIN / 2.0f) + COURT_HEIGHT + VERT_MARGIN)), this, lowerWallBody);
 	lvlEntities.push_back(lowerWall);
 
 }
@@ -129,42 +129,42 @@ void Sector::AddPainfullWallsToLevel()
 	std::shared_ptr<Shape> vertRect1 = std::make_shared<Rectangle>(HOR_MARGIN, halfCrtVrtWall);
 	RigidBody rightWallBody = RigidBody(vertRect1, Static);
 
-	std::shared_ptr<Entity> rightWallUp = std::make_shared<PainWall>(rightWallBody,
-		Vector2f(HOR_MARGIN + (COURT_WIDTH)+(HOR_MARGIN / 2.0f), VERT_MARGIN - (DOOR_WIDTH / 2.0f ) + (COURT_HEIGHT * ( 1.0f / 4.0f))), this);
+	std::shared_ptr<Entity> rightWallUp = std::make_shared<PainWall>(
+		Vector2f(HOR_MARGIN + (COURT_WIDTH)+(HOR_MARGIN / 2.0f), VERT_MARGIN - (DOOR_WIDTH / 2.0f ) + (COURT_HEIGHT * ( 1.0f / 4.0f))), this, rightWallBody);
 	lvlEntities.push_back(rightWallUp);
-	std::shared_ptr<Entity> rightWallDown = std::make_shared<PainWall>(rightWallBody,
-		Vector2f(HOR_MARGIN + (COURT_WIDTH)+(HOR_MARGIN / 2.0f), VERT_MARGIN + (DOOR_WIDTH / 2.0f) + (COURT_HEIGHT * (3.0f / 4.0f))), this);
+	std::shared_ptr<Entity> rightWallDown = std::make_shared<PainWall>(
+		Vector2f(HOR_MARGIN + (COURT_WIDTH)+(HOR_MARGIN / 2.0f), VERT_MARGIN + (DOOR_WIDTH / 2.0f) + (COURT_HEIGHT * (3.0f / 4.0f))), this, rightWallBody);
 	lvlEntities.push_back(rightWallDown);
 
 	std::shared_ptr<Shape> vertRect2 = std::make_shared<Rectangle>(HOR_MARGIN, halfCrtVrtWall);
 	RigidBody leftWallBody = RigidBody(vertRect2, Static);
 
-	std::shared_ptr<Entity> leftWallUp = std::make_shared<PainWall>(leftWallBody,
-		Vector2f((HOR_MARGIN / 2.0f), VERT_MARGIN - (DOOR_WIDTH / 2.0f) + (COURT_HEIGHT * (1.0f / 4.0f))), this);
+	std::shared_ptr<Entity> leftWallUp = std::make_shared<PainWall>(
+		Vector2f((HOR_MARGIN / 2.0f), VERT_MARGIN - (DOOR_WIDTH / 2.0f) + (COURT_HEIGHT * (1.0f / 4.0f))), this, leftWallBody);
 	AddEntPtrToSector(leftWallUp);
-	std::shared_ptr<Entity> leftWallDown = std::make_shared<PainWall>(leftWallBody,
-		Vector2f((HOR_MARGIN / 2.0f), VERT_MARGIN + (DOOR_WIDTH / 2.0f) + (COURT_HEIGHT * (3.0f / 4.0f))), this);
+	std::shared_ptr<Entity> leftWallDown = std::make_shared<PainWall>(
+		Vector2f((HOR_MARGIN / 2.0f), VERT_MARGIN + (DOOR_WIDTH / 2.0f) + (COURT_HEIGHT * (3.0f / 4.0f))), this, leftWallBody);
 	AddEntPtrToSector(leftWallDown);
 
 	std::shared_ptr<Shape> horRect1 = std::make_shared<Rectangle>(halfCrtHorWall, VERT_MARGIN);
 	RigidBody wallBody1 = RigidBody(horRect1, Static);
 
-	std::shared_ptr<Entity> upperWallLeft = std::make_shared<PainWall>(wallBody1,
-		Vector2f(HOR_MARGIN - (DOOR_WIDTH / 2.0f) + (COURT_WIDTH * (1.0f / 4.0f)), (VERT_MARGIN / 2.0f)), this);
+	std::shared_ptr<Entity> upperWallLeft = std::make_shared<PainWall>(
+		Vector2f(HOR_MARGIN - (DOOR_WIDTH / 2.0f) + (COURT_WIDTH * (1.0f / 4.0f)), (VERT_MARGIN / 2.0f)), this, wallBody1);
 	lvlEntities.push_back(upperWallLeft);
-	std::shared_ptr<Entity> upperWallRight = std::make_shared<PainWall>(wallBody1,
-		Vector2f(HOR_MARGIN + (DOOR_WIDTH / 2.0f) + (COURT_WIDTH * (3.0f / 4.0f)), (VERT_MARGIN / 2.0f)), this);
+	std::shared_ptr<Entity> upperWallRight = std::make_shared<PainWall>(
+		Vector2f(HOR_MARGIN + (DOOR_WIDTH / 2.0f) + (COURT_WIDTH * (3.0f / 4.0f)), (VERT_MARGIN / 2.0f)), this, wallBody1);
 	lvlEntities.push_back(upperWallRight);
 
 
 	std::shared_ptr<Shape> horRect2 = std::make_shared<Rectangle>(halfCrtHorWall, VERT_MARGIN);
 	RigidBody lowerWallBody = RigidBody(horRect2, Static);
 
-	std::shared_ptr<Entity> lowerWallLeft = std::make_shared<PainWall>(lowerWallBody,
-		Vector2f(Vector2f(HOR_MARGIN - (DOOR_WIDTH / 2.0f) + (COURT_WIDTH * (1.0f / 4.0f)), (VERT_MARGIN / 2.0f) + COURT_HEIGHT + VERT_MARGIN)), this);
+	std::shared_ptr<Entity> lowerWallLeft = std::make_shared<PainWall>(
+		Vector2f(Vector2f(HOR_MARGIN - (DOOR_WIDTH / 2.0f) + (COURT_WIDTH * (1.0f / 4.0f)), (VERT_MARGIN / 2.0f) + COURT_HEIGHT + VERT_MARGIN)), this, lowerWallBody);
 	lvlEntities.push_back(lowerWallLeft);
-	std::shared_ptr<Entity> lowerWallRight = std::make_shared<PainWall>(lowerWallBody,
-		Vector2f(Vector2f(HOR_MARGIN + (DOOR_WIDTH / 2.0f) + (COURT_WIDTH * (3.0f / 4.0f)), (VERT_MARGIN / 2.0f) + COURT_HEIGHT + VERT_MARGIN)), this);
+	std::shared_ptr<Entity> lowerWallRight = std::make_shared<PainWall>(
+		Vector2f(Vector2f(HOR_MARGIN + (DOOR_WIDTH / 2.0f) + (COURT_WIDTH * (3.0f / 4.0f)), (VERT_MARGIN / 2.0f) + COURT_HEIGHT + VERT_MARGIN)), this, lowerWallBody);
 	lvlEntities.push_back(lowerWallRight);
 
 }
@@ -180,64 +180,64 @@ void Sector::AddRandomPainWall(int i_index)
 	case (0): {
 		std::shared_ptr<Shape> vertRect1 = std::make_shared<Rectangle>(HOR_MARGIN, halfCrtVrtWall);
 		RigidBody rightWallBody = RigidBody(vertRect1, Static);
-		std::shared_ptr<Entity> rightWallUp = std::make_shared<PainWall>(rightWallBody,
-			Vector2f(HOR_MARGIN + (COURT_WIDTH)+(HOR_MARGIN / 2.0f), VERT_MARGIN - (DOOR_WIDTH / 2.0f) + (COURT_HEIGHT * (1.0f / 4.0f))), this);
+		std::shared_ptr<Entity> rightWallUp = std::make_shared<PainWall>(
+			Vector2f(HOR_MARGIN + (COURT_WIDTH)+(HOR_MARGIN / 2.0f), VERT_MARGIN - (DOOR_WIDTH / 2.0f) + (COURT_HEIGHT * (1.0f / 4.0f))), this, rightWallBody);
 		lvlEntities.push_back(rightWallUp);
 		break;
 	}
 	case (1): {
 		std::shared_ptr<Shape> vertRect1 = std::make_shared<Rectangle>(HOR_MARGIN, halfCrtVrtWall);
 		RigidBody rightWallBody = RigidBody(vertRect1, Static);
-		std::shared_ptr<Entity> rightWallDown = std::make_shared<PainWall>(rightWallBody,
-			Vector2f(HOR_MARGIN + (COURT_WIDTH)+(HOR_MARGIN / 2.0f), VERT_MARGIN + (DOOR_WIDTH / 2.0f) + (COURT_HEIGHT * (3.0f / 4.0f))), this);
+		std::shared_ptr<Entity> rightWallDown = std::make_shared<PainWall>(
+			Vector2f(HOR_MARGIN + (COURT_WIDTH)+(HOR_MARGIN / 2.0f), VERT_MARGIN + (DOOR_WIDTH / 2.0f) + (COURT_HEIGHT * (3.0f / 4.0f))), this, rightWallBody);
 		lvlEntities.push_back(rightWallDown);
 		break;
 	}
 	case (2): {
 		std::shared_ptr<Shape> vertRect2 = std::make_shared<Rectangle>(HOR_MARGIN, halfCrtVrtWall);
 		RigidBody leftWallBody = RigidBody(vertRect2, Static);
-		std::shared_ptr<Entity> leftWallUp = std::make_shared<PainWall>(leftWallBody,
-			Vector2f((HOR_MARGIN / 2.0f), VERT_MARGIN - (DOOR_WIDTH / 2.0f) + (COURT_HEIGHT * (1.0f / 4.0f))), this);
+		std::shared_ptr<Entity> leftWallUp = std::make_shared<PainWall>(
+			Vector2f((HOR_MARGIN / 2.0f), VERT_MARGIN - (DOOR_WIDTH / 2.0f) + (COURT_HEIGHT * (1.0f / 4.0f))), this, leftWallBody);
 		AddEntPtrToSector(leftWallUp);
 		break;
 	}
 	case (3): {
 		std::shared_ptr<Shape> vertRect2 = std::make_shared<Rectangle>(HOR_MARGIN, halfCrtVrtWall);
 		RigidBody leftWallBody = RigidBody(vertRect2, Static);
-		std::shared_ptr<Entity> leftWallDown = std::make_shared<PainWall>(leftWallBody,
-			Vector2f((HOR_MARGIN / 2.0f), VERT_MARGIN + (DOOR_WIDTH / 2.0f) + (COURT_HEIGHT * (3.0f / 4.0f))), this);
+		std::shared_ptr<Entity> leftWallDown = std::make_shared<PainWall>(
+			Vector2f((HOR_MARGIN / 2.0f), VERT_MARGIN + (DOOR_WIDTH / 2.0f) + (COURT_HEIGHT * (3.0f / 4.0f))), this, leftWallBody);
 		AddEntPtrToSector(leftWallDown);
 		break;
 	}
 	case (4): {
 		std::shared_ptr<Shape> horRect1 = std::make_shared<Rectangle>(halfCrtHorWall, VERT_MARGIN);
 		RigidBody wallBody1 = RigidBody(horRect1, Static);
-		std::shared_ptr<Entity> upperWallLeft = std::make_shared<PainWall>(wallBody1,
-			Vector2f(HOR_MARGIN - (DOOR_WIDTH / 2.0f) + (COURT_WIDTH * (1.0f / 4.0f)), (VERT_MARGIN / 2.0f)), this);
+		std::shared_ptr<Entity> upperWallLeft = std::make_shared<PainWall>(
+			Vector2f(HOR_MARGIN - (DOOR_WIDTH / 2.0f) + (COURT_WIDTH * (1.0f / 4.0f)), (VERT_MARGIN / 2.0f)), this, wallBody1);
 		lvlEntities.push_back(upperWallLeft);
 		break;
 	}
 	case (5): {
 		std::shared_ptr<Shape> horRect1 = std::make_shared<Rectangle>(halfCrtHorWall, VERT_MARGIN);
 		RigidBody wallBody1 = RigidBody(horRect1, Static);
-		std::shared_ptr<Entity> upperWallRight = std::make_shared<PainWall>(wallBody1,
-			Vector2f(HOR_MARGIN + (DOOR_WIDTH / 2.0f) + (COURT_WIDTH * (3.0f / 4.0f)), (VERT_MARGIN / 2.0f)), this);
+		std::shared_ptr<Entity> upperWallRight = std::make_shared<PainWall>(
+			Vector2f(HOR_MARGIN + (DOOR_WIDTH / 2.0f) + (COURT_WIDTH * (3.0f / 4.0f)), (VERT_MARGIN / 2.0f)), this, wallBody1);
 		lvlEntities.push_back(upperWallRight);
 		break;
 	}
 	case (6): {
 		std::shared_ptr<Shape> horRect2 = std::make_shared<Rectangle>(halfCrtHorWall, VERT_MARGIN);
 		RigidBody lowerWallBody = RigidBody(horRect2, Static);
-		std::shared_ptr<Entity> lowerWallLeft = std::make_shared<PainWall>(lowerWallBody,
-			Vector2f(Vector2f(HOR_MARGIN - (DOOR_WIDTH / 2.0f) + (COURT_WIDTH * (1.0f / 4.0f)), (VERT_MARGIN / 2.0f) + COURT_HEIGHT + VERT_MARGIN)), this);
+		std::shared_ptr<Entity> lowerWallLeft = std::make_shared<PainWall>(
+			Vector2f(Vector2f(HOR_MARGIN - (DOOR_WIDTH / 2.0f) + (COURT_WIDTH * (1.0f / 4.0f)), (VERT_MARGIN / 2.0f) + COURT_HEIGHT + VERT_MARGIN)), this, lowerWallBody);
 		lvlEntities.push_back(lowerWallLeft);
 		break;
 	}
 	case (7): {
 		std::shared_ptr<Shape> horRect2 = std::make_shared<Rectangle>(halfCrtHorWall, VERT_MARGIN);
 		RigidBody lowerWallBody = RigidBody(horRect2, Static);
-		std::shared_ptr<Entity> lowerWallRight = std::make_shared<PainWall>(lowerWallBody,
-			Vector2f(Vector2f(HOR_MARGIN + (DOOR_WIDTH / 2.0f) + (COURT_WIDTH * (3.0f / 4.0f)), (VERT_MARGIN / 2.0f) + COURT_HEIGHT + VERT_MARGIN)), this);
+		std::shared_ptr<Entity> lowerWallRight = std::make_shared<PainWall>(
+			Vector2f(Vector2f(HOR_MARGIN + (DOOR_WIDTH / 2.0f) + (COURT_WIDTH * (3.0f / 4.0f)), (VERT_MARGIN / 2.0f) + COURT_HEIGHT + VERT_MARGIN)), this, lowerWallBody);
 		lvlEntities.push_back(lowerWallRight);
 		break;
 	}
@@ -246,23 +246,16 @@ void Sector::AddRandomPainWall(int i_index)
 
 void Sector::AddEndLevelObject()
 {
-	Material Static = Material(0.0f, 0.4f, 0.4f, 0.2f);
-	std::shared_ptr<Shape> square = std::make_shared<Rectangle>(100.0f, 100.0f);
-	RigidBody lowerWallBody = RigidBody(square, Static);
-	std::shared_ptr<Entity> lowerWall = std::make_shared<EndObject>(lowerWallBody,
-		Vector2f(Vector2f(HOR_MARGIN + (COURT_WIDTH / 2.0f), COURT_HEIGHT / 2.0)), this);
+	std::shared_ptr<Entity> lowerWall = std::make_shared<EndObject>(this,
+				Vector2f(Vector2f(HOR_MARGIN + (COURT_WIDTH / 2.0f), COURT_HEIGHT / 2.0)));
 	lvlEntities.push_back(lowerWall);
 
-	std::shared_ptr<Shape> square2 = std::make_shared<Rectangle>(100.0f, 100.0f);
-	RigidBody lowerWallBody2 = RigidBody(square2, Static);
-	std::shared_ptr<Entity> lowerWall2 = std::make_shared<PowerUp>(this, 0, lowerWallBody2,
-		Vector2f(Vector2f(HOR_MARGIN + (COURT_WIDTH / 4.0f), COURT_HEIGHT / 2.0)));
+	std::shared_ptr<Entity> lowerWall2 = std::make_shared<PowerUp>(this,
+		Vector2f(Vector2f(HOR_MARGIN + (COURT_WIDTH / 4.0f), COURT_HEIGHT / 2.0)), 0);
 	lvlEntities.push_back(lowerWall2);
 
-	std::shared_ptr<Shape> square3 = std::make_shared<Rectangle>(100.0f, 100.0f);
-	RigidBody lowerWallBody3 = RigidBody(square3, Static);
-	std::shared_ptr<Entity> lowerWall3 = std::make_shared<PowerUp>(this, 1, lowerWallBody3,
-		Vector2f(Vector2f(HOR_MARGIN + (COURT_WIDTH * (  3.0f / 4.0f)), COURT_HEIGHT / 2.0)));
+	std::shared_ptr<Entity> lowerWall3 = std::make_shared<PowerUp>(this,
+		Vector2f(Vector2f(HOR_MARGIN + (COURT_WIDTH * (  3.0f / 4.0f)), COURT_HEIGHT / 2.0)), 1);
 	lvlEntities.push_back(lowerWall3);
 }
 
@@ -270,7 +263,9 @@ void Sector::RemoveDestroyedEntities() {
 	std::list<std::shared_ptr<Entity>>::iterator iter = lvlEntities.begin();
 	while (iter != lvlEntities.end()) {
 		if (iter._Ptr->_Myval->MarkedForDeath()) {
-			if (auto enemy = dynamic_cast<Enemy*>(iter._Ptr->_Myval.get())) {
+			int entType = iter._Ptr->_Myval->GetTypeID();
+			if ((entType == ENEMY_SEEK) || (entType == ENEMY_RAND) || (entType == ENEMY_SEEK) || 
+				(entType == ENEMY_SEEK_PUSH) || (entType == ENEMY_RAND_PUSH) || (entType == ENEMY_BOSS)) {
 				--sectEnemyNum;
 			}
 			lvlEntities.erase(iter++);
@@ -288,32 +283,32 @@ void Sector::AddTerrain(int i_terrainType)
 	case 0: {
 		std::shared_ptr<Shape> vertRect1 = std::make_shared<Rectangle>(HOR_MARGIN / 8.0f, COURT_HEIGHT / 4.0f);
 		RigidBody rightWallBody = RigidBody(vertRect1, Static);
-		std::shared_ptr<Entity> rightWall = std::make_shared<Wall>(rightWallBody,
-			Vector2f(HOR_MARGIN + (COURT_WIDTH * ( 1.0f / 5.0f)), VERT_MARGIN + (COURT_HEIGHT / 2.0f)), this);
+		std::shared_ptr<Entity> rightWall = std::make_shared<Wall>(
+			Vector2f(HOR_MARGIN + (COURT_WIDTH * ( 1.0f / 5.0f)), VERT_MARGIN + (COURT_HEIGHT / 2.0f)), this, rightWallBody);
 		lvlEntities.push_back(rightWall);
 		break;
 	}
 	case 1: {
 		std::shared_ptr<Shape> vertRect1 = std::make_shared<Rectangle>(HOR_MARGIN / 8.0f, COURT_HEIGHT / 4.0f);
 		RigidBody rightWallBody = RigidBody(vertRect1, Static);
-		std::shared_ptr<Entity> rightWall = std::make_shared<Wall>(rightWallBody,
-			Vector2f(HOR_MARGIN + (COURT_WIDTH *  (4.0f / 5.0f)), VERT_MARGIN + (COURT_HEIGHT / 2.0f)), this);
+		std::shared_ptr<Entity> rightWall = std::make_shared<Wall>(
+			Vector2f(HOR_MARGIN + (COURT_WIDTH *  (4.0f / 5.0f)), VERT_MARGIN + (COURT_HEIGHT / 2.0f)), this, rightWallBody);
 		lvlEntities.push_back(rightWall);
 		break;
 	}
 	case 2: {
 		std::shared_ptr<Shape> horRect1 = std::make_shared<Rectangle>(COURT_WIDTH / 4.0f, VERT_MARGIN / 8.0f);
 		RigidBody wallBody1 = RigidBody(horRect1, Static);
-		std::shared_ptr<Entity> upperWall = std::make_shared<Wall>(wallBody1,
-			Vector2f(HOR_MARGIN + (COURT_WIDTH / 2.0f), VERT_MARGIN + (COURT_HEIGHT * (1.0f / 5.0f))), this);
+		std::shared_ptr<Entity> upperWall = std::make_shared<Wall>(
+			Vector2f(HOR_MARGIN + (COURT_WIDTH / 2.0f), VERT_MARGIN + (COURT_HEIGHT * (1.0f / 5.0f))), this, wallBody1);
 		lvlEntities.push_back(upperWall);
 		break;
 	}
 	case 3: {
 		std::shared_ptr<Shape> horRect1 = std::make_shared<Rectangle>(COURT_WIDTH / 4.0f, VERT_MARGIN / 8.0f);
 		RigidBody wallBody1 = RigidBody(horRect1, Static);
-		std::shared_ptr<Entity> upperWall = std::make_shared<Wall>(wallBody1,
-			Vector2f(HOR_MARGIN + (COURT_WIDTH / 2.0f), VERT_MARGIN + (COURT_HEIGHT * (4.0f / 5.0f))), this);
+		std::shared_ptr<Entity> upperWall = std::make_shared<Wall>(
+			Vector2f(HOR_MARGIN + (COURT_WIDTH / 2.0f), VERT_MARGIN + (COURT_HEIGHT * (4.0f / 5.0f))), this, wallBody1);
 		lvlEntities.push_back(upperWall);
 		break;
 	}
@@ -321,32 +316,32 @@ void Sector::AddTerrain(int i_terrainType)
 	case 4: {
 		std::shared_ptr<Shape> vertRect1 = std::make_shared<Rectangle>(HOR_MARGIN / 4.0f, COURT_HEIGHT / 2.0f);
 		RigidBody rightWallBody = RigidBody(vertRect1, Static);
-		std::shared_ptr<Entity> rightWall = std::make_shared<Wall>(rightWallBody,
-			Vector2f(HOR_MARGIN + (COURT_WIDTH * (1.0f / 5.0f)), VERT_MARGIN + (COURT_HEIGHT / 2.0f)), this);
+		std::shared_ptr<Entity> rightWall = std::make_shared<Wall>(
+			Vector2f(HOR_MARGIN + (COURT_WIDTH * (1.0f / 5.0f)), VERT_MARGIN + (COURT_HEIGHT / 2.0f)), this, rightWallBody);
 		lvlEntities.push_back(rightWall);
 		break;
 	}
 	case 5: {
 		std::shared_ptr<Shape> vertRect1 = std::make_shared<Rectangle>(HOR_MARGIN / 4.0f, COURT_HEIGHT / 2.0f);
 		RigidBody rightWallBody = RigidBody(vertRect1, Static);
-		std::shared_ptr<Entity> rightWall = std::make_shared<Wall>(rightWallBody,
-			Vector2f(HOR_MARGIN + (COURT_WIDTH *  (4.0f / 5.0f)), VERT_MARGIN + (COURT_HEIGHT / 2.0f)), this);
+		std::shared_ptr<Entity> rightWall = std::make_shared<Wall>(
+			Vector2f(HOR_MARGIN + (COURT_WIDTH *  (4.0f / 5.0f)), VERT_MARGIN + (COURT_HEIGHT / 2.0f)), this, rightWallBody);
 		lvlEntities.push_back(rightWall);
 		break;
 	}
 	case 6: {
 		std::shared_ptr<Shape> horRect1 = std::make_shared<Rectangle>(COURT_WIDTH / 2.0f, VERT_MARGIN / 4.0f);
 		RigidBody wallBody1 = RigidBody(horRect1, Static);
-		std::shared_ptr<Entity> upperWall = std::make_shared<Wall>(wallBody1,
-			Vector2f(HOR_MARGIN + (COURT_WIDTH / 2.0f), VERT_MARGIN + (COURT_HEIGHT * (1.0f / 5.0f))), this);
+		std::shared_ptr<Entity> upperWall = std::make_shared<Wall>(
+			Vector2f(HOR_MARGIN + (COURT_WIDTH / 2.0f), VERT_MARGIN + (COURT_HEIGHT * (1.0f / 5.0f))), this, wallBody1);
 		lvlEntities.push_back(upperWall);
 		break;
 	}
 	case 7: {
 		std::shared_ptr<Shape> horRect1 = std::make_shared<Rectangle>(COURT_WIDTH / 2.0f, VERT_MARGIN / 4.0f);
 		RigidBody wallBody1 = RigidBody(horRect1, Static);
-		std::shared_ptr<Entity> upperWall = std::make_shared<Wall>(wallBody1,
-			Vector2f(HOR_MARGIN + (COURT_WIDTH / 2.0f), VERT_MARGIN + (COURT_HEIGHT * (4.0f / 5.0f))), this);
+		std::shared_ptr<Entity> upperWall = std::make_shared<Wall>(
+			Vector2f(HOR_MARGIN + (COURT_WIDTH / 2.0f), VERT_MARGIN + (COURT_HEIGHT * (4.0f / 5.0f))), this, wallBody1);
 		lvlEntities.push_back(upperWall);
 		break;
 	}

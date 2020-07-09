@@ -3,6 +3,7 @@
 #include <chrono>
 #include <Eigen/Dense>
 #include <SFML/Graphics.hpp>
+#include "Material.h"
 
 //https://www.fluentcpp.com/2019/07/23/how-to-define-a-global-constant-in-cpp/
 //according to this article I should be adding extern here but that means I have to define these variables elsewhere also because I dont use CPP17
@@ -50,6 +51,7 @@ const float RADIAN_ADJUST = 50.0f;
 const float PROJECTILE_RADIUS = 10.0f;
 const float DOOR_WIDTH = 150.0f;
 const float DOOR_HEIGHT = 50.0f;
+const float AOE_RADIUS = 175.0f;
 
 //PHYSICS CONSTANTS
 const Vector2f GRAVITY_COEFFICIENT = Vector2f(0.0f, 100.0f);
@@ -58,6 +60,20 @@ const float GLOBAL_DECELERATION_ANGULAR = 0.005f;
 const float PENETRATION_ALLOWANCE = 0.05f;
 const float PENETRATION_CORRECTION = 0.4f;
 const float ANGULAR_VELOCITY_ADJUSTMENT = 0.15f; //IDK where my angular velocity is getting so fucking jacked
+
+//MATERIALS
+const Material ROCK = Material(0.6f, 0.1f, 0.6f, 0.3f);
+const Material WOOD = Material(0.3f, 0.2f, 0.5f, 0.25f);
+const Material METAL = Material(1.2f, 0.05f, 0.4f, 0.2f);
+const Material BOUNCYBALL = Material(0.3f, 0.8f, 0.7f, 0.2f);
+const Material HEAVYBALL = Material(0.9f, 0.95f, 0.5f, 0.25f);
+const Material SUPERBALL = Material(0.3f, 0.95f, 0.5f, 0.25f);
+const Material PILLOW = Material(0.1f, 0.2f, 0.4f, 0.2f);
+const Material STATIC = Material(0.0f, 0.0f, 0.4f, 0.2f);
+const Material STATICVERYFRICTION = Material(0.0f, 0.0f, 0.9f, 0.7f);
+const Material RUBBER = Material(0.3f, 0.8f, 0.9f, 0.6f);
+const Material ICE = Material(0.3f, 0.1f, 0.7f, 0.05f);
+const Material DEFAULT = Material(0.3f, 0.2f, 0.5f, 0.25f);
 
 //TRIG CONSTANTS
 const float DEGREE_RIGHT = 0.0f;
@@ -99,8 +115,13 @@ const float LEVEL_TIME_LIMIT_HARD = 135.0f;
 enum GAME_STATE { MENU, START_GAME, IN_GAME, EXIT_GAME, WIN, LOSE };
 enum MOUSE_STATE { MOUSE_UP, MOUSE_DOWN };
 enum DIFFICULTY { EASY, MEDIUM, HARD };
-enum ENTITY_TYPE { WALL, DOOR, ENEMY, PLAYER, PROJECTILE};
-enum MATERIAL_TYPE {ROCK, WOOD, METAL, BOUNCYBALL, SUPERBALL, PILLOW, STATIC, STATICVERYFRICTION, RUBBER, ICE};
+//enum ENTITY_TYPE { WALL, DOOR, ENEMY, PLAYER, PROJECTILE};
+//enum MATERIAL_TYPE {ROCK, WOOD, METAL, BOUNCYBALL, SUPERBALL, PILLOW, STATIC, STATICVERYFRICTION, RUBBER, ICE};
+enum TypeID {
+	ENTITY_VIRTUAL, PLAYER, PROJ_BASIC, PROJ_WALL, BLAST_STUN, ENEMY_SEEK,
+	ENEMY_RAND, ENEMY_BOSS, ENEMY_SEEK_PUSH, ENEMY_RAND_PUSH, WALL_BASIC,
+	WALL_FIRE, DOOR_LOCKED, DOOR_OPEN, END_LEVEL, UPGRADE};
+
 //TIME STUFF
 typedef std::chrono::high_resolution_clock               hiResTime;
 typedef std::chrono::microseconds                        microSec;

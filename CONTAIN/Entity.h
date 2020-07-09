@@ -21,26 +21,25 @@ class CrazyBoi;
 
 class Entity
 {
-//enum EntityGroup { PlayerChar, Enemy, Projectile, Wall, Door };
-
-private:
-
 protected:
 	sf::Color fillColor;
 	sf::Color outlineColor;
 	bool killMeNextLoop;
+	const TypeID typeID;
 
 public:
 	bool intangible;
 	bool fixedPosition;
 
 	Entity();
-	Entity(RigidBody i_rb, Vector2f i_startPosition);
+	Entity(Vector2f i_startPosition, RigidBody i_rb, TypeID i_typeID);
 	~Entity();
 
 	RigidBody rb;
 
 	const bool MarkedForDeath();
+
+	const TypeID GetTypeID();
 
 	void CollideWith(Entity& i_other);
 
@@ -67,6 +66,8 @@ public:
 	virtual void CollideWithPowUp(PowerUp* i_powUpPtr);
 
 	virtual void CollideWithBlast(Blast* i_blastPtr);
+
+
 };
 
 class PlayerChar :
@@ -88,7 +89,8 @@ public:
 	int specialAmmo;
 	int numShots;
 
-	PlayerChar(RigidBody i_rb, Vector2f i_startPosition, Game* gamePtr, int i_strtHealth);
+	PlayerChar(Game* i_gamePtr, int i_strtHealth, Vector2f i_startPosition, 
+		RigidBody i_rb = RigidBody(std::make_shared<Rectangle>(100.0f, 100.0f), METAL));
 	~PlayerChar();
 
 	void Update(float i_stepSize) override;
@@ -129,7 +131,7 @@ private:
 	Sector* lvlPtr;
 
 public:
-	Projectile(RigidBody i_rb, Vector2f i_startPosition);
+	Projectile(Vector2f i_startPosition, RigidBody i_rb = RigidBody(std::make_shared<Circle>(PROJECTILE_RADIUS), HEAVYBALL));
 	~Projectile();
 
 	void Update(float i_stepSize) override;
@@ -149,6 +151,31 @@ public:
 	void CollideWithDoor(Door* i_doorPtr) override;
 };
 
+class Blocker : public Entity
+{
+private:
+	Sector* sectPtr;
+
+public:
+	Blocker(Vector2f i_startPosition, RigidBody i_rb = RigidBody(std::make_shared<Rectangle>(40, 270), HEAVYBALL));
+	~Blocker();
+};
+
+class Blast : public Entity
+{
+private:
+	Sector* sectPtr;
+
+public:
+	int blastType;
+	float deathTimer;
+
+	Blast(Sector* i_sectPtr, Vector2f i_startPosition, int i_blastType, RigidBody i_rb = RigidBody(std::make_shared<Circle>(AOE_RADIUS), STATIC));
+	~Blast();
+
+	void Update(float i_stepSize) override;
+};
+
 class Enemy :
 	public Entity
 {
@@ -161,7 +188,7 @@ public:
 	float stunSecs;
 
 
-	Enemy(RigidBody i_rb, Vector2f i_startPosition, std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr);
+	Enemy(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, Vector2f i_startPosition, RigidBody i_rb, TypeID i_typeID = ENEMY_SEEK);
 	~Enemy();
 
 	void Update(float i_stepSize) override;
@@ -187,7 +214,7 @@ private:
 	float timeTillDirSwitch;
 
 public:
-	CrazyBoi(RigidBody i_rb, Vector2f i_startPosition, std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr);
+	CrazyBoi(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, Vector2f i_startPosition, RigidBody i_rb);
 	~CrazyBoi();
 
 	Vector2f CreateRandomDir();
@@ -206,7 +233,7 @@ private:
 	MapCoord outCoord;
 
 public:
-	Door(RigidBody i_rb, Vector2f i_startPosition, Sector* i_sectPtr, MapCoord i_toSect, Vector2f i_outCoord);
+	Door(Sector* i_sectPtr, MapCoord i_outCoord, Vector2f i_startPos, Vector2f i_outPos, RigidBody i_rb );
 	~Door();
 
 	bool open;
@@ -225,7 +252,7 @@ private:
 	Sector* sectPtr;
 
 public:
-	Wall(RigidBody i_rb, Vector2f i_startPosition, Sector* i_sectPtr);
+	Wall(Vector2f i_startPosition, Sector* i_sectPtr, RigidBody i_rb);
 	~Wall();
 };
 
@@ -236,7 +263,7 @@ private:
 	Sector* sectPtr;
 
 public:
-	PainWall(RigidBody i_rb, Vector2f i_startPosition, Sector* i_sectPtr);
+	PainWall(Vector2f i_startPosition, Sector* i_sectPtr, RigidBody i_rb);
 	~PainWall();
 };
 
@@ -247,7 +274,8 @@ private:
 	Sector* sectPtr;
 
 public:
-	EndObject(RigidBody i_rb, Vector2f i_startPosition, Sector* i_sectPtr);
+	EndObject(Sector* i_sectPtr, Vector2f i_startPosition, RigidBody i_rb = 
+		RigidBody(std::make_shared<Rectangle>(100.0f, 100.0f), STATIC));
 	~EndObject();
 };
 
@@ -260,33 +288,9 @@ private:
 public:
 	int powType;
 
-	PowerUp(Sector * i_sectPtr, int i_powType, RigidBody i_rb, Vector2f i_startPosition);
+	PowerUp(Sector * i_sectPtr, Vector2f i_startPosition, int i_powType, RigidBody i_rb = 
+		RigidBody(std::make_shared<Rectangle>(100.0f, 100.0f), STATIC));
 	~PowerUp();
-
-	void Update(float i_stepSize) override;
-};
-
-class Blocker : public Entity 
-{
-private:
-	Sector* sectPtr;
-
-public:
-	Blocker(RigidBody i_rb, Vector2f i_startPosition);
-	~Blocker();
-};
-
-class Blast : public Entity
-{
-private:
-	Sector* sectPtr;
-
-public:
-	int blastType;
-	float deathTimer;
-
-	Blast(Sector* i_sectPtr, int i_blastType, RigidBody i_rb, Vector2f i_startPosition);
-	~Blast();
 
 	void Update(float i_stepSize) override;
 };

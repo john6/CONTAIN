@@ -7,7 +7,8 @@
 
 ///////////////////////Entity///////////////////////
 Entity::Entity() :
-	rb { RigidBody(std::make_shared<Rectangle>(100.0f, 100.0f)) }
+	rb { RigidBody(std::make_shared<Rectangle>(100.0f, 100.0f)) }, 
+	typeID{ ENTITY_VIRTUAL }
 {
 	Material defMaterial(0.6f, 0.1f, 0.6f, 0.3f);
 	rb.mat = defMaterial;
@@ -17,8 +18,8 @@ Entity::Entity() :
 	fixedPosition = false;
 }
 
-Entity::Entity(RigidBody i_rb, Vector2f i_startPosition) :
-	rb { i_rb }
+Entity::Entity(Vector2f i_startPosition, RigidBody i_rb, TypeID i_typeID) :
+	rb { i_rb }, typeID{ i_typeID }
 {
 	/*Material defMaterial(0.6f, 0.1f, 0.6f, 0.3f);
 	rb.mat = defMaterial;
@@ -34,35 +35,53 @@ const bool Entity::MarkedForDeath() {
 	return killMeNextLoop;
 }
 
+const TypeID Entity::GetTypeID()
+{
+	return typeID;
+}
+
 void Entity::CollideWith(Entity & i_other)
 {
-	if (auto player = dynamic_cast<PlayerChar*>(&i_other)) {
+	if (i_other.GetTypeID() == PLAYER) {
+		auto player = dynamic_cast<PlayerChar*>(&i_other);
 		CollideWithPlayer(player);
 	}
-	else if (auto projectile = dynamic_cast<Projectile*>(&i_other)) {
+	else if (i_other.GetTypeID() == PROJ_BASIC) {
+		auto projectile = dynamic_cast<Projectile*>(&i_other);
 		CollideWithProjectile(projectile);
 	}
-	if (auto enemy = dynamic_cast<Enemy*>(&i_other)) {
+	if (i_other.GetTypeID() == ENEMY_SEEK) {
+		auto enemy = dynamic_cast<Enemy*>(&i_other);
 		CollideWithEnemy(enemy);
 	}
-	else if (auto wall = dynamic_cast<Wall*>(&i_other)) {
+	if (i_other.GetTypeID() == ENEMY_RAND) {
+		auto enemy = dynamic_cast<Enemy*>(&i_other);
+		CollideWithEnemy(enemy);
+	}
+	else if (i_other.GetTypeID() == WALL_BASIC) {
+		auto wall = dynamic_cast<Wall*>(&i_other);
 		CollideWithWall(wall);
 	}
-	else if (auto painWall = dynamic_cast<PainWall*>(&i_other)) {
+	else if (i_other.GetTypeID() == WALL_FIRE) {
+		auto painWall = dynamic_cast<PainWall*>(&i_other);
 		CollideWithPainWall(painWall);
 	}
-	else if (auto door = dynamic_cast<Door*>(&i_other)) {
+	else if (i_other.GetTypeID() == DOOR_LOCKED) {
+		auto door = dynamic_cast<Door*>(&i_other);
 		CollideWithDoor(door);
 	}
-	else if (auto endObjPtr= dynamic_cast<EndObject*>(&i_other)) {
+	else if (i_other.GetTypeID() == END_LEVEL) {
+		auto endObjPtr = dynamic_cast<EndObject*>(&i_other);
 		CollideWithEndObject(endObjPtr);
 	}
 
-	else if (auto powUp = dynamic_cast<PowerUp*>(&i_other)) {
+	else if (i_other.GetTypeID() == UPGRADE) {
+		auto powUp = dynamic_cast<PowerUp*>(&i_other);
 		CollideWithPowUp(powUp);
 	}
 
-	else if (auto blast = dynamic_cast<Blast*>(&i_other)) {
+	else if (i_other.GetTypeID() == BLAST_STUN) {
+		auto blast = dynamic_cast<Blast*>(&i_other);
 		CollideWithBlast(blast);
 	}
 }
@@ -115,8 +134,8 @@ Entity::~Entity()
 }
 
 ///////////////////////PlayerChar class ///////////////////////
-PlayerChar::PlayerChar(RigidBody i_rb, Vector2f i_startPosition, Game* i_gamePtr, int i_strtHealth) :
-	Entity(i_rb, i_startPosition), gamePtr{ i_gamePtr },
+PlayerChar::PlayerChar(Game* i_gamePtr, int i_strtHealth, Vector2f i_startPosition, RigidBody i_rb) :
+	Entity(i_startPosition, i_rb, PLAYER), gamePtr{ i_gamePtr },
 	pController{ PlayerController(i_gamePtr->renderWindow) }
 {
 	numShots = 1;
@@ -267,12 +286,9 @@ void PlayerChar::ShootBasic(Vector2f i_mousePos)
 		Vector2f currDirVect = Math::AngleToVect(currAngleRads);
 		int i = 0;
 		while (i < numShots) {
-			std::shared_ptr<Shape> projectileShape = std::make_shared<Circle>(PROJECTILE_RADIUS);
-			Material HeavyBall = Material(0.9f, 0.95f, 0.5f, 0.25f);
-			RigidBody projBody = RigidBody(projectileShape, HeavyBall);
-			projBody.ApplyImpulse((currDirVect * 3000.0f), NULL_VECTOR);
-			std::shared_ptr<Entity> projectile = std::make_shared<Projectile>(projBody,
-				rb.transform.pos + (currDirVect * (100.0f + (i * 15.0f))));
+			std::shared_ptr<Entity> projectile = std::make_shared<Projectile>(
+								rb.transform.pos + (currDirVect * (100.0f + (i * 15.0f))));
+			projectile->rb.ApplyImpulse((currDirVect * 3000.0f), NULL_VECTOR);
 			gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector)->AddEntPtrToSector(projectile);
 			prevAngleRads = currAngleRads;
 			prevDirVect = currDirVect;
@@ -291,13 +307,10 @@ void PlayerChar::ShootWall(Vector2f i_mousePos)
 		Vector2f projectileDir = i_mousePos - rb.transform.pos;
 		projectileDir.normalize();
 		ShootWall(projectileDir);
-		std::shared_ptr<Shape> projectileShape = std::make_shared<Rectangle>(40, 270);
-		Material HeavyBall = Material(0.9f, 0.95f, 0.5f, 0.25f);
-		RigidBody projBody = RigidBody(projectileShape, HeavyBall);
-		projBody.ApplyImpulse((projectileDir * 7000.0f), NULL_VECTOR);
-		projBody.ResetOrientation(projectileDir);
-		std::shared_ptr<Entity> projectile = std::make_shared<Blocker>(projBody,
-			rb.transform.pos + (projectileDir * 100.0f));
+		std::shared_ptr<Entity> projectile = std::make_shared<Blocker>(
+								rb.transform.pos + (projectileDir * 100.0f));
+		projectile->rb.ApplyImpulse((projectileDir * 7000.0f), NULL_VECTOR);
+		projectile->rb.ResetOrientation(projectileDir);
 		gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector)->AddEntPtrToSector(projectile);
 	}
 }
@@ -308,19 +321,16 @@ void PlayerChar::ShootAOE()
 	if ((weaponDelay >= shipRateOfFire) && (specialAmmo > 0)) {
 		--specialAmmo;
 		lastShotFired = hiResTime::now();
-		std::shared_ptr<Shape> projectileShape = std::make_shared<Circle>(175);
-		Material Static = Material(0.0f, 0.0f, 0.4f, 0.2f);
-		RigidBody projBody = RigidBody(projectileShape, Static);
-		std::shared_ptr<Entity> projectile = std::make_shared<Blast>(gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector).get(),
-			0, projBody, rb.transform.pos);
+		std::shared_ptr<Entity> projectile = std::make_shared<Blast>(
+					gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector).get(),
+					rb.transform.pos, 0);
 		gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector)->AddEntPtrToSector(projectile);
 	}
 }
 
-///////////////////////Projectile Class ///////////////////////
-
-Projectile::Projectile(RigidBody i_rb, Vector2f i_startPosition) :
-	Entity{ i_rb, i_startPosition}
+///////////////////////Basic Projectile Class ///////////////////////
+Projectile::Projectile(Vector2f i_startPosition, RigidBody i_rb) :
+	Entity(i_startPosition, i_rb, PROJ_BASIC)
 {
 	fillColor = sf::Color::Red;
 	outlineColor = sf::Color::White;
@@ -369,10 +379,42 @@ void Projectile::CollideWithDoor(Door * i_doorPtr)
 	Destroy();
 }
 
-///////////////////////Enemy Class///////////////////////
+/////////////////////// Blocker ///////////////////////
+Blocker::Blocker(Vector2f i_startPosition, RigidBody i_rb) :
+	Entity(i_startPosition, i_rb, PROJ_WALL)
+{
+	fillColor = sf::Color::Green;
+	outlineColor = sf::Color::Green;
+}
 
-Enemy::Enemy(RigidBody i_rb, Vector2f i_startPosition, std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr) :
-	Entity(i_rb, i_startPosition), charPtr { i_charPtr }, sectPtr{ i_sectPtr }
+Blocker::~Blocker()
+{
+}
+
+/////////////////////// Blast ///////////////////////
+Blast::Blast(Sector* i_sectPtr, Vector2f i_startPosition, int i_blastType, RigidBody i_rb) :
+	Entity(i_startPosition, i_rb, BLAST_STUN), sectPtr{ i_sectPtr }, blastType{ i_blastType }
+{
+	fillColor = sf::Color::Black;
+	outlineColor = sf::Color::Cyan;
+	intangible = true;
+	deathTimer = 1.0f;
+}
+
+Blast::~Blast()
+{
+}
+
+void Blast::Update(float i_stepSize)
+{
+	float secsInUpdate = i_stepSize / 1000.0f;
+	deathTimer -= secsInUpdate;
+	if (deathTimer <= 0) { Destroy(); }
+}
+
+///////////////////////Enemy Class///////////////////////
+Enemy::Enemy(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, Vector2f i_startPosition, RigidBody i_rb, TypeID i_typeID) :
+	Entity(i_startPosition, i_rb, i_typeID), charPtr { i_charPtr }, sectPtr{ i_sectPtr }
 {
 	fillColor = sf::Color::Magenta;
 	outlineColor = sf::Color::White;
@@ -427,9 +469,8 @@ void Enemy::Stun(float i_stunTime)
 }
 
 /////////////////////// CrazyBoi class ///////////////////////
-
-CrazyBoi::CrazyBoi(RigidBody i_rb, Vector2f i_startPosition, std::shared_ptr<Entity> i_charPtr, Sector * i_sectPtr) :
-	Enemy(i_rb, i_startPosition, i_charPtr, i_sectPtr)
+CrazyBoi::CrazyBoi(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, Vector2f i_startPosition, RigidBody i_rb) :
+	Enemy(i_charPtr, i_sectPtr, i_startPosition, i_rb, ENEMY_RAND)
 {
 	sameDirTime = 0.9;
 	speed = 30;
@@ -473,10 +514,9 @@ void CrazyBoi::CollideWithPainWall(PainWall * i_painWallPtr)
 {
 }
 
-///////////////////////Door class///////////////////////
-
-Door::Door(RigidBody i_rb, Vector2f i_startPosition, Sector* i_sectPtr, MapCoord i_outSect, Vector2f i_outCoord) :
-	Entity(i_rb, i_startPosition), sectPtr{ i_sectPtr }, outCoord{ i_outSect }, outPos{ i_outCoord }
+/////////////////////// Door Lockable class///////////////////////
+Door::Door(Sector* i_sectPtr, MapCoord i_outCoord, Vector2f i_startPos, Vector2f i_outPos, RigidBody i_rb) :
+	Entity(i_startPos, i_rb, DOOR_LOCKED), sectPtr{ i_sectPtr }, outCoord{ i_outCoord }, outPos{ i_outPos }
 {
 	open = false;
 	intangible = true;
@@ -507,9 +547,8 @@ void Door::Update(float i_stepSize)
 }
 
 ///////////////////////Wall Class ///////////////////////
-
-Wall::Wall(RigidBody i_rb, Vector2f i_startPosition, Sector* i_sectPtr) :
-	Entity(i_rb, i_startPosition), sectPtr{ i_sectPtr }
+Wall::Wall(Vector2f i_startPosition, Sector* i_sectPtr, RigidBody i_rb) :
+	Entity(i_startPosition, i_rb, WALL_BASIC), sectPtr{ i_sectPtr }
 {
 	fillColor = sf::Color::Black;
 	outlineColor = sf::Color::White;
@@ -520,9 +559,8 @@ Wall::~Wall()
 }
 
 /////////////////////// Pain Wall Class ///////////////////////
-
-PainWall::PainWall(RigidBody i_rb, Vector2f i_startPosition, Sector* i_sectPtr) :
-	Entity(i_rb, i_startPosition), sectPtr{ i_sectPtr }
+PainWall::PainWall(Vector2f i_startPosition, Sector* i_sectPtr, RigidBody i_rb) :
+	Entity(i_startPosition, i_rb, WALL_FIRE), sectPtr{ i_sectPtr }
 {
 	intangible = true;
 	fillColor = sf::Color::Red;
@@ -533,13 +571,9 @@ PainWall::~PainWall()
 {
 }
 
-
-
-
 /////////////////////// End Object ///////////////////////
-
-EndObject::EndObject(RigidBody i_rb, Vector2f i_startPosition, Sector * i_sectPtr) :
-	Entity(i_rb, i_startPosition), sectPtr{ i_sectPtr }
+EndObject::EndObject(Sector* i_sectPtr, Vector2f i_startPosition, RigidBody i_rb) :
+	Entity(i_startPosition, i_rb, END_LEVEL), sectPtr{ i_sectPtr }
 {
 	fillColor = sf::Color::Magenta;
 	outlineColor = sf::Color::Magenta;
@@ -550,25 +584,9 @@ EndObject::~EndObject()
 }
 
 
-/////////////////////// Blocker ///////////////////////
-
-Blocker::Blocker(RigidBody i_rb, Vector2f i_startPosition) :
-Entity(i_rb, i_startPosition)
-{
-	fillColor = sf::Color::Green;
-	outlineColor = sf::Color::Green;
-}
-
-Blocker::~Blocker()
-{
-}
-
-
 /////////////////////// Power Up ///////////////////////
-
-
-PowerUp::PowerUp(Sector * i_sectPtr, int i_powType, RigidBody i_rb, Vector2f i_startPosition) :
-	Entity(i_rb, i_startPosition), sectPtr{ i_sectPtr }, powType { i_powType }
+PowerUp::PowerUp(Sector * i_sectPtr, Vector2f i_startPosition, int i_powType, RigidBody i_rb) :
+	Entity(i_startPosition, i_rb, UPGRADE), sectPtr{ i_sectPtr }, powType { i_powType }
 {
 	switch (i_powType) {
 	case (0): {
@@ -582,8 +600,6 @@ PowerUp::PowerUp(Sector * i_sectPtr, int i_powType, RigidBody i_rb, Vector2f i_s
 		break;
 	}
 	}
-
-
 }
 
 PowerUp::~PowerUp()
@@ -596,29 +612,4 @@ void PowerUp::Update(float i_stepSize)
 {
 	rb.angVel = 0.03f;
 }
-
-
-/////////////////////// Blast ///////////////////////
-
-
-Blast::Blast(Sector* i_sectPtr, int i_blastType, RigidBody i_rb, Vector2f i_startPosition) :
-	Entity(i_rb, i_startPosition), sectPtr{ i_sectPtr }, blastType{ i_blastType }
-{
-	fillColor = sf::Color::Black;
-	outlineColor = sf::Color::Cyan;
-	intangible = true;
-	deathTimer = 1.0f;
-}
-
-Blast::~Blast()
-{
-}
-
-void Blast::Update(float i_stepSize)
-{
-	float secsInUpdate = i_stepSize / 1000.0f;
-	deathTimer -= secsInUpdate;
-	if (deathTimer <= 0) { Destroy(); }
-}
-
 

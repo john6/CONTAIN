@@ -180,11 +180,8 @@ void Game::RequestGoToNextLvl()
 
 void Game::InitGame(DIFFICULTY i_diff)
 {
-	std::shared_ptr<Shape> shape = std::make_shared<Rectangle>(100.0f, 100.0f);
-	Material Metal = Material(1.2f, 0.05f, 0.4f, 0.2f);
-	RigidBody rb(shape, Metal);
 	int startingHealth = 5 * (3 - i_diff);
-	playerChar = std::make_shared<PlayerChar>(PlayerChar(rb, Vector2f(400, 400.0), this, startingHealth));
+	playerChar = std::make_shared<PlayerChar>(this, startingHealth, Vector2f(400, 400.0));
 	playerChar->rb.transform.orient = 1.0f;
 	beginTime = std::chrono::high_resolution_clock::now();
 	numLvls = 5;
@@ -199,13 +196,14 @@ void Game::InitGame(DIFFICULTY i_diff)
 
 void Game::loadTestLevel()
 {
-	//Test scenario for pain walls making things spiral out of control
-	//std::shared_ptr<Shape> shape = std::make_shared<Rectangle>(100.0f, 100.0f);
+	//custom player
 	std::shared_ptr<Shape> shape = std::make_shared<Circle>(50.0f);
 	Material Metal = Material(1.2f, 0.05f, 0.4f, 0.2f);
 	RigidBody rb(shape, Metal);
 	int startingHealth = 999999;
-	playerChar = std::make_shared<PlayerChar>(PlayerChar(rb, Vector2f(200, 200.0), this, startingHealth));
+	playerChar = std::make_shared<PlayerChar>(PlayerChar(this, startingHealth, Vector2f(200, 200.0), rb));
+	//Default player
+	//playerChar = std::make_shared<PlayerChar>(PlayerChar(this, startingHealth, Vector2f(200, 200.0)));
 	playerChar->rb.transform.orient = 1.0f;
 	playerChar->rb.ApplyImpulse(Vector2f(0.0f, 160000.0f), Vector2f(0.0f, 0.0f));
 	beginTime = std::chrono::high_resolution_clock::now();

@@ -32,12 +32,6 @@ public:
 
 	std::shared_ptr<Sector> GetSector(MapCoord i_coord);
 
-	//void GenerateSector(int i_sectX, int i_sectY, int i_numCube, int i_numCirc);
-
-	//void ConnectSectors(int i_sectX1, int i_sectY1, int i_sectX2, int i_sectY2);
-
-	//Material GetMaterial(MATERIAL_TYPE mat);
-
 	void CreateSectorAtCoord(MapCoord i_coord);
 
 	void PopulateSectorAtCoord(MapCoord i_coord, int i_diff);

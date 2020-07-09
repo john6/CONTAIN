@@ -282,8 +282,8 @@ void Level::CreateBidirectionalDoor(MapCoord i_coordA, MapCoord i_coordB)
 	}
 	RigidBody doorBodyA(doorShapeA);
 	RigidBody doorBodyB(doorShapeB);
-	std::shared_ptr<Door> sectDoorA = std::make_shared<Door>(doorBodyA, startPosA, GetSector(i_coordA).get(), i_coordB, outPosA);
-	std::shared_ptr<Door> sectDoorB = std::make_shared<Door>(doorBodyB, startPosB, GetSector(i_coordB).get(), i_coordA, outPosB);
+	std::shared_ptr<Door> sectDoorA = std::make_shared<Door>(GetSector(i_coordA).get(), i_coordB, startPosA,outPosA, doorBodyA);
+	std::shared_ptr<Door> sectDoorB = std::make_shared<Door>(GetSector(i_coordB).get(), i_coordA, startPosB,outPosB, doorBodyB);
 	GetSector(i_coordA)->AddEntPtrToSector(sectDoorA);
 	GetSector(i_coordB)->AddEntPtrToSector(sectDoorB);
 }
@@ -292,43 +292,3 @@ void Level::RandomPlaceEndLevelObject()
 {
 	sectorVect[sectorVect.size() - 1]->AddEndLevelObject();
 }
-
-//Material Level::GetMaterial(MATERIAL_TYPE mat)
-//{
-//	switch (mat)
-//	{
-//	case ROCK: {
-//		return Material(0.6f, 0.1f, 0.6f, 0.3f);
-//	}
-//	case WOOD: {
-//		return Material(0.3f, 0.2f, 0.5f, 0.25f);
-//	}
-//	case METAL: {
-//		return Material(1.2f, 0.05f, 0.4f, 0.2f);
-//	}
-//	case BOUNCYBALL: {
-//		return Material(0.3f, 0.8f, 0.7f, 0.2f);
-//	}
-//	case SUPERBALL: {
-//		return Material(0.3f, 0.95f, 0.5f, 0.25f);
-//	}
-//	case PILLOW: {
-//		return Material(0.1f, 0.2f, 0.4f, 0.2f);
-//	}
-//	case STATIC: {
-//		return Material(0.0f, 0.0f, 0.4f, 0.2f);
-//	}
-//	case STATICVERYFRICTION: {
-//		return Material(0.0f, 0.0f, 0.9f, 0.7f);
-//	}
-//	case RUBBER: {
-//		return Material(0.3f, 0.8f, 0.9f, 0.6f);
-//	}
-//	case ICE: {
-//		return Material(0.3f, 0.1f, 0.7f, 0.05f);
-//	}
-//	default: {
-//		return Material(0.3f, 0.2f, 0.5f, 0.25f);
-//	}
-//	}
-//}
