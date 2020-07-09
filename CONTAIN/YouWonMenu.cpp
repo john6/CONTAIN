@@ -20,6 +20,20 @@ YouWonMenu::YouWonMenu(RESOURCES * i_resources) :
 	winText.setFillColor(sf::Color::White);
 	winText.setPosition(sf::Vector2f(100, 500));
 
+	prevScoreText.setFont(font);
+	std::string finalScoreText = "Your final score was 0!\n";
+	prevScoreText.setString(finalScoreText);
+	prevScoreText.setCharacterSize(25);
+	prevScoreText.setFillColor(sf::Color::White);
+	prevScoreText.setPosition(sf::Vector2f(100, 600));
+
+	highScoresText.setFont(font);
+	std::string highScoreListText = "uuuuuh this should have been set woopsies 0!\n";
+	highScoresText.setString(highScoreListText);
+	highScoresText.setCharacterSize(25);
+	highScoresText.setFillColor(sf::Color::White);
+	highScoresText.setPosition(sf::Vector2f(100, 700));
+
 	font = resources->GetFont();
 }
 
@@ -62,6 +76,30 @@ GAME_STATE YouWonMenu::Update(float microSeconds, sf::RenderWindow * window, sf:
 	}
 }
 
+
+void YouWonMenu::SetPrevScore(int i_prevScore)
+{
+	prevScore = i_prevScore;
+	//prevScoreText.setFont(font);
+	std::string finalScoreText = "Your final score was " + std::to_string(i_prevScore) + "!\n";
+	prevScoreText.setString(finalScoreText);
+	//prevScoreText.setCharacterSize(25);
+	//prevScoreText.setFillColor(sf::Color::White);
+	//prevScoreText.setPosition(sf::Vector2f(100, 600));
+}
+
+void YouWonMenu::SetHighScores(std::string i_highScores)
+{
+	//highScoresText.setFont(font);
+	std::string highScoreListText = i_highScores;
+	highScoresText.setString(highScoreListText);
+	//highScoresText.setCharacterSize(25);
+	//highScoresText.setFillColor(sf::Color::White);
+	//highScoresText.setPosition(sf::Vector2f(100, 700));
+}
+
+
+
 void YouWonMenu::Render(sf::RenderWindow * window)
 {
 	sf::Text playAgainText = playAgainButton.GetText();
@@ -76,6 +114,8 @@ void YouWonMenu::Render(sf::RenderWindow * window)
 	window->draw(quitButton.GetRect());
 	window->draw(quitButtonText);
 	window->draw(winText);
+	window->draw(prevScoreText);
+	window->draw(highScoresText);
 
 	window->display();
 }

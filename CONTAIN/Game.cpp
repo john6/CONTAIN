@@ -46,31 +46,14 @@ GAME_STATE Game::UpdateGeneral(float i_stepSize, sf::Vector2i i_mousePos) {
 }
 
 GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnts, float i_stepSize) {
-	/*
-	CURRENT STATE OF PHYSICS UPDATE EFFICIENCY
-	regular: 47-40 ms avg
-	parallel: 14-18 ms avg
-	quadtree only: 49-52
-	parallel & quadtree: 30-25 ms avg
-
-
-	fully parallelized
-	I think parallel is best is because my quadtree's insert function is not paralellizable
-	*/
-
-	/*
-	I think there might be double velocity or something going on. Gonna do some real lame checking
-
-	  */
 	playerChar->Update(i_stepSize);
 	auto iter = i_lvlEnts->begin();
 	while (iter != i_lvlEnts->end()) {
 		iter._Ptr->_Myval->Update(i_stepSize);
 		iter++;
 	}
-	//std::vector<CollisionData> collisions;
 	concurrency::concurrent_vector<CollisionData> collisions;
-	//PARALLEL WITHOUT QUAD
+
 	std::vector<int> parallelVect;
 	for (int i = 0; i < i_lvlEnts->size(); i++) {
 		parallelVect.push_back(i);
@@ -104,7 +87,6 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnt
 		}
 	});
 
-
 	std::vector<int> parCollisions;
 	for (int i = 0; i < collisions.size(); i++) {
 		parCollisions.push_back(i);
@@ -125,19 +107,9 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnt
 		entPVect[index]->rb.IntegrateVelocity(i_stepSize);
 	});
 
-	//for (auto iter = i_lvlEnts->begin(); iter != i_lvlEnts->end(); ++iter) {
-	//	std::shared_ptr<Entity> entPtr = iter._Ptr->_Myval;
-	//	entPtr->rb.IntegrateForces();
-	//	entPtr->rb.IntegrateVelocity(i_stepSize);
-	//}
-
 	std::for_each(std::execution::par, parCollisions.begin(), parCollisions.end(), [&](int index) {
 		Physics::PositionalCorrection(&collisions[index]);
 	});
-
-	//for (CollisionData collision : collisions) {
-	//	Physics::PositionalCorrection(&collision);
-	//}
 
 	levels[currLvl]->GetSector(currSector)->RemoveDestroyedEntities();
 
@@ -145,11 +117,6 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnt
 }
 
 void Game::Render(float i_elapsedMilliseconds) {
-	//QuadTree qTree = QuadTree(0, Vector2f(0.0f, 0.0f), SCREEN_WIDTH, SCREEN_HEIGHT);/*
-	//auto i_lvlEnts = levels[currLvl]->GetLvlEntites();
-	//for (auto iter1 = i_lvlEnts->begin(); iter1 != i_lvlEnts->end(); ++iter1) {
-	//	qTree.Insert(&(*iter1));
-	//}*/
 	GameRenderer::Render(renderWindow, i_elapsedMilliseconds, levels[currLvl]->GetSector(currSector)->GetSectorEntities(),
 						 playerChar.get(), HUD.GetDrawables());
 
@@ -167,7 +134,6 @@ void Game::TestCollision(std::shared_ptr<Entity> entA, std::shared_ptr<Entity> e
 void Game::GenerateLevels(DIFFICULTY i_diff) {
 	DeleteLevels();
 	for (int i = 0; i < numLvls; ++i) {
-		//std::unique_ptr<Level> lvl = std::make_unique<Level>(i, i_diff);
 		Level* lvl = new Level(i, i_diff, playerChar, resources);
 		levels.push_back(lvl);
 	}
@@ -202,6 +168,7 @@ void Game::RequestGoToNextLvl()
 {
 	if (currLvl < numLvls - 1) {
 		++currLvl;
+		currRunScore += LEVEL_SCORE_INCREASE;
 		currSector = levels[currLvl]->originCoord;
 		dynamic_cast<PlayerChar*>(playerChar.get())->ResetHealth();
 		dynamic_cast<PlayerChar*>(playerChar.get())->specialAmmo = 3;
@@ -222,6 +189,7 @@ void Game::InitGame(DIFFICULTY i_diff)
 	beginTime = std::chrono::high_resolution_clock::now();
 	numLvls = 5;
 	currLvl = 0;
+	currRunScore = 5;
 	timeToComplete = 999999999.0f;
 	playState = GENERAL_GAMEPLAY;
 	const microSec UPDATE_INTERVAL(16666);
@@ -250,7 +218,6 @@ void Game::loadTestLevel()
 	//generate levels test version
 	DeleteLevels();
 	for (int i = 0; i < numLvls; ++i) {
-		//std::unique_ptr<Level> lvl = std::make_unique<Level>(i, i_diff);
 		std::string str = "Test";
 		Level* lvl = new Level(str, playerChar ,resources);
 		levels.push_back(lvl);

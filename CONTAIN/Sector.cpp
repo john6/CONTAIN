@@ -7,7 +7,6 @@ Sector::Sector(std::shared_ptr<Entity> i_charPtr, RESOURCES* i_resources) :
 	sectEnemyNum = 0;
 }
 
-
 Sector::~Sector()
 {
 }

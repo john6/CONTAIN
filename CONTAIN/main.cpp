@@ -9,6 +9,7 @@
 #include "Menu.h"
 #include "YouWonMenu.h"
 #include "YouLostMenu.h"
+#include "SaveData.h"
 
 //TODO: Contact points should be in local space I think, I never convert them
 
@@ -23,9 +24,10 @@ int main()
 	//https://eigen.tuxfamily.org/dox//TopicMultiThreading.html
 	Eigen::initParallel();
 
+	SaveData saveData = SaveData();
+	//saveData.DisplayHighScores();
 
 	sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "CONTAIN");
-
 	int currLvl;
 	RESOURCES resources;
 	DIFFICULTY difficulty = MEDIUM;
@@ -35,7 +37,7 @@ int main()
 	YouLostMenu lostMenu(&resources);
 	GAME_STATE state = MENU;
 	bool justSwitchedBackToMenu = false;
-
+	int lastRunScore = 0;
 	hiRes_time_point currTime = hiResTime::now();
 	const microSec UPDATE_INTERVAL(16666);   //16666.66 microseconds ~~ 16 milliseconds == 60 updates per second
 	microSec lag(0);
@@ -71,6 +73,16 @@ int main()
 				microSec currInterval = std::chrono::duration_cast<microSec>(afterPhysicsUpdate - beforePhysicsUpdate);
 				std::string str = "Physics update took " + std::to_string(currInterval.count()) + " microseconds \n";
 				std::cout << str;
+				if (state == LOSE) {
+					saveData.SaveNewHighScore(globalGame.currRunScore);
+					lostMenu.SetPrevScore(globalGame.currRunScore);
+					lostMenu.SetHighScores(saveData.GetHighScoresString());
+				}
+				else if (state == WIN) {
+					saveData.SaveNewHighScore(globalGame.currRunScore);
+					winMenu.SetPrevScore(globalGame.currRunScore);
+					winMenu.SetHighScores(saveData.GetHighScoresString());
+				}
 				break;
 			}
 			case WIN: {
@@ -127,5 +139,6 @@ int main()
 		}
 		}
 	}
+	saveData.SaveDataToFile();
 	return 0;
 }

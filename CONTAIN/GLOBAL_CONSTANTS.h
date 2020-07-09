@@ -105,3 +105,6 @@ enum MATERIAL_TYPE {ROCK, WOOD, METAL, BOUNCYBALL, SUPERBALL, PILLOW, STATIC, ST
 typedef std::chrono::high_resolution_clock               hiResTime;
 typedef std::chrono::microseconds                        microSec;
 typedef std::chrono::high_resolution_clock::time_point   hiRes_time_point;
+
+//SCORE STUFF
+const float LEVEL_SCORE_INCREASE = 1000;

@@ -4,6 +4,7 @@
 YouLostMenu::YouLostMenu(RESOURCES * i_resources) :
 	resources{ i_resources }
 {
+	resources = i_resources;
 	sf::RectangleShape playAgainButtonRect(sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT));
 	playAgainButtonRect.setPosition(sf::Vector2f(100, 100));
 	tryAgainButton = Button("Try Again?", playAgainButtonRect);
@@ -19,7 +20,21 @@ YouLostMenu::YouLostMenu(RESOURCES * i_resources) :
 	loseText.setString("You lost, Damn u suck!\n");
 	loseText.setCharacterSize(25);
 	loseText.setFillColor(sf::Color::White);
-	loseText.setPosition(sf::Vector2f(100, 500));
+	loseText.setPosition(sf::Vector2f(100, 400));
+
+	prevScoreText.setFont(font);
+	std::string finalScoreText = "Your final score was 0!\n";
+	prevScoreText.setString(finalScoreText);
+	prevScoreText.setCharacterSize(25);
+	prevScoreText.setFillColor(sf::Color::White);
+	prevScoreText.setPosition(sf::Vector2f(100, 600));
+
+	highScoresText.setFont(font);
+	std::string highScoreListText = "uuuuuh this should have been set woopsies 0!\n";
+	highScoresText.setString(highScoreListText);
+	highScoresText.setCharacterSize(25);
+	highScoresText.setFillColor(sf::Color::White);
+	highScoresText.setPosition(sf::Vector2f(100, 700));
 
 	font = resources->GetFont();
 }
@@ -63,6 +78,27 @@ GAME_STATE YouLostMenu::Update(float microSeconds, sf::RenderWindow * window, sf
 	}
 }
 
+void YouLostMenu::SetPrevScore(int i_prevScore)
+{
+	prevScore = i_prevScore;
+	//prevScoreText.setFont(font);
+	std::string finalScoreText = "Your final score was " + std::to_string(i_prevScore) + "!\n";
+	prevScoreText.setString(finalScoreText);
+	//prevScoreText.setCharacterSize(25);
+	//prevScoreText.setFillColor(sf::Color::White);
+	//prevScoreText.setPosition(sf::Vector2f(100, 600));
+}
+
+void YouLostMenu::SetHighScores(std::string i_highScores)
+{
+	//highScoresText.setFont(font);
+	std::string highScoreListText = i_highScores;
+	highScoresText.setString(highScoreListText);
+	//highScoresText.setCharacterSize(25);
+	//highScoresText.setFillColor(sf::Color::White);
+	//highScoresText.setPosition(sf::Vector2f(100, 700));
+}
+
 void YouLostMenu::Render(sf::RenderWindow * window)
 {
 	sf::Text tryAgainButtonText = tryAgainButton.GetText();
@@ -77,6 +113,8 @@ void YouLostMenu::Render(sf::RenderWindow * window)
 	window->draw(quitButton.GetRect());
 	window->draw(quitButtonText);
 	window->draw(loseText);
+	window->draw(prevScoreText);
+	window->draw(highScoresText);
 
 	window->display();
 }

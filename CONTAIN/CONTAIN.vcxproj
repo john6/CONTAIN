@@ -40,6 +40,7 @@
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="Rectangle.cpp" />
     <ClCompile Include="RESOURCES.cpp" />
+    <ClCompile Include="SaveData.cpp" />
     <ClCompile Include="Sector.cpp" />
     <ClCompile Include="Shape.cpp" />
     <ClCompile Include="Transform.cpp" />
@@ -69,6 +70,7 @@
     <ClInclude Include="Rectangle.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="RESOURCES.h" />
+    <ClInclude Include="SaveData.h" />
     <ClInclude Include="Sector.h" />
     <ClInclude Include="Shape.h" />
     <ClInclude Include="Transform.h" />

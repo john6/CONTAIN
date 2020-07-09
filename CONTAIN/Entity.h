@@ -86,7 +86,7 @@ private:
 public:
 	float weaponDelay;
 	int specialAmmo;
-	bool scatterShot;
+	int numShots;
 
 	PlayerChar(RigidBody i_rb, Vector2f i_startPosition, Game* gamePtr, int i_strtHealth);
 	~PlayerChar();
@@ -115,7 +115,11 @@ public:
 
 	void CollideWithPowUp(PowerUp* i_powUpPtr) override;
 
-	void ScatterShot(Vector2f i_dir);
+	void ShootBasic(Vector2f i_mousePos);
+
+	void ShootWall(Vector2f i_mousePos);
+
+	void ShootAOE();
 };
 
 class Projectile :

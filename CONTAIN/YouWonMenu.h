@@ -14,6 +14,10 @@ private:
 	Button quitButton;
 	sf::Text winText;
 
+	int prevScore;
+	sf::Text prevScoreText;
+	sf::Text highScoresText;
+
 public:
 	RESOURCES* resources;
 
@@ -25,5 +29,9 @@ public:
 	GAME_STATE Update(float microSeconds, sf::RenderWindow* window, sf::Vector2i mousePosition);
 
 	void Render(sf::RenderWindow* window);
+
+	void SetPrevScore(int i_prevScore);
+
+	void SetHighScores(std::string i_highScores);
 };
 

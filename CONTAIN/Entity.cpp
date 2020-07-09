@@ -119,7 +119,7 @@ PlayerChar::PlayerChar(RigidBody i_rb, Vector2f i_startPosition, Game* i_gamePtr
 	Entity(i_rb, i_startPosition), gamePtr{ i_gamePtr },
 	pController{ PlayerController(i_gamePtr->renderWindow) }
 {
-	scatterShot = false;
+	numShots = 1;
 	fillColor = sf::Color::Yellow;
 	outlineColor = sf::Color::Red;
 	shipRateOfFire = 1.0f;
@@ -191,52 +191,16 @@ void PlayerChar::AddHealth(int i_healthUp)
 void PlayerChar::AcceptWeaponInput(float i_stepSize)
 {
 	Vector2f leftMousePos = pController.LeftClick();
-	weaponDelay = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastShotFired)).count() / 1000000.0f;
-	if (!leftMousePos.isZero() && (weaponDelay >= shipRateOfFire)) {
-		lastShotFired = hiResTime::now();
-		Vector2f projectileDir = leftMousePos - rb.transform.pos;
-		projectileDir.normalize();
-		if (scatterShot) { ScatterShot(projectileDir); }
-		else {
-			std::shared_ptr<Shape> projectileShape = std::make_shared<Circle>(PROJECTILE_RADIUS);
-			Material HeavyBall = Material(0.9f, 0.95f, 0.5f, 0.25f);
-			RigidBody projBody = RigidBody(projectileShape, HeavyBall);
-			projBody.ApplyImpulse((projectileDir * 3000.0f), NULL_VECTOR);
-			std::shared_ptr<Entity> projectile = std::make_shared<Projectile>(projBody,
-				rb.transform.pos + (projectileDir * 100.0f));
-			gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector)->AddEntPtrToSector(projectile);
-		}
+	if (!leftMousePos.isZero()) {
+		ShootBasic(leftMousePos);
 	}
-
 	Vector2f rightMousePos = pController.RightClick();
-	weaponDelay = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastShotFired)).count() / 1000000.0f;
-	if (!rightMousePos.isZero() && (weaponDelay >= shipRateOfFire)) {
-		lastShotFired = hiResTime::now();
-		Vector2f projectileDir = rightMousePos - rb.transform.pos;
-		projectileDir.normalize();
-		std::shared_ptr<Shape> projectileShape = std::make_shared<Rectangle>(40, 270);
-		Material HeavyBall = Material(0.9f, 0.95f, 0.5f, 0.25f);
-		RigidBody projBody = RigidBody(projectileShape, HeavyBall);
-		projBody.ApplyImpulse((projectileDir * 7000.0f), NULL_VECTOR);
-		projBody.ResetOrientation(projectileDir);
-		std::shared_ptr<Entity> projectile = std::make_shared<Blocker>(projBody,
-			rb.transform.pos + (projectileDir * 100.0f));
-		gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector)->AddEntPtrToSector(projectile);
+	if (!rightMousePos.isZero()) {
+		ShootWall(rightMousePos);
 	}
-
 	bool scrollClick = pController.ScrollClick();
-	weaponDelay = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastShotFired)).count() / 1000000.0f;
-	if (scrollClick && (weaponDelay >= shipRateOfFire) && (specialAmmo > 0)) {
-		--specialAmmo;
-		lastShotFired = hiResTime::now();
-		Vector2f projectileDir = rightMousePos - rb.transform.pos;
-		projectileDir.normalize();
-		std::shared_ptr<Shape> projectileShape = std::make_shared<Circle>(175);
-	Material Static = Material(0.0f, 0.0f, 0.4f, 0.2f);
-		RigidBody projBody = RigidBody(projectileShape, Static);
-		std::shared_ptr<Entity> projectile = std::make_shared<Blast>(gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector).get(),
-			0, projBody, rb.transform.pos);
-		gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector)->AddEntPtrToSector(projectile);
+	if (scrollClick) {
+		ShootAOE();
 	}
 }
 
@@ -280,45 +244,77 @@ void PlayerChar::CollideWithPowUp(PowerUp* i_powUpPtr)
 		shipRateOfFire *= 0.5f;
 		break;
 	}
-	case (1): { //rate of fire
-		scatterShot = true;
+	case (1): { //number of shots
+		numShots += 1;
 		break;
 	}
 	}
 	i_powUpPtr->Destroy();
 }
 
-void PlayerChar::ScatterShot(Vector2f i_dir)
+void PlayerChar::ShootBasic(Vector2f i_mousePos)
 {
-	float radAngle = Math::VectToAngle(i_dir);
-	float radAngle2 = radAngle + 0.174533;
-	float radAngle3 = radAngle - 0.174533;
-	Vector2f dir2 = Math::AngleToVect(radAngle2);
-	Vector2f dir3 = Math::AngleToVect(radAngle3);
+	weaponDelay = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastShotFired)).count() / 1000000.0f;
+	if (weaponDelay >= shipRateOfFire) {
+		lastShotFired = hiResTime::now();
+		Vector2f projDir = i_mousePos - rb.transform.pos;
+		projDir.normalize();
+		float prevAngleRads;
+		Vector2f prevDirVect;
+		float mouseAngleRad = Math::VectToAngle(projDir);
+		float currAngleRads = mouseAngleRad - (0.0872665 * (numShots - 1));
+		//Original angle is shifted back so cluster is still centered on cursor
+		Vector2f currDirVect = Math::AngleToVect(currAngleRads);
+		int i = 0;
+		while (i < numShots) {
+			std::shared_ptr<Shape> projectileShape = std::make_shared<Circle>(PROJECTILE_RADIUS);
+			Material HeavyBall = Material(0.9f, 0.95f, 0.5f, 0.25f);
+			RigidBody projBody = RigidBody(projectileShape, HeavyBall);
+			projBody.ApplyImpulse((currDirVect * 3000.0f), NULL_VECTOR);
+			std::shared_ptr<Entity> projectile = std::make_shared<Projectile>(projBody,
+				rb.transform.pos + (currDirVect * (100.0f + (i * 15.0f))));
+			gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector)->AddEntPtrToSector(projectile);
+			prevAngleRads = currAngleRads;
+			prevDirVect = currDirVect;
+			currAngleRads = prevAngleRads + 0.174533;
+			currDirVect = Math::AngleToVect(currAngleRads);
+			i++;
+		}
+	}
+}
 
-	std::shared_ptr<Shape> projectileShape = std::make_shared<Circle>(PROJECTILE_RADIUS);
-	Material HeavyBall = Material(0.9f, 0.95f, 0.5f, 0.25f);
-	RigidBody projBody = RigidBody(projectileShape, HeavyBall);
-	projBody.ApplyImpulse((i_dir * 3000.0f), NULL_VECTOR);
-	std::shared_ptr<Entity> projectile = std::make_shared<Projectile>(projBody,
-		rb.transform.pos + (i_dir * 140.0f));
-	gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector)->AddEntPtrToSector(projectile);
+void PlayerChar::ShootWall(Vector2f i_mousePos)
+{
+	weaponDelay = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastShotFired)).count() / 1000000.0f;
+	if (weaponDelay >= shipRateOfFire) {
+		lastShotFired = hiResTime::now();
+		Vector2f projectileDir = i_mousePos - rb.transform.pos;
+		projectileDir.normalize();
+		ShootWall(projectileDir);
+		std::shared_ptr<Shape> projectileShape = std::make_shared<Rectangle>(40, 270);
+		Material HeavyBall = Material(0.9f, 0.95f, 0.5f, 0.25f);
+		RigidBody projBody = RigidBody(projectileShape, HeavyBall);
+		projBody.ApplyImpulse((projectileDir * 7000.0f), NULL_VECTOR);
+		projBody.ResetOrientation(projectileDir);
+		std::shared_ptr<Entity> projectile = std::make_shared<Blocker>(projBody,
+			rb.transform.pos + (projectileDir * 100.0f));
+		gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector)->AddEntPtrToSector(projectile);
+	}
+}
 
-	std::shared_ptr<Shape> projectileShape2 = std::make_shared<Circle>(PROJECTILE_RADIUS);
-	Material HeavyBall2 = Material(0.9f, 0.95f, 0.5f, 0.25f);
-	RigidBody projBody2 = RigidBody(projectileShape2, HeavyBall2);
-	projBody2.ApplyImpulse((dir2 * 3000.0f), NULL_VECTOR);
-	std::shared_ptr<Entity> projectile2 = std::make_shared<Projectile>(projBody2,
-		rb.transform.pos + (dir2 * 120.0f));
-	gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector)->AddEntPtrToSector(projectile2);
-
-	std::shared_ptr<Shape> projectileShape3 = std::make_shared<Circle>(PROJECTILE_RADIUS);
-	Material HeavyBall3 = Material(0.9f, 0.95f, 0.5f, 0.25f);
-	RigidBody projBody3 = RigidBody(projectileShape3, HeavyBall3);
-	projBody3.ApplyImpulse((dir3 * 3000.0f), NULL_VECTOR);
-	std::shared_ptr<Entity> projectile3 = std::make_shared<Projectile>(projBody3,
-		rb.transform.pos + (dir3 * 100.0f));
-	gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector)->AddEntPtrToSector(projectile3);
+void PlayerChar::ShootAOE()
+{
+	weaponDelay = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastShotFired)).count() / 1000000.0f;
+	if ((weaponDelay >= shipRateOfFire) && (specialAmmo > 0)) {
+		--specialAmmo;
+		lastShotFired = hiResTime::now();
+		std::shared_ptr<Shape> projectileShape = std::make_shared<Circle>(175);
+		Material Static = Material(0.0f, 0.0f, 0.4f, 0.2f);
+		RigidBody projBody = RigidBody(projectileShape, Static);
+		std::shared_ptr<Entity> projectile = std::make_shared<Blast>(gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector).get(),
+			0, projBody, rb.transform.pos);
+		gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector)->AddEntPtrToSector(projectile);
+	}
 }
 
 ///////////////////////Projectile Class ///////////////////////

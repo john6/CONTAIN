@@ -40,7 +40,10 @@ private:
 	bool playerWon;
 
 
+
 public:
+
+	int currRunScore;
 
 	RESOURCES* resources;
 	MapCoord currSector;

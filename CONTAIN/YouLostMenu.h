@@ -9,10 +9,13 @@ class YouLostMenu
 {
 private:
 
+	int prevScore;
 	sf::Font font;
 	Button tryAgainButton;
 	Button quitButton;
 	sf::Text loseText;
+	sf::Text prevScoreText;
+	sf::Text highScoresText;
 
 public:
 	RESOURCES* resources;
@@ -23,6 +26,10 @@ public:
 	bool PollInput(sf::Vector2i mousePosition, Button* button, bool stickyButton = false);
 
 	GAME_STATE Update(float microSeconds, sf::RenderWindow* window, sf::Vector2i mousePosition);
+
+	void SetPrevScore(int i_prevScore);
+
+	void SetHighScores(std::string i_highScores);
 
 	void Render(sf::RenderWindow* window);
 };
