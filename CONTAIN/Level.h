@@ -3,7 +3,11 @@
 #include "GLOBAL_CONSTANTS.h"
 #include "Entity.h"
 #include "RigidBody.h"
+#include <stdlib.h>
+#include <random>
+#include <queue>
 #include "Sector.h"
+#include "Entity.h"
 
 struct MapNode;
 
@@ -20,6 +24,15 @@ protected:
 	int dimSize;
 
 public:
+	
+	bool phaseOne;
+
+	hiRes_time_point beginTime;
+	microSec timeElapsed;
+	float timeToComplete;
+
+	std::shared_ptr<Entity> charPtr;
+	MapCoord bossRoom;
 	RESOURCES* resources;
 	int m_lvl_num;
 	MapCoord originCoord;
@@ -27,8 +40,6 @@ public:
 	Level(int i_levelNum, DIFFICULTY i_diff, std::shared_ptr<Entity> i_charPtr, RESOURCES* i_resources);
 	Level(std::string i_testStr, std::shared_ptr<Entity> i_charPtr, RESOURCES* i_resources);
 	~Level();
-
-	std::shared_ptr<Entity> charPtr;
 
 	std::shared_ptr<Sector> GetSector(MapCoord i_coord);
 
@@ -40,5 +51,11 @@ public:
 
 	void CreateBidirectionalDoor(MapCoord i_coordA, MapCoord i_coordB);
 
-	void RandomPlaceEndLevelObject();
+	void PopulateBossRoom();
+
+	float GetTimeLeftInLevel();
+
+	void SwitchSectorsToPhaseTwo();
+
+	void UpdateLevel();
 };

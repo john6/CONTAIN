@@ -1,7 +1,4 @@
 #include "Level.h"
-#include <stdlib.h>
-#include <random>
-#include <queue>
 
 struct MapNode {
 	MapNode() : isRoom{ false }, up{ true }, down{ true }, left{ true }, right{ true },
@@ -20,6 +17,8 @@ struct MapNode {
 Level::Level(int i_lvlNum, DIFFICULTY i_diff, std::shared_ptr<Entity> i_charPtr, RESOURCES* i_resources) :
 	charPtr { i_charPtr }, resources { i_resources }
 {
+	phaseOne = true;
+	timeToComplete = 100.0f;
 
 	std::random_device rd1;  //Will be used to obtain a seed for the random number engine
 	std::mt19937 gen1(rd1()); //Standard mersenne_twister_engine seeded with rd()
@@ -42,6 +41,8 @@ Level::Level(int i_lvlNum, DIFFICULTY i_diff, std::shared_ptr<Entity> i_charPtr,
 	sectorMap = std::vector<std::vector<MapNode>>(dimSize, std::vector<MapNode>(dimSize, MapNode()));
 	originCoord = MapCoord((dimSize / 2) + 1, (dimSize / 2) + 1);
 	CreateSectorAtCoord(originCoord);
+
+	GetSector(originCoord)->PopulateEntranceRoom();
 
 	std::queue<MapCoord> fringe;
 	fringe.push(originCoord);
@@ -128,10 +129,7 @@ Level::Level(int i_lvlNum, DIFFICULTY i_diff, std::shared_ptr<Entity> i_charPtr,
 			}
 		}
 	}
-	//for (std::shared_ptr<Sector> sect : sectorVect) {
-	//	sect->InitializeSector();
-	//}
-	RandomPlaceEndLevelObject();
+	PopulateBossRoom();
 }
 
 Level::Level(std::string i_testStr, std::shared_ptr<Entity> i_charPtr, RESOURCES* i_resources) : charPtr{ i_charPtr }, resources{ i_resources }
@@ -170,9 +168,7 @@ std::shared_ptr<Sector> Level::GetSector(MapCoord i_coord)
 
 void Level::CreateSectorAtCoord(MapCoord i_coord)
 {
-	std::shared_ptr<Sector> newSector = std::make_shared<Sector>(charPtr, resources);
-	//newSector->AddWallsToLevel();
-	//GenerateLevelCubes(1);
+	std::shared_ptr<Sector> newSector = std::make_shared<Sector>(this, resources);
 	sectorVect.push_back(newSector);
 	sectorMap[i_coord.x][i_coord.y].vectIndex = sectorVect.size() - 1;
 	sectorMap[i_coord.x][i_coord.y].isRoom = true;
@@ -191,8 +187,10 @@ void Level::PopulateSectorAtCoord(MapCoord i_coord, int i_diff)
 	std::discrete_distribution<> extraRoomDist({ 40, 40, 15, 5 });
 	int randExtraRooms = extraRoomDist(genRoomSeed);
 	int numCubes = 1 + i_diff + randExtraRooms;
-	GetSector(i_coord)->GenerateLevelCubes(numCubes);
-	GetSector(i_coord)->GenerateLevelCircles(1);
+	GetSector(i_coord)->GenerateLevelCubes(numCubes, 1);
+	GetSector(i_coord)->GenerateLevelCubes(numCubes * 3, 2);
+	GetSector(i_coord)->GenerateLevelCircles(1, 1);
+	GetSector(i_coord)->GenerateLevelCircles(3 * 3, 2);
 
 	std::discrete_distribution<> smallTerrainDist({ 40, 50, 5, 5 });
 	std::discrete_distribution<> BigTerrainDist({ 85, 10, 5 });
@@ -233,8 +231,8 @@ void Level::CreateOneWayDoor(MapCoord i_CoordA, MapCoord i_CoordB)
 void Level::CreateBidirectionalDoor(MapCoord i_coordA, MapCoord i_coordB)
 {
 	float doorOutPadding = 150.0f;
-	float horizontalMiddle = HOR_MARGIN + (COURT_WIDTH / 2.0f);
-	float verticleMiddle = VERT_MARGIN + (COURT_HEIGHT / 2.0f);
+	float horizontalMiddle = GLOBAL_CONSTANTS::HOR_MARGIN + (GLOBAL_CONSTANTS::COURT_WIDTH / 2.0f);
+	float verticleMiddle = GLOBAL_CONSTANTS::VERT_MARGIN + (GLOBAL_CONSTANTS::COURT_HEIGHT / 2.0f);
 
 	int yDist = i_coordB.y - i_coordA.y;
 	int xDist = i_coordB.x - i_coordA.x;
@@ -248,34 +246,34 @@ void Level::CreateBidirectionalDoor(MapCoord i_coordA, MapCoord i_coordB)
 	if (yDist == 1) { //UP
 		doorShapeA = std::make_shared<Rectangle>(DOOR_WIDTH, DOOR_HEIGHT);
 		doorShapeB = std::make_shared<Rectangle>(DOOR_WIDTH, DOOR_HEIGHT);
-		startPosA = Vector2f(horizontalMiddle, VERT_MARGIN  + COURT_HEIGHT + (DOOR_HEIGHT * ( 1.0f / 2.0f)));
-		startPosB = Vector2f(horizontalMiddle, VERT_MARGIN - (DOOR_HEIGHT * (1.0f / 2.0f)));
-		outPosA = Vector2f(horizontalMiddle, VERT_MARGIN + doorOutPadding);
-		outPosB = Vector2f(horizontalMiddle, VERT_MARGIN + COURT_HEIGHT - doorOutPadding);
+		startPosA = Vector2f(horizontalMiddle, GLOBAL_CONSTANTS::VERT_MARGIN  + GLOBAL_CONSTANTS::COURT_HEIGHT + (DOOR_HEIGHT * ( 1.0f / 2.0f)));
+		startPosB = Vector2f(horizontalMiddle, GLOBAL_CONSTANTS::VERT_MARGIN - (DOOR_HEIGHT * (1.0f / 2.0f)));
+		outPosA = Vector2f(horizontalMiddle, GLOBAL_CONSTANTS::VERT_MARGIN + doorOutPadding);
+		outPosB = Vector2f(horizontalMiddle, GLOBAL_CONSTANTS::VERT_MARGIN + GLOBAL_CONSTANTS::COURT_HEIGHT - doorOutPadding);
 	}
 	else if (yDist == -1) { //DOWN
 		doorShapeA = std::make_shared<Rectangle>(DOOR_WIDTH, DOOR_HEIGHT);
 		doorShapeB = std::make_shared<Rectangle>(DOOR_WIDTH, DOOR_HEIGHT);
-		startPosA = Vector2f(horizontalMiddle, VERT_MARGIN - (DOOR_HEIGHT * (1.0f / 2.0f)));
-		startPosB = Vector2f(horizontalMiddle, VERT_MARGIN + COURT_HEIGHT + (DOOR_HEIGHT * (1.0f / 2.0f)));
-		outPosA = Vector2f(horizontalMiddle, VERT_MARGIN + COURT_HEIGHT - doorOutPadding);
-		outPosB = Vector2f(horizontalMiddle, VERT_MARGIN + doorOutPadding);
+		startPosA = Vector2f(horizontalMiddle, GLOBAL_CONSTANTS::VERT_MARGIN - (DOOR_HEIGHT * (1.0f / 2.0f)));
+		startPosB = Vector2f(horizontalMiddle, GLOBAL_CONSTANTS::VERT_MARGIN + GLOBAL_CONSTANTS::COURT_HEIGHT + (DOOR_HEIGHT * (1.0f / 2.0f)));
+		outPosA = Vector2f(horizontalMiddle, GLOBAL_CONSTANTS::VERT_MARGIN + GLOBAL_CONSTANTS::COURT_HEIGHT - doorOutPadding);
+		outPosB = Vector2f(horizontalMiddle, GLOBAL_CONSTANTS::VERT_MARGIN + doorOutPadding);
 	}
 	else if (xDist == -1) { //LEFT
 		doorShapeA = std::make_shared<Rectangle>(DOOR_HEIGHT, DOOR_WIDTH);
 		doorShapeB = std::make_shared<Rectangle>(DOOR_HEIGHT, DOOR_WIDTH);
-		startPosA = Vector2f(HOR_MARGIN - (DOOR_HEIGHT * (1.0f / 2.0f)), verticleMiddle);
-		startPosB = Vector2f(HOR_MARGIN + COURT_WIDTH + (DOOR_HEIGHT * (1.0f / 2.0f)), verticleMiddle);
-		outPosA = Vector2f(COURT_WIDTH + HOR_MARGIN - doorOutPadding, verticleMiddle);
-		outPosB = Vector2f(HOR_MARGIN + doorOutPadding, verticleMiddle);
+		startPosA = Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN - (DOOR_HEIGHT * (1.0f / 2.0f)), verticleMiddle);
+		startPosB = Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + GLOBAL_CONSTANTS::COURT_WIDTH + (DOOR_HEIGHT * (1.0f / 2.0f)), verticleMiddle);
+		outPosA = Vector2f(GLOBAL_CONSTANTS::COURT_WIDTH + GLOBAL_CONSTANTS::HOR_MARGIN - doorOutPadding, verticleMiddle);
+		outPosB = Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + doorOutPadding, verticleMiddle);
 	}
 	else if (xDist == 1) { //RIGHT
 		doorShapeA = std::make_shared<Rectangle>(DOOR_HEIGHT, DOOR_WIDTH);
 		doorShapeB = std::make_shared<Rectangle>(DOOR_HEIGHT, DOOR_WIDTH);
-		startPosA = Vector2f(HOR_MARGIN + COURT_WIDTH + (DOOR_HEIGHT * (1.0f / 2.0f)), verticleMiddle);
-		startPosB = Vector2f(HOR_MARGIN - (DOOR_HEIGHT * (1.0f / 2.0f)), verticleMiddle);
-		outPosA = Vector2f(HOR_MARGIN + doorOutPadding, verticleMiddle);
-		outPosB = Vector2f(COURT_WIDTH + HOR_MARGIN - doorOutPadding, verticleMiddle);
+		startPosA = Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + GLOBAL_CONSTANTS::COURT_WIDTH + (DOOR_HEIGHT * (1.0f / 2.0f)), verticleMiddle);
+		startPosB = Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN - (DOOR_HEIGHT * (1.0f / 2.0f)), verticleMiddle);
+		outPosA = Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + doorOutPadding, verticleMiddle);
+		outPosB = Vector2f(GLOBAL_CONSTANTS::COURT_WIDTH + GLOBAL_CONSTANTS::HOR_MARGIN - doorOutPadding, verticleMiddle);
 	}
 	else {
 		//wtf these rooms arent adjacent
@@ -288,7 +286,43 @@ void Level::CreateBidirectionalDoor(MapCoord i_coordA, MapCoord i_coordB)
 	GetSector(i_coordB)->AddEntPtrToSector(sectDoorB);
 }
 
-void Level::RandomPlaceEndLevelObject()
+void Level::PopulateBossRoom()
 {
-	sectorVect[sectorVect.size() - 1]->AddEndLevelObject();
+	sectorVect[sectorVect.size() - 1]->PopulateBossRoom();
+}
+
+float Level::GetTimeLeftInLevel()
+{
+	if (phaseOne) {
+		return timeToComplete;
+	}
+	else {
+		timeElapsed = std::chrono::duration_cast<std::chrono::seconds>(hiResTime::now() - beginTime);
+		float timeElapsedCount = timeElapsed.count();
+		timeElapsedCount = timeElapsedCount / 1000000;
+		float timeLeft = timeToComplete - timeElapsedCount;
+		return timeLeft;
+	}
+}
+
+void Level::SwitchSectorsToPhaseTwo()
+{
+	phaseOne = false;
+	beginTime = hiResTime::now();
+	for (auto sectorPtr : sectorVect) {
+		sectorPtr->SwitchToPhaseTwo();
+	}
+}
+
+void Level::UpdateLevel()
+{
+	if (!phaseOne) {
+		timeElapsed = std::chrono::duration_cast<std::chrono::seconds>(hiResTime::now() - beginTime);
+		float timeElapsedCount = timeElapsed.count();
+		timeElapsedCount = timeElapsedCount / 1000000;
+		float timeLeft = timeToComplete - timeElapsedCount;
+		if (timeLeft <= 0) {
+			dynamic_cast<PlayerChar*>(charPtr.get())->TakeDamage(1);
+		}
+	}
 }

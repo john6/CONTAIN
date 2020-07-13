@@ -186,7 +186,7 @@ public:
 	std::shared_ptr<Entity> charPtr;
 	float speed;
 	float stunSecs;
-
+	bool metal;
 
 	Enemy(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, Vector2f i_startPosition, RigidBody i_rb, TypeID i_typeID = ENEMY_SEEK);
 	~Enemy();
@@ -202,6 +202,8 @@ public:
 	void CollideWithBlast(Blast* i_blastPtr) override;
 
 	void Stun(float i_stunTime);
+
+	void TurnToMetal();
 };
 
 class CrazyBoi :
@@ -274,9 +276,14 @@ private:
 	Sector* sectPtr;
 
 public:
+	bool active;
+
 	EndObject(Sector* i_sectPtr, Vector2f i_startPosition, RigidBody i_rb = 
 		RigidBody(std::make_shared<Rectangle>(100.0f, 100.0f), STATIC));
 	~EndObject();
+
+
+	void Update(float i_stepSize) override;
 };
 
 class PowerUp :

@@ -7,6 +7,7 @@
 
 //https://www.fluentcpp.com/2019/07/23/how-to-define-a-global-constant-in-cpp/
 //according to this article I should be adding extern here but that means I have to define these variables elsewhere also because I dont use CPP17
+//07/13/2020- I am now using CPP17, things are still working without extern, maybe I should switch it still. TODO
 
 //EIGEN STUFF
 //Using a typedef jus to remove one level of namespace might be a little gratuitous but everyone keeps telling me namespaces are bad sooo
@@ -32,16 +33,6 @@ typedef struct MapCoord
 	int y; 
 } MapCoord;
 
-//WINDOW RESOLUTION
-const int SCREEN_WIDTH = 1800;
-const int SCREEN_HEIGHT = 900;
-
-//GAME RESOLUTION
-const float COURT_WIDTH = static_cast<float>(SCREEN_WIDTH * 9.0f / 10.0f);
-const float COURT_HEIGHT = static_cast<float>(SCREEN_HEIGHT * 9.0f / 10.0f);
-const float HOR_MARGIN = static_cast<float>(SCREEN_WIDTH / 20.0f);         //horizontal margin
-const float VERT_MARGIN = static_cast<float>(SCREEN_HEIGHT / 20.0f);       //vertical margin
-
 //GENERAL GAME SETTINGS
 const float WALL_THICKNESS = 100.0f;
 const float MICROSECS_TO_MILLISECS = 1000.0f;
@@ -65,6 +56,7 @@ const float ANGULAR_VELOCITY_ADJUSTMENT = 0.15f; //IDK where my angular velocity
 const Material ROCK = Material(0.6f, 0.1f, 0.6f, 0.3f);
 const Material WOOD = Material(0.3f, 0.2f, 0.5f, 0.25f);
 const Material METAL = Material(1.2f, 0.05f, 0.4f, 0.2f);
+const Material DENSE_METAL = Material(1.9f, 0.05f, 0.4f, 0.2f);
 const Material BOUNCYBALL = Material(0.3f, 0.8f, 0.7f, 0.2f);
 const Material HEAVYBALL = Material(0.9f, 0.95f, 0.5f, 0.25f);
 const Material SUPERBALL = Material(0.3f, 0.95f, 0.5f, 0.25f);
@@ -90,11 +82,6 @@ const Vector2f DOWN(0.0f, -1.0f);
 const Vector2f LEFT(-1.0f, 0.0f);
 const Vector2f RIGHT(1.0f, 0.0f);
 const Vector2f NULL_VECTOR(0.0f, 0.0f);
-
-//MENU SETTINGS
-const float BUTTON_WIDTH = SCREEN_WIDTH / 3;
-const float BUTTON_HEIGHT = SCREEN_HEIGHT / 10;
-
 
 //~~DIFFICULTY SETTINGS~~
 //
@@ -129,3 +116,32 @@ typedef std::chrono::high_resolution_clock::time_point   hiRes_time_point;
 
 //SCORE STUFF
 const float LEVEL_SCORE_INCREASE = 1000;
+
+class GLOBAL_CONSTANTS
+{
+public:
+	//WINDOW SETTINGS
+	static unsigned int SCREEN_WIDTH;
+	static unsigned int SCREEN_HEIGHT;
+
+	//GAME RESOLUTION
+	static float COURT_WIDTH;
+	static float COURT_HEIGHT;
+	static float HOR_MARGIN;   //horizontal margin
+	static float VERT_MARGIN;  //vertical margin
+
+	//MENU RESOLUTION
+	static float BUTTON_WIDTH;
+	static float BUTTON_HEIGHT;
+
+
+public:
+	//GLOBAL_CONSTANTS(unsigned int i_screenWidth, unsigned int i_screenHeight);
+
+	static void SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_screenHeight);
+
+	GLOBAL_CONSTANTS();
+	~GLOBAL_CONSTANTS();
+
+
+};

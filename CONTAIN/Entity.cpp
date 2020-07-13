@@ -253,7 +253,9 @@ void PlayerChar::CollideWithDoor(Door * i_doorPtr)
 
 void PlayerChar::CollideWithEndObject(EndObject * i_endPtr)
 {
-	gamePtr->RequestGoToNextLvl();
+	if (i_endPtr->active) {
+		gamePtr->RequestGoToNextLvl();
+	}
 }
 
 void PlayerChar::CollideWithPowUp(PowerUp* i_powUpPtr)
@@ -416,6 +418,7 @@ void Blast::Update(float i_stepSize)
 Enemy::Enemy(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, Vector2f i_startPosition, RigidBody i_rb, TypeID i_typeID) :
 	Entity(i_startPosition, i_rb, i_typeID), charPtr { i_charPtr }, sectPtr{ i_sectPtr }
 {
+	metal = false;
 	fillColor = sf::Color::Magenta;
 	outlineColor = sf::Color::White;
 	speed = 15;
@@ -453,7 +456,9 @@ void Enemy::CollideWithPainWall(PainWall * i_painWallPtr)
 
 void Enemy::CollideWithPlayer(PlayerChar * i_playerPtr)
 {
-	i_playerPtr->TakeDamage(1.0f);
+	if (!metal) {
+		i_playerPtr->TakeDamage(1.0f);
+	}
 }
 
 void Enemy::CollideWithBlast(Blast * i_blastPtr)
@@ -466,6 +471,14 @@ void Enemy::CollideWithBlast(Blast * i_blastPtr)
 void Enemy::Stun(float i_stunTime)
 {
 	stunSecs = i_stunTime;
+}
+
+void Enemy::TurnToMetal()
+{
+	metal = true;
+	fillColor = sf::Color(128, 128, 128);
+	outlineColor = sf::Color::White;
+	rb.mat = DENSE_METAL;
 }
 
 /////////////////////// CrazyBoi class ///////////////////////
@@ -575,12 +588,27 @@ PainWall::~PainWall()
 EndObject::EndObject(Sector* i_sectPtr, Vector2f i_startPosition, RigidBody i_rb) :
 	Entity(i_startPosition, i_rb, END_LEVEL), sectPtr{ i_sectPtr }
 {
-	fillColor = sf::Color::Magenta;
-	outlineColor = sf::Color::Magenta;
+	fillColor = sf::Color::Black;
+	outlineColor = sf::Color::White;
+	active = false;
 }
 
 EndObject::~EndObject()
 {
+}
+
+void EndObject::Update(float i_stepSize)
+{
+	if (sectPtr->firstPhase) {
+		fillColor = sf::Color::Black;
+		outlineColor = sf::Color::White;
+		active = false;
+	}
+	else {
+		fillColor = sf::Color::Magenta;
+		outlineColor = sf::Color::Magenta;
+		active = true;
+	}
 }
 
 

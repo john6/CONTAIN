@@ -5,6 +5,7 @@
 #include "RESOURCES.h"
 #include "Entity.h"
 #include "RigidBody.h"
+#include "Level.h"
 
 class Sector
 {
@@ -13,17 +14,21 @@ class Sector
 
 public:
 
-	std::list<std::shared_ptr<Entity>> lvlEntities;
+	std::list<std::shared_ptr<Entity>> lvlEntitiesPhase1;
+	std::list<std::shared_ptr<Entity>> lvlEntitiesPhase2;
+
+	bool isBossRoom;
+	bool firstPhase;
 	int sectEnemyNum;
-	std::shared_ptr<Entity> playerChar;
+	Level* myLevel;
 
 	std::list<std::shared_ptr<Entity>>* GetSectorEntities();
 
 	void AddEntPtrToSector(std::shared_ptr<Entity> i_entPtr);
 
-	void GenerateLevelCubes(int i_numCubes);
+	void GenerateLevelCubes(int i_numCubes, int i_phaseNum);
 
-	void GenerateLevelCircles(int i_numCircs);
+	void GenerateLevelCircles(int i_numCircs, int i_phaseNum);
 
 	void AddWallsToLevel();
 
@@ -31,7 +36,8 @@ public:
 
 	void AddRandomPainWall(int i_index);
 
-	void AddEndLevelObject();
+	void PopulateEntranceRoom();
+	void PopulateBossRoom();
 
 	void RemoveDestroyedEntities();
 
@@ -41,7 +47,11 @@ public:
 
 	void PlaySound(int i_soundNum);
 
-	Sector(std::shared_ptr<Entity> i_charPtr, RESOURCES* i_resources);
+	void SwitchToPhaseTwo();
+
+	void SwitchLevelToPhaseTwo();
+
+	Sector(Level* i_lvlPtr, RESOURCES* i_resources);
 	~Sector();
 
 private:
@@ -50,4 +60,3 @@ private:
 	Sector(const Sector& that);
 	Sector& operator=(const Sector& that) = delete;
 };
-

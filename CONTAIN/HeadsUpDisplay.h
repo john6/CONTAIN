@@ -12,7 +12,7 @@ private:
 	RESOURCES* resources;
 	sf::Font font;
 	sf::Text lvlNumText;
-	//sf::Text timeRemainingText;
+	sf::Text timeRemainingText;
 	sf::Text healthRemainingText;
 	sf::Text enemiesRemainingText;
 	sf::Text BasicWeaponCharge;

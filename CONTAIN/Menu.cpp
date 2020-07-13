@@ -5,30 +5,30 @@ Menu::Menu(RESOURCES* i_resources, DIFFICULTY i_defaultDiff) :
 	resources {i_resources}
 {
 
-	sf::RectangleShape playButtonRect(sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT));
+	sf::RectangleShape playButtonRect(sf::Vector2f(GLOBAL_CONSTANTS::BUTTON_WIDTH, GLOBAL_CONSTANTS::BUTTON_HEIGHT));
 	playButtonRect.setPosition(sf::Vector2f(100, 100));
 	playButton = Button("Play", playButtonRect);
 	playButton.SetColors(sf::Color::Black, sf::Color::White, sf::Color(128, 128, 128));
 
-	sf::RectangleShape exitButtonRect(sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT));
-	exitButtonRect.setPosition(sf::Vector2f(BUTTON_WIDTH * 1.35f, 100));
+	sf::RectangleShape exitButtonRect(sf::Vector2f(GLOBAL_CONSTANTS::BUTTON_WIDTH, GLOBAL_CONSTANTS::BUTTON_HEIGHT));
+	exitButtonRect.setPosition(sf::Vector2f(GLOBAL_CONSTANTS::BUTTON_WIDTH * 1.35f, 100));
 	exitButton = Button("Exit", exitButtonRect);
 	exitButton.SetColors(sf::Color::Black, sf::Color::White, sf::Color(128, 128, 128));
 
-	sf::RectangleShape easyButtonRect(sf::Vector2f(BUTTON_WIDTH * .75f, BUTTON_HEIGHT));
-	easyButtonRect.setPosition(sf::Vector2f(70, 150 + BUTTON_HEIGHT));
+	sf::RectangleShape easyButtonRect(sf::Vector2f(GLOBAL_CONSTANTS::BUTTON_WIDTH * .75f, GLOBAL_CONSTANTS::BUTTON_HEIGHT));
+	easyButtonRect.setPosition(sf::Vector2f(70, 150 + GLOBAL_CONSTANTS::BUTTON_HEIGHT));
 	easyButton = Button("Easy", easyButtonRect);
 	easyButton.SetColors(sf::Color::Green, sf::Color::White, sf::Color(128, 128, 128));
 	easyButton.SetState(Button::UP);
 
-	sf::RectangleShape mediumButtonRect(sf::Vector2f(BUTTON_WIDTH * .75f, BUTTON_HEIGHT));
-	mediumButtonRect.setPosition(sf::Vector2f(70 + (BUTTON_WIDTH * 0.85f), 150 + BUTTON_HEIGHT));
+	sf::RectangleShape mediumButtonRect(sf::Vector2f(GLOBAL_CONSTANTS::BUTTON_WIDTH * .75f, GLOBAL_CONSTANTS::BUTTON_HEIGHT));
+	mediumButtonRect.setPosition(sf::Vector2f(70 + (GLOBAL_CONSTANTS::BUTTON_WIDTH * 0.85f), 150 + GLOBAL_CONSTANTS::BUTTON_HEIGHT));
 	mediumButton = Button("Medium", mediumButtonRect);
 	mediumButton.SetColors(sf::Color::Yellow, sf::Color::White, sf::Color(128, 128, 128));
 	mediumButton.SetState(Button::UP);
 
-	sf::RectangleShape hardButtonRect(sf::Vector2f(BUTTON_WIDTH * .75f, BUTTON_HEIGHT));
-	hardButtonRect.setPosition(sf::Vector2f(70 + (BUTTON_WIDTH * 1.70f), 150 + BUTTON_HEIGHT));
+	sf::RectangleShape hardButtonRect(sf::Vector2f(GLOBAL_CONSTANTS::BUTTON_WIDTH * .75f, GLOBAL_CONSTANTS::BUTTON_HEIGHT));
+	hardButtonRect.setPosition(sf::Vector2f(70 + (GLOBAL_CONSTANTS::BUTTON_WIDTH * 1.70f), 150 + GLOBAL_CONSTANTS::BUTTON_HEIGHT));
 	hardButton = Button("Hard", hardButtonRect);
 	hardButton.SetColors(sf::Color::Red, sf::Color::White, sf::Color(128, 128, 128));
 	hardButton.SetState(Button::UP);

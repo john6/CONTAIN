@@ -18,7 +18,7 @@ GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vecto
 	float millisecLag = abs(i_microSecs / MICROSECS_TO_MILLISECS);
 	float timeLeft = timeToComplete - timeElapsed.count();
 	int timeLeftSeconds = timeLeft / 1000000;
-	HUD.Update(currLvl, timeLeftSeconds, playerChar);
+	HUD.Update(currLvl, levels[currLvl]->GetTimeLeftInLevel(), playerChar);
 	//if (timeLeft <= 0) {
 	//	return LOSE;
 	//}
@@ -35,6 +35,7 @@ GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vecto
 }
 
 GAME_STATE Game::UpdateGeneral(float i_stepSize, sf::Vector2i i_mousePos) {
+	levels[currLvl]->UpdateLevel();
 	UpdateLvlEntities(levels[currLvl]->GetSector(currSector)->GetSectorEntities(), i_stepSize);
 	if (playerWon) {
 		return WIN;

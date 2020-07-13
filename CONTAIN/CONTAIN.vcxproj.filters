@@ -96,6 +96,9 @@
     <ClCompile Include="SaveData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GLOBAL_CONSTANTS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameRenderer.h">

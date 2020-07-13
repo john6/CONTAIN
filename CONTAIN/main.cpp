@@ -12,6 +12,10 @@
 #include "SaveData.h"
 
 //TODO: Contact points should be in local space I think, I never convert them
+//sf::RenderWindow window(sf::VideoMode(1800, 900), "CONTAIN", sf::Style::Fullscreen);
+//sf::Vector2u size = window.getSize();
+//const extern unsigned int GlobVars::SCREEN_WIDTH = size.x;
+//const extern unsigned int GlobVars::SCREEN_HEIGHT = size.y;
 
 int main()
 {
@@ -27,7 +31,36 @@ int main()
 	SaveData saveData = SaveData();
 	//saveData.DisplayHighScores();
 
-	sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "CONTAIN");
+
+	//sf::RenderWindow window(sf::VideoMode(1800, 900), "CONTAIN", sf::Style::Fullscreen);
+	//sf::RenderWindow window(sf::VideoMode(GlobVars::SCREEN_WIDTH, GlobVars::SCREEN_HEIGHT), sf::Style::Fullscreen);
+	//sf::Vector2u size = window.getSize();
+	//unsigned int windowWidth = size.x;
+	//unsigned int windowHeight = size.y;
+	//const extern unsigned int GlobVars::SCREEN_WIDTH = size.x;
+	//const extern unsigned int GlobVars::SCREEN_HEIGHT = size.y;
+	sf::RenderWindow window(sf::VideoMode(1800, 900), "CONTAIN", sf::Style::Fullscreen);
+	sf::Vector2u size = window.getSize();
+	unsigned int screenWidth = size.x;
+	unsigned int screenHeight = size.y;
+	//GLOBAL_CONSTANTS globVars();
+	GLOBAL_CONSTANTS::SetGlobalConstants(screenWidth, screenHeight);
+	////WINDOW SETTINGS
+	//unsigned int GLOBAL_CONSTANTS::SCREEN_WIDTH = screenWidth;
+	//unsigned int GLOBAL_CONSTANTS::SCREEN_HEIGHT = screenHeight;
+
+	////GAME RESOLUTION
+	//float GLOBAL_CONSTANTS::COURT_WIDTH = static_cast<float>(GLOBAL_CONSTANTS::SCREEN_WIDTH * 9.0f / 10.0f);
+	//float GLOBAL_CONSTANTS::COURT_HEIGHT = static_cast<float>(GLOBAL_CONSTANTS::SCREEN_HEIGHT * 9.0f / 10.0f);
+	//float GLOBAL_CONSTANTS::HOR_MARGIN = static_cast<float>(GLOBAL_CONSTANTS::SCREEN_WIDTH / 20.0f);         //horizontal margin
+	//float GLOBAL_CONSTANTS::VERT_MARGIN = static_cast<float>(GLOBAL_CONSTANTS::SCREEN_HEIGHT / 20.0f);       //vertical margin
+
+	////MENU RESOLUTION
+	//float GLOBAL_CONSTANTS::BUTTON_WIDTH = GLOBAL_CONSTANTS::SCREEN_WIDTH / 3;
+	//float GLOBAL_CONSTANTS::BUTTON_HEIGHT = GLOBAL_CONSTANTS::SCREEN_HEIGHT / 10;
+
+
+
 	int currLvl;
 	RESOURCES resources;
 	DIFFICULTY difficulty = MEDIUM;
