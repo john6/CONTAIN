@@ -5,7 +5,7 @@ UpgradeMenu::UpgradeMenu(RESOURCES * i_resources, DIFFICULTY i_diff, PlayerChar*
 {
 	std::random_device rd1;  //Will be used to obtain a seed for the random number engine
 	std::mt19937 gen1(rd1()); //Standard mersenne_twister_engine seeded with rd()
-	std::uniform_int_distribution<> distrib(0, 1); //both boundaries are inclusive
+	std::uniform_int_distribution<> distrib(1, 6); //both boundaries are inclusive
 	upgradeA = distrib(gen1);
 	upgradeB = distrib(gen1);
 	upgradeC = distrib(gen1);
@@ -69,9 +69,9 @@ bool UpgradeMenu::PollInput(sf::Vector2i mousePosition, Button * button, bool st
 
 void UpgradeMenu::PollButtonTriplet(sf::Vector2i mousePosition)
 {
-	if (PollInput(mousePosition, &upgradeButtonA, true)) { UpdateButtonTriplet(EASY); }
-	else if (PollInput(mousePosition, &upgradeButtonB, true)) { UpdateButtonTriplet(MEDIUM); }
-	else if (PollInput(mousePosition, &upgradeButtonC, true)) { UpdateButtonTriplet(HARD); }
+	if (PollInput(mousePosition, &upgradeButtonA, true)) { UpdateButtonTriplet(1); }
+	else if (PollInput(mousePosition, &upgradeButtonB, true)) { UpdateButtonTriplet(2); }
+	else if (PollInput(mousePosition, &upgradeButtonC, true)) { UpdateButtonTriplet(3); }
 }
 
 void UpgradeMenu::UpdateButtonTriplet(int i_upgradeSelected)
@@ -105,6 +105,10 @@ std::string UpgradeMenu::GetUpgradeText(UPGRADE_TYPE i_type)
 {
 	std::string upgradeString = "";
 	switch (i_type) {
+	case NONE: {
+		upgradeString = "Big oopsie everyone this is an error";
+		break;
+	}
 	case RATE_OF_FIRE : {
 		upgradeString = "double rate of fire";
 			break;
@@ -117,6 +121,10 @@ std::string UpgradeMenu::GetUpgradeText(UPGRADE_TYPE i_type)
 		upgradeString = "decrease ship size, increase speed";
 		break;
 	}
+	case BIG_SHIP: {
+		upgradeString = "increase ship size, increase health";
+		break;
+	}
 	case BLAST : {
 		upgradeString = "Make blast larger";
 		break;
@@ -125,10 +133,10 @@ std::string UpgradeMenu::GetUpgradeText(UPGRADE_TYPE i_type)
 		upgradeString = "increase wall size";
 		break;
 	}
-	case WALL_HURT: {
-		upgradeString = "make walls hurt enemies";
-		break;
-	}
+	//case WALL_HURT: {
+	//	upgradeString = "make walls hurt enemies";
+	//	break;
+	//}
 	}
 	return upgradeString;
 }
@@ -137,7 +145,7 @@ UpgradeMenu::~UpgradeMenu()
 {
 }
 
-int UpgradeMenu::Update(float microSeconds, sf::RenderWindow * window, sf::Vector2i i_mousePos)
+UPGRADE_TYPE UpgradeMenu::Update(float microSeconds, sf::RenderWindow * window, sf::Vector2i i_mousePos)
 {
 	if (firstOpen) {
 		firstOpen = false;
@@ -151,10 +159,10 @@ int UpgradeMenu::Update(float microSeconds, sf::RenderWindow * window, sf::Vecto
 			return currUpgradeType;
 		}
 		else {
-			return -1;
+			return NONE;
 		}
 	}
-	return -1;
+	return NONE;
 }
 
 void UpgradeMenu::Render(sf::RenderWindow * window)

@@ -51,3 +51,19 @@ float Rectangle::GetInertiaCoeff()
 {
 	return (pow(width, 2) + pow(height, 2)) / 12.0f;
 }
+
+void Rectangle::ChangeSizeOfShape(float i_widthOrRadius, float i_heightOrGarbage)
+{
+	width = i_widthOrRadius;
+	height = i_heightOrGarbage;
+}
+
+float Rectangle::GetWidth()
+{
+	return width;
+}
+
+float Rectangle::GetHeight()
+{
+	return height;
+}

@@ -9,7 +9,6 @@
 
 class UpgradeMenu
 {
-	enum UPGRADE_TYPE { RATE_OF_FIRE, SCATTER, SMALL_SHIP, BLAST, WALL_BIG, WALL_HURT };
 
 private:
 	sf::Font font;
@@ -35,7 +34,7 @@ public:
 	UpgradeMenu(RESOURCES* i_resources, DIFFICULTY i_diff, PlayerChar* i_player);
 	~UpgradeMenu();
 
-	int Update(float microSeconds, sf::RenderWindow* window, sf::Vector2i i_mousePos);
+	UPGRADE_TYPE Update(float microSeconds, sf::RenderWindow* window, sf::Vector2i i_mousePos);
 
 	void Render(sf::RenderWindow* window);
 };

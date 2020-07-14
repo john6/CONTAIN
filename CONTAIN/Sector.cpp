@@ -104,30 +104,36 @@ void Sector::AddWallsToLevel()
 {
 	Material Static = Material(0.0f, 0.4f, 0.4f, 0.2f);
 
+	float wall_thick = 5.0f;
 
-	std::shared_ptr<Shape> vertRect1 = std::make_shared<Rectangle>(GLOBAL_CONSTANTS::HOR_MARGIN, GLOBAL_CONSTANTS::COURT_HEIGHT);
+	//Right wall
+	std::shared_ptr<Shape> vertRect1 = std::make_shared<Rectangle>(GLOBAL_CONSTANTS::HOR_MARGIN * wall_thick, GLOBAL_CONSTANTS::COURT_HEIGHT * 2.0f);
 	RigidBody rightWallBody = RigidBody(vertRect1, Static);
 	std::shared_ptr<Entity> rightWall = std::make_shared<Wall>(
-		Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + (GLOBAL_CONSTANTS::COURT_WIDTH)+(GLOBAL_CONSTANTS::HOR_MARGIN / 2.0f), GLOBAL_CONSTANTS::VERT_MARGIN + (GLOBAL_CONSTANTS::COURT_HEIGHT / 2.0f)), this, rightWallBody);
+		Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + (GLOBAL_CONSTANTS::COURT_WIDTH) + ((GLOBAL_CONSTANTS::HOR_MARGIN * wall_thick) / 2.0f),
+				GLOBAL_CONSTANTS::VERT_MARGIN + (GLOBAL_CONSTANTS::COURT_HEIGHT / 2.0f)), this, rightWallBody);
 	lvlEntitiesPhase1.push_back(rightWall);
-
-	std::shared_ptr<Shape> vertRect2 = std::make_shared<Rectangle>(GLOBAL_CONSTANTS::HOR_MARGIN, GLOBAL_CONSTANTS::COURT_HEIGHT);
+	//Left wall
+	std::shared_ptr<Shape> vertRect2 = std::make_shared<Rectangle>(GLOBAL_CONSTANTS::HOR_MARGIN * wall_thick, GLOBAL_CONSTANTS::COURT_HEIGHT * 2.0f);
 	RigidBody leftWallBody = RigidBody(vertRect2, Static);
 	std::shared_ptr<Entity> leftWall = std::make_shared<Wall>(
-		Vector2f((GLOBAL_CONSTANTS::HOR_MARGIN / 2.0f), GLOBAL_CONSTANTS::VERT_MARGIN + (GLOBAL_CONSTANTS::COURT_HEIGHT / 2.0f)), this, leftWallBody);
+		Vector2f((GLOBAL_CONSTANTS::HOR_MARGIN / 2.0f) - (GLOBAL_CONSTANTS::HOR_MARGIN * 2.0),
+			GLOBAL_CONSTANTS::VERT_MARGIN + (GLOBAL_CONSTANTS::COURT_HEIGHT / 2.0f)), this, leftWallBody);
 	AddEntPtrToSector(leftWall);
-
-	std::shared_ptr<Shape> horRect1 = std::make_shared<Rectangle>(GLOBAL_CONSTANTS::COURT_WIDTH + (GLOBAL_CONSTANTS::HOR_MARGIN * 2), GLOBAL_CONSTANTS::VERT_MARGIN);
+	//Top wall
+	std::shared_ptr<Shape> horRect1 = std::make_shared<Rectangle>(GLOBAL_CONSTANTS::COURT_WIDTH + (GLOBAL_CONSTANTS::HOR_MARGIN * 8), GLOBAL_CONSTANTS::VERT_MARGIN * wall_thick);
 	RigidBody wallBody1 = RigidBody(horRect1, Static);
 	std::shared_ptr<Entity> upperWall = std::make_shared<Wall>(
-		Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + (GLOBAL_CONSTANTS::COURT_WIDTH / 2.0f), (GLOBAL_CONSTANTS::VERT_MARGIN / 2.0f)), this, wallBody1);
+		Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + (GLOBAL_CONSTANTS::COURT_WIDTH / 2.0f), 
+				- (GLOBAL_CONSTANTS::VERT_MARGIN * 1.5f)), this, wallBody1);
 	lvlEntitiesPhase1.push_back(upperWall);
 
-
-	std::shared_ptr<Shape> horRect2 = std::make_shared<Rectangle>(GLOBAL_CONSTANTS::COURT_WIDTH + (GLOBAL_CONSTANTS::HOR_MARGIN * 2), GLOBAL_CONSTANTS::VERT_MARGIN);
+	//Bottom wall
+	std::shared_ptr<Shape> horRect2 = std::make_shared<Rectangle>(GLOBAL_CONSTANTS::COURT_WIDTH + (GLOBAL_CONSTANTS::HOR_MARGIN * 8), GLOBAL_CONSTANTS::VERT_MARGIN * wall_thick);
 	RigidBody lowerWallBody = RigidBody(horRect2, Static);
 	std::shared_ptr<Entity> lowerWall = std::make_shared<Wall>(
-		Vector2f(Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + (GLOBAL_CONSTANTS::COURT_WIDTH / 2.0f), (GLOBAL_CONSTANTS::VERT_MARGIN / 2.0f) + GLOBAL_CONSTANTS::COURT_HEIGHT + GLOBAL_CONSTANTS::VERT_MARGIN)), this, lowerWallBody);
+		Vector2f(Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + (GLOBAL_CONSTANTS::COURT_WIDTH / 2.0f),
+			(GLOBAL_CONSTANTS::VERT_MARGIN * 2.5f) + GLOBAL_CONSTANTS::COURT_HEIGHT + GLOBAL_CONSTANTS::VERT_MARGIN)), this, lowerWallBody);
 	lvlEntitiesPhase1.push_back(lowerWall);
 
 }
@@ -263,6 +269,50 @@ void Sector::PopulateEntranceRoom()
 	std::shared_ptr<Entity> lowerWall = std::make_shared<EndObject>(this,
 				Vector2f(Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + (GLOBAL_CONSTANTS::COURT_WIDTH / 2.0f), GLOBAL_CONSTANTS::COURT_HEIGHT / 2.0)));
 	lvlEntitiesPhase1.push_back(lowerWall);
+
+	//std::shared_ptr<Entity> rofPOW = std::make_shared<PowerUp>(this,
+	//	Vector2f(Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + (GLOBAL_CONSTANTS::COURT_WIDTH / 4.0f), GLOBAL_CONSTANTS::COURT_HEIGHT / 2.0)), RATE_OF_FIRE);
+	//lvlEntitiesPhase1.push_back(rofPOW);
+
+	//std::shared_ptr<Entity> scatterPOW = std::make_shared<PowerUp>(this,
+	//	Vector2f(Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + (GLOBAL_CONSTANTS::COURT_WIDTH / 4.0f), GLOBAL_CONSTANTS::COURT_HEIGHT / 2.0)), SCATTER);
+	//lvlEntitiesPhase1.push_back(scatterPOW);
+
+	std::shared_ptr<Entity> smallShipPOW = std::make_shared<PowerUp>(this,
+		Vector2f(Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + (GLOBAL_CONSTANTS::COURT_WIDTH / 4.0f), GLOBAL_CONSTANTS::COURT_HEIGHT / 2.0)), SMALL_SHIP);
+	lvlEntitiesPhase1.push_back(smallShipPOW);
+
+	std::shared_ptr<Entity> smallShipPOW2 = std::make_shared<PowerUp>(this,
+		Vector2f(Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + (GLOBAL_CONSTANTS::COURT_WIDTH * (3.0f / 4.0f)), GLOBAL_CONSTANTS::COURT_HEIGHT / 2.0)), SMALL_SHIP);
+	lvlEntitiesPhase1.push_back(smallShipPOW2);
+
+	std::shared_ptr<Entity> smallShipPOW3 = std::make_shared<PowerUp>(this,
+		Vector2f(Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + (GLOBAL_CONSTANTS::COURT_WIDTH / 4.0f), GLOBAL_CONSTANTS::COURT_HEIGHT / 4.0)), SMALL_SHIP);
+	lvlEntitiesPhase1.push_back(smallShipPOW3);
+
+	std::shared_ptr<Entity> smallShipPOW4 = std::make_shared<PowerUp>(this,
+		Vector2f(Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + (GLOBAL_CONSTANTS::COURT_WIDTH * (3.0f / 4.0f)), GLOBAL_CONSTANTS::COURT_HEIGHT / 4.0)), SMALL_SHIP);
+	lvlEntitiesPhase1.push_back(smallShipPOW4);
+
+	//std::shared_ptr<Entity> bigShipPOW = std::make_shared<PowerUp>(this,
+	//	Vector2f(Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + (GLOBAL_CONSTANTS::COURT_WIDTH / 4.0f), GLOBAL_CONSTANTS::COURT_HEIGHT / 2.0)), BIG_SHIP);
+	//lvlEntitiesPhase1.push_back(bigShipPOW);
+
+	//std::shared_ptr<Entity> bigShipPOW2 = std::make_shared<PowerUp>(this,
+	//	Vector2f(Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + (GLOBAL_CONSTANTS::COURT_WIDTH  * (3.0f/ 4.0f)), GLOBAL_CONSTANTS::COURT_HEIGHT / 2.0)), BIG_SHIP);
+	//lvlEntitiesPhase1.push_back(bigShipPOW2);
+
+	//std::shared_ptr<Entity> blastPOW = std::make_shared<PowerUp>(this,
+	//	Vector2f(Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + (GLOBAL_CONSTANTS::COURT_WIDTH * (3.0f / 4.0f)), GLOBAL_CONSTANTS::COURT_HEIGHT / 2.0)), BLAST);
+	//lvlEntitiesPhase1.push_back(blastPOW);
+
+	//std::shared_ptr<Entity> blastPOW2 = std::make_shared<PowerUp>(this,
+	//	Vector2f(Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + (GLOBAL_CONSTANTS::COURT_WIDTH * (1.0f / 4.0f)), GLOBAL_CONSTANTS::COURT_HEIGHT / 2.0)), BLAST);
+	//lvlEntitiesPhase1.push_back(blastPOW2);
+
+	//std::shared_ptr<Entity> wallBigPOW = std::make_shared<PowerUp>(this,
+	//	Vector2f(Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + (GLOBAL_CONSTANTS::COURT_WIDTH * (3.0f / 4.0f)), GLOBAL_CONSTANTS::COURT_HEIGHT / 2.0)), WALL_BIG);
+	//lvlEntitiesPhase1.push_back(wallBigPOW);
 }
 
 void Sector::PopulateBossRoom()
@@ -273,14 +323,6 @@ void Sector::PopulateBossRoom()
 	RigidBody projBody = RigidBody(shape, ROCK);
 	std::shared_ptr<Entity> ent = std::make_shared<ShootyBoi>(myLevel->charPtr, this, Vector2f(400.0f, 400.0f), projBody);
 	lvlEntitiesPhase1.push_back(ent);
-
-	std::shared_ptr<Entity> lowerWall2 = std::make_shared<PowerUp>(this,
-		Vector2f(Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + (GLOBAL_CONSTANTS::COURT_WIDTH / 4.0f), GLOBAL_CONSTANTS::COURT_HEIGHT / 2.0)), 0);
-	lvlEntitiesPhase1.push_back(lowerWall2);
-
-	std::shared_ptr<Entity> lowerWall3 = std::make_shared<PowerUp>(this,
-		Vector2f(Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + (GLOBAL_CONSTANTS::COURT_WIDTH * (3.0f / 4.0f)), GLOBAL_CONSTANTS::COURT_HEIGHT / 2.0)), 1);
-	lvlEntitiesPhase1.push_back(lowerWall3);
 }
 
 void Sector::RemoveDestroyedEntities() {

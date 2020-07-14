@@ -5,6 +5,7 @@
 #include <chrono>
 //#include <thread>
 #include <execution>
+#include <random>
 #include <concurrent_vector.h>
 #include <SFML/Audio.hpp>
 #include "GLOBAL_CONSTANTS.h"
@@ -82,5 +83,7 @@ public:
 	void InitGame(DIFFICULTY i_diff);
 
 	void loadTestLevel(); 
+
+	void PlayRandomSong();
 };
 

@@ -25,12 +25,18 @@ GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vecto
 			break;
 		}
 		case (WON_LEVEL): {
-			int upgradeResult = currUpgradeMenu->Update(i_microSecs, i_window, i_mousePos);
-			if (upgradeResult != -1) {
-				dynamic_cast<PlayerChar*>(playerChar.get())->ReceivePowerUp(upgradeResult);
+			UPGRADE_TYPE upgradeResult = currUpgradeMenu->Update(i_microSecs, i_window, i_mousePos);
+			if (upgradeResult != NONE) {
+				PlayerChar* playerPtr = dynamic_cast<PlayerChar*>(playerChar.get());
+				playerPtr->ReceivePowerUp(upgradeResult);
 				playState = GENERAL_GAMEPLAY;
 				++currLvl;
 				currSector = levels[currLvl]->originCoord;
+				currRunScore += LEVEL_SCORE_INCREASE;
+				playerPtr->ResetHealth();
+				playerPtr->ResetSpecialAmmo();
+				resources->PlaySound(RESOURCES::SOUNDS::MAJORPICKUP);
+				PlayRandomSong();
 			}
 			return IN_GAME;
 			break;
@@ -180,11 +186,7 @@ void Game::SpawnProjectile()
 void Game::RequestGoToNextLvl()
 {
 	if (currLvl < numLvls - 1) {
-		//++currLvl;
-		currRunScore += LEVEL_SCORE_INCREASE;
-		//currSector = levels[currLvl]->originCoord;
-		dynamic_cast<PlayerChar*>(playerChar.get())->ResetHealth();
-		dynamic_cast<PlayerChar*>(playerChar.get())->specialAmmo = 3;
+		resources->PlaySound(RESOURCES::SOUNDS::LEVELUP);
 		playState = WON_LEVEL;
 		currUpgradeMenu = std::make_shared<UpgradeMenu>(resources, gameDiff, dynamic_cast<PlayerChar*>(playerChar.get()));
 	}
@@ -196,7 +198,7 @@ void Game::RequestGoToNextLvl()
 void Game::InitGame(DIFFICULTY i_diff)
 {
 	gameDiff = i_diff;
-	int startingHealth = 5 * (3 - i_diff);
+	int startingHealth = 9999; //5 * (3 - i_diff);
 	playerChar = std::make_shared<PlayerChar>(this, startingHealth, Vector2f(400, 400.0));
 	playerChar->rb.transform.orient = 1.0f;
 	beginTime = std::chrono::high_resolution_clock::now();
@@ -208,6 +210,7 @@ void Game::InitGame(DIFFICULTY i_diff)
 	const microSec UPDATE_INTERVAL(16666);
 	playerWon = false;
 	GenerateLevels(i_diff);
+	PlayRandomSong();
 }
 
 void Game::loadTestLevel()
@@ -237,6 +240,16 @@ void Game::loadTestLevel()
 		levels.push_back(lvl);
 	}
 	currSector = levels[currLvl]->originCoord;
+}
+
+void Game::PlayRandomSong()
+{
+	std::random_device rd1;  //Will be used to obtain a seed for the random number engine
+	std::mt19937 gen1(rd1()); //Standard mersenne_twister_engine seeded with rd()
+	std::uniform_int_distribution<> distrib(1, 6); //both boundaries are inclusive
+	int randExtra = distrib(gen1);
+	resources->PlayMusicFromFile(randExtra);
+	//resources->PlayMusicFromFile(1);
 }
 
 

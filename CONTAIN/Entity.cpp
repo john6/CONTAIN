@@ -152,8 +152,12 @@ PlayerChar::PlayerChar(Game* i_gamePtr, int i_strtHealth, Vector2f i_startPositi
 	dmgRate = 1.0f;
 	maxHealth = i_strtHealth;
 	health = maxHealth;
-	specialAmmo = 3;
+	currSpecialAmmo = 3;
 	weaponDelay = shipRateOfFire;
+	wallWidth = 40;
+	wallHeight = 270;
+	BlastRadius = 175;
+	maxSpecialAmmo = 3;
 }
 
 PlayerChar::~PlayerChar()
@@ -206,6 +210,16 @@ void PlayerChar::ResetHealth()
 	health = maxHealth;
 }
 
+void PlayerChar::ResetSpecialAmmo()
+{
+	currSpecialAmmo = maxSpecialAmmo;
+}
+
+void PlayerChar::AddSpecialAmmo(int i_ammo)
+{
+	currSpecialAmmo = std::min(currSpecialAmmo + i_ammo, maxSpecialAmmo);
+}
+
 void PlayerChar::AddHealth(int i_healthUp)
 {
 	health = std::max(health + i_healthUp, maxHealth);
@@ -231,21 +245,42 @@ void PlayerChar::TakeDamage(float i_dmg)
 {
 	auto timeSinceDamaged = std::chrono::duration_cast<std::chrono::seconds>(hiResTime::now() - lastDamageReceived);
 	if (timeSinceDamaged.count() >= dmgRate) {
-		gamePtr->resources->PlaySound(1);
+		gamePtr->resources->PlaySound(3);
 		lastDamageReceived = hiResTime::now();
 		health -= i_dmg;
 	}
 }
 
-void PlayerChar::ReceivePowerUp(int i_powType)
+void PlayerChar::ReceivePowerUp(UPGRADE_TYPE i_powType)
 {
 	switch (i_powType) {
-	case (0): { //rate of fire
+	case (RATE_OF_FIRE): { //rate of fire
 		shipRateOfFire *= 0.5f;
 		break;
 	}
-	case (1): { //number of shots
+	case (SCATTER): { //number of shots
 		numShots += 1;
+		break;
+	}
+	case (SMALL_SHIP): { //number of shots
+		auto playerRect = dynamic_cast<Rectangle*>(rb.shape.get());
+		rb.ChangeSizeOfShape(playerRect->GetWidth() - 15.0f, playerRect->GetHeight() - 15.0f);
+		break;
+	}
+	case (BIG_SHIP): { //number of shots
+		auto playerRect = dynamic_cast<Rectangle*>(rb.shape.get());
+		rb.ChangeSizeOfShape(playerRect->GetWidth() + 15.0f, playerRect->GetHeight() + 15.0f);
+		maxHealth += 5;
+		shipSpeed += 15;
+		break;
+	}
+	case (BLAST): { //number of shots
+		BlastRadius += 50;
+		break;
+	}
+	case (WALL_BIG): { //number of shots
+		wallWidth += 10;
+		wallHeight += 50;
 		break;
 	}
 	}
@@ -327,7 +362,8 @@ void PlayerChar::ShootWall(Vector2f i_mousePos)
 		projectileDir.normalize();
 		ShootWall(projectileDir);
 		std::shared_ptr<Entity> projectile = std::make_shared<Blocker>(
-								rb.transform.pos + (projectileDir * 100.0f));
+								rb.transform.pos + (projectileDir * 100.0f),
+								RigidBody(std::make_shared<Rectangle>(wallWidth, wallHeight), HEAVYBALL));
 		projectile->rb.ApplyImpulse((projectileDir * 7000.0f), NULL_VECTOR);
 		projectile->rb.ResetOrientation(projectileDir);
 		gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector)->AddEntPtrToSector(projectile);
@@ -337,12 +373,12 @@ void PlayerChar::ShootWall(Vector2f i_mousePos)
 void PlayerChar::ShootAOE()
 {
 	weaponDelay = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastShotFired)).count() / 1000000.0f;
-	if ((weaponDelay >= shipRateOfFire) && (specialAmmo > 0)) {
-		--specialAmmo;
+	if ((weaponDelay >= shipRateOfFire) && (currSpecialAmmo > 0)) {
+		--currSpecialAmmo;
 		lastShotFired = hiResTime::now();
 		std::shared_ptr<Entity> projectile = std::make_shared<Blast>(
 					gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector).get(),
-					rb.transform.pos, 0);
+					rb.transform.pos, 0, RigidBody(std::make_shared<Circle>(BlastRadius), STATIC));
 		gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector)->AddEntPtrToSector(projectile);
 	}
 }
@@ -509,7 +545,6 @@ void Enemy::CollideWithProjectile(Projectile * i_projPtr)
 		TakeDamage(1);
 	}
 }
-
 
 void Enemy::UpdateHealth(float i_stepSize)
 {
@@ -728,16 +763,16 @@ void EndObject::Update(float i_stepSize)
 
 
 /////////////////////// Power Up ///////////////////////
-PowerUp::PowerUp(Sector * i_sectPtr, Vector2f i_startPosition, int i_powType, RigidBody i_rb) :
+PowerUp::PowerUp(Sector * i_sectPtr, Vector2f i_startPosition, UPGRADE_TYPE i_powType, RigidBody i_rb) :
 	Entity(i_startPosition, i_rb, UPGRADE), sectPtr{ i_sectPtr }, powType { i_powType }
 {
 	switch (i_powType) {
-	case (0): {
+	case (RATE_OF_FIRE): {
 		fillColor = sf::Color(255, 128, 128);
 		outlineColor = sf::Color::Magenta;
 		break;
 	}
-	case (1): {
+	case (SCATTER): {
 		fillColor = sf::Color(51, 153, 102);
 		outlineColor = sf::Color::Magenta;
 		break;

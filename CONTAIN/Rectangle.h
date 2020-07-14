@@ -12,11 +12,14 @@ public:
 	Rectangle(float i_width, float i_height);
 	~Rectangle();
 
-	Vector2f GetSFMLOriginOffset();
-	std::unique_ptr<sf::Shape> GetSFMLRepr();
-	ShapeType GetType();
-	float GetDistToEdge();
-	std::vector<Vector2f> GetPoints();
-	float GetArea();
-	float GetInertiaCoeff();
+	Vector2f GetSFMLOriginOffset() override;
+	std::unique_ptr<sf::Shape> GetSFMLRepr() override;
+	ShapeType GetType() override;
+	float GetDistToEdge() override;
+	std::vector<Vector2f> GetPoints() override;
+	float GetArea() override;
+	float GetInertiaCoeff() override;
+	void ChangeSizeOfShape(float i_widthOrRadius, float i_heightOrGarbage) override;
+	float GetWidth();
+	float GetHeight();
 };

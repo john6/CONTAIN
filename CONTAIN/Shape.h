@@ -19,4 +19,5 @@ public:
 	virtual std::vector<Vector2f> GetPoints() = 0;
 	virtual float GetArea() = 0;
 	virtual float GetInertiaCoeff() = 0;
+	virtual void ChangeSizeOfShape(float i_widthOrRadius, float i_heightOrGarbage) = 0;
 };

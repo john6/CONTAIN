@@ -47,6 +47,11 @@ float Circle::GetInertiaCoeff()
 	return  0.5f * radius * radius;
 }
 
+void Circle::ChangeSizeOfShape(float i_widthOrRadius, float i_heightOrGarbage)
+{
+	radius = i_widthOrRadius;
+}
+
 std::vector<Vector2f> GetPoints() {
 	std::vector<Vector2f> pointVector = std::vector<Vector2f>();
 	pointVector.push_back(Vector2f(0.0f, 0.0f));

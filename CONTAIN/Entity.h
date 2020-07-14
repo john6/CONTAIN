@@ -85,10 +85,14 @@ private:
 	int health;
 	float dmgRate;
 	hiRes_time_point lastDamageReceived;
+	float BlastRadius;
+	float wallWidth;
+	float wallHeight;
 
 public:
 	float weaponDelay;
-	int specialAmmo;
+	int maxSpecialAmmo;
+	int currSpecialAmmo;
 	int numShots;
 
 	PlayerChar(Game* i_gamePtr, int i_strtHealth, Vector2f i_startPosition, 
@@ -103,13 +107,17 @@ public:
 
 	void ResetHealth();
 
+	void ResetSpecialAmmo();
+
+	void AddSpecialAmmo(int i_ammo);
+
 	void AddHealth(int i_healthUp);
 
 	void AcceptWeaponInput(float i_stepSize);
 
 	void TakeDamage(float i_dmg);
 
-	void ReceivePowerUp(int i_powType);
+	void ReceivePowerUp(UPGRADE_TYPE i_powType);
 
 	float GetCurrHealth();
 
@@ -180,7 +188,7 @@ public:
 	int blastType;
 	float deathTimer;
 
-	Blast(Sector* i_sectPtr, Vector2f i_startPosition, int i_blastType, RigidBody i_rb = RigidBody(std::make_shared<Circle>(AOE_RADIUS), STATIC));
+	Blast(Sector* i_sectPtr, Vector2f i_startPosition, int i_blastType, RigidBody i_rb = RigidBody(std::make_shared<Circle>(175.0f), STATIC));
 	~Blast();
 
 	void Update(float i_stepSize) override;
@@ -333,9 +341,9 @@ private:
 	Sector* sectPtr;
 
 public:
-	int powType;
+	UPGRADE_TYPE powType;
 
-	PowerUp(Sector * i_sectPtr, Vector2f i_startPosition, int i_powType, RigidBody i_rb = 
+	PowerUp(Sector * i_sectPtr, Vector2f i_startPosition, UPGRADE_TYPE i_powType, RigidBody i_rb =
 		RigidBody(std::make_shared<Rectangle>(100.0f, 100.0f), STATIC));
 	~PowerUp();
 

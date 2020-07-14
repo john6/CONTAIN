@@ -218,3 +218,11 @@ float RigidBody::GetLerpOrient(float i_lerp_fraction)
 {
 	return (1.0f - i_lerp_fraction) * transform.prevOrient + i_lerp_fraction * transform.orient;
 }
+
+void RigidBody::ChangeSizeOfShape(float i_widthOrRadius, float i_heightOrGarbage)
+{
+	shape->ChangeSizeOfShape(i_widthOrRadius, i_heightOrGarbage);
+	SetMassData();
+	objVerts = shape->GetPoints();
+	UpdateVertsAndNorms();
+}

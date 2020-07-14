@@ -60,7 +60,8 @@ public:
 	void IntegrateVelocity(float i_deltaTime);
 	Vector2f GetLerpPosition(float i_lerp_fraction);
 	float GetLerpOrient(float i_lerp_fraction);
-
+	//Im just gonna give a single function to change the size, the circle class will just ignore the second arg
+	void ChangeSizeOfShape(float i_widthOrRadius, float i_heightOrGarbage);
 
 	//SFML drawing functions
 	/*std::unique_ptr<sf::Shape> CreateDrawable(float i_lerp_fraction);*/
