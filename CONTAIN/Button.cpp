@@ -21,7 +21,8 @@ Button::BUTTON_STATE Button::GetState() {
 
 void Button::SetText(std::string s) {
 	m_text.setString(s);
-	m_text.setCharacterSize(static_cast<int>(m_positionAndSize.getSize().x / 12.0f));
+	int charSize = std::min(30, static_cast<int>(m_positionAndSize.getSize().x / 12.0f));
+	m_text.setCharacterSize(charSize);
 	m_text.setOutlineThickness(1.0f);
 	m_text.setPosition(sf::Vector2f(m_positionAndSize.getPosition().x + (m_positionAndSize.getSize().x / 3.0f),
 		m_positionAndSize.getPosition().y + (m_positionAndSize.getSize().y / 3.0f)));
@@ -62,7 +63,8 @@ void Button::SetColorsFromState() {
 
 void Button::SetPositionAndSize(sf::RectangleShape rect) {
 	m_positionAndSize = rect;
-	m_positionAndSize.setOutlineThickness(rect.getSize().x / 30);
+	int outLineThickness = std::min(10, static_cast<int>(rect.getSize().x / 30));
+	m_positionAndSize.setOutlineThickness(outLineThickness);
 }
 
 void Button::SetSize(sf::Vector2f size) { m_positionAndSize.setSize(size); }

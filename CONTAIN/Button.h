@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include <functional>
 #include "GLOBAL_CONSTANTS.h"
+#include <algorithm> 
 
 class Button
 {

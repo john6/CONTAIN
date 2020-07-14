@@ -5,31 +5,32 @@ UpgradeMenu::UpgradeMenu(RESOURCES * i_resources, DIFFICULTY i_diff, PlayerChar*
 {
 	std::random_device rd1;  //Will be used to obtain a seed for the random number engine
 	std::mt19937 gen1(rd1()); //Standard mersenne_twister_engine seeded with rd()
-	std::uniform_int_distribution<> distrib(1, 1); //both boundaries are inclusive
+	std::uniform_int_distribution<> distrib(0, 1); //both boundaries are inclusive
 	upgradeA = distrib(gen1);
 	upgradeB = distrib(gen1);
 	upgradeC = distrib(gen1);
 	//need to make mutually exclusive
 
 	sf::RectangleShape nextLevelRect(sf::Vector2f(GLOBAL_CONSTANTS::BUTTON_WIDTH, GLOBAL_CONSTANTS::BUTTON_HEIGHT));
-	nextLevelRect.setPosition(sf::Vector2f(100, 100));
+	nextLevelRect.setPosition(sf::Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + GLOBAL_CONSTANTS::COURT_WIDTH * 0.5f - GLOBAL_CONSTANTS::BUTTON_WIDTH * 0.5,
+											GLOBAL_CONSTANTS::VERT_MARGIN + GLOBAL_CONSTANTS::COURT_HEIGHT * 0.9f));
 	nextLevelButton = Button("Next Level", nextLevelRect);
 	nextLevelButton.SetColors(sf::Color::Black, sf::Color::White, sf::Color(128, 128, 128));
 
-	sf::RectangleShape upgradeRectA(sf::Vector2f(GLOBAL_CONSTANTS::BUTTON_WIDTH * .75f, GLOBAL_CONSTANTS::BUTTON_HEIGHT));
-	upgradeRectA.setPosition(sf::Vector2f(70, 150 + GLOBAL_CONSTANTS::BUTTON_HEIGHT));
+	sf::RectangleShape upgradeRectA(sf::Vector2f(GLOBAL_CONSTANTS::COURT_WIDTH, GLOBAL_CONSTANTS::BUTTON_HEIGHT));
+	upgradeRectA.setPosition(sf::Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN, GLOBAL_CONSTANTS::VERT_MARGIN + GLOBAL_CONSTANTS::BUTTON_HEIGHT * 2.0f));
 	upgradeButtonA = Button(GetUpgradeText(static_cast<UPGRADE_TYPE>(upgradeA)), upgradeRectA);
 	upgradeButtonA.SetColors(sf::Color::Green, sf::Color::White, sf::Color(128, 128, 128));
 	upgradeButtonA.SetState(Button::UP);
 
-	sf::RectangleShape upgradeRectB(sf::Vector2f(GLOBAL_CONSTANTS::BUTTON_WIDTH * .75f, GLOBAL_CONSTANTS::BUTTON_HEIGHT));
-	upgradeRectB.setPosition(sf::Vector2f(70 + (GLOBAL_CONSTANTS::BUTTON_WIDTH * 0.85f), 150 + GLOBAL_CONSTANTS::BUTTON_HEIGHT));
+	sf::RectangleShape upgradeRectB(sf::Vector2f(GLOBAL_CONSTANTS::COURT_WIDTH, GLOBAL_CONSTANTS::BUTTON_HEIGHT));
+	upgradeRectB.setPosition(sf::Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN, GLOBAL_CONSTANTS::VERT_MARGIN + GLOBAL_CONSTANTS::BUTTON_HEIGHT * 4.0f));
 	upgradeButtonB = Button(GetUpgradeText(static_cast<UPGRADE_TYPE>(upgradeB)), upgradeRectB);
 	upgradeButtonB.SetColors(sf::Color::Yellow, sf::Color::White, sf::Color(128, 128, 128));
 	upgradeButtonB.SetState(Button::UP);
 
-	sf::RectangleShape upgradeRectC(sf::Vector2f(GLOBAL_CONSTANTS::BUTTON_WIDTH * .75f, GLOBAL_CONSTANTS::BUTTON_HEIGHT));
-	upgradeRectC.setPosition(sf::Vector2f(70 + (GLOBAL_CONSTANTS::BUTTON_WIDTH * 1.70f), 150 + GLOBAL_CONSTANTS::BUTTON_HEIGHT));
+	sf::RectangleShape upgradeRectC(sf::Vector2f(GLOBAL_CONSTANTS::COURT_WIDTH, GLOBAL_CONSTANTS::BUTTON_HEIGHT));
+	upgradeRectC.setPosition(sf::Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN, GLOBAL_CONSTANTS::VERT_MARGIN + GLOBAL_CONSTANTS::BUTTON_HEIGHT * 6.0f));
 	upgradeButtonC = Button(GetUpgradeText(static_cast<UPGRADE_TYPE>(upgradeC)), upgradeRectC);
 	upgradeButtonC.SetColors(sf::Color::Red, sf::Color::White, sf::Color(128, 128, 128));
 	upgradeButtonC.SetState(Button::UP);
@@ -41,7 +42,7 @@ UpgradeMenu::UpgradeMenu(RESOURCES * i_resources, DIFFICULTY i_diff, PlayerChar*
 	upgradeText.setString("Choose and upgrade before advancing to the next level!");
 	upgradeText.setCharacterSize(25);
 	upgradeText.setFillColor(sf::Color::White);
-	upgradeText.setPosition(sf::Vector2f(100, 500));
+	upgradeText.setPosition(sf::Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN, GLOBAL_CONSTANTS::VERT_MARGIN));
 	
 	firstOpen = true;
 	currUpgradeType = static_cast<UPGRADE_TYPE>(upgradeA);
@@ -150,10 +151,10 @@ int UpgradeMenu::Update(float microSeconds, sf::RenderWindow * window, sf::Vecto
 			return currUpgradeType;
 		}
 		else {
-			return 0;
+			return -1;
 		}
 	}
-	return 0;
+	return -1;
 }
 
 void UpgradeMenu::Render(sf::RenderWindow * window)

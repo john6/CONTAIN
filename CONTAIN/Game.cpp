@@ -19,9 +19,6 @@ GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vecto
 	float timeLeft = timeToComplete - timeElapsed.count();
 	int timeLeftSeconds = timeLeft / 1000000;
 	HUD.Update(currLvl, levels[currLvl]->GetTimeLeftInLevel(), playerChar);
-	//if (timeLeft <= 0) {
-	//	return LOSE;
-	//}
 	switch (playState) {
 		case (GENERAL_GAMEPLAY): {
 			return UpdateGeneral(millisecLag, i_mousePos);
@@ -29,7 +26,7 @@ GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vecto
 		}
 		case (WON_LEVEL): {
 			int upgradeResult = currUpgradeMenu->Update(i_microSecs, i_window, i_mousePos);
-			if (upgradeResult != 0) {
+			if (upgradeResult != -1) {
 				dynamic_cast<PlayerChar*>(playerChar.get())->ReceivePowerUp(upgradeResult);
 				playState = GENERAL_GAMEPLAY;
 				++currLvl;
