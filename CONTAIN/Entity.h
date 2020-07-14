@@ -18,6 +18,9 @@ class PainWall;
 class PowerUp;
 class Blast;
 class CrazyBoi;
+class ShootyBoi;
+//class SpawnyBoi;
+//class ChargyBoi;
 
 class Entity
 {
@@ -67,7 +70,6 @@ public:
 
 	virtual void CollideWithBlast(Blast* i_blastPtr);
 
-
 };
 
 class PlayerChar :
@@ -107,6 +109,8 @@ public:
 
 	void TakeDamage(float i_dmg);
 
+	void ReceivePowerUp(int i_powType);
+
 	float GetCurrHealth();
 
 	void CollideWithPainWall(PainWall * i_painWallPtr) override;
@@ -116,6 +120,8 @@ public:
 	void CollideWithEndObject(EndObject* i_endPtr) override;
 
 	void CollideWithPowUp(PowerUp* i_powUpPtr) override;
+
+	void CollideWithProjectile(Projectile* i_projPtr) override;
 
 	void ShootBasic(Vector2f i_mousePos);
 
@@ -131,8 +137,12 @@ private:
 	Sector* lvlPtr;
 
 public:
-	Projectile(Vector2f i_startPosition, RigidBody i_rb = RigidBody(std::make_shared<Circle>(PROJECTILE_RADIUS), HEAVYBALL));
+	int projType;
+
+	Projectile(Vector2f i_startPosition, int i_projType = 0, RigidBody i_rb = RigidBody(std::make_shared<Circle>(PROJECTILE_RADIUS), HEAVYBALL));
 	~Projectile();
+	//projtype 0 is sent from the player,
+	//projType 1 is sent from an enemy
 
 	void Update(float i_stepSize) override;
 
@@ -180,7 +190,12 @@ class Enemy :
 	public Entity
 {
 private:
+
+protected:
 	Sector* sectPtr;
+	float maxHealth;
+	float health;
+
 
 public:
 	std::shared_ptr<Entity> charPtr;
@@ -193,6 +208,8 @@ public:
 
 	void Update(float i_stepSize) override;
 
+	Vector2f CreateRandomDir();
+
 	void Destroy() override;
 
 	void CollideWithPainWall(PainWall * i_painWallPtr) override;
@@ -200,6 +217,12 @@ public:
 	void CollideWithPlayer(PlayerChar* i_playerPtr) override;
 
 	void CollideWithBlast(Blast* i_blastPtr) override;
+
+	void CollideWithProjectile(Projectile* i_projPtr) override;
+
+	void UpdateHealth(float i_stepSize);
+
+	void TakeDamage(float i_dmg);
 
 	void Stun(float i_stunTime);
 
@@ -219,11 +242,28 @@ public:
 	CrazyBoi(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, Vector2f i_startPosition, RigidBody i_rb);
 	~CrazyBoi();
 
-	Vector2f CreateRandomDir();
-
 	void Update(float i_stepSize) override;
 
 	void CollideWithPainWall(PainWall * i_painWallPtr) override;
+};
+
+class ShootyBoi : public Enemy
+{
+private:
+	Vector2f currDir;
+	float sameDirTime;
+	float timeTillDirSwitch;
+	float numShots;
+	hiRes_time_point lastShotFired;
+	float shipRateOfFire;
+	float weaponDelay;
+
+public:
+	ShootyBoi(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, Vector2f i_startPosition, RigidBody i_rb);
+
+	void Update(float i_stepSize) override;
+
+	void shootProj();
 };
 
 class Door :

@@ -18,7 +18,7 @@ Level::Level(int i_lvlNum, DIFFICULTY i_diff, std::shared_ptr<Entity> i_charPtr,
 	charPtr { i_charPtr }, resources { i_resources }
 {
 	phaseOne = true;
-	timeToComplete = 100.0f;
+	timeToComplete = 20.0f;
 
 	std::random_device rd1;  //Will be used to obtain a seed for the random number engine
 	std::mt19937 gen1(rd1()); //Standard mersenne_twister_engine seeded with rd()

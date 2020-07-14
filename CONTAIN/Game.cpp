@@ -27,6 +27,17 @@ GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vecto
 			return UpdateGeneral(millisecLag, i_mousePos);
 			break;
 		}
+		case (WON_LEVEL): {
+			int upgradeResult = currUpgradeMenu->Update(i_microSecs, i_window, i_mousePos);
+			if (upgradeResult != 0) {
+				dynamic_cast<PlayerChar*>(playerChar.get())->ReceivePowerUp(upgradeResult);
+				playState = GENERAL_GAMEPLAY;
+				++currLvl;
+				currSector = levels[currLvl]->originCoord;
+			}
+			return IN_GAME;
+			break;
+		}
 		default: {
 			return MENU;
 			break;
@@ -118,9 +129,13 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnt
 }
 
 void Game::Render(float i_elapsedMilliseconds) {
-	GameRenderer::Render(renderWindow, i_elapsedMilliseconds, levels[currLvl]->GetSector(currSector)->GetSectorEntities(),
-						 playerChar.get(), HUD.GetDrawables());
-
+	if (playState == GENERAL_GAMEPLAY) {
+		GameRenderer::Render(renderWindow, i_elapsedMilliseconds, levels[currLvl]->GetSector(currSector)->GetSectorEntities(),
+			playerChar.get(), HUD.GetDrawables());
+	}
+	else if (playState == WON_LEVEL) {
+		currUpgradeMenu->Render(renderWindow);
+	}
 }
 
 void Game::TestCollision(std::shared_ptr<Entity> entA, std::shared_ptr<Entity> entB, std::vector<CollisionData>* collisionList)
@@ -168,11 +183,13 @@ void Game::SpawnProjectile()
 void Game::RequestGoToNextLvl()
 {
 	if (currLvl < numLvls - 1) {
-		++currLvl;
+		//++currLvl;
 		currRunScore += LEVEL_SCORE_INCREASE;
-		currSector = levels[currLvl]->originCoord;
+		//currSector = levels[currLvl]->originCoord;
 		dynamic_cast<PlayerChar*>(playerChar.get())->ResetHealth();
 		dynamic_cast<PlayerChar*>(playerChar.get())->specialAmmo = 3;
+		playState = WON_LEVEL;
+		currUpgradeMenu = std::make_shared<UpgradeMenu>(resources, gameDiff, dynamic_cast<PlayerChar*>(playerChar.get()));
 	}
 	else {
 		playerWon = true;
@@ -181,6 +198,7 @@ void Game::RequestGoToNextLvl()
 
 void Game::InitGame(DIFFICULTY i_diff)
 {
+	gameDiff = i_diff;
 	int startingHealth = 5 * (3 - i_diff);
 	playerChar = std::make_shared<PlayerChar>(this, startingHealth, Vector2f(400, 400.0));
 	playerChar->rb.transform.orient = 1.0f;

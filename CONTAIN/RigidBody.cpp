@@ -5,6 +5,7 @@ RigidBody::RigidBody(std::shared_ptr<Shape> i_shape, Material i_material) :
 	vel{Vector2f(0.0f ,0.0f)}, force{Vector2f(0.0f ,0.0f)},
 	angVel{0.0f}, torq{0.0f}
 {
+	ignoreForcesThisStep = false;
 	SetMassData();
 	objVerts = shape->GetPoints();
 	UpdateVertsAndNorms();
@@ -16,6 +17,7 @@ RigidBody::~RigidBody()
 
 RigidBody::RigidBody(const RigidBody & i_rb)
 {
+	ignoreForcesThisStep = false;
 	shape = i_rb.shape;
 	mat = i_rb.mat;
 	transform = i_rb.transform;
@@ -151,7 +153,7 @@ float RigidBody::GetInstAngVel()
 void RigidBody::ApplyImpulse(Vector2f i_imp, Vector2f contactP) 
 { 
 	force  += i_imp * massD.GetMassInv();
-	float oo = Math::CrossProdScalar(contactP, i_imp);
+	//float oo = Math::CrossProdScalar(contactP, i_imp);
 	torq += Math::CrossProdScalar(contactP, i_imp) * massD.GetInertInv() * ANGULAR_VELOCITY_ADJUSTMENT;
 }
 
@@ -179,11 +181,18 @@ void RigidBody::ResetOrientation(Vector2f i_dirVect)
 
 void RigidBody::IntegrateForces()
 {
-	vel += force;
-	angVel += torq;
-	//vel += GRAVITY_COEFFICIENT * massD.GetMassInv();
-	force = Vector2f(0.0f, 0.0f);
-	torq = 0.0f;
+	if (ignoreForcesThisStep) {
+		force = Vector2f(0.0f, 0.0f);
+		torq = 0.0f;
+		ignoreForcesThisStep = false;
+	}
+	else {
+		vel += force;
+		angVel += torq;
+		//vel += GRAVITY_COEFFICIENT * massD.GetMassInv();
+		force = Vector2f(0.0f, 0.0f);
+		torq = 0.0f;	
+	}
 }
 
 void RigidBody::IntegrateVelocity(float i_deltaTime)

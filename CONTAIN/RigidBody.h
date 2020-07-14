@@ -39,7 +39,7 @@ public:
 	float angVel;
 	float torq;
 	int layer;
-
+	bool ignoreForcesThisStep;
 
 	std::vector<Vector2f> RotatePoints(std::vector<Vector2f> i_axisAlignedCoords);
 	std::vector<Vector2f> vertsToWorldSpace(std::vector<Vector2f> i_objectSpaceCoords);

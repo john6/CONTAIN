@@ -45,6 +45,7 @@
     <ClCompile Include="Sector.cpp" />
     <ClCompile Include="Shape.cpp" />
     <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="UpgradeMenu.cpp" />
     <ClCompile Include="YouLostMenu.cpp" />
     <ClCompile Include="YouWonMenu.cpp" />
   </ItemGroup>
@@ -75,6 +76,7 @@
     <ClInclude Include="Sector.h" />
     <ClInclude Include="Shape.h" />
     <ClInclude Include="Transform.h" />
+    <ClInclude Include="UpgradeMenu.h" />
     <ClInclude Include="YouLostMenu.h" />
     <ClInclude Include="YouWonMenu.h" />
   </ItemGroup>

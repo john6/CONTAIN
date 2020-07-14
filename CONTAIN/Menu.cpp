@@ -4,7 +4,6 @@
 Menu::Menu(RESOURCES* i_resources, DIFFICULTY i_defaultDiff) :
 	resources {i_resources}
 {
-
 	sf::RectangleShape playButtonRect(sf::Vector2f(GLOBAL_CONSTANTS::BUTTON_WIDTH, GLOBAL_CONSTANTS::BUTTON_HEIGHT));
 	playButtonRect.setPosition(sf::Vector2f(100, 100));
 	playButton = Button("Play", playButtonRect);

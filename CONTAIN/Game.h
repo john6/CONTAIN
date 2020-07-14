@@ -16,6 +16,7 @@
 #include "LevelGenerator.h"
 #include "Entity.h"
 #include "QuadTree.h"
+#include "UpgradeMenu.h"
 
 enum PLAY_STATE { GENERAL_GAMEPLAY, WON_LEVEL, DEAD, WON_GAME };
 
@@ -39,9 +40,12 @@ private:
 	void DeleteLevels();
 	bool playerWon;
 
+	std::shared_ptr<UpgradeMenu> currUpgradeMenu;
 
 
 public:
+	DIFFICULTY gameDiff;
+
 
 	int currRunScore;
 

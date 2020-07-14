@@ -86,8 +86,7 @@ void Sector::GenerateLevelCircles(int i_numCircs, int i_phaseNum)
 		int randSizeDiff2 = (rand2 - 2) * 5;
 
 		std::shared_ptr<Shape> shape = std::make_shared<Circle>(40 + randSizeDiff);
-		Material Rock = Material(0.6f, 0.1f, 0.6f, 0.3f);
-		RigidBody projBody = RigidBody(shape, Rock);
+		RigidBody projBody = RigidBody(shape, ROCK);
 		int zoneIndex = i % (cornerZones.size());
 		Vector2f spawnPos(cornerZones[zoneIndex][0] + (cornerZoneWidth / i_numCircs), cornerZones[zoneIndex][1] + (cornerZoneHeight / i_numCircs));
 		std::shared_ptr<Entity> ent = std::make_shared<CrazyBoi>(myLevel->charPtr, this, spawnPos, projBody);
@@ -269,6 +268,11 @@ void Sector::PopulateEntranceRoom()
 void Sector::PopulateBossRoom()
 {
 	isBossRoom = true;
+
+	std::shared_ptr<Shape> shape = std::make_shared<Circle>(70);
+	RigidBody projBody = RigidBody(shape, ROCK);
+	std::shared_ptr<Entity> ent = std::make_shared<ShootyBoi>(myLevel->charPtr, this, Vector2f(400.0f, 400.0f), projBody);
+	lvlEntitiesPhase1.push_back(ent);
 
 	std::shared_ptr<Entity> lowerWall2 = std::make_shared<PowerUp>(this,
 		Vector2f(Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + (GLOBAL_CONSTANTS::COURT_WIDTH / 4.0f), GLOBAL_CONSTANTS::COURT_HEIGHT / 2.0)), 0);

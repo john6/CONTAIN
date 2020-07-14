@@ -50,11 +50,15 @@ void Entity::CollideWith(Entity & i_other)
 		auto projectile = dynamic_cast<Projectile*>(&i_other);
 		CollideWithProjectile(projectile);
 	}
-	if (i_other.GetTypeID() == ENEMY_SEEK) {
+	else if (i_other.GetTypeID() == ENEMY_SEEK) {
 		auto enemy = dynamic_cast<Enemy*>(&i_other);
 		CollideWithEnemy(enemy);
 	}
-	if (i_other.GetTypeID() == ENEMY_RAND) {
+	else if (i_other.GetTypeID() == ENEMY_RAND) {
+		auto enemy = dynamic_cast<Enemy*>(&i_other);
+		CollideWithEnemy(enemy);
+	}
+	else if (i_other.GetTypeID() == ENEMY_BOSS) {
 		auto enemy = dynamic_cast<Enemy*>(&i_other);
 		CollideWithEnemy(enemy);
 	}
@@ -233,6 +237,20 @@ void PlayerChar::TakeDamage(float i_dmg)
 	}
 }
 
+void PlayerChar::ReceivePowerUp(int i_powType)
+{
+	switch (i_powType) {
+	case (0): { //rate of fire
+		shipRateOfFire *= 0.5f;
+		break;
+	}
+	case (1): { //number of shots
+		numShots += 1;
+		break;
+	}
+	}
+}
+
 float PlayerChar::GetCurrHealth()
 {
 	return health;
@@ -246,6 +264,7 @@ void PlayerChar::CollideWithPainWall(PainWall * i_painWallPtr)
 void PlayerChar::CollideWithDoor(Door * i_doorPtr)
 {
 	if (i_doorPtr->open) {
+		rb.ignoreForcesThisStep = true;
 		gamePtr->RequestTravelToSector(i_doorPtr->GetOutCoord());
 		rb.ResetPosition(i_doorPtr->GetOutPos());
 	}
@@ -260,17 +279,15 @@ void PlayerChar::CollideWithEndObject(EndObject * i_endPtr)
 
 void PlayerChar::CollideWithPowUp(PowerUp* i_powUpPtr)
 {
-	switch (i_powUpPtr->powType) {
-	case (0): { //rate of fire
-		shipRateOfFire *= 0.5f;
-		break;
-	}
-	case (1): { //number of shots
-		numShots += 1;
-		break;
-	}
-	}
+	ReceivePowerUp(i_powUpPtr->powType);
 	i_powUpPtr->Destroy();
+}
+
+void PlayerChar::CollideWithProjectile(Projectile * i_projPtr)
+{
+	if (i_projPtr->projType == 1) {
+		TakeDamage(1.0f);
+	}
 }
 
 void PlayerChar::ShootBasic(Vector2f i_mousePos)
@@ -331,11 +348,17 @@ void PlayerChar::ShootAOE()
 }
 
 ///////////////////////Basic Projectile Class ///////////////////////
-Projectile::Projectile(Vector2f i_startPosition, RigidBody i_rb) :
-	Entity(i_startPosition, i_rb, PROJ_BASIC)
+Projectile::Projectile(Vector2f i_startPosition, int i_projType, RigidBody i_rb) :
+	Entity(i_startPosition, i_rb, PROJ_BASIC), projType { i_projType }
 {
-	fillColor = sf::Color::Red;
-	outlineColor = sf::Color::White;
+	if (projType == 0) {
+		fillColor = sf::Color::Red;
+		outlineColor = sf::Color::White;
+	}
+	else if (projType == 1) {
+		fillColor = sf::Color::Green;
+		outlineColor = sf::Color::White;
+	}
 }
 
 Projectile::~Projectile()
@@ -363,7 +386,6 @@ void Projectile::CollideWithProjectile(Projectile * i_projPtr)
 void Projectile::CollideWithEnemy(Enemy * i_enemyPtr)
 {
 	Destroy();
-	i_enemyPtr->Destroy();
 }
 
 void Projectile::CollideWithWall(Wall * i_wallPtr)
@@ -423,6 +445,8 @@ Enemy::Enemy(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, Vector2f i_st
 	outlineColor = sf::Color::White;
 	speed = 15;
 	Stun(0.3f);
+	maxHealth = 1;
+	health = maxHealth;
 }
 
 Enemy::~Enemy()
@@ -431,6 +455,7 @@ Enemy::~Enemy()
 
 void Enemy::Update(float i_stepSize)
 { //enemies cant all access the player's location at the same time, so updates shouldnt be parallel
+	UpdateHealth(i_stepSize);
 	if (stunSecs < 0) {
 		Vector2f playerDir = charPtr->rb.transform.pos - rb.transform.pos;
 		playerDir.normalize();
@@ -443,6 +468,16 @@ void Enemy::Update(float i_stepSize)
 	}
 }
 
+Vector2f Enemy::CreateRandomDir()
+{
+	std::random_device rd1;  //Will be used to obtain a seed for the random number engine
+	std::mt19937 gen1(rd1()); //Standard mersenne_twister_engine seeded with rd()
+	std::uniform_int_distribution<> distrib(1, 20); //both boundaries are inclusive
+	float randX = (distrib(gen1) / 10.0f) - 1.0f;
+	float randY = (distrib(gen1) / 10.0f) - 1.0f;
+	return Vector2f(randX, randY);
+}
+
 void Enemy::Destroy() {
 	sectPtr->PlaySound(0);
 	//sectPtr->sectEnemyNum -= 1;
@@ -451,7 +486,7 @@ void Enemy::Destroy() {
 
 void Enemy::CollideWithPainWall(PainWall * i_painWallPtr)
 {
-	Destroy();
+	TakeDamage(1);
 }
 
 void Enemy::CollideWithPlayer(PlayerChar * i_playerPtr)
@@ -466,6 +501,29 @@ void Enemy::CollideWithBlast(Blast * i_blastPtr)
 	if (i_blastPtr->blastType == 0) {
 		Stun(3.0f);
 	}
+}
+
+void Enemy::CollideWithProjectile(Projectile * i_projPtr)
+{
+	if (i_projPtr->projType == 0) {
+		TakeDamage(1);
+	}
+}
+
+
+void Enemy::UpdateHealth(float i_stepSize)
+{
+	if (health <= 0.0f) {
+		fillColor = sf::Color::Red;
+		outlineColor = sf::Color::Red;
+		Destroy();
+	}
+}
+
+void Enemy::TakeDamage(float i_dmg)
+{
+		//sectPtr->resources->PlaySound(1);
+		health -= i_dmg;
 }
 
 void Enemy::Stun(float i_stunTime)
@@ -495,20 +553,11 @@ CrazyBoi::~CrazyBoi()
 {
 }
 
-Vector2f CrazyBoi::CreateRandomDir()
-{
-	std::random_device rd1;  //Will be used to obtain a seed for the random number engine
-	std::mt19937 gen1(rd1()); //Standard mersenne_twister_engine seeded with rd()
-	std::uniform_int_distribution<> distrib(1, 20); //both boundaries are inclusive
-	float randX = (distrib(gen1) / 10.0f) - 1.0f;
-	float randY = (distrib(gen1) / 10.0f) - 1.0f ;
-	return Vector2f(randX, randY);
-}
-
 void CrazyBoi::Update(float i_stepSize)
 {
-	std::string str = "crazyStepSize: " + std::to_string(i_stepSize);
-	std::cout << str;
+	//std::string str = "crazyStepSize: " + std::to_string(i_stepSize);
+	//std::cout << str;
+	UpdateHealth(i_stepSize);
 	if (timeTillDirSwitch < 0) {
 		timeTillDirSwitch = sameDirTime;
 		currDir = CreateRandomDir();
@@ -526,6 +575,72 @@ void CrazyBoi::Update(float i_stepSize)
 void CrazyBoi::CollideWithPainWall(PainWall * i_painWallPtr)
 {
 }
+
+/////////////////////// ShootyBoi class ///////////////////////
+ShootyBoi::ShootyBoi(std::shared_ptr<Entity> i_charPtr, Sector * i_sectPtr, Vector2f i_startPosition, RigidBody i_rb) : 
+	Enemy(i_charPtr, i_sectPtr, i_startPosition, i_rb, ENEMY_BOSS)
+{
+	Stun(0.3f);
+	sameDirTime = 0.3;
+	speed = 50;
+	timeTillDirSwitch = 0.0f;
+	numShots = 7;
+	lastShotFired = hiResTime::now();
+	shipRateOfFire = 1.0f;
+	maxHealth = 5;
+	health = maxHealth;
+	currDir = CreateRandomDir();
+}
+
+void ShootyBoi::Update(float i_stepSize)
+{
+	UpdateHealth(i_stepSize);
+	if (stunSecs < 0) {
+		//apply impulse towards player
+		Vector2f playerDir = charPtr->rb.transform.pos - rb.transform.pos;
+		playerDir.normalize();
+		float moveDist = (speed / 2.0f) * i_stepSize;
+		rb.ApplyImpulse(playerDir * moveDist, NULL_VECTOR);
+		if (timeTillDirSwitch < 0) {
+			// also apply random impulse, lets see what happens lul
+			timeTillDirSwitch = sameDirTime;
+			currDir = CreateRandomDir();
+			float moveDist = speed * i_stepSize;
+			rb.ApplyImpulse(currDir * moveDist, NULL_VECTOR);
+		}
+		else {
+			float secsInUpdate = i_stepSize / 1000.0f;
+			timeTillDirSwitch -= secsInUpdate;
+			float moveDist = speed * i_stepSize;
+			rb.ApplyImpulse(currDir * moveDist, NULL_VECTOR);
+		}
+		//attempt to shoot projectiles all over the place
+		shootProj();
+	}
+	else {
+		float secsInUpdate = i_stepSize / 1000.0f;
+		stunSecs -= secsInUpdate;
+	}
+}
+
+void ShootyBoi::shootProj()
+{
+	weaponDelay = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastShotFired)).count() / 1000000.0f;
+	if (weaponDelay >= shipRateOfFire) {
+		lastShotFired = hiResTime::now();
+		int i = 0;
+		while (i < numShots) {
+		Vector2f projDir = CreateRandomDir();
+		projDir.normalize();
+		std::shared_ptr<Entity> projectile = std::make_shared<Projectile>(
+			rb.transform.pos + (projDir * (100.0f + (i * 15.0f))), 1);
+		projectile->rb.ApplyImpulse((projDir * 3000.0f), NULL_VECTOR);
+		sectPtr->AddEntPtrToSector(projectile);
+		i++;
+		}
+	}
+}
+
 
 /////////////////////// Door Lockable class///////////////////////
 Door::Door(Sector* i_sectPtr, MapCoord i_outCoord, Vector2f i_startPos, Vector2f i_outPos, RigidBody i_rb) :
@@ -640,4 +755,3 @@ void PowerUp::Update(float i_stepSize)
 {
 	rb.angVel = 0.03f;
 }
-
