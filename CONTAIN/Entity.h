@@ -4,6 +4,7 @@
 #include "PlayerController.h"
 #include <random>
 #include "Math.h"
+#include <map>
 
 class Game;
 class Level;
@@ -81,19 +82,23 @@ private:
 	hiRes_time_point lastShotFired;
 	float shipRateOfFire;
 	float shipSpeed;
-	int maxHealth;
-	int health;
 	float dmgRate;
 	hiRes_time_point lastDamageReceived;
 	float BlastRadius;
 	float wallWidth;
 	float wallHeight;
+	std::map<UPGRADE_TYPE, int> shipLvl;
+
 
 public:
+	int maxHealth;
+	int health;
+
 	float weaponDelay;
 	int maxSpecialAmmo;
 	int currSpecialAmmo;
 	int numShots;
+	float weapSpeed;
 
 	PlayerChar(Game* i_gamePtr, int i_strtHealth, Vector2f i_startPosition, 
 		RigidBody i_rb = RigidBody(std::make_shared<Rectangle>(100.0f, 100.0f), METAL));
@@ -134,6 +139,10 @@ public:
 	void ShootBasic(Vector2f i_mousePos);
 
 	void ShootWall(Vector2f i_mousePos);
+
+	void InitLvl();
+
+	std::map<UPGRADE_TYPE, int>* GetLvl();
 
 	void ShootAOE();
 };
@@ -211,7 +220,7 @@ public:
 	float stunSecs;
 	bool metal;
 
-	Enemy(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, Vector2f i_startPosition, RigidBody i_rb, TypeID i_typeID = ENEMY_SEEK);
+	Enemy(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb, TypeID i_typeID = ENEMY_SEEK);
 	~Enemy();
 
 	void Update(float i_stepSize) override;
@@ -234,6 +243,8 @@ public:
 
 	void Stun(float i_stunTime);
 
+	virtual void SetDiffVars(int i_diff);
+
 	void TurnToMetal();
 };
 
@@ -247,12 +258,14 @@ private:
 	float timeTillDirSwitch;
 
 public:
-	CrazyBoi(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, Vector2f i_startPosition, RigidBody i_rb);
+	CrazyBoi(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb);
 	~CrazyBoi();
 
 	void Update(float i_stepSize) override;
 
 	void CollideWithPainWall(PainWall * i_painWallPtr) override;
+
+	void SetDiffVars(int i_diff) override;
 };
 
 class ShootyBoi : public Enemy
@@ -267,11 +280,17 @@ private:
 	float weaponDelay;
 
 public:
-	ShootyBoi(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, Vector2f i_startPosition, RigidBody i_rb);
+	ShootyBoi(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb);
 
 	void Update(float i_stepSize) override;
 
+	void Destroy() override;
+
+	void TakeDamage(float i_dmg);
+
 	void shootProj();
+
+	void SetDiffVars(int i_diff);
 };
 
 class Door :
@@ -283,7 +302,10 @@ private:
 	MapCoord outCoord;
 
 public:
-	Door(Sector* i_sectPtr, MapCoord i_outCoord, Vector2f i_startPos, Vector2f i_outPos, RigidBody i_rb );
+	SCREEN_SIDE side;
+
+	Door(Sector* i_sectPtr, MapCoord i_outCoord, Vector2f i_startPos, Vector2f i_outPos,
+		RigidBody i_rb, SCREEN_SIDE i_side);
 	~Door();
 
 	bool open;
@@ -302,7 +324,8 @@ private:
 	Sector* sectPtr;
 
 public:
-	Wall(Vector2f i_startPosition, Sector* i_sectPtr, RigidBody i_rb);
+	Wall(Vector2f i_startPosition, Sector* i_sectPtr, RigidBody i_rb,
+		sf::Color i_fillCol = sf::Color::Black, sf::Color i_outCol = sf::Color::White);
 	~Wall();
 };
 

@@ -6,35 +6,47 @@ UpgradeMenu::UpgradeMenu(RESOURCES * i_resources, DIFFICULTY i_diff, PlayerChar*
 	std::random_device rd1;  //Will be used to obtain a seed for the random number engine
 	std::mt19937 gen1(rd1()); //Standard mersenne_twister_engine seeded with rd()
 	std::uniform_int_distribution<> distrib(1, 6); //both boundaries are inclusive
-	upgradeA = distrib(gen1);
-	upgradeB = distrib(gen1);
-	upgradeC = distrib(gen1);
-	//need to make mutually exclusive
+	auto playerLvls = i_player->GetLvl();
 
-	sf::RectangleShape nextLevelRect(sf::Vector2f(GLOBAL_CONSTANTS::BUTTON_WIDTH, GLOBAL_CONSTANTS::BUTTON_HEIGHT));
-	nextLevelRect.setPosition(sf::Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN + GLOBAL_CONSTANTS::COURT_WIDTH * 0.5f - GLOBAL_CONSTANTS::BUTTON_WIDTH * 0.5,
-											GLOBAL_CONSTANTS::VERT_MARGIN + GLOBAL_CONSTANTS::COURT_HEIGHT * 0.9f));
+	std::vector<UPGRADE_TYPE> availableUpgrades;
+	for (int upInt = 0; upInt != WALL_BIG + 1; ++upInt) {
+		if (playerLvls->at((UPGRADE_TYPE)upInt) <= GLBVRS::GetUpgradeMax((UPGRADE_TYPE)upInt)) {
+			availableUpgrades.push_back((UPGRADE_TYPE)upInt);
+		}
+	}
+	upgradeA = availableUpgrades[distrib(gen1)%availableUpgrades.size()];
+	auto iter1 = std::find(availableUpgrades.begin(), availableUpgrades.end(), upgradeA);
+	availableUpgrades.erase(iter1);
+	upgradeB = availableUpgrades[distrib(gen1) % availableUpgrades.size()];
+	auto iter2 = std::find(availableUpgrades.begin(), availableUpgrades.end(), upgradeB);
+	availableUpgrades.erase(iter2);
+	upgradeC = availableUpgrades[distrib(gen1) % availableUpgrades.size()];
+	auto iter3 = std::find(availableUpgrades.begin(), availableUpgrades.end(), upgradeC);
+	availableUpgrades.erase(iter3);
+
+	sf::RectangleShape nextLevelRect(sf::Vector2f(GLBVRS::BTTN_WDTH, GLBVRS::BTTN_HGHT));
+	nextLevelRect.setPosition(sf::Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH * 0.5f - GLBVRS::BTTN_WDTH * 0.5,
+											GLBVRS::VRT_MRG + GLBVRS::CRT_HGHT * 0.9f));
 	nextLevelButton = Button("Next Level", nextLevelRect);
 	nextLevelButton.SetColors(sf::Color::Black, sf::Color::White, sf::Color(128, 128, 128));
 
-	sf::RectangleShape upgradeRectA(sf::Vector2f(GLOBAL_CONSTANTS::COURT_WIDTH, GLOBAL_CONSTANTS::BUTTON_HEIGHT));
-	upgradeRectA.setPosition(sf::Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN, GLOBAL_CONSTANTS::VERT_MARGIN + GLOBAL_CONSTANTS::BUTTON_HEIGHT * 2.0f));
+	sf::RectangleShape upgradeRectA(sf::Vector2f(GLBVRS::CRT_WDTH, GLBVRS::BTTN_HGHT));
+	upgradeRectA.setPosition(sf::Vector2f(GLBVRS::HR_MRG, GLBVRS::VRT_MRG + GLBVRS::BTTN_HGHT * 2.0f));
 	upgradeButtonA = Button(GetUpgradeText(static_cast<UPGRADE_TYPE>(upgradeA)), upgradeRectA);
 	upgradeButtonA.SetColors(sf::Color::Green, sf::Color::White, sf::Color(128, 128, 128));
 	upgradeButtonA.SetState(Button::UP);
 
-	sf::RectangleShape upgradeRectB(sf::Vector2f(GLOBAL_CONSTANTS::COURT_WIDTH, GLOBAL_CONSTANTS::BUTTON_HEIGHT));
-	upgradeRectB.setPosition(sf::Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN, GLOBAL_CONSTANTS::VERT_MARGIN + GLOBAL_CONSTANTS::BUTTON_HEIGHT * 4.0f));
+	sf::RectangleShape upgradeRectB(sf::Vector2f(GLBVRS::CRT_WDTH, GLBVRS::BTTN_HGHT));
+	upgradeRectB.setPosition(sf::Vector2f(GLBVRS::HR_MRG, GLBVRS::VRT_MRG + GLBVRS::BTTN_HGHT * 4.0f));
 	upgradeButtonB = Button(GetUpgradeText(static_cast<UPGRADE_TYPE>(upgradeB)), upgradeRectB);
 	upgradeButtonB.SetColors(sf::Color::Yellow, sf::Color::White, sf::Color(128, 128, 128));
 	upgradeButtonB.SetState(Button::UP);
 
-	sf::RectangleShape upgradeRectC(sf::Vector2f(GLOBAL_CONSTANTS::COURT_WIDTH, GLOBAL_CONSTANTS::BUTTON_HEIGHT));
-	upgradeRectC.setPosition(sf::Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN, GLOBAL_CONSTANTS::VERT_MARGIN + GLOBAL_CONSTANTS::BUTTON_HEIGHT * 6.0f));
+	sf::RectangleShape upgradeRectC(sf::Vector2f(GLBVRS::CRT_WDTH, GLBVRS::BTTN_HGHT));
+	upgradeRectC.setPosition(sf::Vector2f(GLBVRS::HR_MRG, GLBVRS::VRT_MRG + GLBVRS::BTTN_HGHT * 6.0f));
 	upgradeButtonC = Button(GetUpgradeText(static_cast<UPGRADE_TYPE>(upgradeC)), upgradeRectC);
 	upgradeButtonC.SetColors(sf::Color::Red, sf::Color::White, sf::Color(128, 128, 128));
 	upgradeButtonC.SetState(Button::UP);
-
 
 	font = resources->GetFont();
 
@@ -42,7 +54,7 @@ UpgradeMenu::UpgradeMenu(RESOURCES * i_resources, DIFFICULTY i_diff, PlayerChar*
 	upgradeText.setString("Choose and upgrade before advancing to the next level!");
 	upgradeText.setCharacterSize(25);
 	upgradeText.setFillColor(sf::Color::White);
-	upgradeText.setPosition(sf::Vector2f(GLOBAL_CONSTANTS::HOR_MARGIN, GLOBAL_CONSTANTS::VERT_MARGIN));
+	upgradeText.setPosition(sf::Vector2f(GLBVRS::HR_MRG, GLBVRS::VRT_MRG));
 	
 	firstOpen = true;
 	currUpgradeType = static_cast<UPGRADE_TYPE>(upgradeA);
@@ -109,6 +121,10 @@ std::string UpgradeMenu::GetUpgradeText(UPGRADE_TYPE i_type)
 		upgradeString = "Big oopsie everyone this is an error";
 		break;
 	}
+	case WEAP_SPEED: {
+		upgradeString = "Increase basic weapon thrust";
+		break;
+	}
 	case RATE_OF_FIRE : {
 		upgradeString = "double rate of fire";
 			break;
@@ -155,7 +171,7 @@ UPGRADE_TYPE UpgradeMenu::Update(float microSeconds, sf::RenderWindow * window, 
 		PollButtonTriplet(i_mousePos);
 		bool nextLevelButtonPressed = PollInput(i_mousePos, &nextLevelButton);
 		if (nextLevelButtonPressed) {
-			resources->PlaySound(RESOURCES::OCTAVE_BEEP);
+			resources->PlaySound(RESOURCES::SOUNDS::MAJORPICKUP);
 			return currUpgradeType;
 		}
 		else {

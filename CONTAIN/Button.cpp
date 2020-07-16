@@ -80,7 +80,7 @@ void Button::SetColors(sf::Color colorUp, sf::Color colorDown, sf::Color colorHo
 
 void Button::ResizeForText()
 {
-	m_positionAndSize.setSize(sf::Vector2f(GLOBAL_CONSTANTS::BUTTON_WIDTH + (GLOBAL_CONSTANTS::BUTTON_WIDTH * (m_text.getString().getSize() * (1.0f/ 50.0f) )), GLOBAL_CONSTANTS::BUTTON_HEIGHT));
+	m_positionAndSize.setSize(sf::Vector2f(GLBVRS::BTTN_WDTH + (GLBVRS::BTTN_WDTH * (m_text.getString().getSize() * (1.0f/ 50.0f) )), GLBVRS::BTTN_HGHT));
 }
 
 void Button::SetState(BUTTON_STATE state) {

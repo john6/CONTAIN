@@ -22,7 +22,7 @@ public:
 	HeadsUpDisplay(RESOURCES* i_resources);
 	~HeadsUpDisplay();
 
-	void Update(int i_lvlNum, int i_timeRemaining, std::shared_ptr<Entity> i_player);
+	void Update(int i_lvlNum, int i_timeRemaining, int i_maxTime, std::shared_ptr<Entity> i_player);
 	/*
 	void RenderHUD(sf::RenderWindow* i_window, float i_lerp_fraction, std::shared_ptr<Entity> i_player, Level* i_lvl);*/
 

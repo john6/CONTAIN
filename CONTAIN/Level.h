@@ -2,6 +2,7 @@
 #include <vector>
 #include "GLOBAL_CONSTANTS.h"
 #include "Entity.h"
+#include <cmath>
 #include "RigidBody.h"
 #include <stdlib.h>
 #include <random>
@@ -18,6 +19,8 @@ protected:
 	std::vector<std::vector<MapNode>> sectorMap;
 	//Sector vect owns all sectors
 	std::vector<std::shared_ptr<Sector>> sectorVect;
+	//I need to hold a reference to all the map coords with rooms in them how was I not doing this
+	std::vector<MapCoord> allCoords;
 	//the origin is the center coordinates of the map
 
 	int numSectors;
@@ -37,6 +40,10 @@ public:
 	int m_lvl_num;
 	MapCoord originCoord;
 
+	sf::Color colPalA;
+	sf::Color colPalB;
+
+
 	Level(int i_levelNum, DIFFICULTY i_diff, std::shared_ptr<Entity> i_charPtr, RESOURCES* i_resources);
 	Level(std::string i_testStr, std::shared_ptr<Entity> i_charPtr, RESOURCES* i_resources);
 	~Level();
@@ -51,11 +58,21 @@ public:
 
 	void CreateBidirectionalDoor(MapCoord i_coordA, MapCoord i_coordB);
 
-	void PopulateBossRoom();
+	void PopulateBossRoom(DIFFICULTY i_diff);
 
 	float GetTimeLeftInLevel();
 
 	void SwitchSectorsToPhaseTwo();
+
+	sf::Color GenerateRandomColor();
+
+	void GenerateMapGrip(int i_lvlNum, DIFFICULTY i_diff);
+
+	void ChooseBossRoom();
+
+	void FillMapWithRooms(int i_levelNum, DIFFICULTY i_diff);
+
+	void PopulateMapRooms(int i_levelNum, DIFFICULTY i_diff);
 
 	void UpdateLevel();
 };

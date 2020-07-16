@@ -21,14 +21,14 @@ public:
 	bool firstPhase;
 	int sectEnemyNum;
 	Level* myLevel;
+	sf::Color colPalA;
+	sf::Color colPalB;
 
 	std::list<std::shared_ptr<Entity>>* GetSectorEntities();
 
 	void AddEntPtrToSector(std::shared_ptr<Entity> i_entPtr);
 
-	void GenerateLevelCubes(int i_numCubes, int i_phaseNum);
-
-	void GenerateLevelCircles(int i_numCircs, int i_phaseNum);
+	void GenerateEnemies(int i_numEnems, TypeID enemyType, SCREEN_AREA i_area, int i_phaseNum, DIFFICULTY i_diff, int i_randMod);
 
 	void AddWallsToLevel();
 
@@ -37,7 +37,8 @@ public:
 	void AddRandomPainWall(int i_index);
 
 	void PopulateEntranceRoom();
-	void PopulateBossRoom();
+
+	void PopulateBossRoom(DIFFICULTY i_diff);
 
 	void RemoveDestroyedEntities();
 
@@ -51,7 +52,9 @@ public:
 
 	void SwitchLevelToPhaseTwo();
 
-	Sector(Level* i_lvlPtr, RESOURCES* i_resources);
+	std::vector<std::tuple<Vector2f, Vector2f>> GetScreenAreas(SCREEN_AREA i_area);
+
+	Sector(Level* i_lvlPtr, RESOURCES* i_resources, sf::Color i_colA = sf::Color::Black, sf::Color i_colB = sf::Color::White);
 	~Sector();
 
 private:

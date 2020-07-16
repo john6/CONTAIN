@@ -68,6 +68,9 @@ RESOURCES::RESOURCES()
 	if (!Explode20.loadFromFile("Sounds/YalSounds/Explode20.wav")) {
 		std::cerr << "error loading .wav \n";
 	}
+	if (!Explode20.loadFromFile("Sounds/YalSounds/Fire5.wav")) {
+		std::cerr << "error loading Fire5.wav \n";
+	}
 	if (!laser14.loadFromFile("Sounds/YalSounds/laser14.wav")) {
 		std::cerr << "error loading .wav \n";
 	}
@@ -86,8 +89,17 @@ RESOURCES::RESOURCES()
 	if (!magic9.loadFromFile("Sounds/YalSounds/magic9.wav")) {
 		std::cerr << "error loading .wav \n";
 	}
-	if (!magic10.loadFromFile("Sounds/YalSounds/magic10.wav")) {
+	if (!magic10.loadFromFile("Sounds/YalSounds/MenuAccept.wav")) {
 		std::cerr << "error loading magic10.wav \n";
+	}
+	if (!MenuAccept2.loadFromFile("Sounds/YalSounds/MenuAccept2.wav")) {
+		std::cerr << "error loading MenuAccept2.wav \n";
+	}
+	if (!MenuAccept3.loadFromFile("Sounds/YalSounds/MenuAccept3.wav")) {
+		std::cerr << "error loading MenuAccept3.wav \n";
+	}
+	if (!MenuAccept6.loadFromFile("Sounds/YalSounds/MenuAccept6.wav")) {
+		std::cerr << "error loading MenuAccept6.wav \n";
 	}
 	if (!ouch1.loadFromFile("Sounds/YalSounds/ouch1.wav")) {
 		std::cerr << "error loading ouch1.wav \n";
@@ -97,6 +109,12 @@ RESOURCES::RESOURCES()
 	}
 	if (!PlayerDie13.loadFromFile("Sounds/YalSounds/PlayerDie13.wav")) {
 		std::cerr << "error loading PlayerDie13.wav \n";
+	}
+	if (!PlayerDie13.loadFromFile("Sounds/YalSounds/PlayerDie13.wav")) {
+		std::cerr << "error loading PlayerDie13.wav \n";
+	}
+	if (!Powerup4.loadFromFile("Sounds/YalSounds/Powerup4.wav")) {
+		std::cerr << "error loading Powerup4.wav \n";
 	}
 	if (!shoot11.loadFromFile("Sounds/YalSounds/shoot11.wav")) {
 		std::cerr << "error loading shoot11.wav \n";
@@ -112,6 +130,9 @@ RESOURCES::RESOURCES()
 	}
 	if (!shot2.loadFromFile("Sounds/YalSounds/shot2.wav")) {
 		std::cerr << "error loading shot2.wav \n";
+	}
+	if (!shot17.loadFromFile("Sounds/YalSounds/shot17.wav")) {
+		std::cerr << "error loading shot17.wav \n";
 	}
 	if (!steam3.loadFromFile("Sounds/YalSounds/steam3.wav")) {
 		std::cerr << "error loading steam3.wav \n";
@@ -196,6 +217,7 @@ void RESOURCES::PlayMusicFromFile(int i_songNum)
 	//	break;
 	//}
 	}
+	music.setLoop(true);
 	music.play();
 	mtx.unlock();
 }
@@ -245,6 +267,11 @@ void RESOURCES::PlaySound(int soundNum) {
 	}
 	case (LEVELUP): {
 		m_sound.setBuffer(m_bufferplayfulLevelUp);
+		m_sound.play();
+		break;
+	}
+	case (PLAYFULPICKUP): {
+		m_sound.setBuffer(m_bufferplayfulPickup);
 		m_sound.play();
 		break;
 	}
@@ -303,6 +330,11 @@ void RESOURCES::PlaySound(int soundNum) {
 		m_sound.play();
 		break;
 	}
+	case (FIRE5): {
+		m_sound.setBuffer(Fire5);
+		m_sound.play();
+		break;
+	}
 	case (LASER14): {
 		m_sound.setBuffer(laser14);
 		m_sound.play();
@@ -333,8 +365,23 @@ void RESOURCES::PlaySound(int soundNum) {
 		m_sound.play();
 		break;
 	}
-	case (MAGIC10): {
-		m_sound.setBuffer(magic10);
+	case (MENUACCEPT): {
+		m_sound.setBuffer(MenuAccept);
+		m_sound.play();
+		break;
+	}
+	case (MENUACCEPT2): {
+		m_sound.setBuffer(MenuAccept2);
+		m_sound.play();
+		break;
+	}
+	case (MENUACCEPT3): {
+		m_sound.setBuffer(MenuAccept3);
+		m_sound.play();
+		break;
+	}
+	case (MENUACCEPT6): {
+		m_sound.setBuffer(MenuAccept6);
 		m_sound.play();
 		break;
 	}
@@ -350,6 +397,11 @@ void RESOURCES::PlaySound(int soundNum) {
 	}
 	case (PLAYERDIE13): {
 		m_sound.setBuffer(PlayerDie13);
+		m_sound.play();
+		break;
+	}
+	case (POWERUP4): {
+		m_sound.setBuffer(Powerup4);
 		m_sound.play();
 		break;
 	}

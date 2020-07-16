@@ -145,7 +145,7 @@ PlayerChar::PlayerChar(Game* i_gamePtr, int i_strtHealth, Vector2f i_startPositi
 	numShots = 1;
 	fillColor = sf::Color::Yellow;
 	outlineColor = sf::Color::Red;
-	shipRateOfFire = 1.0f;
+	shipRateOfFire = 0.9f;
 	shipSpeed = 100;
 	lastShotFired = std::chrono::high_resolution_clock::now();
 	lastDamageReceived = std::chrono::high_resolution_clock::now();
@@ -158,6 +158,8 @@ PlayerChar::PlayerChar(Game* i_gamePtr, int i_strtHealth, Vector2f i_startPositi
 	wallHeight = 270;
 	BlastRadius = 175;
 	maxSpecialAmmo = 3;
+	weapSpeed = 3000.0f;
+	InitLvl();
 }
 
 PlayerChar::~PlayerChar()
@@ -253,21 +255,41 @@ void PlayerChar::TakeDamage(float i_dmg)
 
 void PlayerChar::ReceivePowerUp(UPGRADE_TYPE i_powType)
 {
+	gamePtr->levels[gamePtr->currLvl]->GetSector(gamePtr->currSector)->PlaySound(RESOURCES::MENUACCEPT6);
 	switch (i_powType) {
 	case (RATE_OF_FIRE): { //rate of fire
-		shipRateOfFire *= 0.5f;
+		if (shipLvl.at(RATE_OF_FIRE) <= GLBVRS::GetUpgradeMax(RATE_OF_FIRE)) {
+			shipLvl[RATE_OF_FIRE]++;
+			shipRateOfFire *= 0.5f;
+		}
+		break;
+	}
+	case (WEAP_SPEED): { //number of shots
+		if (shipLvl.at(WEAP_SPEED) <= GLBVRS::GetUpgradeMax(WEAP_SPEED)) {
+			shipLvl[WEAP_SPEED]++;
+			weapSpeed *= 1.5;
+		}
 		break;
 	}
 	case (SCATTER): { //number of shots
-		numShots += 1;
+		if (shipLvl.at(SCATTER) <= GLBVRS::GetUpgradeMax(SCATTER)) {
+			shipLvl[SCATTER]++;
+			numShots += 1;
+		}
 		break;
 	}
 	case (SMALL_SHIP): { //number of shots
-		auto playerRect = dynamic_cast<Rectangle*>(rb.shape.get());
-		rb.ChangeSizeOfShape(playerRect->GetWidth() - 15.0f, playerRect->GetHeight() - 15.0f);
+		if (shipLvl.at(SMALL_SHIP) <= GLBVRS::GetUpgradeMax(SMALL_SHIP)) {
+			shipLvl[SMALL_SHIP]++;
+			auto playerRect = dynamic_cast<Rectangle*>(rb.shape.get());
+			rb.ChangeSizeOfShape(playerRect->GetWidth() - 15.0f, playerRect->GetHeight() - 15.0f);
+		}
 		break;
 	}
 	case (BIG_SHIP): { //number of shots
+		if (shipLvl.at(BIG_SHIP) <= GLBVRS::GetUpgradeMax(BIG_SHIP)) {
+			shipLvl[BIG_SHIP]++;
+		}
 		auto playerRect = dynamic_cast<Rectangle*>(rb.shape.get());
 		rb.ChangeSizeOfShape(playerRect->GetWidth() + 15.0f, playerRect->GetHeight() + 15.0f);
 		maxHealth += 5;
@@ -275,10 +297,16 @@ void PlayerChar::ReceivePowerUp(UPGRADE_TYPE i_powType)
 		break;
 	}
 	case (BLAST): { //number of shots
+		if (shipLvl.at(BLAST) <= GLBVRS::GetUpgradeMax(BLAST)) {
+			shipLvl[BLAST]++;
+		}
 		BlastRadius += 50;
 		break;
 	}
 	case (WALL_BIG): { //number of shots
+		if (shipLvl.at(WALL_BIG) <= GLBVRS::GetUpgradeMax(WALL_BIG)) {
+			shipLvl[WALL_BIG]++;
+		}
 		wallWidth += 10;
 		wallHeight += 50;
 		break;
@@ -293,12 +321,14 @@ float PlayerChar::GetCurrHealth()
 
 void PlayerChar::CollideWithPainWall(PainWall * i_painWallPtr)
 {
+	gamePtr->levels[gamePtr->currLvl]->GetSector(gamePtr->currSector)->PlaySound(RESOURCES::FIRE5);
 	TakeDamage(1.0f);
 }
 
 void PlayerChar::CollideWithDoor(Door * i_doorPtr)
 {
 	if (i_doorPtr->open) {
+		gamePtr->levels[gamePtr->currLvl]->GetSector(gamePtr->currSector)->PlaySound(RESOURCES::MAGIC7);
 		rb.ignoreForcesThisStep = true;
 		gamePtr->RequestTravelToSector(i_doorPtr->GetOutCoord());
 		rb.ResetPosition(i_doorPtr->GetOutPos());
@@ -329,6 +359,7 @@ void PlayerChar::ShootBasic(Vector2f i_mousePos)
 {
 	weaponDelay = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastShotFired)).count() / 1000000.0f;
 	if (weaponDelay >= shipRateOfFire) {
+		gamePtr->levels[gamePtr->currLvl]->GetSector(gamePtr->currSector)->PlaySound(RESOURCES::SHOT2);
 		lastShotFired = hiResTime::now();
 		Vector2f projDir = i_mousePos - rb.transform.pos;
 		projDir.normalize();
@@ -342,7 +373,7 @@ void PlayerChar::ShootBasic(Vector2f i_mousePos)
 		while (i < numShots) {
 			std::shared_ptr<Entity> projectile = std::make_shared<Projectile>(
 								rb.transform.pos + (currDirVect * (100.0f + (i * 15.0f))));
-			projectile->rb.ApplyImpulse((currDirVect * 3000.0f), NULL_VECTOR);
+			projectile->rb.ApplyImpulse((currDirVect * weapSpeed), NULL_VECTOR);
 			gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector)->AddEntPtrToSector(projectile);
 			prevAngleRads = currAngleRads;
 			prevDirVect = currDirVect;
@@ -357,6 +388,7 @@ void PlayerChar::ShootWall(Vector2f i_mousePos)
 {
 	weaponDelay = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastShotFired)).count() / 1000000.0f;
 	if (weaponDelay >= shipRateOfFire) {
+		gamePtr->levels[gamePtr->currLvl]->GetSector(gamePtr->currSector)->PlaySound(RESOURCES::SHOOT14);
 		lastShotFired = hiResTime::now();
 		Vector2f projectileDir = i_mousePos - rb.transform.pos;
 		projectileDir.normalize();
@@ -370,10 +402,24 @@ void PlayerChar::ShootWall(Vector2f i_mousePos)
 	}
 }
 
+void PlayerChar::InitLvl()
+{
+	for (int upInt = 0; upInt != WALL_BIG+1; upInt++) {
+		shipLvl.emplace((UPGRADE_TYPE)upInt, 0);
+	}
+}
+
+std::map<UPGRADE_TYPE, int>* PlayerChar::GetLvl()
+{
+
+	return &shipLvl;
+}
+
 void PlayerChar::ShootAOE()
 {
 	weaponDelay = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastShotFired)).count() / 1000000.0f;
 	if ((weaponDelay >= shipRateOfFire) && (currSpecialAmmo > 0)) {
+		gamePtr->levels[gamePtr->currLvl]->GetSector(gamePtr->currSector)->PlaySound(RESOURCES::MAGIC10);
 		--currSpecialAmmo;
 		lastShotFired = hiResTime::now();
 		std::shared_ptr<Entity> projectile = std::make_shared<Blast>(
@@ -473,13 +519,13 @@ void Blast::Update(float i_stepSize)
 }
 
 ///////////////////////Enemy Class///////////////////////
-Enemy::Enemy(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, Vector2f i_startPosition, RigidBody i_rb, TypeID i_typeID) :
+Enemy::Enemy(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb, TypeID i_typeID) :
 	Entity(i_startPosition, i_rb, i_typeID), charPtr { i_charPtr }, sectPtr{ i_sectPtr }
 {
 	metal = false;
-	fillColor = sf::Color::Magenta;
+	fillColor = MOSS;
 	outlineColor = sf::Color::White;
-	speed = 15;
+	SetDiffVars(i_diff);
 	Stun(0.3f);
 	maxHealth = 1;
 	health = maxHealth;
@@ -515,13 +561,14 @@ Vector2f Enemy::CreateRandomDir()
 }
 
 void Enemy::Destroy() {
-	sectPtr->PlaySound(0);
+	sectPtr->PlaySound(RESOURCES::OUCH1);
 	//sectPtr->sectEnemyNum -= 1;
 	killMeNextLoop = true;
 }
 
 void Enemy::CollideWithPainWall(PainWall * i_painWallPtr)
 {
+	sectPtr->PlaySound(RESOURCES::FIRE5);
 	TakeDamage(1);
 }
 
@@ -557,7 +604,6 @@ void Enemy::UpdateHealth(float i_stepSize)
 
 void Enemy::TakeDamage(float i_dmg)
 {
-		//sectPtr->resources->PlaySound(1);
 		health -= i_dmg;
 }
 
@@ -566,22 +612,44 @@ void Enemy::Stun(float i_stunTime)
 	stunSecs = i_stunTime;
 }
 
+void Enemy::SetDiffVars(int i_diff)
+{
+	switch (i_diff) {
+	case EASY: {
+		speed = ENEMYSPEEDEASY;
+		break;
+	}
+	case MEDIUM: {
+		speed = ENEMYSPEEDMED;
+		break;
+	}
+	case HARD: {
+		speed = ENEMYSPEEDHARD;
+		break;
+	}
+	}
+}
+
 void Enemy::TurnToMetal()
 {
 	metal = true;
 	fillColor = sf::Color(128, 128, 128);
 	outlineColor = sf::Color::White;
 	rb.mat = DENSE_METAL;
+	speed *= 3.0f;
+	rb.SetMassData();
 }
 
 /////////////////////// CrazyBoi class ///////////////////////
-CrazyBoi::CrazyBoi(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, Vector2f i_startPosition, RigidBody i_rb) :
-	Enemy(i_charPtr, i_sectPtr, i_startPosition, i_rb, ENEMY_RAND)
+CrazyBoi::CrazyBoi(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb) :
+	Enemy(i_charPtr, i_sectPtr, i_diff, i_startPosition, i_rb, ENEMY_RAND)
 {
 	sameDirTime = 0.9;
-	speed = 30;
 	timeTillDirSwitch = 0.0f;
+	fillColor = CHARTREUSE;
+	outlineColor = sf::Color::White;
 	currDir = CreateRandomDir();
+	SetDiffVars(i_diff);
 }
 
 CrazyBoi::~CrazyBoi()
@@ -593,17 +661,23 @@ void CrazyBoi::Update(float i_stepSize)
 	//std::string str = "crazyStepSize: " + std::to_string(i_stepSize);
 	//std::cout << str;
 	UpdateHealth(i_stepSize);
-	if (timeTillDirSwitch < 0) {
-		timeTillDirSwitch = sameDirTime;
-		currDir = CreateRandomDir();
-		float moveDist = speed * i_stepSize;
-		rb.ApplyImpulse(currDir * moveDist, NULL_VECTOR);
+	if (stunSecs < 0) {
+		if (timeTillDirSwitch < 0) {
+			timeTillDirSwitch = sameDirTime;
+			currDir = CreateRandomDir();
+			float moveDist = speed * i_stepSize;
+			rb.ApplyImpulse(currDir * moveDist, NULL_VECTOR);
+		}
+		else {
+			float secsInUpdate = i_stepSize / 1000.0f;
+			timeTillDirSwitch -= secsInUpdate;
+			float moveDist = speed * i_stepSize;
+			rb.ApplyImpulse(currDir * moveDist, NULL_VECTOR);
+		}
 	}
 	else {
 		float secsInUpdate = i_stepSize / 1000.0f;
-		timeTillDirSwitch -= secsInUpdate;
-		float moveDist = speed * i_stepSize;
-		rb.ApplyImpulse(currDir * moveDist, NULL_VECTOR);
+		stunSecs -= secsInUpdate;
 	}
 }
 
@@ -611,20 +685,36 @@ void CrazyBoi::CollideWithPainWall(PainWall * i_painWallPtr)
 {
 }
 
+void CrazyBoi::SetDiffVars(int i_diff)
+{
+	switch (i_diff) {
+	case EASY: {
+		speed = ENEMYSPEEDEASY;
+		break;
+	}
+	case MEDIUM: {
+		speed = ENEMYSPEEDMED;
+		break;
+	}
+	case HARD: {
+		speed = ENEMYSPEEDHARD;
+		break;
+	}
+	}
+	speed *= 2;
+}
+
 /////////////////////// ShootyBoi class ///////////////////////
-ShootyBoi::ShootyBoi(std::shared_ptr<Entity> i_charPtr, Sector * i_sectPtr, Vector2f i_startPosition, RigidBody i_rb) : 
-	Enemy(i_charPtr, i_sectPtr, i_startPosition, i_rb, ENEMY_BOSS)
+ShootyBoi::ShootyBoi(std::shared_ptr<Entity> i_charPtr, Sector * i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb) :
+	Enemy(i_charPtr, i_sectPtr, i_diff, i_startPosition, i_rb, ENEMY_BOSS)
 {
 	Stun(0.3f);
 	sameDirTime = 0.3;
-	speed = 50;
 	timeTillDirSwitch = 0.0f;
-	numShots = 7;
 	lastShotFired = hiResTime::now();
 	shipRateOfFire = 1.0f;
-	maxHealth = 5;
-	health = maxHealth;
 	currDir = CreateRandomDir();
+	SetDiffVars(i_diff);
 }
 
 void ShootyBoi::Update(float i_stepSize)
@@ -658,10 +748,23 @@ void ShootyBoi::Update(float i_stepSize)
 	}
 }
 
+void ShootyBoi::TakeDamage(float i_dmg)
+{
+	sectPtr->PlaySound(RESOURCES::OUCH3);
+	health -= i_dmg;
+}
+
+void ShootyBoi::Destroy()
+{
+	sectPtr->PlaySound(RESOURCES::BOSSEXPLODE);
+	killMeNextLoop = true;
+}
+
 void ShootyBoi::shootProj()
 {
 	weaponDelay = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastShotFired)).count() / 1000000.0f;
 	if (weaponDelay >= shipRateOfFire) {
+		sectPtr->PlaySound(RESOURCES::SWORD5);
 		lastShotFired = hiResTime::now();
 		int i = 0;
 		while (i < numShots) {
@@ -676,10 +779,38 @@ void ShootyBoi::shootProj()
 	}
 }
 
+void ShootyBoi::SetDiffVars(int i_diff)
+{
+	switch (i_diff) {
+	case EASY: {
+		speed = ENEMYSPEEDEASY;
+		numShots = 6;
+		maxHealth = 4;
+		health = maxHealth;
+		break;
+	}
+	case MEDIUM: {
+		speed = ENEMYSPEEDMED;
+		numShots = 7;
+		maxHealth = 5;
+		health = maxHealth;
+		break;
+	}
+	case HARD: {
+		speed = ENEMYSPEEDHARD;
+		numShots = 8;
+		maxHealth = 6;
+		health = maxHealth;
+		break;
+	}
+	}
+	speed *= 3;
+}
+
 
 /////////////////////// Door Lockable class///////////////////////
-Door::Door(Sector* i_sectPtr, MapCoord i_outCoord, Vector2f i_startPos, Vector2f i_outPos, RigidBody i_rb) :
-	Entity(i_startPos, i_rb, DOOR_LOCKED), sectPtr{ i_sectPtr }, outCoord{ i_outCoord }, outPos{ i_outPos }
+Door::Door(Sector* i_sectPtr, MapCoord i_outCoord, Vector2f i_startPos, Vector2f i_outPos, RigidBody i_rb, SCREEN_SIDE i_side) :
+	Entity(i_startPos, i_rb, DOOR_LOCKED), sectPtr{ i_sectPtr }, outCoord{ i_outCoord }, outPos{ i_outPos }, side { i_side }
 {
 	open = false;
 	intangible = true;
@@ -710,11 +841,12 @@ void Door::Update(float i_stepSize)
 }
 
 ///////////////////////Wall Class ///////////////////////
-Wall::Wall(Vector2f i_startPosition, Sector* i_sectPtr, RigidBody i_rb) :
+Wall::Wall(Vector2f i_startPosition, Sector* i_sectPtr, RigidBody i_rb,
+			sf::Color i_fillCol, sf::Color i_outCol) :
 	Entity(i_startPosition, i_rb, WALL_BASIC), sectPtr{ i_sectPtr }
 {
-	fillColor = sf::Color::Black;
-	outlineColor = sf::Color::White;
+	fillColor = i_fillCol;
+	outlineColor = i_outCol;
 }
 
 Wall::~Wall()

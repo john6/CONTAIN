@@ -18,7 +18,7 @@ GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vecto
 	float millisecLag = abs(i_microSecs / MICROSECS_TO_MILLISECS);
 	float timeLeft = timeToComplete - timeElapsed.count();
 	int timeLeftSeconds = timeLeft / 1000000;
-	HUD.Update(currLvl, levels[currLvl]->GetTimeLeftInLevel(), playerChar);
+	HUD.Update(currLvl, levels[currLvl]->GetTimeLeftInLevel(), levels[currLvl]->timeToComplete, playerChar);
 	switch (playState) {
 		case (GENERAL_GAMEPLAY): {
 			return UpdateGeneral(millisecLag, i_mousePos);
@@ -35,7 +35,6 @@ GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vecto
 				currRunScore += LEVEL_SCORE_INCREASE;
 				playerPtr->ResetHealth();
 				playerPtr->ResetSpecialAmmo();
-				resources->PlaySound(RESOURCES::SOUNDS::MAJORPICKUP);
 				PlayRandomSong();
 			}
 			return IN_GAME;
@@ -186,7 +185,7 @@ void Game::SpawnProjectile()
 void Game::RequestGoToNextLvl()
 {
 	if (currLvl < numLvls - 1) {
-		resources->PlaySound(RESOURCES::SOUNDS::LEVELUP);
+		resources->PlaySound(RESOURCES::SOUNDS::MENUACCEPT3);
 		playState = WON_LEVEL;
 		currUpgradeMenu = std::make_shared<UpgradeMenu>(resources, gameDiff, dynamic_cast<PlayerChar*>(playerChar.get()));
 	}
@@ -198,7 +197,7 @@ void Game::RequestGoToNextLvl()
 void Game::InitGame(DIFFICULTY i_diff)
 {
 	gameDiff = i_diff;
-	int startingHealth = 9999; //5 * (3 - i_diff);
+	int startingHealth = 6 * (3 - i_diff);
 	playerChar = std::make_shared<PlayerChar>(this, startingHealth, Vector2f(400, 400.0));
 	playerChar->rb.transform.orient = 1.0f;
 	beginTime = std::chrono::high_resolution_clock::now();
@@ -240,6 +239,15 @@ void Game::loadTestLevel()
 		levels.push_back(lvl);
 	}
 	currSector = levels[currLvl]->originCoord;
+	//levels[currLvl]->GetSector(currSector)->AddTerrain(0);
+	//levels[currLvl]->GetSector(currSector)->AddTerrain(1);
+	//levels[currLvl]->GetSector(currSector)->AddTerrain(2);
+	//levels[currLvl]->GetSector(currSector)->AddTerrain(3);
+	//levels[currLvl]->GetSector(currSector)->AddTerrain(4);
+	//levels[currLvl]->GetSector(currSector)->AddTerrain(5);
+	//levels[currLvl]->GetSector(currSector)->AddTerrain(6);
+	//levels[currLvl]->GetSector(currSector)->AddTerrain(7);
+
 }
 
 void Game::PlayRandomSong()
@@ -251,5 +259,3 @@ void Game::PlayRandomSong()
 	resources->PlayMusicFromFile(randExtra);
 	//resources->PlayMusicFromFile(1);
 }
-
-

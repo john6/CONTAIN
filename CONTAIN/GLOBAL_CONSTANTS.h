@@ -56,7 +56,7 @@ const float ANGULAR_VELOCITY_ADJUSTMENT = 0.15f; //IDK where my angular velocity
 const Material ROCK = Material(0.6f, 0.1f, 0.6f, 0.3f);
 const Material WOOD = Material(0.3f, 0.2f, 0.5f, 0.25f);
 const Material METAL = Material(1.2f, 0.05f, 0.4f, 0.2f);
-const Material DENSE_METAL = Material(1.9f, 0.05f, 0.4f, 0.2f);
+const Material DENSE_METAL = Material(2.2f, 0.05f, 0.4f, 0.2f);
 const Material BOUNCYBALL = Material(0.3f, 0.8f, 0.7f, 0.2f);
 const Material HEAVYBALL = Material(0.9f, 0.95f, 0.5f, 0.25f);
 const Material SUPERBALL = Material(0.3f, 0.95f, 0.5f, 0.25f);
@@ -83,26 +83,43 @@ const Vector2f LEFT(-1.0f, 0.0f);
 const Vector2f RIGHT(1.0f, 0.0f);
 const Vector2f NULL_VECTOR(0.0f, 0.0f);
 
+//Colors
+const sf::Color BASIL = sf::Color(82, 89, 19);
+const sf::Color PEAR = sf::Color(82, 146, 41);
+const sf::Color CHARTREUSE = sf::Color(50, 100, 0);
+const sf::Color EMERALD = sf::Color(31, 78, 47);
+const sf::Color PISTACHIO = sf::Color(58, 77, 45);
+const sf::Color SAGE = sf::Color(188, 184, 138);
+const sf::Color MOSS = sf::Color(138, 154, 91);
+
 //~~DIFFICULTY SETTINGS~~
 //
+const float ENEMYSPEEDEASY = 12;
+const float ENEMYSPEEDMED = 15;
+const float ENEMYSPEEDHARD = 18;
 //EASY SETTINGS
-const float SPEED_MULTIPLIER_EASY = 0.40f;
-const float PLAYER_SPEED_MULTIPLIER_EASY = 0.6f;
-const float LEVEL_TIME_LIMIT_EASY = 300.0f;
+//const float SPEED_MULTIPLIER_EASY = 0.40f;
+//const float PLAYER_SPEED_MULTIPLIER_EASY = 0.6f;
+//const float LEVEL_TIME_LIMIT_EASY = 300.0f;
+
+
 //MEDIUM SETTINGS
-const float SPEED_MULTIPLIER_MEDIUM = 0.7f;
-const float PLAYER_SPEED_MULTIPLIER_MEDIUM = 0.6f;
-const float LEVEL_TIME_LIMIT_MEDIUM = 180.0f;
+//const float SPEED_MULTIPLIER_MEDIUM = 0.7f;
+//const float PLAYER_SPEED_MULTIPLIER_MEDIUM = 0.6f;
+//const float LEVEL_TIME_LIMIT_MEDIUM = 180.0f;
 //HARD SETTINGS
-const float SPEED_MULTIPLIER_HARD = 1.0f;
-const float PLAYER_SPEED_MULTIPLIER_HARD = 0.9f;
-const float LEVEL_TIME_LIMIT_HARD = 135.0f;
+//const float SPEED_MULTIPLIER_HARD = 1.0f;
+//const float PLAYER_SPEED_MULTIPLIER_HARD = 0.9f;
+//const float LEVEL_TIME_LIMIT_HARD = 135.0f;
 
 //ENUMS
 enum GAME_STATE { MENU, START_GAME, IN_GAME, EXIT_GAME, WIN, LOSE };
-enum UPGRADE_TYPE { NONE, RATE_OF_FIRE, SCATTER, SMALL_SHIP, BIG_SHIP, BLAST, WALL_BIG };
+//Leave WALL_BIG as last upgrade I use it as a terminating condition for InitLvl();
+enum UPGRADE_TYPE { NONE, RATE_OF_FIRE, WEAP_SPEED, SCATTER, SMALL_SHIP, BIG_SHIP, BLAST, WALL_BIG };
 enum MOUSE_STATE { MOUSE_UP, MOUSE_DOWN };
 enum DIFFICULTY { EASY, MEDIUM, HARD };
+enum SCREEN_AREA { CORNERS, MARGINS, DOORS, CENTER };
+enum SCREEN_SIDE {SCREEN_UP, SCREEN_RIGHT, SCREEN_DOWN, SCREEN_LEFT };
 
 //enum UPGRADE_STATE { EXIT_UP_1, EXIT_UP_2, EXIT_UP_3, CONTINUE };
 //enum ENTITY_TYPE { WALL, DOOR, ENEMY, PLAYER, PROJECTILE};
@@ -120,7 +137,7 @@ typedef std::chrono::high_resolution_clock::time_point   hiRes_time_point;
 //SCORE STUFF
 const float LEVEL_SCORE_INCREASE = 1000;
 
-class GLOBAL_CONSTANTS
+class GLBVRS
 {
 public:
 	//WINDOW SETTINGS
@@ -128,14 +145,14 @@ public:
 	static unsigned int SCREEN_HEIGHT;
 
 	//GAME RESOLUTION
-	static float COURT_WIDTH;
-	static float COURT_HEIGHT;
-	static float HOR_MARGIN;   //horizontal margin
-	static float VERT_MARGIN;  //vertical margin
+	static float CRT_WDTH; //Court width- amount of non-margin screen space
+	static float CRT_HGHT; //Court height- amount of non-margin screen space
+	static float HR_MRG;   //horizontal margin
+	static float VRT_MRG;  //vertical margin
 
 	//MENU RESOLUTION
-	static float BUTTON_WIDTH;
-	static float BUTTON_HEIGHT;
+	static float BTTN_WDTH; // Button width 
+	static float BTTN_HGHT; // button height
 
 
 public:
@@ -143,8 +160,10 @@ public:
 
 	static void SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_screenHeight);
 
-	GLOBAL_CONSTANTS();
-	~GLOBAL_CONSTANTS();
+	static int GetUpgradeMax(UPGRADE_TYPE i_powType);
+
+	GLBVRS();
+	~GLBVRS();
 
 
 };

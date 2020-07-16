@@ -5,42 +5,81 @@
 //
 //}
 
-void GLOBAL_CONSTANTS::SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_screenHeight)
+void GLBVRS::SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_screenHeight)
 {
 	//WINDOW SETTINGS
-	GLOBAL_CONSTANTS::SCREEN_WIDTH = i_screenWidth;
-	GLOBAL_CONSTANTS::SCREEN_HEIGHT = i_screenHeight;
+	GLBVRS::SCREEN_WIDTH = i_screenWidth;
+	GLBVRS::SCREEN_HEIGHT = i_screenHeight;
 
 	//GAME RESOLUTION
-	GLOBAL_CONSTANTS::COURT_WIDTH = static_cast<float>(GLOBAL_CONSTANTS::SCREEN_WIDTH * 9.0f / 10.0f);
-	GLOBAL_CONSTANTS::COURT_HEIGHT = static_cast<float>(GLOBAL_CONSTANTS::SCREEN_HEIGHT * 9.0f / 10.0f);
-	GLOBAL_CONSTANTS::HOR_MARGIN = static_cast<float>(GLOBAL_CONSTANTS::SCREEN_WIDTH / 20.0f);         //horizontal margin
-	GLOBAL_CONSTANTS::VERT_MARGIN = static_cast<float>(GLOBAL_CONSTANTS::SCREEN_HEIGHT / 20.0f);       //vertical margin
+	GLBVRS::CRT_WDTH = static_cast<float>(GLBVRS::SCREEN_WIDTH * 9.0f / 10.0f);
+	GLBVRS::CRT_HGHT = static_cast<float>(GLBVRS::SCREEN_HEIGHT * 9.0f / 10.0f);
+	GLBVRS::HR_MRG = static_cast<float>(GLBVRS::SCREEN_WIDTH / 20.0f);         //horizontal margin
+	GLBVRS::VRT_MRG = static_cast<float>(GLBVRS::SCREEN_HEIGHT / 20.0f);       //vertical margin
 
 	//MENU RESOLUTION
-	GLOBAL_CONSTANTS::BUTTON_WIDTH = GLOBAL_CONSTANTS::SCREEN_WIDTH / 3;
-	GLOBAL_CONSTANTS::BUTTON_HEIGHT = GLOBAL_CONSTANTS::SCREEN_HEIGHT / 10;
+	GLBVRS::BTTN_WDTH = GLBVRS::SCREEN_WIDTH / 3;
+	GLBVRS::BTTN_HGHT = GLBVRS::SCREEN_HEIGHT / 10;
 }
 
-GLOBAL_CONSTANTS::GLOBAL_CONSTANTS()
+int GLBVRS::GetUpgradeMax(UPGRADE_TYPE i_powType)
+{
+	switch (i_powType) {
+	case (NONE): { //rate of fire
+		return 0;
+		break;
+	}
+	case (RATE_OF_FIRE): { //rate of fire
+		return 3;
+		break;
+	}
+	case (WEAP_SPEED): { //number of shots
+		return 3;
+		break;
+	}
+	case (SCATTER): { //number of shots
+		return 3;
+		break;
+	}
+	case (SMALL_SHIP): { //number of shots
+		return 3;
+		break;
+	}
+	case (BIG_SHIP): { //number of shots
+		return 3;
+		break;
+	}
+	case (BLAST): { //number of shots
+		return 3;
+		break;
+	}
+	case (WALL_BIG): { //number of shots
+		return 3;
+		break;
+	}
+	}
+
+}
+
+GLBVRS::GLBVRS()
 {
 }
 
 //WINDOW SETTINGS
-unsigned int GLOBAL_CONSTANTS::SCREEN_WIDTH = 0;
-unsigned int GLOBAL_CONSTANTS::SCREEN_HEIGHT = 0;
+unsigned int GLBVRS::SCREEN_WIDTH = 0;
+unsigned int GLBVRS::SCREEN_HEIGHT = 0;
 
 //GAME RESOLUTION
-float GLOBAL_CONSTANTS::COURT_WIDTH = static_cast<float>(GLOBAL_CONSTANTS::SCREEN_WIDTH * 9.0f / 10.0f);
-float GLOBAL_CONSTANTS::COURT_HEIGHT = static_cast<float>(GLOBAL_CONSTANTS::SCREEN_HEIGHT * 9.0f / 10.0f);
-float GLOBAL_CONSTANTS::HOR_MARGIN = static_cast<float>(GLOBAL_CONSTANTS::SCREEN_WIDTH / 20.0f);         //horizontal margin
-float GLOBAL_CONSTANTS::VERT_MARGIN = static_cast<float>(GLOBAL_CONSTANTS::SCREEN_HEIGHT / 20.0f);       //vertical margin
+float GLBVRS::CRT_WDTH = static_cast<float>(GLBVRS::SCREEN_WIDTH * 9.0f / 10.0f);
+float GLBVRS::CRT_HGHT = static_cast<float>(GLBVRS::SCREEN_HEIGHT * 9.0f / 10.0f);
+float GLBVRS::HR_MRG = static_cast<float>(GLBVRS::SCREEN_WIDTH / 20.0f);         //horizontal margin
+float GLBVRS::VRT_MRG = static_cast<float>(GLBVRS::SCREEN_HEIGHT / 20.0f);       //vertical margin
 
 //MENU RESOLUTION
-float GLOBAL_CONSTANTS::BUTTON_WIDTH = GLOBAL_CONSTANTS::SCREEN_WIDTH / 3;
-float GLOBAL_CONSTANTS::BUTTON_HEIGHT = GLOBAL_CONSTANTS::SCREEN_HEIGHT / 10;
+float GLBVRS::BTTN_WDTH = GLBVRS::SCREEN_WIDTH / 3;
+float GLBVRS::BTTN_HGHT = GLBVRS::SCREEN_HEIGHT / 10;
 
 
-GLOBAL_CONSTANTS::~GLOBAL_CONSTANTS()
+GLBVRS::~GLBVRS()
 {
 }

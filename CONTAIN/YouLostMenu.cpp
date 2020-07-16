@@ -5,14 +5,14 @@ YouLostMenu::YouLostMenu(RESOURCES * i_resources) :
 	resources{ i_resources }
 {
 	resources = i_resources;
-	sf::RectangleShape playAgainButtonRect(sf::Vector2f(GLOBAL_CONSTANTS::BUTTON_WIDTH, GLOBAL_CONSTANTS::BUTTON_HEIGHT));
+	sf::RectangleShape playAgainButtonRect(sf::Vector2f(GLBVRS::BTTN_WDTH, GLBVRS::BTTN_HGHT));
 	playAgainButtonRect.setPosition(sf::Vector2f(100, 100));
 	tryAgainButton = Button("Try Again?", playAgainButtonRect);
 	tryAgainButton.ResizeForText();
 	tryAgainButton.SetColors(sf::Color::Black, sf::Color::White, sf::Color(128, 128, 128));
 
-	sf::RectangleShape quitButtonRect(sf::Vector2f(GLOBAL_CONSTANTS::BUTTON_WIDTH, GLOBAL_CONSTANTS::BUTTON_HEIGHT));
-	quitButtonRect.setPosition(sf::Vector2f(tryAgainButton.GetRect().getSize().x + (GLOBAL_CONSTANTS::BUTTON_WIDTH * (0.4f)), 100));
+	sf::RectangleShape quitButtonRect(sf::Vector2f(GLBVRS::BTTN_WDTH, GLBVRS::BTTN_HGHT));
+	quitButtonRect.setPosition(sf::Vector2f(tryAgainButton.GetRect().getSize().x + (GLBVRS::BTTN_WDTH * (0.4f)), 100));
 	quitButton = Button("Exit", quitButtonRect);
 	quitButton.SetColors(sf::Color::Black, sf::Color::White, sf::Color(128, 128, 128));
 
