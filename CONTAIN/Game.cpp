@@ -35,6 +35,11 @@ GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vecto
 				currRunScore += LEVEL_SCORE_INCREASE;
 				playerPtr->ResetHealth();
 				playerPtr->ResetSpecialAmmo();
+				playerPtr->rb.ResetPosition(Vector2f(
+					GLBVRS::HR_MRG + GLBVRS::CRT_WDTH / 2.0f, 
+					GLBVRS::VRT_MRG + GLBVRS::CRT_HGHT * (3.0f / 4.0f)));
+				playerPtr->rb.angVel = 0.0f;
+				playerPtr->rb.vel = Vector2f(0.0f, 0.0f);
 				PlayRandomSong();
 			}
 			return IN_GAME;

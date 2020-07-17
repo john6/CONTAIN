@@ -11,6 +11,7 @@ class Level;
 class Sector;
 class PlayerChar;
 class Projectile;
+class Blocker;
 class Enemy;
 class Door;
 class Wall;
@@ -19,8 +20,11 @@ class PainWall;
 class PowerUp;
 class Blast;
 class CrazyBoi;
-class ShootyBoi;
-//class SpawnyBoi;
+class BossBurst;
+class BossStream;
+class BossRush;
+class BossSpawn;
+class BossSplit;
 //class ChargyBoi;
 
 class Entity
@@ -57,6 +61,8 @@ public:
 
 	virtual void CollideWithProjectile(Projectile* i_projPtr);
 
+	virtual void CollideWithBlocker(Blocker* i_blockPtr);
+
 	virtual void CollideWithEnemy(Enemy* i_enemyPtr);
 
 	virtual void CollideWithWall(Wall* i_wallPtr);
@@ -80,14 +86,20 @@ private:
 	Game* gamePtr;
 	PlayerController pController;
 	hiRes_time_point lastShotFired;
+	hiRes_time_point lastAOEFired;
 	float shipRateOfFire;
+	float shipRateOfAOE;
 	float shipSpeed;
 	float dmgRate;
 	hiRes_time_point lastDamageReceived;
 	float BlastRadius;
+	float blastStrength;
+	float blastStunTime;
 	float wallWidth;
 	float wallHeight;
 	std::map<UPGRADE_TYPE, int> shipLvl;
+	Rectangle* rectPtr;
+
 
 
 public:
@@ -169,6 +181,8 @@ public:
 
 	void CollideWithProjectile(Projectile* i_projPtr) override;
 
+	void CollideWithBlocker(Blocker* i_blockPtr) override;
+
 	void CollideWithEnemy(Enemy* i_enemyPtr) override;
 
 	void CollideWithWall(Wall* i_wallPtr) override;
@@ -196,8 +210,11 @@ private:
 public:
 	int blastType;
 	float deathTimer;
+	float strength;
+	float stunTime;
 
-	Blast(Sector* i_sectPtr, Vector2f i_startPosition, int i_blastType, RigidBody i_rb = RigidBody(std::make_shared<Circle>(175.0f), STATIC));
+	Blast(Sector* i_sectPtr, Vector2f i_startPosition, int i_blastType, float i_strength, float i_stunTime,
+			RigidBody i_rb = RigidBody(std::make_shared<Circle>(175.0f), STATIC));
 	~Blast();
 
 	void Update(float i_stepSize) override;
@@ -268,7 +285,7 @@ public:
 	void SetDiffVars(int i_diff) override;
 };
 
-class ShootyBoi : public Enemy
+class BossBurst : public Enemy
 {
 private:
 	Vector2f currDir;
@@ -280,7 +297,7 @@ private:
 	float weaponDelay;
 
 public:
-	ShootyBoi(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb);
+	BossBurst(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb);
 
 	void Update(float i_stepSize) override;
 
@@ -290,8 +307,121 @@ public:
 
 	void shootProj();
 
-	void SetDiffVars(int i_diff);
+	void SetDiffVars(int i_diff, int i_lvlNum);
 };
+
+class BossStream : public Enemy
+{
+private:
+	Vector2f currDir;
+	float sameDirTime;
+	float timeTillDirSwitch;
+	float numShots;
+	hiRes_time_point lastShotFired;
+	float shipRateOfFire;
+	float weaponDelay;
+
+public:
+	BossStream(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb);
+
+	void Update(float i_stepSize) override;
+
+	void Destroy() override;
+
+	void TakeDamage(float i_dmg);
+
+	void shootProj();
+
+	void SetDiffVars(int i_diff, int i_lvlNum);
+};
+
+class BossRush : public Enemy
+{
+private:
+	Vector2f currDir;
+	bool rushing;
+	float timeTillSwitch;
+	float rushTime;
+	float waitTime;
+	float numShots;
+	hiRes_time_point lastShotFired;
+	float shipRateOfFire;
+	float weaponDelay;
+
+public:
+	BossRush(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb);
+
+	void Update(float i_stepSize) override;
+
+	void Destroy() override;
+
+	void TakeDamage(float i_dmg);
+
+	void shootProj();
+
+	void SetDiffVars(int i_diff, int i_lvlNum);
+
+	void CollideWithPainWall(PainWall * i_painWallPtr) override;
+
+	void CollideWithPlayer(PlayerChar* i_playerPtr) override;
+};
+
+class BossSplit : public Enemy
+{
+private:
+	bool crazy;
+	int splitsLeft;
+	DIFFICULTY diff;
+	Vector2f currDir;
+	float sameDirTime;
+	float timeTillDirSwitch;
+	float numShots;
+	hiRes_time_point lastShotFired;
+	float shipRateOfFire;
+	float weaponDelay;
+
+public:
+	BossSplit(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, int i_splitsLeft, float i_spdFct, bool i_crazy,
+			Vector2f i_startPosition, RigidBody i_rb = RigidBody(std::make_shared<Circle>(150), BOUNCYBALL));
+
+	void Update(float i_stepSize) override;
+
+	void Destroy() override;
+
+	void TakeDamage(float i_dmg);
+
+	void shootProj();
+
+	void SetDiffVars(int i_diff, int i_lvlNum);
+};
+
+class BossSpawn : public Enemy
+{
+private:
+	DIFFICULTY diff;
+	Vector2f currDir;
+	float sameDirTime;
+	float timeTillDirSwitch;
+	float numShots;
+	hiRes_time_point lastShotFired;
+	float shipRateOfFire;
+	float weaponDelay;
+
+public:
+	BossSpawn(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition,
+		RigidBody i_rb = RigidBody(std::make_shared<Circle>(30), STATIC));
+
+	void Update(float i_stepSize) override;
+
+	void Destroy() override;
+
+	void TakeDamage(float i_dmg);
+
+	void shootProj();
+
+	void SetDiffVars(int i_diff, int i_lvlNum);
+};
+
 
 class Door :
 	public Entity

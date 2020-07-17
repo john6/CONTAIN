@@ -51,13 +51,15 @@ const float GLOBAL_DECELERATION_ANGULAR = 0.005f;
 const float PENETRATION_ALLOWANCE = 0.05f;
 const float PENETRATION_CORRECTION = 0.4f;
 const float ANGULAR_VELOCITY_ADJUSTMENT = 0.15f; //IDK where my angular velocity is getting so fucking jacked
+const float SQRT_TWO = 1.4142857;
 
 //MATERIALS
 const Material ROCK = Material(0.6f, 0.1f, 0.6f, 0.3f);
 const Material WOOD = Material(0.3f, 0.2f, 0.5f, 0.25f);
 const Material METAL = Material(1.2f, 0.05f, 0.4f, 0.2f);
 const Material DENSE_METAL = Material(2.2f, 0.05f, 0.4f, 0.2f);
-const Material BOUNCYBALL = Material(0.3f, 0.8f, 0.7f, 0.2f);
+const Material BOUNCYBALL = Material(0.35f, 0.8f, 0.7f, 0.2f);
+const Material LESSBOUNCYBALL = Material(0.35f, 0.6f, 0.7f, 0.2f);
 const Material HEAVYBALL = Material(0.9f, 0.95f, 0.5f, 0.25f);
 const Material SUPERBALL = Material(0.3f, 0.95f, 0.5f, 0.25f);
 const Material PILLOW = Material(0.1f, 0.2f, 0.4f, 0.2f);
@@ -120,6 +122,7 @@ enum MOUSE_STATE { MOUSE_UP, MOUSE_DOWN };
 enum DIFFICULTY { EASY, MEDIUM, HARD };
 enum SCREEN_AREA { CORNERS, MARGINS, DOORS, CENTER };
 enum SCREEN_SIDE {SCREEN_UP, SCREEN_RIGHT, SCREEN_DOWN, SCREEN_LEFT };
+enum TERRAIN_AREA { TER_UP, TER_RIGHT, TER_DOWN, TER_LEFT, TER_CENT };
 
 //enum UPGRADE_STATE { EXIT_UP_1, EXIT_UP_2, EXIT_UP_3, CONTINUE };
 //enum ENTITY_TYPE { WALL, DOOR, ENEMY, PLAYER, PROJECTILE};

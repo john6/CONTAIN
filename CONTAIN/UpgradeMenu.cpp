@@ -10,7 +10,7 @@ UpgradeMenu::UpgradeMenu(RESOURCES * i_resources, DIFFICULTY i_diff, PlayerChar*
 
 	std::vector<UPGRADE_TYPE> availableUpgrades;
 	for (int upInt = 0; upInt != WALL_BIG + 1; ++upInt) {
-		if (playerLvls->at((UPGRADE_TYPE)upInt) <= GLBVRS::GetUpgradeMax((UPGRADE_TYPE)upInt)) {
+		if (playerLvls->at((UPGRADE_TYPE)upInt) < GLBVRS::GetUpgradeMax((UPGRADE_TYPE)upInt)) {
 			availableUpgrades.push_back((UPGRADE_TYPE)upInt);
 		}
 	}
@@ -126,7 +126,7 @@ std::string UpgradeMenu::GetUpgradeText(UPGRADE_TYPE i_type)
 		break;
 	}
 	case RATE_OF_FIRE : {
-		upgradeString = "double rate of fire";
+		upgradeString = "Increase rate of fire";
 			break;
 		}
 	case SCATTER : {
@@ -134,19 +134,19 @@ std::string UpgradeMenu::GetUpgradeText(UPGRADE_TYPE i_type)
 		break;
 	}
 	case SMALL_SHIP: {
-		upgradeString = "decrease ship size, increase speed";
+		upgradeString = "Decrease ship size, increase speed";
 		break;
 	}
 	case BIG_SHIP: {
-		upgradeString = "increase ship size, increase health";
+		upgradeString = "Increase ship size, increase health";
 		break;
 	}
 	case BLAST : {
-		upgradeString = "Make blast larger";
+		upgradeString = "Make EMP blast larger and more powerful";
 		break;
 	}
 	case WALL_BIG : {
-		upgradeString = "increase wall size";
+		upgradeString = "Increase wall size";
 		break;
 	}
 	//case WALL_HURT: {

@@ -19,10 +19,14 @@ public:
 
 	bool isBossRoom;
 	bool firstPhase;
+	bool filledIn;
+
 	int sectEnemyNum;
 	Level* myLevel;
 	sf::Color colPalA;
 	sf::Color colPalB;
+
+	std::vector<TERRAIN_AREA> emptyTerrainAreas;
 
 	std::list<std::shared_ptr<Entity>>* GetSectorEntities();
 
@@ -42,7 +46,7 @@ public:
 
 	void RemoveDestroyedEntities();
 
-	void AddTerrain(int i_terrainType);
+	void AddTerrain(int i_terrainType, bool terrainBig); // -1 input indicates random
 
 	void InitializeSector();
 

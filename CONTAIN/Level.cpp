@@ -72,6 +72,8 @@ void Level::CreateSectorAtCoord(MapCoord i_coord)
 
 void Level::PopulateSectorAtCoord(MapCoord i_coord, int i_diff)
 {
+	if (GetSector(i_coord)->filledIn == true) { return; } //I have no idea why, but some sectors are getting filled in twice, this should prevent that
+
 	std::random_device rd1;  //Will be used to obtain a seed for the random number engine
 	std::mt19937 gen1(rd1()); //Standard mersenne_twister_engine seeded with rd()
 	std::uniform_int_distribution<> distrib(0, 3); //both boundaries are inclusive
@@ -84,9 +86,9 @@ void Level::PopulateSectorAtCoord(MapCoord i_coord, int i_diff)
 	int numCubes = 1 + i_diff + randExtraRooms;
 	//phase one
 	int numSeekersPhase1 = 2 + (i_diff * 1) + (m_lvl_num * 1);
-	int numRandosPhase1 = 3 + (i_diff * 1) + (m_lvl_num * 1);
-	GetSector(i_coord)->GenerateEnemies(numSeekersPhase1, ENEMY_SEEK_PUSH, CORNERS, 1, (DIFFICULTY)i_diff, 0);
-	GetSector(i_coord)->GenerateEnemies(numRandosPhase1, ENEMY_RAND_PUSH, CENTER, 1, (DIFFICULTY)i_diff, 0);
+	int numRandosPhase1 = (i_diff * 1) + (m_lvl_num * 1);
+	GetSector(i_coord)->GenerateEnemies(numSeekersPhase1, ENEMY_SEEK, MARGINS, 1, (DIFFICULTY)i_diff, 0);
+	GetSector(i_coord)->GenerateEnemies(numRandosPhase1, ENEMY_RAND, CENTER, 1, (DIFFICULTY)i_diff, 0);
 	//phase two
 	int numSeekersPhase2 = 4 + (i_diff * 1) + (m_lvl_num * 1);
 	int numRandosPhase2 = 6 + (i_diff * 1) + (m_lvl_num * 1);
@@ -103,13 +105,14 @@ void Level::PopulateSectorAtCoord(MapCoord i_coord, int i_diff)
 		--bigTerrainCount;
 	}
 	while (smallTerrainCount > 0) {
-		int rando = distrib(gen1);
-		GetSector(i_coord)->AddTerrain(rando);
+		//int rando = distrib(gen1);
+		GetSector(i_coord)->AddTerrain(-1, false);
 		--smallTerrainCount;
 	}
+	//bigTerrainCount = 6;
 	while (bigTerrainCount > 0) {
-		int rando = distrib(gen1);
-		GetSector(i_coord)->AddTerrain(4 + rando);
+		//int rando = distrib(gen1);
+		GetSector(i_coord)->AddTerrain(-1, true);
 		--bigTerrainCount;
 	}
 
@@ -127,6 +130,8 @@ void Level::PopulateSectorAtCoord(MapCoord i_coord, int i_diff)
 		--painWallCount;
 	}
 	//newSector->GenerateLevelCircles(1);
+
+	GetSector(i_coord)->filledIn = true;
 }
 
 void Level::CreateOneWayDoor(MapCoord i_CoordA, MapCoord i_CoordB)
@@ -364,7 +369,7 @@ void Level::PopulateMapRooms(int i_levelNum, DIFFICULTY i_diff)
 	for (MapCoord coord : allCoords) { //Populate all sectors except first
 		if (((coord.x != originCoord.x) || (coord.y != originCoord.y)) &&
 			((coord.x != bossRoom.x) || (coord.y != bossRoom.y))) {
-			//PopulateSectorAtCoord(coord, i_diff);
+			PopulateSectorAtCoord(coord, i_diff);
 		}
 	}
 	PopulateBossRoom(i_diff);

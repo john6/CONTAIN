@@ -22,6 +22,9 @@ std::list<std::shared_ptr<Entity>>* Sector::GetSectorEntities()
 
 void Sector::AddEntPtrToSector(std::shared_ptr<Entity> i_entPtr)
 {
+	if (auto enemy = dynamic_cast<Enemy*>(i_entPtr.get())) {
+		sectEnemyNum++;
+	}
 	lvlEntitiesPhase1.push_back(i_entPtr);
 }
 
@@ -32,11 +35,12 @@ void Sector::GenerateEnemies(int i_numEnems, TypeID enemyType, SCREEN_AREA i_are
 
 		std::random_device sizeSeed;
 		std::mt19937 genRoomSeed(sizeSeed());
-		std::discrete_distribution<> sizeModDist({ 12, 13, 50, 13, 12 });
-		int rand1 = sizeModDist(genRoomSeed);
-		int ranDifwidth = (rand1 - 2 + i_sizeMod) * 5;
-		int rand2 = sizeModDist(genRoomSeed);
-		int randDifHeight = (rand2 - 2 + i_sizeMod) * 5;
+		std::discrete_distribution<> widthModDist({ 10, 15, 50, 15, 10 });
+		std::discrete_distribution<> heightModDist({ 13, 18, 40, 18, 13 });
+		int rand1 = widthModDist(genRoomSeed);
+		int ranDifwidth = (rand1 - 2 + i_sizeMod) * 10;
+		int rand2 = heightModDist(genRoomSeed);
+		int randDifHeight = (rand2 - 2 + i_sizeMod) * 10;
 
 		//Create random spawn position
 		std::shared_ptr<Shape> shape = std::make_shared<Circle>(40);
@@ -55,8 +59,22 @@ void Sector::GenerateEnemies(int i_numEnems, TypeID enemyType, SCREEN_AREA i_are
 		Vector2f spawnPos(randXcordInBounds, randYcordInBounds);
 		std::shared_ptr<Entity> ent;
 		switch (enemyType) {
+		case ENEMY_SEEK: {
+			std::shared_ptr<Shape> shape = std::make_shared<Rectangle>(65 + ranDifwidth, 65 + randDifHeight);
+			//std::shared_ptr<Shape> shape = std::make_shared<Rectangle>(60 + randSizeDiff, 60 + randSizeDiff2);
+			Material Rock = Material(0.6f, 0.1f, 0.6f, 0.3f);
+			RigidBody projBody = RigidBody(shape, Rock);
+			ent = std::make_shared<Enemy>(myLevel->charPtr, this, i_diff, spawnPos, projBody);
+			break;
+		}
+		case ENEMY_RAND:{
+			std::shared_ptr<Shape> shape = std::make_shared<Circle>(40 + ranDifwidth);
+			RigidBody projBody = RigidBody(shape, ROCK);
+			ent = std::make_shared<CrazyBoi>(myLevel->charPtr, this, i_diff, spawnPos, projBody);
+			break;
+		}
 		case ENEMY_SEEK_PUSH: {
-			std::shared_ptr<Shape> shape = std::make_shared<Rectangle>(60 + ranDifwidth, 60 + randDifHeight);
+			std::shared_ptr<Shape> shape = std::make_shared<Rectangle>(65 + ranDifwidth, 65 + randDifHeight);
 			//std::shared_ptr<Shape> shape = std::make_shared<Rectangle>(60 + randSizeDiff, 60 + randSizeDiff2);
 			Material Rock = Material(0.6f, 0.1f, 0.6f, 0.3f);
 			RigidBody projBody = RigidBody(shape, Rock);
@@ -257,37 +275,38 @@ void Sector::PopulateEntranceRoom()
 				Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH / 2.0f), GLBVRS::CRT_HGHT / 2.0)));
 	lvlEntitiesPhase1.push_back(lowerWall);
 
-	std::shared_ptr<Entity> smallShipPOW = std::make_shared<PowerUp>(this,
-		Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH / 4.0f), GLBVRS::CRT_HGHT / 2.0)), WEAP_SPEED);
-	lvlEntitiesPhase1.push_back(smallShipPOW);
+	//std::shared_ptr<Entity> smallShipPOW2 = std::make_shared<PowerUp>(this,
+	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (1.0f / 5.0f)), GLBVRS::CRT_HGHT / 2.0)), SMALL_SHIP);
+	//lvlEntitiesPhase1.push_back(smallShipPOW2);
 
-	std::shared_ptr<Entity> smallShipPOW2 = std::make_shared<PowerUp>(this,
-		Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (3.0f / 4.0f)), GLBVRS::CRT_HGHT / 2.0)), WEAP_SPEED);
-	lvlEntitiesPhase1.push_back(smallShipPOW2);
+	//std::shared_ptr<Entity> smallShipPOW3 = std::make_shared<PowerUp>(this,
+	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (2.0f / 5.0f)), GLBVRS::CRT_HGHT / 2.0)), WALL_BIG);
+	//lvlEntitiesPhase1.push_back(smallShipPOW3);
 
-	std::shared_ptr<Entity> smallShipPOW3 = std::make_shared<PowerUp>(this,
-		Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH / 4.0f), GLBVRS::CRT_HGHT / 4.0)), WEAP_SPEED);
-	lvlEntitiesPhase1.push_back(smallShipPOW3);
+	//std::shared_ptr<Entity> smallShipPOW4 = std::make_shared<PowerUp>(this,
+	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (3.0f / 5.0f)), GLBVRS::CRT_HGHT / 2.0)), WALL_BIG);
+	//lvlEntitiesPhase1.push_back(smallShipPOW4);
 
-	std::shared_ptr<Entity> smallShipPOW4 = std::make_shared<PowerUp>(this,
-		Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH / 4.0f), GLBVRS::CRT_HGHT / 4.0)), WEAP_SPEED);
-	lvlEntitiesPhase1.push_back(smallShipPOW4);
+	//std::shared_ptr<Entity> smallShipPOW5 = std::make_shared<PowerUp>(this,
+	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (4.0f / 5.0f)), GLBVRS::CRT_HGHT / 2.0)), WALL_BIG);
+	//lvlEntitiesPhase1.push_back(smallShipPOW5);
 
-	std::shared_ptr<Entity> smallShipPOW41 = std::make_shared<PowerUp>(this,
-		Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (3.0f / 4.0f)), GLBVRS::CRT_HGHT / 4.0)), BIG_SHIP);
-	lvlEntitiesPhase1.push_back(smallShipPOW41);
+	//std::shared_ptr<Entity> asd1 = std::make_shared<PowerUp>(this,
+	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (1.0f / 5.0f)), GLBVRS::CRT_HGHT / 4.0)), SCATTER);
+	//lvlEntitiesPhase1.push_back(asd1);
 
-	std::shared_ptr<Entity> smallShipPOW42 = std::make_shared<PowerUp>(this,
-		Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (3.0f / 4.0f)), GLBVRS::CRT_HGHT / 4.0)), BIG_SHIP);
-	lvlEntitiesPhase1.push_back(smallShipPOW42);
+	//std::shared_ptr<Entity> asd2 = std::make_shared<PowerUp>(this,
+	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (2.0f / 5.0f)), GLBVRS::CRT_HGHT / 4.0)), BLAST);
+	//lvlEntitiesPhase1.push_back(asd2);
 
-	std::shared_ptr<Entity> smallShipPOW43 = std::make_shared<PowerUp>(this,
-		Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (3.0f / 4.0f)), GLBVRS::CRT_HGHT / 4.0)), BIG_SHIP);
-	lvlEntitiesPhase1.push_back(smallShipPOW43);
+	//std::shared_ptr<Entity> asd3 = std::make_shared<PowerUp>(this,
+	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (3.0f / 5.0f)), GLBVRS::CRT_HGHT / 4.0)), BLAST);
+	//lvlEntitiesPhase1.push_back(asd3);
 
-	std::shared_ptr<Entity> smallShipPOW44 = std::make_shared<PowerUp>(this,
-		Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (3.0f / 4.0f)), GLBVRS::CRT_HGHT / 4.0)), BIG_SHIP);
-	lvlEntitiesPhase1.push_back(smallShipPOW44);
+	//std::shared_ptr<Entity> asd = std::make_shared<PowerUp>(this,
+	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (4.0f / 5.0f)), GLBVRS::CRT_HGHT / 4.0)), BLAST);
+	//lvlEntitiesPhase1.push_back(asd3);
+
 }
 
 void Sector::PopulateBossRoom(DIFFICULTY i_diff)
@@ -296,7 +315,32 @@ void Sector::PopulateBossRoom(DIFFICULTY i_diff)
 
 	std::shared_ptr<Shape> shape = std::make_shared<Circle>(70);
 	RigidBody projBody = RigidBody(shape, ROCK);
-	std::shared_ptr<Entity> ent = std::make_shared<ShootyBoi>(myLevel->charPtr, this, i_diff, Vector2f(400.0f, 400.0f), projBody);
+
+	//Create random spawn position
+	auto screenAreas = GetScreenAreas(CENTER);
+	std::random_device rd;
+	std::mt19937 gen1(rd());
+	int leftX = (int)std::get<0>(screenAreas[0])[0];
+	int rightX = (int)std::get<1>(screenAreas[0])[0];
+	int topY = (int)std::get<0>(screenAreas[0])[1];
+	int bottomY = (int)std::get<1>(screenAreas[0])[1];
+	std::uniform_int_distribution<> xCordDist(leftX, rightX);
+	std::uniform_int_distribution<> yCordDist(topY, bottomY);
+	int randXcordInBounds = xCordDist(gen1);
+	int randYcordInBounds = yCordDist(gen1);
+	Vector2f spawnPos(randXcordInBounds, randYcordInBounds);
+
+	//rush
+	std::shared_ptr<Entity> ent = std::make_shared<BossRush>(myLevel->charPtr, this, i_diff, spawnPos, projBody);
+	
+	//splitter
+	//std::shared_ptr<Shape> shape1 = std::make_shared<Circle>(100);
+	//RigidBody projBody1 = RigidBody(shape1, ROCK);
+	//std::shared_ptr<Entity> splitBoss = std::make_shared<BossSplit>(myLevel->charPtr, this, i_diff, 4, 6, false, spawnPos, projBody1);
+	
+	//Spawner
+	//std::shared_ptr<Entity> spawnBoss = std::make_shared<BossSpawn>(myLevel->charPtr, this, i_diff, spawnPos);
+
 	lvlEntitiesPhase1.push_back(ent);
 	++sectEnemyNum;
 }
@@ -322,13 +366,31 @@ void Sector::RemoveDestroyedEntities() {
 	}
 }
 
-void Sector::AddTerrain(int i_terrainType)
+void Sector::AddTerrain(int i_terrainType, bool terrainBig)
 {
+	int terrType = i_terrainType;
+	if (terrType == -1) {//random
+		if (emptyTerrainAreas.size() == 0) { return; }
+		std::random_device rd1;
+		std::mt19937 gen1(rd1());
+		std::uniform_int_distribution<> distrib(1, 3);
+		terrType = emptyTerrainAreas[distrib(gen1) % emptyTerrainAreas.size()];
+		auto iter1 = std::find(emptyTerrainAreas.begin(), emptyTerrainAreas.end(), terrType);
+		emptyTerrainAreas.erase(iter1);
+	}
+	else {
+		if (std::find(emptyTerrainAreas.begin(), emptyTerrainAreas.end(), terrType) == emptyTerrainAreas.end()) {
+			return;
+		}
+	}
+	if (terrainBig) {
+		terrType += 4;
+	}
 	float smallWidth = GLBVRS::HR_MRG / 2.5f;
 	float smallHeight = GLBVRS::CRT_HGHT / 4.0f;
 	float bigWidth = GLBVRS::HR_MRG / 2.5f;
 	float bigHeight = GLBVRS::CRT_HGHT / 1.5f;
-	switch (i_terrainType) {
+	switch (terrType) {
 		//small walls
 	case 0: {
 		std::shared_ptr<Shape> vertRect1 = std::make_shared<Rectangle>(smallWidth, smallHeight);
@@ -400,10 +462,12 @@ void Sector::AddTerrain(int i_terrainType)
 
 void Sector::InitializeSector()
 {
+	emptyTerrainAreas = { TER_UP, TER_RIGHT, TER_DOWN, TER_LEFT }; //, TER_CENT };
 	AddWallsToLevel();
 	sectEnemyNum = 0;
 	isBossRoom = false;
 	firstPhase = true;
+	filledIn = false;
 }
 
 void Sector::PlaySound(int i_soundNum)
