@@ -18,6 +18,8 @@
 #include "Entity.h"
 #include "QuadTree.h"
 #include "UpgradeMenu.h"
+#include "InfoPopUp.h"
+#include "TuteLib.h"
 
 enum PLAY_STATE { GENERAL_GAMEPLAY, WON_LEVEL, DEAD, WON_GAME };
 
@@ -45,6 +47,8 @@ private:
 
 
 public:
+	bool tutorial;
+	TuteLib tuteLib;
 	DIFFICULTY gameDiff;
 
 
@@ -68,6 +72,8 @@ public:
 
 	void GenerateLevels(DIFFICULTY i_diff);
 
+	void GenerateTutorialLevels();
+
 	const int GetCurrLvl();
 
 	const int GetNumLvls();
@@ -81,6 +87,8 @@ public:
 	void RequestGoToNextLvl();
 
 	void InitGame(DIFFICULTY i_diff);
+
+	void InitTutorial();
 
 	void loadTestLevel(); 
 

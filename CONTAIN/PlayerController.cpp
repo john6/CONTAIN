@@ -53,7 +53,7 @@ Vector2f PlayerController::RightClick()
 
 bool PlayerController::ScrollClick()
 {
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Middle)) {
+	if ((sf::Mouse::isButtonPressed(sf::Mouse::Middle)) || (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space))) {
 		return true;
 	}
 	else {

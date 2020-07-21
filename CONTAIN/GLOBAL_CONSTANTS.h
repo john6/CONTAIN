@@ -42,6 +42,7 @@ const float RADIAN_ADJUST = 50.0f;
 const float PROJECTILE_RADIUS = 10.0f;
 const float DOOR_WIDTH = 150.0f;
 const float DOOR_HEIGHT = 50.0f;
+const float MAX_NUM_BLOCKERS = 10;
 //const float AOE_RADIUS = 175.0f;
 
 //PHYSICS CONSTANTS
@@ -93,12 +94,21 @@ const sf::Color EMERALD = sf::Color(31, 78, 47);
 const sf::Color PISTACHIO = sf::Color(58, 77, 45);
 const sf::Color SAGE = sf::Color(188, 184, 138);
 const sf::Color MOSS = sf::Color(138, 154, 91);
+const sf::Color BLUEVIOLET = sf::Color(138, 43, 226);
+const sf::Color INDIGO = sf::Color(75, 0, 130);
+const sf::Color MEDIUMPURPLE = sf::Color(147, 112, 219);
+const sf::Color PURPLE = sf::Color(128, 0, 128);
+const sf::Color DARKVIOLET = sf::Color(148, 0, 211);
+const sf::Color DIMGRAY = sf::Color(105, 105, 105);
+const sf::Color SILVER = sf::Color(192, 192, 192);
+const sf::Color SLATEGRAY = sf::Color(112, 128, 144);
 
 //~~DIFFICULTY SETTINGS~~
 //
 const float ENEMYSPEEDEASY = 12;
 const float ENEMYSPEEDMED = 15;
 const float ENEMYSPEEDHARD = 18;
+
 //EASY SETTINGS
 //const float SPEED_MULTIPLIER_EASY = 0.40f;
 //const float PLAYER_SPEED_MULTIPLIER_EASY = 0.6f;
@@ -115,7 +125,7 @@ const float ENEMYSPEEDHARD = 18;
 //const float LEVEL_TIME_LIMIT_HARD = 135.0f;
 
 //ENUMS
-enum GAME_STATE { MENU, START_GAME, IN_GAME, EXIT_GAME, WIN, LOSE };
+enum GAME_STATE { MENU, START_GAME, START_TUTORIAL, IN_GAME, EXIT_GAME, WIN, LOSE };
 //Leave WALL_BIG as last upgrade I use it as a terminating condition for InitLvl();
 enum UPGRADE_TYPE { NONE, RATE_OF_FIRE, WEAP_SPEED, SCATTER, SMALL_SHIP, BIG_SHIP, BLAST, WALL_BIG };
 enum MOUSE_STATE { MOUSE_UP, MOUSE_DOWN };

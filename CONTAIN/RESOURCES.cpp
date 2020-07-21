@@ -89,7 +89,7 @@ RESOURCES::RESOURCES()
 	if (!magic9.loadFromFile("Sounds/YalSounds/magic9.wav")) {
 		std::cerr << "error loading .wav \n";
 	}
-	if (!magic10.loadFromFile("Sounds/YalSounds/MenuAccept.wav")) {
+	if (!magic10.loadFromFile("Sounds/YalSounds/magic10.wav")) {
 		std::cerr << "error loading magic10.wav \n";
 	}
 	if (!MenuAccept2.loadFromFile("Sounds/YalSounds/MenuAccept2.wav")) {
@@ -143,8 +143,32 @@ RESOURCES::RESOURCES()
 	if (!warning3.loadFromFile("Sounds/YalSounds/warning3.wav")) {
 		std::cerr << "error loading warning3.wav \n";
 	}
+	if (!warning7.loadFromFile("Sounds/YalSounds/warning7.wav")) {
+		std::cerr << "error loading warning7.wav \n";
+	}
 	if (!Whoosh.loadFromFile("Sounds/YalSounds/Whoosh.wav")) {
 		std::cerr << "error loading Whoosh.wav \n";
+	}
+	if (!Fireball.loadFromFile("Sounds/YalSounds/Fireball.wav")) {
+		std::cerr << "error loading Fireball.wav \n";
+	}
+	if (!enemyDeath6.loadFromFile("Sounds/YalSounds/Enemy Death 6.wav")) {
+		std::cerr << "error loading Enemy Death 6.wav \n";
+	}
+	if (!playershoot.loadFromFile("Sounds/YalSounds/playershoot.wav")) {
+		std::cerr << "error loading player shoot .wav \n";
+	}
+	if (!Brake.loadFromFile("Sounds/YalSounds/Brake.wav")) {
+		std::cerr << "error loading Brake.wav \n";
+	}
+	if (!Plop.loadFromFile("Sounds/YalSounds/Plop.wav")) {
+		std::cerr << "error loading Plop.wav \n";
+	}
+	if (!PlopBanana.loadFromFile("Sounds/YalSounds/Plop Banana.wav")) {
+		std::cerr << "error loading Plop Banana.wav \n";
+	}
+	if (!Sword_Clash.loadFromFile("Sounds/YalSounds/Sword Clash.wav")) {
+		std::cerr << "error loading Sword Clash.wav \n";
 	}
 }
 
@@ -365,6 +389,11 @@ void RESOURCES::PlaySound(int soundNum) {
 		m_sound.play();
 		break;
 	}
+	case (MAGIC10): {
+		m_sound.setBuffer(magic10);
+		m_sound.play();
+		break;
+	}
 	case (MENUACCEPT): {
 		m_sound.setBuffer(MenuAccept);
 		m_sound.play();
@@ -450,6 +479,47 @@ void RESOURCES::PlaySound(int soundNum) {
 		m_sound.play();
 		break;
 	}
+	case (WARNING7): {
+		m_sound.setBuffer(warning7);
+		m_sound.play();
+		break;
+	}
+	case (FIREBALL): {
+		m_sound.setBuffer(Fireball);
+		m_sound.play();
+		break;
+	}
+	case (ENEMYDEATH6): {
+		m_sound.setBuffer(enemyDeath6);
+		m_sound.play();
+		break;
+	}
+	case (BRAKE): {
+		m_sound.setBuffer(Brake);
+		m_sound.play();
+		break;
+	}	
+	case (PLOPBANANA): {
+		m_sound.setBuffer(PlopBanana);
+		m_sound.play();
+		break;
+	}
+	case (PLOP): {
+		m_sound.setBuffer(Plop);
+		m_sound.play();
+		break;
+	}
+	case (SWORDCLASH): {
+		m_sound.setBuffer(Sword_Clash);
+		m_sound.play();
+		break;
+	}
+	case (PLAYERSHOOT): {
+		m_sound.setBuffer(Sword_Clash);
+		m_sound.play();
+		break;
+	}
+	
 	default: {
 		std::cerr << "soundNum not found \n";
 	}

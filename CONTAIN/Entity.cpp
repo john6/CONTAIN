@@ -152,7 +152,7 @@ PlayerChar::PlayerChar(Game* i_gamePtr, int i_strtHealth, Vector2f i_startPositi
 	fillColor = sf::Color::Yellow;
 	outlineColor = sf::Color::Red;
 	shipRateOfFire = 0.9f;
-	shipRateOfAOE = 0.75f;
+	shipRateOfAOE = 6.0f;
 	shipSpeed = 100;
 	lastShotFired = std::chrono::high_resolution_clock::now();
 	lastAOEFired = std::chrono::high_resolution_clock::now();
@@ -164,7 +164,7 @@ PlayerChar::PlayerChar(Game* i_gamePtr, int i_strtHealth, Vector2f i_startPositi
 	weaponDelay = shipRateOfFire;
 	wallWidth = 40;
 	wallHeight = 270;
-	BlastRadius = 150;
+	BlastRadius = 185;
 	blastStrength = 600.0f;
 	blastStunTime = 4.0f;
 	maxSpecialAmmo = 4;
@@ -317,7 +317,8 @@ void PlayerChar::ReceivePowerUp(UPGRADE_TYPE i_powType)
 			BlastRadius *= 1.3f;
 			blastStrength *= 1.3f;
 			blastStunTime *= 1.3f;
-			maxSpecialAmmo += 2;
+			//maxSpecialAmmo += 2;
+			shipRateOfAOE *= 0.70;
 		}
 		break;
 	}
@@ -339,7 +340,7 @@ float PlayerChar::GetCurrHealth()
 
 void PlayerChar::CollideWithPainWall(PainWall * i_painWallPtr)
 {
-	gamePtr->levels[gamePtr->currLvl]->GetSector(gamePtr->currSector)->PlaySound(RESOURCES::FIRE5);
+	gamePtr->levels[gamePtr->currLvl]->GetSector(gamePtr->currSector)->PlaySound(RESOURCES::FIREBALL);
 	TakeDamage(1.0f);
 }
 
@@ -443,13 +444,14 @@ void PlayerChar::ShootAOE()
 {// AOE is a panic button it should not have a timer on it that kinda defeats the prupose,
 	//JK everything needs a slight timer or else I'll fire them all at once
 	weaponDelay = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastAOEFired)).count() / 1000000.0f;
-	if ((weaponDelay >= shipRateOfAOE) && (currSpecialAmmo > 0)) {
+	//if ((weaponDelay >= shipRateOfAOE) && (currSpecialAmmo > 0)) {
+	if (weaponDelay >= shipRateOfAOE) {
 	//if (currSpecialAmmo > 0) {
 		gamePtr->levels[gamePtr->currLvl]->GetSector(gamePtr->currSector)->PlaySound(RESOURCES::MAGIC10);
 		--currSpecialAmmo;
 		lastAOEFired = hiResTime::now();
 		std::shared_ptr<Entity> projectile = std::make_shared<Blast>(
-					gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector).get(),
+					gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector).get(), this,
 					rb.transform.pos, 0, blastStrength, blastStunTime, RigidBody(std::make_shared<Circle>(BlastRadius), STATIC));
 		gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector)->AddEntPtrToSector(projectile);
 	}
@@ -502,6 +504,19 @@ void Projectile::CollideWithBlocker(Blocker * i_blockPtr)
 
 void Projectile::CollideWithEnemy(Enemy * i_enemyPtr)
 {
+	if (i_enemyPtr->GetTypeID() == ENEMY_BOSS) {
+		if (auto spawnerBoss = dynamic_cast<BossSpawn*>(i_enemyPtr)) {
+			if (spawnerBoss->invulnerable) {
+
+			}
+			else {
+				Destroy();
+			}
+		}
+		else {
+			Destroy();
+		}
+	}
 	Destroy();
 }
 
@@ -509,9 +524,6 @@ void Projectile::CollideWithWall(Wall * i_wallPtr)
 {
 	Destroy();
 }
-
-
-
 
 void Projectile::CollideWithPainWall(PainWall * i_painWallPtr)
 {
@@ -536,8 +548,11 @@ Blocker::~Blocker()
 }
 
 /////////////////////// Blast ///////////////////////
-Blast::Blast(Sector* i_sectPtr, Vector2f i_startPosition, int i_blastType, float i_strength, float i_stunTime, RigidBody i_rb) :
-	Entity(i_startPosition, i_rb, BLAST_STUN), sectPtr{ i_sectPtr }, blastType{ i_blastType }, strength { i_strength }, stunTime { i_stunTime }
+Blast::Blast(Sector* i_sectPtr, PlayerChar* charP, Vector2f i_startPosition, int i_blastType, float i_strength, float i_stunTime, RigidBody i_rb) :
+	Entity(i_startPosition, i_rb, BLAST_STUN),
+	sectPtr{ i_sectPtr }, blastType{ i_blastType },
+	strength { i_strength }, stunTime { i_stunTime },
+	charP { charP }
 {
 	fillColor = sf::Color(0, 255, 255, 128);
 	outlineColor = sf::Color::Cyan;
@@ -551,6 +566,7 @@ Blast::~Blast()
 
 void Blast::Update(float i_stepSize)
 {
+	rb.transform.pos = charP->rb.transform.pos;
 	float secsInUpdate = i_stepSize / 1000.0f;
 	deathTimer -= secsInUpdate;
 	if (deathTimer <= 0) { Destroy(); }
@@ -564,7 +580,7 @@ Enemy::Enemy(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_
 	fillColor = MOSS;
 	outlineColor = sf::Color::White;
 	SetDiffVars(i_diff);
-	Stun(0.3f);
+	Stun(0.6f);
 	maxHealth = 1;
 	health = maxHealth;
 }
@@ -606,7 +622,7 @@ void Enemy::Destroy() {
 
 void Enemy::CollideWithPainWall(PainWall * i_painWallPtr)
 {
-	sectPtr->PlaySound(RESOURCES::FIRE5);
+	sectPtr->PlaySound(RESOURCES::FIREBALL);
 	TakeDamage(1);
 }
 
@@ -726,6 +742,8 @@ void CrazyBoi::Update(float i_stepSize)
 
 void CrazyBoi::CollideWithPainWall(PainWall * i_painWallPtr)
 {
+	//sectPtr->PlaySound(RESOURCES::FIRE5);
+	TakeDamage(1);
 }
 
 void CrazyBoi::SetDiffVars(int i_diff)
@@ -822,27 +840,32 @@ void BossBurst::shootProj()
 	}
 }
 
+void BossBurst::Stun(float i_stunTime)
+{
+	stunSecs = i_stunTime / 2.0f;
+}
+
 void BossBurst::SetDiffVars(int i_diff, int i_lvlNum)
 {
 	switch (i_diff) {
 	case EASY: {
 		speed = ENEMYSPEEDEASY;
 		numShots = 6;
-		maxHealth = 5;
+		maxHealth = 7;
 		health = maxHealth;
 		break;
 	}
 	case MEDIUM: {
 		speed = ENEMYSPEEDMED;
 		numShots = 7;
-		maxHealth = 6;
+		maxHealth = 8;
 		health = maxHealth;
 		break;
 	}
 	case HARD: {
 		speed = ENEMYSPEEDHARD;
 		numShots = 8;
-		maxHealth = 7;
+		maxHealth = 9;
 		health = maxHealth;
 		break;
 	}
@@ -905,7 +928,7 @@ void BossStream::shootProj()
 {
 	weaponDelay = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastShotFired)).count() / 1000000.0f;
 	if (weaponDelay >= shipRateOfFire) {
-		sectPtr->PlaySound(RESOURCES::SWORD5);
+		sectPtr->PlaySound(RESOURCES::PLAYERSHOOT);
 		lastShotFired = hiResTime::now();
 			Vector2f projDir = Math::AngleToVect(rb.transform.orient);
 			projDir.normalize();
@@ -916,41 +939,46 @@ void BossStream::shootProj()
 	}
 }
 
+void BossStream::Stun(float i_stunTime)
+{
+	stunSecs = i_stunTime / 2.0f;
+}
+
 void BossStream::SetDiffVars(int i_diff, int i_lvlNum)
 {
 	switch (i_diff) {
 	case EASY: {
 		speed = ENEMYSPEEDEASY;
 		numShots = 6;
-		maxHealth = 4;
+		maxHealth = 9;
 		health = maxHealth;
 		break;
 	}
 	case MEDIUM: {
 		speed = ENEMYSPEEDMED;
 		numShots = 7;
-		maxHealth = 5;
+		maxHealth = 10;
 		health = maxHealth;
 		break;
 	}
 	case HARD: {
 		speed = ENEMYSPEEDHARD;
 		numShots = 8;
-		maxHealth = 6;
+		maxHealth =11;
 		health = maxHealth;
 		break;
 	}
 	}
-	speed *= 3;
+	speed *= 4;
 }
 
 /////////////////////// Rush Boss class ///////////////////////
 BossRush::BossRush(std::shared_ptr<Entity> i_charPtr, Sector * i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb) :
 	Enemy(i_charPtr, i_sectPtr, i_diff, i_startPosition, i_rb, ENEMY_BOSS)
 {
-	Stun(0.3f);
-	rushTime = 5.0f;
-	waitTime = 2.5f;
+	Stun(1.0f);
+	rushTime = 3.0f;
+	waitTime = 1.0f;
 	rushing = true;
 	timeTillSwitch = rushTime;
 	lastShotFired = hiResTime::now();
@@ -1007,27 +1035,32 @@ void BossRush::shootProj()
 {
 }
 
+void BossRush::Stun(float i_stunTime)
+{
+	stunSecs = i_stunTime / 2.0f;
+}
+
 void BossRush::SetDiffVars(int i_diff, int i_lvlNum)
 {
 	switch (i_diff) {
 	case EASY: {
 		speed = ENEMYSPEEDEASY;
 		numShots = 6;
-		maxHealth = 4;
+		maxHealth = 8;
 		health = maxHealth;
 		break;
 	}
 	case MEDIUM: {
 		speed = ENEMYSPEEDMED;
 		numShots = 7;
-		maxHealth = 5;
+		maxHealth = 9;
 		health = maxHealth;
 		break;
 	}
 	case HARD: {
 		speed = ENEMYSPEEDHARD;
 		numShots = 8;
-		maxHealth = 6;
+		maxHealth = 10;
 		health = maxHealth;
 		break;
 	}
@@ -1097,7 +1130,7 @@ void BossSplit::Destroy()
 {
 	switch (splitsLeft) {
 	case 4: {
-		sectPtr->PlaySound(RESOURCES::BOSSEXPLODE);
+		sectPtr->PlaySound(RESOURCES::PLOPBANANA);
 		std::shared_ptr<Shape> shape1 = std::make_shared<Circle>(100);
 		std::shared_ptr<Shape> shape2 = std::make_shared<Circle>(100);
 		RigidBody projBody1 = RigidBody(shape1, LESSBOUNCYBALL);
@@ -1110,6 +1143,7 @@ void BossSplit::Destroy()
 		break;
 	}
 	case 3: {
+		sectPtr->PlaySound(RESOURCES::PLOPBANANA);
 		std::shared_ptr<Shape> shape1 = std::make_shared<Circle>(75);
 		std::shared_ptr<Shape> shape2 = std::make_shared<Circle>(75);
 		RigidBody projBody1 = RigidBody(shape1, LESSBOUNCYBALL);
@@ -1118,11 +1152,11 @@ void BossSplit::Destroy()
 		std::shared_ptr<Entity> split2 = std::make_shared<BossSplit>(charPtr, sectPtr, diff, splitsLeft - 1, 3, false, rb.transform.pos, projBody2);
 		sectPtr->AddEntPtrToSector(split1);
 		sectPtr->AddEntPtrToSector(split2);
-		sectPtr->PlaySound(RESOURCES::OUCH1);
 		killMeNextLoop = true; 
 		break;
 	}
 	case 2: {
+		sectPtr->PlaySound(RESOURCES::PLOPBANANA);
 		std::shared_ptr<Shape> shape1 = std::make_shared<Circle>(50);
 		std::shared_ptr<Shape> shape2 = std::make_shared<Circle>(50);
 		RigidBody projBody1 = RigidBody(shape1, LESSBOUNCYBALL);
@@ -1131,25 +1165,24 @@ void BossSplit::Destroy()
 		std::shared_ptr<Entity> split2 = std::make_shared<BossSplit>(charPtr, sectPtr, diff, splitsLeft - 1, 2, false, rb.transform.pos, projBody2);
 		sectPtr->AddEntPtrToSector(split1);
 		sectPtr->AddEntPtrToSector(split2);
-		sectPtr->PlaySound(RESOURCES::OUCH1);
 		killMeNextLoop = true; 
 		break;
 	}
 	case 1: {
+		sectPtr->PlaySound(RESOURCES::PLOPBANANA);
 		std::shared_ptr<Shape> shape1 = std::make_shared<Circle>(30);
 		std::shared_ptr<Shape> shape2 = std::make_shared<Circle>(30);
-		RigidBody projBody1 = RigidBody(shape1, LESSBOUNCYBALL);
-		RigidBody projBody2 = RigidBody(shape2, LESSBOUNCYBALL);
+		RigidBody projBody1 = RigidBody(shape1, BOUNCYBALL);
+		RigidBody projBody2 = RigidBody(shape2, BOUNCYBALL);
 		std::shared_ptr<Entity> split1 = std::make_shared<BossSplit>(charPtr, sectPtr, diff, splitsLeft - 1, true, 1, rb.transform.pos, projBody1);
 		std::shared_ptr<Entity> split2 = std::make_shared<BossSplit>(charPtr, sectPtr, diff, splitsLeft - 1, false, 1, rb.transform.pos, projBody2);
 		sectPtr->AddEntPtrToSector(split1);
 		sectPtr->AddEntPtrToSector(split2);
-		sectPtr->PlaySound(RESOURCES::OUCH1);
 		killMeNextLoop = true;
 		break;
 	}
 	case 0: {
-		sectPtr->PlaySound(RESOURCES::OUCH1);
+		sectPtr->PlaySound(RESOURCES::PLOP);
 		killMeNextLoop = true;
 	}
 	}
@@ -1165,40 +1198,141 @@ void BossSplit::shootProj()
 {
 }
 
+void BossSplit::Stun(float i_stunTime)
+{
+	stunSecs = i_stunTime / 2.0f;
+}
+
 void BossSplit::SetDiffVars(int i_diff, int i_lvlNum)
 {
+	if (splitsLeft == 4)
 	switch (i_diff) {
 	case EASY: {
 		speed *= ENEMYSPEEDEASY;
 		numShots = 6;
-		maxHealth = 1;
+		maxHealth = 2;
 		health = maxHealth;
 		break;
 	}
 	case MEDIUM: {
 		speed *= ENEMYSPEEDMED;
 		numShots = 7;
-		maxHealth = 1;
+		maxHealth = 3;
 		health = maxHealth;
 		break;
 	}
 	case HARD: {
 		speed *= ENEMYSPEEDHARD;
 		numShots = 8;
-		maxHealth = 1;
+		maxHealth = 4;
 		health = maxHealth;
 		break;
 	}
 	}
+	else if (splitsLeft == 3)
+		switch (i_diff) {
+		case EASY: {
+			speed *= ENEMYSPEEDEASY;
+			numShots = 6;
+			maxHealth = 2;
+			health = maxHealth;
+			break;
+		}
+		case MEDIUM: {
+			speed *= ENEMYSPEEDMED;
+			numShots = 7;
+			maxHealth = 3;
+			health = maxHealth;
+			break;
+		}
+		case HARD: {
+			speed *= ENEMYSPEEDHARD;
+			numShots = 8;
+			maxHealth = 3;
+			health = maxHealth;
+			break;
+		}
+		}
+	if (splitsLeft == 2)
+		switch (i_diff) {
+		case EASY: {
+			speed *= ENEMYSPEEDEASY;
+			numShots = 6;
+			maxHealth = 1;
+			health = maxHealth;
+			break;
+		}
+		case MEDIUM: {
+			speed *= ENEMYSPEEDMED;
+			numShots = 7;
+			maxHealth = 2;
+			health = maxHealth;
+			break;
+		}
+		case HARD: {
+			speed *= ENEMYSPEEDHARD;
+			numShots = 8;
+			maxHealth = 2;
+			health = maxHealth;
+			break;
+		}
+		}
+	if (splitsLeft == 1)
+		switch (i_diff) {
+		case EASY: {
+			speed *= ENEMYSPEEDEASY;
+			numShots = 6;
+			maxHealth = 1;
+			health = maxHealth;
+			break;
+		}
+		case MEDIUM: {
+			speed *= ENEMYSPEEDMED;
+			numShots = 7;
+			maxHealth = 1;
+			health = maxHealth;
+			break;
+		}
+		case HARD: {
+			speed *= ENEMYSPEEDHARD;
+			numShots = 8;
+			maxHealth = 1;
+			health = maxHealth;
+			break;
+		}
+		}
+	if (splitsLeft == 0)
+		switch (i_diff) {
+		case EASY: {
+			speed *= ENEMYSPEEDEASY;
+			numShots = 6;
+			maxHealth = 1;
+			health = maxHealth;
+			break;
+		}
+		case MEDIUM: {
+			speed *= ENEMYSPEEDMED;
+			numShots = 7;
+			maxHealth = 1;
+			health = maxHealth;
+			break;
+		}
+		case HARD: {
+			speed *= ENEMYSPEEDHARD;
+			numShots = 8;
+			maxHealth = 1;
+			health = maxHealth;
+			break;
+		}
+		}
 }
 
 /////////////////////// Spawn Boss class ///////////////////////
 BossSpawn::BossSpawn(std::shared_ptr<Entity> i_charPtr, Sector * i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb) :
 	Enemy(i_charPtr, i_sectPtr, i_diff, i_startPosition, i_rb, ENEMY_BOSS), diff { i_diff }
 {
-	Stun(0.05f);
-	sameDirTime = 10.0;
-	timeTillDirSwitch = sameDirTime;
+	invulnerable = true;
+	Stun(0.5f);
 	lastShotFired = hiResTime::now();
 	shipRateOfFire = 1.0f;
 	currDir = CreateRandomDir();
@@ -1207,12 +1341,32 @@ BossSpawn::BossSpawn(std::shared_ptr<Entity> i_charPtr, Sector * i_sectPtr, DIFF
 
 void BossSpawn::Update(float i_stepSize)
 {
+	if (sectPtr->sectEnemyNum < 2) {
+		invulnerable = false;
+		fillColor = EMERALD;
+		outlineColor = PISTACHIO;
+	}
+	else {
+		invulnerable = true;
+		fillColor = SILVER;
+		outlineColor = DIMGRAY;
+	}
 	UpdateHealth(i_stepSize);
 	if (stunSecs < 0) {
 			if (timeTillDirSwitch < 0) {
-				timeTillDirSwitch = sameDirTime;
-				sectPtr->GenerateEnemies(numShots, ENEMY_RAND, CENTER, 1, diff, 0);
-			}
+				if (sectPtr->sectEnemyNum < 2) {
+					timeTillDirSwitch = sameDirTime;
+					sectPtr->PlaySound(RESOURCES::BRAKE);
+					sectPtr->GenerateEnemies(numShots, ENEMY_RAND, CENTER, 1, diff, 0);
+					sectPtr->GenerateEnemies(numShots, ENEMY_SEEK, CENTER, 1, diff, 0);
+				}
+				else {
+					timeTillDirSwitch = sameDirTime;
+					sectPtr->PlaySound(RESOURCES::BRAKE);
+					sectPtr->GenerateEnemies(std::max((int)numShots-2, 1), ENEMY_RAND, CENTER, 1, diff, 0);
+					sectPtr->GenerateEnemies(std::max((int)numShots - 2, 1), ENEMY_SEEK, CENTER, 1, diff, 0);
+				}
+				}
 			else {
 				float secsInUpdate = i_stepSize / 1000.0f;
 				timeTillDirSwitch -= secsInUpdate;
@@ -1226,36 +1380,60 @@ void BossSpawn::Update(float i_stepSize)
 
 void BossSpawn::Destroy()
 {
+	sectPtr->PlaySound(RESOURCES::BOSSEXPLODE);
+	killMeNextLoop = true;
 }
 
 void BossSpawn::TakeDamage(float i_dmg)
 {
-	sectPtr->PlaySound(RESOURCES::OUCH3);
-	health -= i_dmg;
+	if (!invulnerable) {
+		int xasd = 5;
+		sectPtr->PlaySound(RESOURCES::OUCH3);
+		health -= i_dmg;
+	}
+	int x = 5;
+	int xasd = 5;
+	int xa = 5;
+	int xq = 5;
+	if (invulnerable) {
+		int x = 5;
+		sectPtr->PlaySound(RESOURCES::SWORDCLASH);
+	}
 }
 
 void BossSpawn::shootProj()
 {
 }
 
+void BossSpawn::Stun(float i_stunTime)
+{
+	stunSecs = i_stunTime / 2.0f;
+}
+
 void BossSpawn::SetDiffVars(int i_diff, int i_lvlNum)
 {
 	switch (i_diff) {
 	case EASY: {
-		numShots = 3;
-		maxHealth = 8;
+		numShots = 4;
+		maxHealth = 16;
+		sameDirTime = 14.0;
+		timeTillDirSwitch = 0.0f;
 		health = maxHealth;
 		break;
 	}
 	case MEDIUM: {
-		numShots = 4;
-		maxHealth = 9;
+		numShots = 5;
+		maxHealth = 18;
+		sameDirTime = 10.0;
+		timeTillDirSwitch = 0.0f;
 		health = maxHealth;
 		break;
 	}
 	case HARD: {
-		numShots = 5;
+		numShots = 6;
 		maxHealth = 10;
+		sameDirTime = 8.0;
+		timeTillDirSwitch = 0.0f;
 		health = maxHealth;
 		break;
 	}
@@ -1308,17 +1486,43 @@ Wall::~Wall()
 {
 }
 
+
 /////////////////////// Pain Wall Class ///////////////////////
 PainWall::PainWall(Vector2f i_startPosition, Sector* i_sectPtr, RigidBody i_rb) :
 	Entity(i_startPosition, i_rb, WALL_FIRE), sectPtr{ i_sectPtr }
 {
 	intangible = true;
+	colorSwitchRate = 1.5;
+	timeSinceColorSwitch = 0.0f;
+	colorState = true;
 	fillColor = sf::Color::Red;
-	outlineColor = sf::Color::Yellow;
+	outlineColor = sf::Color::Black;
 }
 
 PainWall::~PainWall()
 {
+}
+
+
+void PainWall::Update(float i_stepSize)
+{
+	if (timeSinceColorSwitch < 0) {
+		timeSinceColorSwitch = colorSwitchRate;
+		fillColor = sf::Color::Red;
+		if (colorState) {
+			fillColor = sf::Color::Yellow;
+			colorState = false;
+		}
+		else {
+			fillColor = sf::Color::Red;
+			colorState = true;
+		}
+
+	}
+	else {
+		float secsInUpdate = i_stepSize / 1000.0f;
+		timeSinceColorSwitch -= secsInUpdate;
+	}
 }
 
 /////////////////////// End Object ///////////////////////
@@ -1342,9 +1546,10 @@ void EndObject::Update(float i_stepSize)
 		active = false;
 	}
 	else {
-		fillColor = sf::Color::Magenta;
+		fillColor = sf::Color::Cyan;
 		outlineColor = sf::Color::Magenta;
 		active = true;
+		rb.angVel = 1.0f;
 	}
 }
 

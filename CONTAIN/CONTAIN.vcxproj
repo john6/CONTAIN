@@ -25,6 +25,7 @@
     <ClCompile Include="EnemyAI.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="GLOBAL_CONSTANTS.cpp" />
+    <ClCompile Include="InfoPopUp.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Math.cpp" />
     <ClCompile Include="PlayerController.cpp" />
@@ -44,7 +45,10 @@
     <ClCompile Include="SaveData.cpp" />
     <ClCompile Include="Sector.cpp" />
     <ClCompile Include="Shape.cpp" />
+    <ClCompile Include="Source.cpp" />
+    <ClCompile Include="TextBox.cpp" />
     <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="TuteLib.cpp" />
     <ClCompile Include="UpgradeMenu.cpp" />
     <ClCompile Include="YouLostMenu.cpp" />
     <ClCompile Include="YouWonMenu.cpp" />
@@ -55,6 +59,7 @@
     <ClInclude Include="CollisionData.h" />
     <ClInclude Include="EnemyAI.h" />
     <ClInclude Include="Entity.h" />
+    <ClInclude Include="InfoPopUp.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="PlayerController.h" />
@@ -75,7 +80,9 @@
     <ClInclude Include="SaveData.h" />
     <ClInclude Include="Sector.h" />
     <ClInclude Include="Shape.h" />
+    <ClInclude Include="TextBox.h" />
     <ClInclude Include="Transform.h" />
+    <ClInclude Include="TuteLib.h" />
     <ClInclude Include="UpgradeMenu.h" />
     <ClInclude Include="YouLostMenu.h" />
     <ClInclude Include="YouWonMenu.h" />

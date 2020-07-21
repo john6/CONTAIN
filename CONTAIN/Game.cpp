@@ -1,7 +1,8 @@
 #include "Game.h"
+#include "TuteLib.h"
 
 Game::Game(sf::RenderWindow* i_window, RESOURCES* i_resources, DIFFICULTY i_difficulty)
-	: renderWindow{ i_window }, resources {i_resources}, HUD{ HeadsUpDisplay(i_resources) }
+	: renderWindow{ i_window }, resources {i_resources}, HUD{ HeadsUpDisplay(i_resources) }, tuteLib{ TuteLib(i_window, i_resources)}
 {
 	font = resources->GetFont();
 	//InitGame(i_difficulty);
@@ -14,6 +15,26 @@ Game::~Game()
 }
 
 GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vector2i i_mousePos) {
+
+	//InfoPopUp begin = InfoPopUp(resources, GLBVRS::CRT_WDTH, GLBVRS::CRT_HGHT);
+	//begin.AddTextBox("Get started bucko");
+	//begin.RenderAndWait(i_window);
+	if (tutorial) {
+		if ((currSector.x == 5) && (currSector.y == 0) && (levels[currLvl]->GetSector(currSector)->sectEnemyNum == 0)) {
+			tuteLib.PlayTutorial(TuteLib::TUTORIALS::ESCAPE);
+		}
+		else if ((currSector.x == 4) && (currSector.y == 0) && (levels[currLvl]->GetSector(currSector)->firstPhase == false)) {
+			tuteLib.PlayTutorial(TuteLib::TUTORIALS::PUSH_ENEMIES);
+		}
+		else {
+			tuteLib.PlayTutorial(tuteLib.GetTuteFromSect(currSector.x, currSector.y));
+		}
+
+	}
+	//renderWindow->clear();
+	//renderWindow->display();
+
+
 	timeElapsed = std::chrono::duration_cast<std::chrono::seconds>(hiResTime::now() - beginTime);
 	float millisecLag = abs(i_microSecs / MICROSECS_TO_MILLISECS);
 	float timeLeft = timeToComplete - timeElapsed.count();
@@ -163,6 +184,14 @@ void Game::GenerateLevels(DIFFICULTY i_diff) {
 	currSector = levels[currLvl]->originCoord;
 }
 
+void Game::GenerateTutorialLevels()
+{
+	DeleteLevels();
+	Level* lvl = new Level(playerChar, resources);
+	levels.push_back(lvl);
+	currSector = levels[currLvl]->originCoord;
+}
+
 void Game::DeleteLevels() {
 	int size = levels.size();
 	for (int i = 0; i < size; ++i) {
@@ -195,14 +224,33 @@ void Game::RequestGoToNextLvl()
 		currUpgradeMenu = std::make_shared<UpgradeMenu>(resources, gameDiff, dynamic_cast<PlayerChar*>(playerChar.get()));
 	}
 	else {
+		if (tutorial) {
+			tuteLib.PlayTutorial(TuteLib::TUTORIALS::TUTORIAL_END);
+		}
 		playerWon = true;
 	}
 }
 
 void Game::InitGame(DIFFICULTY i_diff)
 {
+	tutorial = false;
 	gameDiff = i_diff;
-	int startingHealth = 6 * (3 - i_diff);
+	int startingHealth = 7 * (3 - i_diff);
+
+	switch (i_diff) {
+	case EASY: {
+		startingHealth = 20;
+		break;
+	}
+	case MEDIUM: {
+		startingHealth = 16;
+		break;
+	}
+	case HARD: {
+		startingHealth = 12;
+		break;
+	}
+	}
 	playerChar = std::make_shared<PlayerChar>(this, startingHealth, Vector2f(400, 400.0));
 	playerChar->rb.transform.orient = 1.0f;
 	beginTime = std::chrono::high_resolution_clock::now();
@@ -214,6 +262,28 @@ void Game::InitGame(DIFFICULTY i_diff)
 	const microSec UPDATE_INTERVAL(16666);
 	playerWon = false;
 	GenerateLevels(i_diff);
+	PlayRandomSong();
+}
+
+void Game::InitTutorial()
+{
+	tutorial = true;
+	gameDiff = EASY;
+	int startingHealth = 999999; //6 * (3 - i_diff);
+	playerChar = std::make_shared<PlayerChar>(this, startingHealth, Vector2f(400, 400.0));
+	PlayerChar* playerPtr = dynamic_cast<PlayerChar*>(playerChar.get());
+	playerPtr->maxSpecialAmmo = 999;
+	playerPtr->ResetSpecialAmmo();
+	playerChar->rb.transform.orient = 1.0f;
+	beginTime = std::chrono::high_resolution_clock::now();
+	numLvls = 1;
+	currLvl = 0;
+	currRunScore = 2;
+	timeToComplete = 999999999.0f;
+	playState = GENERAL_GAMEPLAY;
+	const microSec UPDATE_INTERVAL(16666);
+	playerWon = false;
+	GenerateTutorialLevels();
 	PlayRandomSong();
 }
 

@@ -21,6 +21,7 @@ public:
 	bool firstPhase;
 	bool filledIn;
 
+	int numBlockers;
 	int sectEnemyNum;
 	Level* myLevel;
 	sf::Color colPalA;
@@ -42,13 +43,17 @@ public:
 
 	void PopulateEntranceRoom();
 
-	void PopulateBossRoom(DIFFICULTY i_diff);
+	void PopulateBossRoom(int i_lvlNum, DIFFICULTY i_diff);
+
+	void PopulateBossRoom(std::string i_tutorial);
 
 	void RemoveDestroyedEntities();
 
 	void AddTerrain(int i_terrainType, bool terrainBig); // -1 input indicates random
 
 	void InitializeSector();
+
+	bool IsBlocker(std::shared_ptr<Entity> i_entPtr);
 
 	void PlaySound(int i_soundNum);
 

@@ -25,7 +25,25 @@ void Sector::AddEntPtrToSector(std::shared_ptr<Entity> i_entPtr)
 	if (auto enemy = dynamic_cast<Enemy*>(i_entPtr.get())) {
 		sectEnemyNum++;
 	}
+	if (auto wall = dynamic_cast<Blocker*>(i_entPtr.get())) {
+		numBlockers++;
+		if (numBlockers > MAX_NUM_BLOCKERS) {
+			//auto wallPtr = std::find_if(lvlEntitiesPhase1.begin(), lvlEntitiesPhase1.end(), IsBlocker);
+			for (std::shared_ptr<Entity> iterPtr : lvlEntitiesPhase1) {
+				if ((iterPtr->GetTypeID() == PROJ_WALL) & (numBlockers > MAX_NUM_BLOCKERS)) {
+					iterPtr->Destroy();
+					numBlockers--;
+				}
+			}
+		}
+	}
 	lvlEntitiesPhase1.push_back(i_entPtr);
+}
+
+bool Sector::IsBlocker(std::shared_ptr<Entity> i_entPtr)
+{
+	if (i_entPtr->GetTypeID() == PROJ_WALL) { return true; }
+	return false;
 }
 
 void Sector::GenerateEnemies(int i_numEnems, TypeID enemyType, SCREEN_AREA i_area, int i_phaseNum, DIFFICULTY i_diff, int i_sizeMod)
@@ -36,11 +54,14 @@ void Sector::GenerateEnemies(int i_numEnems, TypeID enemyType, SCREEN_AREA i_are
 		std::random_device sizeSeed;
 		std::mt19937 genRoomSeed(sizeSeed());
 		std::discrete_distribution<> widthModDist({ 10, 15, 50, 15, 10 });
+		std::discrete_distribution<> radiusModDist({ 0, 15, 55, 20, 10 });
 		std::discrete_distribution<> heightModDist({ 13, 18, 40, 18, 13 });
 		int rand1 = widthModDist(genRoomSeed);
 		int ranDifwidth = (rand1 - 2 + i_sizeMod) * 10;
 		int rand2 = heightModDist(genRoomSeed);
 		int randDifHeight = (rand2 - 2 + i_sizeMod) * 10;
+		int randRad = radiusModDist(genRoomSeed);
+		int randDifRadius = (randRad - 2 + i_sizeMod) * 10;
 
 		//Create random spawn position
 		std::shared_ptr<Shape> shape = std::make_shared<Circle>(40);
@@ -68,7 +89,7 @@ void Sector::GenerateEnemies(int i_numEnems, TypeID enemyType, SCREEN_AREA i_are
 			break;
 		}
 		case ENEMY_RAND:{
-			std::shared_ptr<Shape> shape = std::make_shared<Circle>(40 + ranDifwidth);
+			std::shared_ptr<Shape> shape = std::make_shared<Circle>(40 + randDifRadius);
 			RigidBody projBody = RigidBody(shape, ROCK);
 			ent = std::make_shared<CrazyBoi>(myLevel->charPtr, this, i_diff, spawnPos, projBody);
 			break;
@@ -82,7 +103,7 @@ void Sector::GenerateEnemies(int i_numEnems, TypeID enemyType, SCREEN_AREA i_are
 			break;
 		}
 		case ENEMY_RAND_PUSH:
-			std::shared_ptr<Shape> shape = std::make_shared<Circle>(40 + ranDifwidth);
+			std::shared_ptr<Shape> shape = std::make_shared<Circle>(40 + randDifRadius);
 			RigidBody projBody = RigidBody(shape, ROCK);
 			ent = std::make_shared<CrazyBoi>(myLevel->charPtr, this, i_diff, spawnPos, projBody);
 			break;
@@ -296,25 +317,29 @@ void Sector::PopulateEntranceRoom()
 	//lvlEntitiesPhase1.push_back(asd1);
 
 	//std::shared_ptr<Entity> asd2 = std::make_shared<PowerUp>(this,
-	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (2.0f / 5.0f)), GLBVRS::CRT_HGHT / 4.0)), BLAST);
+	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (2.0f / 5.0f)), GLBVRS::CRT_HGHT / 4.0)), SCATTER);
 	//lvlEntitiesPhase1.push_back(asd2);
 
 	//std::shared_ptr<Entity> asd3 = std::make_shared<PowerUp>(this,
-	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (3.0f / 5.0f)), GLBVRS::CRT_HGHT / 4.0)), BLAST);
+	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (3.0f / 5.0f)), GLBVRS::CRT_HGHT / 4.0)), SCATTER);
 	//lvlEntitiesPhase1.push_back(asd3);
 
-	//std::shared_ptr<Entity> asd = std::make_shared<PowerUp>(this,
-	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (4.0f / 5.0f)), GLBVRS::CRT_HGHT / 4.0)), BLAST);
-	//lvlEntitiesPhase1.push_back(asd3);
+	//std::shared_ptr<Entity> asd4 = std::make_shared<PowerUp>(this,
+	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (4.0f / 5.0f)), GLBVRS::CRT_HGHT / 4.0)), RATE_OF_FIRE);
+	//lvlEntitiesPhase1.push_back(asd4);
+
+	//std::shared_ptr<Entity> asd5 = std::make_shared<PowerUp>(this,
+	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (4.0f / 5.0f)), GLBVRS::CRT_HGHT / 4.0)), RATE_OF_FIRE);
+	//lvlEntitiesPhase1.push_back(asd5);
 
 }
 
-void Sector::PopulateBossRoom(DIFFICULTY i_diff)
+void Sector::PopulateBossRoom(int i_lvlNum, DIFFICULTY i_diff)
 {
 	isBossRoom = true;
 
 	std::shared_ptr<Shape> shape = std::make_shared<Circle>(70);
-	RigidBody projBody = RigidBody(shape, ROCK);
+	RigidBody projBody = RigidBody(shape, LESSBOUNCYBALL);
 
 	//Create random spawn position
 	auto screenAreas = GetScreenAreas(CENTER);
@@ -329,20 +354,53 @@ void Sector::PopulateBossRoom(DIFFICULTY i_diff)
 	int randXcordInBounds = xCordDist(gen1);
 	int randYcordInBounds = yCordDist(gen1);
 	Vector2f spawnPos(randXcordInBounds, randYcordInBounds);
-
-	//rush
-	std::shared_ptr<Entity> ent = std::make_shared<BossRush>(myLevel->charPtr, this, i_diff, spawnPos, projBody);
-	
-	//splitter
-	//std::shared_ptr<Shape> shape1 = std::make_shared<Circle>(100);
-	//RigidBody projBody1 = RigidBody(shape1, ROCK);
-	//std::shared_ptr<Entity> splitBoss = std::make_shared<BossSplit>(myLevel->charPtr, this, i_diff, 4, 6, false, spawnPos, projBody1);
-	
-	//Spawner
-	//std::shared_ptr<Entity> spawnBoss = std::make_shared<BossSpawn>(myLevel->charPtr, this, i_diff, spawnPos);
-
+	std::shared_ptr<Entity> ent;
+	//i_lvlNum = 2;
+	switch (i_lvlNum) {
+	case 0: {
+		ent = std::make_shared<BossBurst>(myLevel->charPtr, this, i_diff, spawnPos, projBody);
+		break;
+	}
+	case 1: {
+		ent = std::make_shared<BossRush>(myLevel->charPtr, this, i_diff, spawnPos, projBody);
+		AddPainfullWallsToLevel();
+		break;
+	}
+	case 2: {
+		ent = std::make_shared<BossStream>(myLevel->charPtr, this, i_diff, spawnPos, projBody);
+		break;
+	}
+	case 3: {
+		std::shared_ptr<Shape> shape1 = std::make_shared<Circle>(100);
+		RigidBody projBody1 = RigidBody(shape1, ROCK);
+		ent = std::make_shared<BossSplit>(myLevel->charPtr, this, i_diff, 4, 6, false, spawnPos, projBody1);
+		break;
+	}
+	case 4: {
+		ent = std::make_shared<BossSpawn>(myLevel->charPtr, this, i_diff, spawnPos);
+		AddTerrain(0, 1);
+		AddTerrain(1, 0);
+		AddTerrain(2, 1);
+		AddTerrain(3, 0);
+		break;
+	}
+	}
 	lvlEntitiesPhase1.push_back(ent);
 	++sectEnemyNum;
+}
+
+void Sector::PopulateBossRoom(std::string i_tutorial)
+{
+	isBossRoom = true;
+	Vector2f spawnPos(GLBVRS::CRT_WDTH, GLBVRS::CRT_HGHT);
+	std::shared_ptr<Shape> shape = std::make_shared<Rectangle>(100, 100);
+	Material Rock = Material(0.6f, 0.1f, 0.6f, 0.3f);
+	RigidBody projBody = RigidBody(shape, Rock);
+	std::shared_ptr<Entity> ent = std::make_shared<Enemy>(myLevel->charPtr, this, (DIFFICULTY)0, spawnPos, projBody);
+	//auto enemy = dynamic_cast<Enemy*>(ent.get());
+	lvlEntitiesPhase1.push_back(ent);
+	++sectEnemyNum;
+
 }
 
 void Sector::RemoveDestroyedEntities() {
@@ -396,7 +454,7 @@ void Sector::AddTerrain(int i_terrainType, bool terrainBig)
 		std::shared_ptr<Shape> vertRect1 = std::make_shared<Rectangle>(smallWidth, smallHeight);
 		RigidBody rightWallBody = RigidBody(vertRect1, STATIC);
 		std::shared_ptr<Entity> rightWall = std::make_shared<Wall>(
-			Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * ( 1.0f / 5.0f)), GLBVRS::VRT_MRG + (GLBVRS::CRT_HGHT / 2.0f)), this, rightWallBody);
+			Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * ( 1.0f / 5.0f)), GLBVRS::VRT_MRG + (GLBVRS::CRT_HGHT / 2.0f)), this, rightWallBody, colPalA, colPalB);
 		lvlEntitiesPhase1.push_back(rightWall);
 		break;
 	}
@@ -404,7 +462,7 @@ void Sector::AddTerrain(int i_terrainType, bool terrainBig)
 		std::shared_ptr<Shape> vertRect1 = std::make_shared<Rectangle>(smallWidth, GLBVRS::CRT_HGHT / 4.0f);
 		RigidBody rightWallBody = RigidBody(vertRect1, STATIC);
 		std::shared_ptr<Entity> rightWall = std::make_shared<Wall>(
-			Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH *  (4.0f / 5.0f)), GLBVRS::VRT_MRG + (GLBVRS::CRT_HGHT / 2.0f)), this, rightWallBody);
+			Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH *  (4.0f / 5.0f)), GLBVRS::VRT_MRG + (GLBVRS::CRT_HGHT / 2.0f)), this, rightWallBody, colPalA, colPalB);
 		lvlEntitiesPhase1.push_back(rightWall);
 		break;
 	}
@@ -412,7 +470,7 @@ void Sector::AddTerrain(int i_terrainType, bool terrainBig)
 		std::shared_ptr<Shape> horRect1 = std::make_shared<Rectangle>(GLBVRS::CRT_WDTH / 4.0f, smallWidth);
 		RigidBody wallBody1 = RigidBody(horRect1, STATIC);
 		std::shared_ptr<Entity> upperWall = std::make_shared<Wall>(
-			Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH / 2.0f), GLBVRS::VRT_MRG + (GLBVRS::CRT_HGHT * (1.0f / 5.0f))), this, wallBody1);
+			Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH / 2.0f), GLBVRS::VRT_MRG + (GLBVRS::CRT_HGHT * (1.0f / 5.0f))), this, wallBody1, colPalA, colPalB);
 		lvlEntitiesPhase1.push_back(upperWall);
 		break;
 	}
@@ -420,7 +478,7 @@ void Sector::AddTerrain(int i_terrainType, bool terrainBig)
 		std::shared_ptr<Shape> horRect1 = std::make_shared<Rectangle>(GLBVRS::CRT_WDTH / 4.0f, smallWidth);
 		RigidBody wallBody1 = RigidBody(horRect1, STATIC);
 		std::shared_ptr<Entity> upperWall = std::make_shared<Wall>(
-			Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH / 2.0f), GLBVRS::VRT_MRG + (GLBVRS::CRT_HGHT * (4.0f / 5.0f))), this, wallBody1);
+			Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH / 2.0f), GLBVRS::VRT_MRG + (GLBVRS::CRT_HGHT * (4.0f / 5.0f))), this, wallBody1, colPalA, colPalB);
 		lvlEntitiesPhase1.push_back(upperWall);
 		break;
 	}
@@ -429,7 +487,7 @@ void Sector::AddTerrain(int i_terrainType, bool terrainBig)
 		std::shared_ptr<Shape> vertRect1 = std::make_shared<Rectangle>(bigWidth, bigHeight);
 		RigidBody rightWallBody = RigidBody(vertRect1, STATIC);
 		std::shared_ptr<Entity> rightWall = std::make_shared<Wall>(
-			Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (1.0f / 5.0f)), GLBVRS::VRT_MRG + (GLBVRS::CRT_HGHT / 2.0f)), this, rightWallBody);
+			Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (1.0f / 5.0f)), GLBVRS::VRT_MRG + (GLBVRS::CRT_HGHT / 2.0f)), this, rightWallBody, colPalA, colPalB);
 		lvlEntitiesPhase1.push_back(rightWall);
 		break;
 	}
@@ -437,7 +495,7 @@ void Sector::AddTerrain(int i_terrainType, bool terrainBig)
 		std::shared_ptr<Shape> vertRect1 = std::make_shared<Rectangle>(bigWidth, bigHeight);
 		RigidBody rightWallBody = RigidBody(vertRect1, STATIC);
 		std::shared_ptr<Entity> rightWall = std::make_shared<Wall>(
-			Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH *  (4.0f / 5.0f)), GLBVRS::VRT_MRG + (GLBVRS::CRT_HGHT / 2.0f)), this, rightWallBody);
+			Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH *  (4.0f / 5.0f)), GLBVRS::VRT_MRG + (GLBVRS::CRT_HGHT / 2.0f)), this, rightWallBody, colPalA, colPalB);
 		lvlEntitiesPhase1.push_back(rightWall);
 		break;
 	}
@@ -445,7 +503,7 @@ void Sector::AddTerrain(int i_terrainType, bool terrainBig)
 		std::shared_ptr<Shape> horRect1 = std::make_shared<Rectangle>(bigHeight, bigWidth);
 		RigidBody wallBody1 = RigidBody(horRect1, STATIC);
 		std::shared_ptr<Entity> upperWall = std::make_shared<Wall>(
-			Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH / 2.0f), GLBVRS::VRT_MRG + (GLBVRS::CRT_HGHT * (1.0f / 5.0f))), this, wallBody1);
+			Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH / 2.0f), GLBVRS::VRT_MRG + (GLBVRS::CRT_HGHT * (1.0f / 5.0f))), this, wallBody1, colPalA, colPalB);
 		lvlEntitiesPhase1.push_back(upperWall);
 		break;
 	}
@@ -453,7 +511,7 @@ void Sector::AddTerrain(int i_terrainType, bool terrainBig)
 		std::shared_ptr<Shape> horRect1 = std::make_shared<Rectangle>(bigHeight, bigWidth);
 		RigidBody wallBody1 = RigidBody(horRect1, STATIC);
 		std::shared_ptr<Entity> upperWall = std::make_shared<Wall>(
-			Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH / 2.0f), GLBVRS::VRT_MRG + (GLBVRS::CRT_HGHT * (4.0f / 5.0f))), this, wallBody1);
+			Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH / 2.0f), GLBVRS::VRT_MRG + (GLBVRS::CRT_HGHT * (4.0f / 5.0f))), this, wallBody1, colPalA, colPalB);
 		lvlEntitiesPhase1.push_back(upperWall);
 		break;
 	}
@@ -465,6 +523,7 @@ void Sector::InitializeSector()
 	emptyTerrainAreas = { TER_UP, TER_RIGHT, TER_DOWN, TER_LEFT }; //, TER_CENT };
 	AddWallsToLevel();
 	sectEnemyNum = 0;
+	numBlockers = 0;
 	isBossRoom = false;
 	firstPhase = true;
 	filledIn = false;
@@ -483,6 +542,7 @@ void Sector::SwitchToPhaseTwo()
 		enemy->TurnToMetal();
 		lvlEntitiesPhase1.push_back(entPtr);
 	}
+	resources->PlaySound(RESOURCES::WARNING7);
 }
 
 void Sector::SwitchLevelToPhaseTwo()

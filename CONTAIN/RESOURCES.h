@@ -29,10 +29,14 @@ private:
 	sf::SoundBuffer bossexplode2;
 	sf::SoundBuffer Buzzer6;
 	sf::SoundBuffer Buzzer9;
+	sf::SoundBuffer Brake;
 	sf::SoundBuffer coin3;
 	sf::SoundBuffer Explode5;
 	sf::SoundBuffer Explode20;
+	sf::SoundBuffer Explode37;
+	sf::SoundBuffer enemyDeath6;
 	sf::SoundBuffer Fire5;
+	sf::SoundBuffer Fireball;
 	sf::SoundBuffer laser14;
 	sf::SoundBuffer magic2;
 	sf::SoundBuffer magic6;
@@ -47,7 +51,11 @@ private:
 	sf::SoundBuffer ouch1;
 	sf::SoundBuffer ouch3;
 	sf::SoundBuffer PlayerDie13;
+	sf::SoundBuffer playershoot;
+	sf::SoundBuffer Plop;
+	sf::SoundBuffer PlopBanana;
 	sf::SoundBuffer Powerup4;
+	sf::SoundBuffer Powerup11;
 	sf::SoundBuffer shoot11;
 	sf::SoundBuffer shoot14;
 	sf::SoundBuffer shoot23;
@@ -56,7 +64,9 @@ private:
 	sf::SoundBuffer shot17;
 	sf::SoundBuffer steam3;
 	sf::SoundBuffer sword5;
+	sf::SoundBuffer Sword_Clash;
 	sf::SoundBuffer warning3;
+	sf::SoundBuffer warning7;
 	sf::SoundBuffer Whoosh;
 
 	sf::Sound m_sound;
@@ -70,11 +80,11 @@ public:
 	~RESOURCES();
 
 	enum SOUNDS { REGULAR_BEEP, NEGATIVE_BEEP, OCTAVE_BEEP, EXPLOSION, CHROM_BEEP, ATTACK,
-		HEALING, LEVELUP, PLAYFULPICKUP, MAJORPICKUP, PICKUP, ATTACK3, ATTACK4, BOSSEXPLODE, 
-		BOSSEXPLODE2, BUZZER6, BUZZER9, COIN3, EXPLODE5, EXPLODE20, FIRE5, LASER14, MAGICAL2,
+		HEALING, BRAKE, LEVELUP, PLAYFULPICKUP, MAJORPICKUP, PICKUP, ATTACK3, ATTACK4, BOSSEXPLODE, 
+		BOSSEXPLODE2, BUZZER6, BUZZER9, COIN3, EXPLODE5, EXPLODE20, ENEMYDEATH6, FIRE5, FIREBALL, LASER14, MAGICAL2,
 		MAGIC6, MAGIC7, MAGIC8, MAGIC9, MAGIC10, MENUACCEPT, MENUACCEPT2, MENUACCEPT3, MENUACCEPT6, 
-		OUCH1, OUCH3, PLAYERDIE13, POWERUP4, SHOOT11, SHOOT14, SHOOT23, 
-		SHOOT35, SHOT2, STEAM3, SWORD5, WARNING3, WHOOSH};
+		OUCH1, OUCH3, PLAYERSHOOT, PLAYERDIE13, POWERUP4, SHOOT11, SHOOT14, SHOOT23, 
+		SHOOT35, SHOOT3, SHOT2, STEAM3, SWORD5, WARNING3, WARNING7, WHOOSH, PLOPBANANA, PLOP, SWORDCLASH};
 
 	sf::Font GetFont();
 

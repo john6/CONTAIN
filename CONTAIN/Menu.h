@@ -18,6 +18,7 @@ private:
 	sf::Font font;
 	sf::Text instructions1;
 	Button playButton;
+	Button playTutorialButton;
 	Button exitButton;
 	Button easyButton;
 	Button mediumButton;

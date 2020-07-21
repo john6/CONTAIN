@@ -14,7 +14,7 @@ struct MapNode {
 };
 
 Level::Level(int i_lvlNum, DIFFICULTY i_diff, std::shared_ptr<Entity> i_charPtr, RESOURCES* i_resources) :
-	charPtr { i_charPtr }, resources { i_resources }
+	charPtr { i_charPtr }, resources { i_resources }, m_lvl_num {i_lvlNum}
 {
 	//settings
 	colPalA = GenerateRandomColor();
@@ -52,6 +52,84 @@ Level::Level(std::string i_testStr, std::shared_ptr<Entity> i_charPtr, RESOURCES
 	//GetSector(originCoord)->AddTerrain(7);
 }
 
+
+Level::Level(std::shared_ptr<Entity> i_charPtr, RESOURCES * i_resources) : //TUTORIAL LEVEL
+	charPtr{ i_charPtr }, resources{ i_resources }, m_lvl_num{ 0 }
+{
+	//init globals
+	colPalA = GenerateRandomColor();
+	colPalB = GenerateRandomColor();
+	dimSize = 6;
+	numSectors = 6;
+	phaseOne = true;
+	timeToComplete = 999.0f;
+	sectorMap = std::vector<std::vector<MapNode>>(dimSize, std::vector<MapNode>(dimSize, MapNode()));
+
+	//init map coords
+	originCoord = MapCoord(0, 0);
+	CreateSectorAtCoord(originCoord);
+	MapCoord room2;
+	room2 = MapCoord(1, 0);
+	CreateSectorAtCoord(room2);
+	MapCoord room3;
+	room3 = MapCoord(2, 0);
+	CreateSectorAtCoord(room3);
+	MapCoord room4;
+	room4 = MapCoord(3, 0);
+	CreateSectorAtCoord(room4);
+	MapCoord room5;
+	room5 = MapCoord(4, 0);
+	CreateSectorAtCoord(room5);
+	bossRoom = MapCoord(5, 0);
+	CreateSectorAtCoord(bossRoom);
+
+	//init doors
+	CreateBidirectionalDoor(originCoord, room2);
+	CreateBidirectionalDoor(room2, room3);
+	CreateBidirectionalDoor(room3, room4);
+	CreateBidirectionalDoor(room4, room5);
+	CreateBidirectionalDoor(room5, bossRoom);
+
+	//ROOM 1 ENTRANCE
+	GetSector(originCoord)->PopulateEntranceRoom();
+	
+	//ROOM 2 LEARN TO SHOOT
+	GetSector(room2)->GenerateEnemies(1, ENEMY_SEEK, MARGINS, 1, (DIFFICULTY)0, 2);
+	//GetSector(room2)->GenerateEnemies(numRandosPhase1, ENEMY_RAND, CENTER, 1, (DIFFICULTY)i_diff, 0);
+	GetSector(room2)->GenerateEnemies(3, ENEMY_SEEK_PUSH, CENTER, 2, (DIFFICULTY)0, 0);
+	GetSector(room2)->GenerateEnemies(3, ENEMY_RAND_PUSH, CORNERS, 2, (DIFFICULTY)0, 0);
+	GetSector(room2)->AddTerrain(0, false);
+	
+	//ROOM 3 LEARN TO USE WALL
+	//GetSector(room3)->GenerateEnemies(1, ENEMY_SEEK, MARGINS, 1, (DIFFICULTY)0, 1);
+	GetSector(room3)->GenerateEnemies(2, ENEMY_SEEK, MARGINS, 1, (DIFFICULTY)0, 1);
+	//GetSector(room2)->GenerateEnemies(numRandosPhase1, ENEMY_RAND, CENTER, 1, (DIFFICULTY)i_diff, 0);
+	GetSector(room3)->GenerateEnemies(3, ENEMY_SEEK_PUSH, CENTER, 2, (DIFFICULTY)0, 0);
+	GetSector(room3)->GenerateEnemies(3, ENEMY_RAND_PUSH, CORNERS, 2, (DIFFICULTY)0, 0);
+
+	//ROOM 4 LEARN TO USE EMP 
+	GetSector(room4)->GenerateEnemies(3, ENEMY_SEEK, MARGINS, 1, (DIFFICULTY)0, 2);
+	//GetSector(room4)->GenerateEnemies(1, ENEMY_RAND, MARGINS, 1, (DIFFICULTY)0, 1);
+	//GetSector(room2)->GenerateEnemies(numRandosPhase1, ENEMY_RAND, CENTER, 1, (DIFFICULTY)i_diff, 0);
+	GetSector(room4)->GenerateEnemies(3, ENEMY_SEEK_PUSH, CENTER, 2, (DIFFICULTY)0, 0);
+	GetSector(room4)->GenerateEnemies(3, ENEMY_RAND_PUSH, CORNERS, 2, (DIFFICULTY)0, 0);
+
+	//ROOM 5 LEARN ABOUT PAIN WALLS
+	//GetSector(room4)->GenerateEnemies(4, ENEMY_SEEK, MARGINS, 1, (DIFFICULTY)0, 1);
+	GetSector(room5)->GenerateEnemies(4, ENEMY_RAND, MARGINS, 1, (DIFFICULTY)0, 1);
+	//GetSector(room2)->GenerateEnemies(numRandosPhase1, ENEMY_RAND, CENTER, 1, (DIFFICULTY)i_diff, 0);
+	GetSector(room5)->GenerateEnemies(3, ENEMY_SEEK_PUSH, CENTER, 2, (DIFFICULTY)0, 0);
+	GetSector(room5)->GenerateEnemies(3, ENEMY_RAND_PUSH, CORNERS, 2, (DIFFICULTY)0, 0);
+	GetSector(room5)->AddRandomPainWall(0);
+	GetSector(room5)->AddRandomPainWall(1);
+	GetSector(room5)->AddRandomPainWall(4);
+	GetSector(room5)->AddRandomPainWall(5);
+	
+	//5 BOSS ROOM
+	GetSector(bossRoom)->PopulateBossRoom("TUTORIAL");
+
+}
+
 Level::~Level()
 {
 }
@@ -85,8 +163,8 @@ void Level::PopulateSectorAtCoord(MapCoord i_coord, int i_diff)
 	int randExtraRooms = extraRoomDist(genRoomSeed);
 	int numCubes = 1 + i_diff + randExtraRooms;
 	//phase one
-	int numSeekersPhase1 = 2 + (i_diff * 1) + (m_lvl_num * 1);
-	int numRandosPhase1 = (i_diff * 1) + (m_lvl_num * 1);
+	int numSeekersPhase1 = 2 + (i_diff * 1) + ((m_lvl_num+1)/2);
+	int numRandosPhase1 = (i_diff * 1) + ((m_lvl_num+1)/2);
 	GetSector(i_coord)->GenerateEnemies(numSeekersPhase1, ENEMY_SEEK, MARGINS, 1, (DIFFICULTY)i_diff, 0);
 	GetSector(i_coord)->GenerateEnemies(numRandosPhase1, ENEMY_RAND, CENTER, 1, (DIFFICULTY)i_diff, 0);
 	//phase two
@@ -126,7 +204,7 @@ void Level::PopulateSectorAtCoord(MapCoord i_coord, int i_diff)
 
 	while (painWallCount > 0) {
 		int randPainWall = distrib07(gen6);
-		//GetSector(i_coord)->AddRandomPainWall(randPainWall);
+		GetSector(i_coord)->AddRandomPainWall(randPainWall);
 		--painWallCount;
 	}
 	//newSector->GenerateLevelCircles(1);
@@ -208,11 +286,6 @@ void Level::CreateBidirectionalDoor(MapCoord i_coordA, MapCoord i_coordB)
 	GetSector(i_coordB)->AddEntPtrToSector(sectDoorB);
 }
 
-void Level::PopulateBossRoom(DIFFICULTY i_diff)
-{
-	GetSector(bossRoom)->PopulateBossRoom(i_diff);
-}
-
 float Level::GetTimeLeftInLevel()
 {
 	if (phaseOne) {
@@ -257,9 +330,9 @@ void Level::GenerateMapGrip(int i_lvlNum, DIFFICULTY i_diff)
 	//decide num rooms, create MapGrid
 	std::random_device rdRoomSeed;  //Will be used to obtain a seed for the random number engine
 	std::mt19937 genRoomSeed(rdRoomSeed()); //Standard mersenne_twister_engine seeded with rd()
-	std::discrete_distribution<> extraRoomDist({ 25, 50, 25 });
+	std::discrete_distribution<> extraRoomDist({ 13, 25, 25, 25, 12 });
 	int randExtraRooms = extraRoomDist(genRoomSeed);
-	numSectors = 2 + (i_lvlNum * 3) + (i_diff * 2) + randExtraRooms;
+	numSectors = 2 + (i_lvlNum * 2) + (i_diff * 2) + randExtraRooms;
 	dimSize = (int)std::sqrt(numSectors*2);
 	if (dimSize % 2 == 0) { //Gonna make the dimensions always be odd so I can have a center coord
 		dimSize += 1;
@@ -372,7 +445,7 @@ void Level::PopulateMapRooms(int i_levelNum, DIFFICULTY i_diff)
 			PopulateSectorAtCoord(coord, i_diff);
 		}
 	}
-	PopulateBossRoom(i_diff);
+	GetSector(bossRoom)->PopulateBossRoom(m_lvl_num, i_diff);
 }
 
 void Level::UpdateLevel()

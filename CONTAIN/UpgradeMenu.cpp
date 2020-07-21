@@ -122,7 +122,7 @@ std::string UpgradeMenu::GetUpgradeText(UPGRADE_TYPE i_type)
 		break;
 	}
 	case WEAP_SPEED: {
-		upgradeString = "Increase basic weapon thrust";
+		upgradeString = "Increase bullet speed";
 		break;
 	}
 	case RATE_OF_FIRE : {

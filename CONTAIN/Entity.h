@@ -86,9 +86,7 @@ private:
 	Game* gamePtr;
 	PlayerController pController;
 	hiRes_time_point lastShotFired;
-	hiRes_time_point lastAOEFired;
 	float shipRateOfFire;
-	float shipRateOfAOE;
 	float shipSpeed;
 	float dmgRate;
 	hiRes_time_point lastDamageReceived;
@@ -103,6 +101,9 @@ private:
 
 
 public:
+	hiRes_time_point lastAOEFired;
+	float shipRateOfAOE;
+
 	int maxHealth;
 	int health;
 
@@ -206,6 +207,7 @@ class Blast : public Entity
 {
 private:
 	Sector* sectPtr;
+	PlayerChar* charP;
 
 public:
 	int blastType;
@@ -213,8 +215,8 @@ public:
 	float strength;
 	float stunTime;
 
-	Blast(Sector* i_sectPtr, Vector2f i_startPosition, int i_blastType, float i_strength, float i_stunTime,
-			RigidBody i_rb = RigidBody(std::make_shared<Circle>(175.0f), STATIC));
+	Blast(Sector* i_sectPtr, PlayerChar* charP, Vector2f i_startPosition, int i_blastType, float i_strength, float i_stunTime,
+			RigidBody i_rb = RigidBody(std::make_shared<Circle>(150.0f), STATIC));
 	~Blast();
 
 	void Update(float i_stepSize) override;
@@ -256,9 +258,9 @@ public:
 
 	void UpdateHealth(float i_stepSize);
 
-	void TakeDamage(float i_dmg);
+	virtual void TakeDamage(float i_dmg);
 
-	void Stun(float i_stunTime);
+	virtual void Stun(float i_stunTime);
 
 	virtual void SetDiffVars(int i_diff);
 
@@ -307,6 +309,8 @@ public:
 
 	void shootProj();
 
+	void Stun(float i_stunTime) override;
+
 	void SetDiffVars(int i_diff, int i_lvlNum);
 };
 
@@ -332,6 +336,8 @@ public:
 
 	void shootProj();
 
+	void Stun(float i_stunTime) override;
+
 	void SetDiffVars(int i_diff, int i_lvlNum);
 };
 
@@ -349,7 +355,8 @@ private:
 	float weaponDelay;
 
 public:
-	BossRush(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb);
+	BossRush(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition,
+		RigidBody i_rb = RigidBody(std::make_shared<Circle>(75), LESSBOUNCYBALL));
 
 	void Update(float i_stepSize) override;
 
@@ -358,6 +365,8 @@ public:
 	void TakeDamage(float i_dmg);
 
 	void shootProj();
+
+	void Stun(float i_stunTime) override;
 
 	void SetDiffVars(int i_diff, int i_lvlNum);
 
@@ -392,6 +401,8 @@ public:
 
 	void shootProj();
 
+	void Stun(float i_stunTime) override;
+
 	void SetDiffVars(int i_diff, int i_lvlNum);
 };
 
@@ -408,8 +419,10 @@ private:
 	float weaponDelay;
 
 public:
+	bool invulnerable;
+
 	BossSpawn(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition,
-		RigidBody i_rb = RigidBody(std::make_shared<Circle>(30), STATIC));
+		RigidBody i_rb = RigidBody(std::make_shared<Rectangle>(100, 100), STATIC));
 
 	void Update(float i_stepSize) override;
 
@@ -418,6 +431,8 @@ public:
 	void TakeDamage(float i_dmg);
 
 	void shootProj();
+
+	void Stun(float i_stunTime) override;
 
 	void SetDiffVars(int i_diff, int i_lvlNum);
 };
@@ -463,9 +478,15 @@ class PainWall :
 	public Entity
 {
 private:
+	float timeSinceColorSwitch;
+	float colorSwitchRate;
+	bool colorState;
 	Sector* sectPtr;
 
 public:
+
+	void Update(float i_stepSize) override;
+
 	PainWall(Vector2f i_startPosition, Sector* i_sectPtr, RigidBody i_rb);
 	~PainWall();
 };

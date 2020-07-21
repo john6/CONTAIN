@@ -9,6 +9,11 @@ Menu::Menu(RESOURCES* i_resources, DIFFICULTY i_defaultDiff) :
 	playButton = Button("Play", playButtonRect);
 	playButton.SetColors(sf::Color::Black, sf::Color::White, sf::Color(128, 128, 128));
 
+	sf::RectangleShape playTutorialButtonRect(sf::Vector2f(GLBVRS::BTTN_WDTH * 2, GLBVRS::BTTN_HGHT));
+	playTutorialButtonRect.setPosition(sf::Vector2f(100, 500));
+	playTutorialButton = Button("Play Tutorial", playTutorialButtonRect);
+	playTutorialButton.SetColors(sf::Color::Black, sf::Color::White, sf::Color(128, 128, 128));
+
 	sf::RectangleShape exitButtonRect(sf::Vector2f(GLBVRS::BTTN_WDTH, GLBVRS::BTTN_HGHT));
 	exitButtonRect.setPosition(sf::Vector2f(GLBVRS::BTTN_WDTH * 1.35f, 100));
 	exitButton = Button("Exit", exitButtonRect);
@@ -38,10 +43,10 @@ Menu::Menu(RESOURCES* i_resources, DIFFICULTY i_defaultDiff) :
 	font = resources->GetFont();
 
 	instructions1.setFont(font);
-	instructions1.setString("Controls: \n#WASD# to move,\n#Left Click# to shoot a basic basic projectile\n");
+	instructions1.setString("Controls: \n#WASD# to move,\n#Left Click# to shoot a basic basic projectile\n#Right Click# to Release a wall\n#Scroll Button Click# to trigger an EMP blast\n");
 	instructions1.setCharacterSize(25);
 	instructions1.setFillColor(sf::Color::White);
-	instructions1.setPosition(sf::Vector2f(100, 500));
+	instructions1.setPosition(sf::Vector2f(100, 800));
 }
 
 Menu::~Menu()
@@ -53,6 +58,7 @@ DIFFICULTY Menu::GetDifficulty() { return currDifficulty; }
 void Menu::ResetMenu()
 {
 	playButton.SetState(Button::UP);
+	playTutorialButton.SetState(Button::UP);
 	exitButton.SetState(Button::UP);
 	easyButton.SetState(Button::UP);
 	mediumButton.SetState(Button::UP);
@@ -113,11 +119,16 @@ void  Menu::UpdateButtonTriplet(DIFFICULTY i_difficultySelected) {
 GAME_STATE Menu::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vector2i i_mousePos) {
 	PollButtonTriplet(i_mousePos);
 	bool playButtonPressed = PollInput(i_mousePos, &playButton);
+	bool playTutorialButtonPressed = PollInput(i_mousePos, &playTutorialButton);
 	bool exitButtonPressed = PollInput(i_mousePos, &exitButton);
 
 	if (playButtonPressed) {
 		resources->PlaySound(RESOURCES::OCTAVE_BEEP);
 		return START_GAME;
+	}
+	if (playTutorialButtonPressed) {
+		resources->PlaySound(RESOURCES::OCTAVE_BEEP);
+		return START_TUTORIAL;
 	}
 	else if (exitButtonPressed) {
 		resources->PlaySound(RESOURCES::OCTAVE_BEEP);
@@ -130,11 +141,13 @@ GAME_STATE Menu::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vecto
 
 void Menu::Render(sf::RenderWindow* window) {
 	sf::Text play = playButton.GetText();
+	sf::Text playTutorial = playTutorialButton.GetText();
 	sf::Text exit = exitButton.GetText();
 	sf::Text easy = easyButton.GetText();
 	sf::Text medium = mediumButton.GetText();
 	sf::Text hard = hardButton.GetText();
 	play.setFont(font);
+	playTutorial.setFont(font);
 	exit.setFont(font);
 	easy.setFont(font);
 	medium.setFont(font);
@@ -143,11 +156,13 @@ void Menu::Render(sf::RenderWindow* window) {
 	window->clear();
 
 	window->draw(playButton.GetRect());
+	window->draw(playTutorialButton.GetRect());
 	window->draw(exitButton.GetRect());
 	window->draw(easyButton.GetRect());
 	window->draw(mediumButton.GetRect());
 	window->draw(hardButton.GetRect());
 	window->draw(play);
+	window->draw(playTutorial);
 	window->draw(exit);
 	window->draw(easy);
 	window->draw(medium);

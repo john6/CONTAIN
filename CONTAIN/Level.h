@@ -46,6 +46,7 @@ public:
 
 	Level(int i_levelNum, DIFFICULTY i_diff, std::shared_ptr<Entity> i_charPtr, RESOURCES* i_resources);
 	Level(std::string i_testStr, std::shared_ptr<Entity> i_charPtr, RESOURCES* i_resources);
+	Level(std::shared_ptr<Entity> i_charPtr, RESOURCES* i_resources);
 	~Level();
 
 	std::shared_ptr<Sector> GetSector(MapCoord i_coord);
@@ -57,8 +58,6 @@ public:
 	void CreateOneWayDoor(MapCoord i_coordA, MapCoord i_coordB);
 
 	void CreateBidirectionalDoor(MapCoord i_coordA, MapCoord i_coordB);
-
-	void PopulateBossRoom(DIFFICULTY i_diff);
 
 	float GetTimeLeftInLevel();
 
