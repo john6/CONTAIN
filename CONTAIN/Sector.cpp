@@ -1,9 +1,20 @@
 #include "Sector.h"
 
-Sector::Sector(Level* i_lvlPtr, RESOURCES* i_resources, sf::Color i_colA, sf::Color i_colB) :
+Sector::Sector(Level* i_lvlPtr, RESOURCES* i_resources, sf::Color i_colA, sf::Color i_colB, bool i_testSector) :
 	myLevel { i_lvlPtr }, resources { i_resources }, colPalA { i_colA }, colPalB { i_colB }
 {
-	InitializeSector();
+	if (i_testSector) {
+		emptyTerrainAreas = { TER_UP, TER_RIGHT, TER_DOWN, TER_LEFT }; //, TER_CENT };
+		AddWallsToLevel();
+		sectEnemyNum = 0;
+		numBlockers = 0;
+		isBossRoom = false;
+		firstPhase = true;
+		filledIn = false;
+	}
+	else {
+		InitializeSector();
+	}
 }
 
 Sector::~Sector()
@@ -328,9 +339,68 @@ void Sector::PopulateEntranceRoom()
 	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (4.0f / 5.0f)), GLBVRS::CRT_HGHT / 4.0)), RATE_OF_FIRE);
 	//lvlEntitiesPhase1.push_back(asd4);
 
-	//std::shared_ptr<Entity> asd5 = std::make_shared<PowerUp>(this,
-	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (4.0f / 5.0f)), GLBVRS::CRT_HGHT / 4.0)), RATE_OF_FIRE);
+	//std::vector<Vector2f> vector;
+	////counterclockwise
+	//vector.push_back(Vector2f(-50.0, -50.0));
+	//vector.push_back(Vector2f(-350.0, 30.0));
+	//vector.push_back(Vector2f(-200.0, 50.0));
+	//vector.push_back(Vector2f(0.0, 50.0));
+	//vector.push_back(Vector2f(50.0, -50.0));
+	//std::shared_ptr<Shape> shape1 = std::make_shared<Polygon>(vector);
+	//RigidBody rb1 = RigidBody(shape1, METAL);
+	//std::shared_ptr<Entity> asd5 = std::make_shared<Wall>(
+	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH / 2.0f), GLBVRS::CRT_HGHT / 2.0)),
+	//	this, rb1);
 	//lvlEntitiesPhase1.push_back(asd5);
+
+	RigidBody rb1 = RigidBody(Physics::CreateIrregularPolygon(6, 400), BOUNCYBALL);
+	std::shared_ptr<Entity> asd5 = std::make_shared<Wall>(
+		Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH / 4.0f), GLBVRS::CRT_HGHT / 4.0)),
+		this, rb1);
+	lvlEntitiesPhase1.push_back(asd5);
+
+	RigidBody rb2 = RigidBody(Physics::CreateIrregularPolygon(4, 200), BOUNCYBALL);
+	std::shared_ptr<Entity> asd6 = std::make_shared<Wall>(
+		Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH / 4.0f), GLBVRS::CRT_HGHT / 4.0)),
+		this, rb2);
+	lvlEntitiesPhase1.push_back(asd6);
+
+	RigidBody rb3 = RigidBody(Physics::CreateIrregularPolygon(7, 400), BOUNCYBALL);
+	std::shared_ptr<Entity> asd7 = std::make_shared<Wall>(
+		Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH / 4.0f), GLBVRS::CRT_HGHT / 4.0)),
+		this, rb3);
+	lvlEntitiesPhase1.push_back(asd7);
+
+	RigidBody rb4 = RigidBody(Physics::CreateIrregularPolygon(6, 300), BOUNCYBALL);
+	std::shared_ptr<Entity> asd8 = std::make_shared<Wall>(
+		Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH / 4.0f), GLBVRS::CRT_HGHT / 4.0)),
+		this, rb4);
+	lvlEntitiesPhase1.push_back(asd8);
+
+	RigidBody rb5 = RigidBody(Physics::CreateIrregularPolygon(6, 400), BOUNCYBALL);
+	std::shared_ptr<Entity> asd9 = std::make_shared<Wall>(
+		Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH / 4.0f), GLBVRS::CRT_HGHT / 4.0)),
+		this, rb5);
+	lvlEntitiesPhase1.push_back(asd9);
+
+
+	//RigidBody rb2 = RigidBody(Physics::CreateRegularPolygon(5, 100), METAL);
+	//std::shared_ptr<Entity> asd6 = std::make_shared<Wall>(
+	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * 3.0f / 4.0f), GLBVRS::CRT_HGHT / 4.0)),
+	//	this, rb2);
+	//lvlEntitiesPhase1.push_back(asd6);
+
+	//RigidBody rb3 = RigidBody(Physics::CreateRegularPolygon(6, 100), METAL);
+	//std::shared_ptr<Entity> asd7 = std::make_shared<Wall>(
+	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * 1.0f / 4.0f), GLBVRS::CRT_HGHT *3.0f / 4.0)),
+	//	this, rb3);
+	//lvlEntitiesPhase1.push_back(asd7);
+
+	//RigidBody rb4 = RigidBody(Physics::CreateRegularPolygon(7, 100), METAL);
+	//std::shared_ptr<Entity> asd8 = std::make_shared<Wall>(
+	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * 3.0f / 4.0f), GLBVRS::CRT_HGHT *3.0f / 4.0)),
+	//	this, rb4);
+	//lvlEntitiesPhase1.push_back(asd8);
 
 }
 
@@ -527,6 +597,17 @@ void Sector::InitializeSector()
 	isBossRoom = false;
 	firstPhase = true;
 	filledIn = false;
+
+
+
+	//std::vector<Vector2f> vector;
+	////counterclockwise
+	//vector.push_back(Vector2f(-50.0, -50.0));
+	//vector.push_back(Vector2f(-350.0, 30.0));
+	//vector.push_back(Vector2f(-200.0, 50.0));
+	//vector.push_back(Vector2f(0.0, 50.0));
+	//vector.push_back(Vector2f(50.0, -50.0));
+	//std::shared_ptr<Shape> shape1 = std::make_shared<Polygon>(vector);
 }
 
 void Sector::PlaySound(int i_soundNum)

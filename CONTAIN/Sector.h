@@ -6,6 +6,7 @@
 #include "Entity.h"
 #include "RigidBody.h"
 #include "Level.h"
+#include "Physics.h"
 
 class Sector
 {
@@ -63,7 +64,7 @@ public:
 
 	std::vector<std::tuple<Vector2f, Vector2f>> GetScreenAreas(SCREEN_AREA i_area);
 
-	Sector(Level* i_lvlPtr, RESOURCES* i_resources, sf::Color i_colA = sf::Color::Black, sf::Color i_colB = sf::Color::White);
+	Sector(Level* i_lvlPtr, RESOURCES* i_resources, sf::Color i_colA = sf::Color::Black, sf::Color i_colB = sf::Color::White, bool i_testSector = false);
 	~Sector();
 
 private:

@@ -5,6 +5,7 @@
 #include "RigidBody.h"
 #include "CollisionData.h"
 #include <iostream>
+#include <cstdlib>
 
 class Physics
 {
@@ -38,6 +39,10 @@ public:
 	static void InfiniteMassCorrection(CollisionData* i_data);
 
 	static void PositionalCorrection(CollisionData* i_data);
+
+	static std::shared_ptr<Polygon> CreateRegularPolygon(int i_numVerts, float i_size);
+
+	static std::shared_ptr<Polygon> CreateIrregularPolygon(int i_numVerts, float i_size);
 
 	//static void TimeStepRigidBody(RigidBody* i_entity, float i_stepSize);
 };

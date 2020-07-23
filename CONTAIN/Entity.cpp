@@ -97,16 +97,32 @@ void Entity::CollideWith(Entity & i_other)
 std::unique_ptr<sf::Shape> Entity::CreateDrawable(float i_lerp_fraction)
 {
 	//for linear interpolation this will now use the previous position and orientation
-	Vector2f lerpPos = rb.GetLerpPosition(i_lerp_fraction);
-	float lerpOrient = rb.GetLerpOrient(i_lerp_fraction);
-	std::unique_ptr<sf::Shape> drawShape = rb.shape->GetSFMLRepr();
-	drawShape->setOrigin(sf::Vector2f(rb.shape->GetSFMLOriginOffset()(0), rb.shape->GetSFMLOriginOffset()(1)));
-	drawShape->setPosition(lerpPos(0), lerpPos(1));
-	drawShape->setRotation((lerpOrient*180.0f) / PI);
-	drawShape->setFillColor(fillColor);
-	drawShape->setOutlineColor(outlineColor);
-	drawShape->setOutlineThickness(3.0f);
-	return drawShape;
+
+	if (rb.shape->GetType() == Shape::POLYGON) {
+		Vector2f lerpPos = rb.GetLerpPosition(i_lerp_fraction);
+		float lerpOrient = rb.GetLerpOrient(i_lerp_fraction);
+		std::unique_ptr<sf::Shape> drawShape = rb.shape->GetSFMLRepr();
+		drawShape->setOrigin(sf::Vector2f(rb.shape->GetSFMLOriginOffset()(0), rb.shape->GetSFMLOriginOffset()(1)));
+		drawShape->setPosition(lerpPos(0), lerpPos(1));
+		drawShape->setRotation((lerpOrient*180.0f) / PI);
+		drawShape->setFillColor(fillColor);
+		drawShape->setOutlineColor(outlineColor);
+		drawShape->setOutlineThickness(3.0f);
+		return drawShape;
+	}
+	else {
+		Vector2f lerpPos = rb.GetLerpPosition(i_lerp_fraction);
+		float lerpOrient = rb.GetLerpOrient(i_lerp_fraction);
+		std::unique_ptr<sf::Shape> drawShape = rb.shape->GetSFMLRepr();
+		drawShape->setOrigin(sf::Vector2f(rb.shape->GetSFMLOriginOffset()(0), rb.shape->GetSFMLOriginOffset()(1)));
+		drawShape->setPosition(lerpPos(0), lerpPos(1));
+		drawShape->setRotation((lerpOrient*180.0f) / PI);
+		drawShape->setFillColor(fillColor);
+		drawShape->setOutlineColor(outlineColor);
+		drawShape->setOutlineThickness(3.0f);
+		return drawShape;
+	}
+
 }
 
 void Entity::CollideWithPlayer(PlayerChar* i_playerPtr) {}

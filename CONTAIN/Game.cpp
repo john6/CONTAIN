@@ -294,11 +294,11 @@ void Game::loadTestLevel()
 	Material Metal = Material(1.2f, 0.05f, 0.4f, 0.2f);
 	RigidBody rb(shape, Metal);
 	int startingHealth = 999999;
-	playerChar = std::make_shared<PlayerChar>(PlayerChar(this, startingHealth, Vector2f(200, 200.0), rb));
+	playerChar = std::make_shared<PlayerChar>(PlayerChar(this, startingHealth, Vector2f(GLBVRS::HR_MRG * 10, GLBVRS::VRT_MRG * 2 + 70)));
 	//Default player
 	//playerChar = std::make_shared<PlayerChar>(PlayerChar(this, startingHealth, Vector2f(200, 200.0)));
 	playerChar->rb.transform.orient = 1.0f;
-	playerChar->rb.ApplyImpulse(Vector2f(0.0f, 160000.0f), Vector2f(0.0f, 0.0f));
+	//playerChar->rb.ApplyImpulse(Vector2f(0.0f, 160000.0f), Vector2f(0.0f, 0.0f));
 	beginTime = std::chrono::high_resolution_clock::now();
 	numLvls = 5;
 	currLvl = 0;
@@ -323,6 +323,68 @@ void Game::loadTestLevel()
 	//levels[currLvl]->GetSector(currSector)->AddTerrain(6);
 	//levels[currLvl]->GetSector(currSector)->AddTerrain(7);
 
+
+	std::vector<Vector2f> vector;
+	//counterclockwise
+	vector.push_back(Vector2f(-50.0, -50.0));
+	vector.push_back(Vector2f(-350.0, 30.0));
+	vector.push_back(Vector2f(-200.0, 50.0));
+	vector.push_back(Vector2f(0.0, 50.0));
+	vector.push_back(Vector2f(50.0, -50.0));
+	std::shared_ptr<Shape> shape1 = std::make_shared<Polygon>(vector);
+	RigidBody rb1 = RigidBody(shape1, METAL);
+	std::shared_ptr<Entity> asd5 = std::make_shared<Wall>(
+		Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH / 2.0f), GLBVRS::CRT_HGHT / 2.0)),
+		levels[currLvl]->GetSector(currSector).get(), rb1);
+	levels[currLvl]->GetSector(currSector)->AddEntPtrToSector(asd5);
+
+
+
+
+
+	std::vector<Vector2f> vector2;
+	vector2.push_back(Vector2f(-50.0, -50.0));
+	vector2.push_back(Vector2f(-50.0, 50.0));
+	vector2.push_back(Vector2f(50.0, 50.0));
+	vector2.push_back(Vector2f(50.0, -50.0));
+
+	std::shared_ptr<Shape> shape2 = std::make_shared<Polygon>(vector2);
+	RigidBody rb2 = RigidBody(shape2, METAL);
+	std::shared_ptr<Entity> asd6 = std::make_shared<Wall>(
+		Vector2f(GLBVRS::HR_MRG * 2, GLBVRS::VRT_MRG * 2), levels[currLvl]->GetSector(currSector).get(), rb2);
+	levels[currLvl]->GetSector(currSector)->AddEntPtrToSector(asd6);
+
+
+
+	/*
+	std::shared_ptr<Entity> asd67 = std::make_shared<Wall>(
+		Vector2f(GLBVRS::HR_MRG * 2, GLBVRS::VRT_MRG * 2 + 70), levels[currLvl]->GetSector(currSector).get(), RigidBody(std::make_shared<Rectangle>(100.0f, 100.0f), METAL));
+	asd67->rb.transform.orient = 1.0f;
+	levels[currLvl]->GetSector(currSector)->AddEntPtrToSector(asd67);
+
+
+*/
+	//playerChar = std::make_shared<Blocker>(PlayerChar(this, startingHealth, Vector2f(GLBVRS::HR_MRG * 2, GLBVRS::VRT_MRG * 2 + 70)));
+	////Default player
+	////playerChar = std::make_shared<PlayerChar>(PlayerChar(this, startingHealth, Vector2f(200, 200.0)));
+	//playerChar->rb.transform.orient = 1.0f;
+
+
+
+	std::vector<Vector2f> vector3;
+	//counterclockwise
+	vector3.push_back(Vector2f(-50.0, -50.0));
+	vector3.push_back(Vector2f(-50.0, 50.0));
+	vector3.push_back(Vector2f(200.0, 50.0));
+	vector3.push_back(Vector2f(200.0, -50.0));
+
+
+
+	std::shared_ptr<Shape> shape23 = std::make_shared<Polygon>(vector3);
+	RigidBody rb3 = RigidBody(shape23, METAL);
+	std::shared_ptr<Entity> asd61 = std::make_shared<Wall>(
+		Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH / 2.0f), GLBVRS::CRT_HGHT / 2.0)), levels[currLvl]->GetSector(currSector).get(), rb3);
+	levels[currLvl]->GetSector(currSector)->AddEntPtrToSector(asd61);
 }
 
 void Game::PlayRandomSong()

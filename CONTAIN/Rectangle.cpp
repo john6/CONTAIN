@@ -35,7 +35,7 @@ std::vector<Vector2f> Rectangle::GetPoints()
 
 Shape::ShapeType Rectangle::GetType()
 {
-	return ShapeType::Rectangle;
+	return ShapeType::RECTANGLE;
 }
 
 float Rectangle::GetDistToEdge() {

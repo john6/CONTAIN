@@ -10,6 +10,7 @@ Origin of object space is the center
 #include "Shape.h"
 #include "Circle.h"
 #include "Rectangle.h"
+#include "Polygon.h"
 #include "Transform.h"
 #include "MassData.h"
 #include "Material.h"

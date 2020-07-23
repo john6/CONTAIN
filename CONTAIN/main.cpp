@@ -132,6 +132,7 @@ int main()
 				case START_GAME: {
 					currLvl = 0;
 					globalGame.InitGame(menu.GetDifficulty());
+					//globalGame.loadTestLevel();
 					state = IN_GAME;
 					break;
 				}

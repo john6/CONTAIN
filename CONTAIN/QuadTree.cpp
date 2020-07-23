@@ -50,7 +50,7 @@ int QuadTree::GetSubIndex(Entity* i_ent)
 	bool leftVertMidLine = false;
 	bool onVertMidLine = false;
 
-	if (i_ent->rb.shape->GetType() == Shape::ShapeType::Circle) {
+	if (i_ent->rb.shape->GetType() == Shape::ShapeType::CIRCLE) {
 		std::shared_ptr<Circle> circlePtr = std::dynamic_pointer_cast<Circle>(i_ent->rb.shape);
 		Vector2f position = i_ent->rb.transform.pos;
 		float radius = circlePtr->radius;

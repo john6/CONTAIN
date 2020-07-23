@@ -28,14 +28,14 @@ Level::Level(int i_lvlNum, DIFFICULTY i_diff, std::shared_ptr<Entity> i_charPtr,
 }
 
 Level::Level(std::string i_testStr, std::shared_ptr<Entity> i_charPtr, RESOURCES* i_resources) : charPtr{ i_charPtr }, resources{ i_resources }
-{
+{//TEST LEVEL
 	dimSize = 1;
 	numSectors = 1;
 
 	sectorMap = std::vector<std::vector<MapNode>>(dimSize, std::vector<MapNode>(dimSize, MapNode()));
 	originCoord = MapCoord(0, 0);
 	CreateSectorAtCoord(originCoord);
-	GetSector(originCoord)->AddPainfullWallsToLevel();
+	//GetSector(originCoord)->AddPainfullWallsToLevel();
 	//GetSector(originCoord)->GenerateLevelCircles(1);
 	//GetSector(originCoord)->GenerateLevelCubes(9);
 	//GetSector(originCoord)->AddRandomPainWall(0);
@@ -141,7 +141,7 @@ std::shared_ptr<Sector> Level::GetSector(MapCoord i_coord)
 
 void Level::CreateSectorAtCoord(MapCoord i_coord)
 {
-	std::shared_ptr<Sector> newSector = std::make_shared<Sector>(this, resources, colPalA, colPalB);
+	std::shared_ptr<Sector> newSector = std::make_shared<Sector>(this, resources, colPalA, colPalB); //Test SECTOR PARAM IS TRUE
 	sectorVect.push_back(newSector);
 	sectorMap[i_coord.x][i_coord.y].vectIndex = sectorVect.size() - 1;
 	sectorMap[i_coord.x][i_coord.y].isRoom = true;

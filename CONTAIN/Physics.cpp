@@ -80,6 +80,7 @@ int Physics::Clip(Vector2f normal, float c, std::vector<Vector2f>* face)
 
 std::vector<float> Physics::FindAxisLeastPenetration(RigidBody* i_entA, RigidBody* i_entB)
 {
+	//These might not need to re recomputed
 	std::vector<Vector2f> verticesA = i_entA->GetVertCords();
 	std::vector<Vector2f> verticesB = i_entB->GetVertCords();
 	std::vector<Vector2f> normalsA = i_entA->GetFaceNorms();
@@ -88,6 +89,7 @@ std::vector<float> Physics::FindAxisLeastPenetration(RigidBody* i_entA, RigidBod
 	for (int i = 0; i < verticesA.size(); ++i) {
 		Vector2f bMaxVertProjAlongNormalA = GetMaxProjection(-normalsA[i], verticesB);
 		//Not converting between object spaces, I really hope it wont break it to just do everything in world space for now
+		//I THINK THIS IS FUCKING MY FPS TODO
 		Vector2f distFromConerAToBProj = bMaxVertProjAlongNormalA - verticesA[i];
 		float penetrationDist = normalsA[i].dot(distFromConerAToBProj);
 		if (penetrationDist > maxPenetrationDist) {
@@ -285,22 +287,22 @@ bool Physics::CheckCollision(CollisionData* i_collision)
 	Shape::ShapeType shape1 = i_collision->entA->rb.shape->GetType();
 	Shape::ShapeType shape2 = i_collision->entB->rb.shape->GetType();
 	bool collisionOccured = false;
-	if ((shape1 == Shape::Circle) && (shape2 == Shape::Circle))
+	if ((shape1 == Shape::CIRCLE) && (shape2 == Shape::CIRCLE))
 	{
 		collisionOccured = ResolveCircleToCircleCollision(i_collision);
 	}
-	else if ((shape1 == Shape::Rectangle) && (shape2 == Shape::Rectangle))
+	else if (((shape1 == Shape::RECTANGLE) || (shape1 == Shape::POLYGON)) && ((shape2 == Shape::RECTANGLE) || (shape2 == Shape::POLYGON)))
 	{
 		collisionOccured = ResolveRectToRectCollision(i_collision);
 	}
-	else if ((shape1 == Shape::Rectangle) && (shape2 == Shape::Circle))
+	else if (((shape1 == Shape::RECTANGLE)||(shape1 == Shape::POLYGON)) && (shape2 == Shape::CIRCLE))
 	{
 		collisionOccured = ResolveRectToCircleCollision(i_collision);
 		std::shared_ptr<Entity> temp = i_collision->entA;
 		i_collision->entA = i_collision->entB;
 		i_collision->entB = temp;
 	}
-	else if ((shape1 == Shape::Circle) && (shape2 == Shape::Rectangle))
+	else if ((shape1 == Shape::CIRCLE) && ((shape2 == Shape::RECTANGLE)||(shape2 == Shape::POLYGON)))
 	{
 		std::shared_ptr<Entity> temp = i_collision->entA;
 		i_collision->entA = i_collision->entB;
@@ -339,6 +341,128 @@ void Physics::PositionalCorrection(CollisionData * i_data)
 		i_data->entA->rb.AdjustPosition(-correction * i_data->entA->rb.massD.GetMassInv());
 		i_data->entB->rb.AdjustPosition(correction * i_data->entB->rb.massD.GetMassInv());
 	}
+}
+
+std::shared_ptr<Polygon> Physics::CreateRegularPolygon(int i_numVerts, float i_size)
+{
+	std::vector<Vector2f> vertVect;
+	for (int i = 0; i < i_numVerts; ++i) {
+		float radAngle = ((((float)(i_numVerts-i)/(float)i_numVerts))*2.0f*PI);
+		Vector2f vert = Math::AngleToVect(radAngle) * i_size;
+		vertVect.push_back(vert);
+	}
+	return std::make_shared<Polygon>(vertVect);
+}
+
+std::shared_ptr<Polygon> Physics::CreateIrregularPolygon(int i_numVerts, float i_size)
+{ //GOnna use an algorithm I found here in Java : http://cglab.ca/~sander/misc/ConvexGeneration/convex.html
+
+	std::random_device rd1;
+	std::mt19937 gen1(rd1());
+	std::uniform_int_distribution<> distrib(1, i_size); //both boundaries are inclusive
+
+	std::vector<float> xPool = {};
+	std::vector<float> yPool = {};
+
+	for (int i = 0; i < i_numVerts; i++) {
+		xPool.push_back(distrib(gen1));
+		yPool.push_back(distrib(gen1));
+		}
+
+	std::sort(xPool.begin(), xPool.begin() + xPool.size());
+	std::sort(yPool.begin(), yPool.begin() + yPool.size());
+	float minX = xPool[0];
+	float maxX = xPool[xPool.size()-1];
+	float minY = yPool[0];
+	float maxY = yPool[xPool.size() - 1];
+	
+	std::vector<float> xVec = {};
+	std::vector<float> yVec = {};
+	
+	float lastTop = minX;
+	float lastBot = minX;
+	
+	for (int i = 1; i < i_numVerts - 1; i++) {
+		float x = xPool[i];
+		if (distrib(gen1) % 2 == 1) {
+			xVec.push_back(x - lastTop);
+			lastTop = x;
+		}
+		else {
+			xVec.push_back(lastBot - x);
+			lastBot = x;
+		}
+	}
+
+	xVec.push_back(maxX - lastTop);
+	xVec.push_back(lastBot - maxX);
+	
+	float lastLeft = minY;
+	float lastRight = maxY;
+
+	for (int i = 1; i < i_numVerts; i++) {
+		float y = yPool[i];
+		if (distrib(gen1) % 2 == 1) {
+			yVec.push_back(y - lastLeft);
+			lastLeft = y;
+		}
+		else {
+			yVec.push_back(lastRight - y);
+			lastRight = y;
+		}
+	}
+
+	yVec.push_back(maxY - lastLeft);
+	yVec.push_back(lastRight - maxY);
+
+	//https://en.cppreference.com/w/cpp/algorithm/random_shuffle
+	std::random_device rd;
+	std::mt19937 g(rd());
+	std::shuffle(yVec.begin(), yVec.end(), g);
+
+	std::vector<Vector2f> vectorVect = {};
+
+	for (int i = 0; i < i_numVerts; i++) {
+		vectorVect.push_back(Vector2f(xVec[i], yVec[i]));
+	}
+
+	std::sort(vectorVect.begin(), vectorVect.end(), [](const Vector2f & v1, const Vector2f & v2) {
+		return atan2(v1.y(), v1.x()) > atan2(v2.y(), v2.x());
+	}); // I DONT KNOW IF IM SUPPOSED TO BE SORTING LOW TO HIGH OR HIGH TO LOW, ASSUMING LOW TO HIGH
+	
+	float x = 0;
+	float y = 0;
+	float minPolyX = 0;
+	float minPolyY = 0;
+	std::vector<Vector2f> points = {};
+
+	for (int i = 0; i < i_numVerts; i++) {
+		points.push_back(Vector2f(x, y));
+
+		x += vectorVect[i].x();
+		y += vectorVect[i].y();
+
+		minPolyX = std::min(minPolyX, x);
+		minPolyY = std::min(minPolyY, y);
+	}
+
+	float xShift = minX - minPolyX;
+	float yShift = minY - minPolyY;
+
+	for (int i = 0; i < i_numVerts; i++) {
+		Vector2f vert = points[i];
+		points[i] = Vector2f(vert.x() + xShift, vert.y() + yShift);
+	}
+
+	return std::make_shared<Polygon>(points);
+
+	std::vector<Vector2f> vertVect;
+	////for (int i = 0; i < i_numVerts; ++i) {
+	////	float radAngle = ((((float)(i_numVerts - i) / (float)i_numVerts))*2.0f*PI);
+	////	Vector2f vert = Math::AngleToVect(radAngle) * i_size;
+	////	vertVect.push_back(vert);
+	////}
+	////
 }
 
 void Physics::CreateCollisionImpulse(CollisionData* i_data) {
@@ -408,7 +532,7 @@ void Physics::CreateCollisionImpulse(CollisionData* i_data) {
 		if (abs(tanMag) < impulseScalar * statFric) { tangentImpulse = tan * tanMag; }
 		else { tangentImpulse = tan * -impulseScalar * dynaFric; }
 
-		if (bodyA->shape->GetType() == Shape::Circle) {
+		if (bodyA->shape->GetType() == Shape::CIRCLE) {
 			impulseCalls.push_back(SaveImpulse(bodyA, tangentImpulse, contactPtA));
 			//bodyA->ApplyImpulse(tangentImpulse, contactPtA);
 		}
@@ -416,7 +540,7 @@ void Physics::CreateCollisionImpulse(CollisionData* i_data) {
 			impulseCalls.push_back(SaveImpulse(bodyA, -tangentImpulse, contactPtA));
 			//bodyA->ApplyImpulse(-tangentImpulse, contactPtA);
 		}
-		if (bodyB->shape->GetType() == Shape::Circle) {
+		if (bodyB->shape->GetType() == Shape::CIRCLE) {
 			impulseCalls.push_back(SaveImpulse(bodyB, -tangentImpulse, contactPtB));
 			//bodyB->ApplyImpulse(-tangentImpulse, contactPtB);
 		}

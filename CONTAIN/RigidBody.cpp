@@ -75,15 +75,33 @@ void RigidBody::UpdateVertsAndNorms()
 void RigidBody::UpdateFaceNorms()
 {
 	std::vector<Vector2f> faceNormals;
-	if (shape->GetType() == Shape::ShapeType::Rectangle) {
+	if (shape->GetType() == Shape::ShapeType::RECTANGLE) {
 		std::vector<Vector2f> rotatedPoints = RotatePoints(objVerts);
 		faceNormals.push_back(Vector2f(rotatedPoints[1] - rotatedPoints[0]).unitOrthogonal()); 	//top face normal
 		faceNormals.push_back(Vector2f(rotatedPoints[2] - rotatedPoints[1]).unitOrthogonal()); 	//left face normal
 		faceNormals.push_back(Vector2f(rotatedPoints[3] - rotatedPoints[2]).unitOrthogonal()); 	//right face normal
 		faceNormals.push_back(Vector2f(rotatedPoints[0] - rotatedPoints[3]).unitOrthogonal()); 	//bottom face normal
 	}
-	else if (shape->GetType() == Shape::ShapeType::Circle) {
+	else if (shape->GetType() == Shape::ShapeType::CIRCLE) {
 		//Do nothing this should return an empty list representing the infinite/nonexistent face normals of a circle
+	}
+	else if (shape->GetType() == Shape::ShapeType::POLYGON) {
+		std::vector<Vector2f> rotatedPoints = RotatePoints(objVerts);
+		int size = rotatedPoints.size();
+		for (int i = 0; i < size; i++) {
+			//if (i < size - 1) {//might be backwards but idk
+			//	faceNormals.push_back(Vector2f(rotatedPoints[i+1] - rotatedPoints[i]).unitOrthogonal());
+			//}
+			//else {
+			//	faceNormals.push_back(Vector2f(rotatedPoints[0] - rotatedPoints[i]).unitOrthogonal());
+			//}
+			if (i < size - 1) {//might be backwards but idk
+				faceNormals.push_back(Vector2f(rotatedPoints[i + 1] - rotatedPoints[i]).unitOrthogonal());
+			}
+			else {
+				faceNormals.push_back(Vector2f(rotatedPoints[0] - rotatedPoints[i]).unitOrthogonal());
+			}
+		}
 	}
 	faceNorms = faceNormals;
 }

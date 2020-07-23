@@ -22,9 +22,42 @@ void GameRenderer::Render(sf::RenderWindow* i_window, float i_lerp_fraction,
 		it++;
 	}
 
-	for (sf::Drawable* drawble : i_HUDelem) {
-		i_window->draw(*drawble);
-	}
+	//for (sf::Drawable* drawble : i_HUDelem) {
+	//	i_window->draw(*drawble);
+	//}
+
+	//std::vector<sf::Vector2f> vector;
+	//vector.push_back(sf::Vector2f(-50.0, -50.0));
+	//vector.push_back(sf::Vector2f(50.0, -50.0));
+	//vector.push_back(sf::Vector2f(0.0, 50.0));
+
+
+
+
+	//sf::ConvexShape poly = sf::ConvexShape(vector);
+	//int size = pointArr.size();
+	//for (int i = 0; i < size; ++i) {
+	//	sf::Vector2f vect = sf::Vector2f(pointArr[i][0], pointArr[i][0]);
+	//	polyPtr->setPoint(i, vect);
+	//}
+	//std::unique_ptr<sf::Shape> shapePtr = move(polyPtr);
+	//return shapePtr;
+
+	
+// create an empty shape
+sf::ConvexShape convex;
+
+// resize it to 5 points
+convex.setPointCount(5);
+
+// define the points
+//convex.setPoint(0, sf::Vector2f(0, 0));
+//convex.setPoint(1, sf::Vector2f(150, 10));
+//convex.setPoint(2, sf::Vector2f(120, 90));
+//convex.setPoint(3, sf::Vector2f(30, 100));
+//convex.setPoint(4, sf::Vector2f(0, 50));
+//i_window->draw(convex);
+
 
 
 	//for (sf::VertexArray section : i_sections) {

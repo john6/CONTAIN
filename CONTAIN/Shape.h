@@ -7,7 +7,7 @@ class Shape
 private:
 
 public:
-	enum ShapeType {Circle, Rectangle};
+	enum ShapeType {CIRCLE, RECTANGLE, POLYGON};
 
 	Shape();
 	~Shape();

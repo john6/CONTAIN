@@ -23,7 +23,7 @@ std::unique_ptr<sf::Shape> Circle::GetSFMLRepr()
 
 Shape::ShapeType Circle::GetType()
 {
-	return ShapeType::Circle;
+	return ShapeType::CIRCLE;
 }
 
 float Circle::GetDistToEdge() {
@@ -44,7 +44,7 @@ float Circle::GetArea()
 
 float Circle::GetInertiaCoeff()
 {
-	return  0.5f * radius * radius;
+	return  radius * radius;
 }
 
 void Circle::ChangeSizeOfShape(float i_widthOrRadius, float i_heightOrGarbage)
