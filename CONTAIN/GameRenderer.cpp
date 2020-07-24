@@ -22,9 +22,9 @@ void GameRenderer::Render(sf::RenderWindow* i_window, float i_lerp_fraction,
 		it++;
 	}
 
-	//for (sf::Drawable* drawble : i_HUDelem) {
-	//	i_window->draw(*drawble);
-	//}
+	for (sf::Drawable* drawble : i_HUDelem) {
+		i_window->draw(*drawble);
+	}
 
 	//std::vector<sf::Vector2f> vector;
 	//vector.push_back(sf::Vector2f(-50.0, -50.0));

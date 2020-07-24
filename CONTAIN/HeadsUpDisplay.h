@@ -11,30 +11,55 @@
 class HeadsUpDisplay
 {
 private:
+	sf::Vector2f  hudTopLeft;
+	sf::Vector2f hudItemsOffset;
+	sf::Vector2f hudItemPosition;
+	float hudItemSpacing;
+	float hudItemRectHeight;
+	float hudFillBarHeight;
+	float hudOutLineThickness;
+	float hudItemOutLineThickness;
+	float textHorOffset;
+	float textVertOffset;
+	float rectHorExtraWidth;
+	sf::Vector2f textOffset;
+
 	RESOURCES* resources;
 	sf::Font font;
 	sf::Text lvlNumText;
 	sf::Text timeRemainingText;
-	sf::Text healthRemainingText;
-	sf::Text enemiesRemainingText;
-	sf::Text BasicWeaponCharge;
-	sf::Text specialWeaponAmmo;
 
+	sf::RectangleShape backGroundRect;
 	sf::RectangleShape lvlNumRect;
-	sf::RectangleShape healthRemainingRect;
-	sf::RectangleShape specialWeaponAmmoRect;
-	sf::RectangleShape specialWeaponChargeRect;
+	sf::RectangleShape specialWeaponRect;
+	sf::RectangleShape specialWeaponCurrChargeRect;
 	sf::RectangleShape timeRemainingRects;
+
+	sf::Vector2f lvlNumPositionOffset;
+	sf::Vector2f healthLabelOffset;
+	sf::Vector2f specialWeapPosOffset;
+	sf::Vector2f timeRemPosOffset;
+
+	//HEALTH
+	sf::Vector2f healthRemainingPosOffset;
+	int prevHealth;
+	float healthRectWidth;	
+	sf::RectangleShape healthLabelRect;
+	sf::Text healthLabelText;
+	sf::RectangleShape healthSegmentsRect;
+	std::vector<sf::RectangleShape> healthSegments;
 
 public:
 	HeadsUpDisplay(RESOURCES* i_resources);
 	~HeadsUpDisplay();
 
-	void Update(int i_lvlNum, int i_timeRemaining, int i_maxTime, std::shared_ptr<Entity> i_player);
+	void Update(int i_lvlNum, int i_timeRemaining, int i_maxTime, PlayerChar* i_player);
 	/*
 	void RenderHUD(sf::RenderWindow* i_window, float i_lerp_fraction, std::shared_ptr<Entity> i_player, Level* i_lvl);*/
 
-	void UpdateAOECHarge(std::shared_ptr<Entity> i_player);
+	void UpdateAOECHarge(PlayerChar* i_player);
+
+	void UpdateHealth(PlayerChar* i_player);
 
 	std::vector<sf::Drawable*> GetDrawables();
 };

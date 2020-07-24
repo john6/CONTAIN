@@ -356,107 +356,126 @@ std::shared_ptr<Polygon> Physics::CreateRegularPolygon(int i_numVerts, float i_s
 
 std::shared_ptr<Polygon> Physics::CreateIrregularPolygon(int i_numVerts, float i_size)
 { //GOnna use an algorithm I found here in Java : http://cglab.ca/~sander/misc/ConvexGeneration/convex.html
+	std::vector<Vector2f> points;
+	bool verifiedConvex = false;
+	while (!verifiedConvex) {
+		std::random_device rd1;
+		std::mt19937 gen1(rd1());
+		std::uniform_int_distribution<> distrib(1, i_size); //both boundaries are inclusive
 
-	std::random_device rd1;
-	std::mt19937 gen1(rd1());
-	std::uniform_int_distribution<> distrib(1, i_size); //both boundaries are inclusive
+		std::vector<float> xPool = {};
+		std::vector<float> yPool = {};
 
-	std::vector<float> xPool = {};
-	std::vector<float> yPool = {};
-
-	for (int i = 0; i < i_numVerts; i++) {
-		xPool.push_back(distrib(gen1));
-		yPool.push_back(distrib(gen1));
+		for (int i = 0; i < i_numVerts; i++) {
+			xPool.push_back(distrib(gen1));
+			yPool.push_back(distrib(gen1));
 		}
 
-	std::sort(xPool.begin(), xPool.begin() + xPool.size());
-	std::sort(yPool.begin(), yPool.begin() + yPool.size());
-	float minX = xPool[0];
-	float maxX = xPool[xPool.size()-1];
-	float minY = yPool[0];
-	float maxY = yPool[xPool.size() - 1];
-	
-	std::vector<float> xVec = {};
-	std::vector<float> yVec = {};
-	
-	float lastTop = minX;
-	float lastBot = minX;
-	
-	for (int i = 1; i < i_numVerts - 1; i++) {
-		float x = xPool[i];
-		if (distrib(gen1) % 2 == 1) {
-			xVec.push_back(x - lastTop);
-			lastTop = x;
+		std::sort(xPool.begin(), xPool.begin() + xPool.size());
+		std::sort(yPool.begin(), yPool.begin() + yPool.size());
+		float minX = xPool[0];
+		float maxX = xPool[xPool.size() - 1];
+		float minY = yPool[0];
+		float maxY = yPool[xPool.size() - 1];
+
+		std::vector<float> xVec = {};
+		std::vector<float> yVec = {};
+
+		float lastTop = minX;
+		float lastBot = minX;
+
+		for (int i = 1; i < i_numVerts - 1; i++) {
+			float x = xPool[i];
+			if (distrib(gen1) % 2 == 1) {
+				xVec.push_back(x - lastTop);
+				lastTop = x;
+			}
+			else {
+				xVec.push_back(lastBot - x);
+				lastBot = x;
+			}
 		}
-		else {
-			xVec.push_back(lastBot - x);
-			lastBot = x;
+
+		xVec.push_back(maxX - lastTop);
+		xVec.push_back(lastBot - maxX);
+
+		float lastLeft = minY;
+		float lastRight = maxY;
+
+		for (int i = 1; i < i_numVerts; i++) {
+			float y = yPool[i];
+			if (distrib(gen1) % 2 == 1) {
+				yVec.push_back(y - lastLeft);
+				lastLeft = y;
+			}
+			else {
+				yVec.push_back(lastRight - y);
+				lastRight = y;
+			}
+		}
+
+		yVec.push_back(maxY - lastLeft);
+		yVec.push_back(lastRight - maxY);
+
+		//https://en.cppreference.com/w/cpp/algorithm/random_shuffle
+		std::random_device rd;
+		std::mt19937 g(rd());
+		std::shuffle(yVec.begin(), yVec.end(), g);
+
+		std::vector<Vector2f> vectorVect = {};
+
+		for (int i = 0; i < i_numVerts; i++) {
+			vectorVect.push_back(Vector2f(xVec[i], yVec[i]));
+		}
+
+		std::sort(vectorVect.begin(), vectorVect.end(), [](const Vector2f & v1, const Vector2f & v2) {
+			return atan2(v1.y(), v1.x()) > atan2(v2.y(), v2.x());
+		});
+
+		float x = 0;
+		float y = 0;
+		float minPolyX = 0;
+		float minPolyY = 0;
+		points = {};
+
+		for (int i = 0; i < i_numVerts; i++) {
+			points.push_back(Vector2f(x, y));
+
+			x += vectorVect[i].x();
+			y += vectorVect[i].y();
+
+			minPolyX = std::min(minPolyX, x);
+			minPolyY = std::min(minPolyY, y);
+		}
+
+		float xShift = minX - minPolyX;
+		float yShift = minY - minPolyY;
+
+		for (int i = 0; i < i_numVerts; i++) {
+			Vector2f vert = points[i];
+			points[i] = Vector2f(vert.x() + xShift, vert.y() + yShift);
+		}
+
+
+		verifiedConvex = true;
+		for (int i1 = 0; i1 < i_numVerts; i1++) {
+			//https://math.stackexchange.com/questions/51310/equation-to-find-if-a-set-of-vertices-form-a-concave-shape#:~:text=1%20Answer&text=A%20polygon%20is%20concave%20if,x3%2Cy3).
+			//Check to see if theres a concave angle anywhere in the shape, Im not sure whats wrong with the original algorith where this is happening but I dont mind just checking for sure
+			//Maybe its a rounding error because they're usually barely concave.
+			int i2 = (i1 + 1) % i_numVerts;
+			int i3 = (i1 + 2) % i_numVerts;
+			Vector2f vertA = points[i1];
+			Vector2f vertB = points[i2];
+			Vector2f vertC = points[i3];
+			if (((vertB.x() - vertA.x())*(vertC.y() - vertB.y()) - (vertC.x() - vertB.x())*(vertB.y() - vertA.y())) > 0.0f) {
+				std::cout << "FOUND A CONCAVE ANGLE IN A POLYGON WHAT THE ASBOLUTE FRICK\n";
+				verifiedConvex = false;
+			}
 		}
 	}
-
-	xVec.push_back(maxX - lastTop);
-	xVec.push_back(lastBot - maxX);
-	
-	float lastLeft = minY;
-	float lastRight = maxY;
-
-	for (int i = 1; i < i_numVerts; i++) {
-		float y = yPool[i];
-		if (distrib(gen1) % 2 == 1) {
-			yVec.push_back(y - lastLeft);
-			lastLeft = y;
-		}
-		else {
-			yVec.push_back(lastRight - y);
-			lastRight = y;
-		}
-	}
-
-	yVec.push_back(maxY - lastLeft);
-	yVec.push_back(lastRight - maxY);
-
-	//https://en.cppreference.com/w/cpp/algorithm/random_shuffle
-	std::random_device rd;
-	std::mt19937 g(rd());
-	std::shuffle(yVec.begin(), yVec.end(), g);
-
-	std::vector<Vector2f> vectorVect = {};
-
-	for (int i = 0; i < i_numVerts; i++) {
-		vectorVect.push_back(Vector2f(xVec[i], yVec[i]));
-	}
-
-	std::sort(vectorVect.begin(), vectorVect.end(), [](const Vector2f & v1, const Vector2f & v2) {
-		return atan2(v1.y(), v1.x()) > atan2(v2.y(), v2.x());
-	}); // I DONT KNOW IF IM SUPPOSED TO BE SORTING LOW TO HIGH OR HIGH TO LOW, ASSUMING LOW TO HIGH
-	
-	float x = 0;
-	float y = 0;
-	float minPolyX = 0;
-	float minPolyY = 0;
-	std::vector<Vector2f> points = {};
-
-	for (int i = 0; i < i_numVerts; i++) {
-		points.push_back(Vector2f(x, y));
-
-		x += vectorVect[i].x();
-		y += vectorVect[i].y();
-
-		minPolyX = std::min(minPolyX, x);
-		minPolyY = std::min(minPolyY, y);
-	}
-
-	float xShift = minX - minPolyX;
-	float yShift = minY - minPolyY;
-
-	for (int i = 0; i < i_numVerts; i++) {
-		Vector2f vert = points[i];
-		points[i] = Vector2f(vert.x() + xShift, vert.y() + yShift);
-	}
-
 	return std::make_shared<Polygon>(points);
 
-	std::vector<Vector2f> vertVect;
+	//std::vector<Vector2f> vertVect;
 	////for (int i = 0; i < i_numVerts; ++i) {
 	////	float radAngle = ((((float)(i_numVerts - i) / (float)i_numVerts))*2.0f*PI);
 	////	Vector2f vert = Math::AngleToVect(radAngle) * i_size;

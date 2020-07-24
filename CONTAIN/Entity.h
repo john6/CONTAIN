@@ -114,7 +114,7 @@ public:
 	float weapSpeed;
 
 	PlayerChar(Game* i_gamePtr, int i_strtHealth, Vector2f i_startPosition, 
-		RigidBody i_rb = RigidBody(std::make_shared<Rectangle>(100.0f, 100.0f), METAL));
+		RigidBody i_rb = RigidBody(std::make_shared<Rectangle>(100.0f * GLBVRS::SIZE_RAT, 100.0f * GLBVRS::SIZE_RAT), METAL));
 	~PlayerChar();
 
 	void Update(float i_stepSize) override;
@@ -169,7 +169,7 @@ private:
 public:
 	int projType;
 
-	Projectile(Vector2f i_startPosition, int i_projType = 0, RigidBody i_rb = RigidBody(std::make_shared<Circle>(PROJECTILE_RADIUS), HEAVYBALL));
+	Projectile(Vector2f i_startPosition, int i_projType = 0, RigidBody i_rb = RigidBody(std::make_shared<Circle>(GLBVRS::PROJECTILE_RADIUS), HEAVYBALL));
 	~Projectile();
 	//projtype 0 is sent from the player,
 	//projType 1 is sent from an enemy
@@ -297,9 +297,10 @@ private:
 	hiRes_time_point lastShotFired;
 	float shipRateOfFire;
 	float weaponDelay;
-
+	float projSpeed;
 public:
-	BossBurst(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb);
+	BossBurst(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition,
+		RigidBody i_rb = RigidBody(std::make_shared<Circle>(70 * GLBVRS::SIZE_RAT), LESSBOUNCYBALL));
 
 	void Update(float i_stepSize) override;
 
@@ -324,9 +325,11 @@ private:
 	hiRes_time_point lastShotFired;
 	float shipRateOfFire;
 	float weaponDelay;
+	float projSpeed;
 
 public:
-	BossStream(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb);
+	BossStream(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, 
+		RigidBody i_rb = RigidBody(std::make_shared<Circle>(70 * GLBVRS::SIZE_RAT), LESSBOUNCYBALL));
 
 	void Update(float i_stepSize) override;
 
@@ -356,7 +359,7 @@ private:
 
 public:
 	BossRush(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition,
-		RigidBody i_rb = RigidBody(std::make_shared<Circle>(75), LESSBOUNCYBALL));
+		RigidBody i_rb = RigidBody(std::make_shared<Circle>(75 * GLBVRS::SIZE_RAT), LESSBOUNCYBALL));
 
 	void Update(float i_stepSize) override;
 
@@ -391,7 +394,7 @@ private:
 
 public:
 	BossSplit(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, int i_splitsLeft, float i_spdFct, bool i_crazy,
-			Vector2f i_startPosition, RigidBody i_rb = RigidBody(std::make_shared<Circle>(150), BOUNCYBALL));
+			Vector2f i_startPosition, RigidBody i_rb = RigidBody(std::make_shared<Circle>(150.0f * GLBVRS::SIZE_RAT), BOUNCYBALL));
 
 	void Update(float i_stepSize) override;
 
@@ -422,7 +425,7 @@ public:
 	bool invulnerable;
 
 	BossSpawn(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition,
-		RigidBody i_rb = RigidBody(std::make_shared<Rectangle>(100, 100), STATIC));
+		RigidBody i_rb = RigidBody(std::make_shared<Rectangle>(100.0f * GLBVRS::SIZE_RAT, 100.0f * GLBVRS::SIZE_RAT), STATIC));
 
 	void Update(float i_stepSize) override;
 

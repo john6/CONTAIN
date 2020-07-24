@@ -34,14 +34,14 @@ typedef struct MapCoord
 } MapCoord;
 
 //GENERAL GAME SETTINGS
-const float WALL_THICKNESS = 100.0f;
+//const float WALL_THICKNESS = 100.0f;
 const float MICROSECS_TO_MILLISECS = 1000.0f;
 const float MAX_ROTATION_DEGREES = 45;
 const float AVG_MILLISEC_PER_UPDATE = 10.0f;
 const float RADIAN_ADJUST = 50.0f;
-const float PROJECTILE_RADIUS = 10.0f;
-const float DOOR_WIDTH = 150.0f;
-const float DOOR_HEIGHT = 50.0f;
+//const float PROJECTILE_RADIUS = 10.0f;
+//const float DOOR_WIDTH = 150.0f;
+//const float DOOR_HEIGHT = 50.0f;
 const float MAX_NUM_BLOCKERS = 10;
 //const float AOE_RADIUS = 175.0f;
 
@@ -104,10 +104,10 @@ const sf::Color SILVER = sf::Color(192, 192, 192);
 const sf::Color SLATEGRAY = sf::Color(112, 128, 144);
 
 //~~DIFFICULTY SETTINGS~~
-//
-const float ENEMYSPEEDEASY = 12;
-const float ENEMYSPEEDMED = 15;
-const float ENEMYSPEEDHARD = 18;
+////
+//const float ENEMYSPEEDEASY = 12;
+//const float ENEMYSPEEDMED = 15;
+//const float ENEMYSPEEDHARD = 18;
 
 //EASY SETTINGS
 //const float SPEED_MULTIPLIER_EASY = 0.40f;
@@ -162,11 +162,22 @@ public:
 	static float CRT_HGHT; //Court height- amount of non-margin screen space
 	static float HR_MRG;   //horizontal margin
 	static float VRT_MRG;  //vertical margin
+	static float SIZE_RAT;
 
 	//MENU RESOLUTION
 	static float BTTN_WDTH; // Button width 
 	static float BTTN_HGHT; // button height
 
+	//OBJECT SIZES
+	static float DOOR_WIDTH;
+	static float DOOR_HEIGHT;
+	static float WALL_THICKNESS;
+	static float PROJECTILE_RADIUS;
+
+	//SPEED ADJUSTMENTS
+	static float ENEMYSPEEDEASY;
+	static float ENEMYSPEEDMED;
+	static float ENEMYSPEEDHARD;
 
 public:
 	//GLOBAL_CONSTANTS(unsigned int i_screenWidth, unsigned int i_screenHeight);

@@ -4,92 +4,97 @@ HeadsUpDisplay::HeadsUpDisplay(RESOURCES* i_resources) : resources{ i_resources 
 {
 	font = resources->GetFont();
 	lvlNumText.setFont(font);
+	healthLabelText.setFont(font);
 	timeRemainingText.setFont(font);
-	healthRemainingText.setFont(font);
-	BasicWeaponCharge.setFont(font);
-	specialWeaponAmmo.setFont(font);
 
-	float rectHorOffset = -10.0f;
-	float rectHorExtraWidth = 10.0f;
-
-	lvlNumRect = sf::RectangleShape(sf::Vector2f(rectHorExtraWidth + GLBVRS::HR_MRG * (6.0f / 5.0f), GLBVRS::VRT_MRG * (4.0f / 5.0f)));
-	healthRemainingRect = sf::RectangleShape(sf::Vector2f(rectHorExtraWidth + GLBVRS::HR_MRG * (10.0f / 5.0f), GLBVRS::VRT_MRG * (4.0f / 5.0f)));
-	specialWeaponAmmoRect = sf::RectangleShape(sf::Vector2f(rectHorExtraWidth + GLBVRS::HR_MRG * (12.0f / 5.0f), GLBVRS::VRT_MRG * (4.0f / 5.0f)));
-	specialWeaponChargeRect = sf::RectangleShape(sf::Vector2f(rectHorExtraWidth + GLBVRS::HR_MRG * (12.0f / 5.0f), GLBVRS::VRT_MRG * (4.0f / 5.0f)));
-	timeRemainingRects = sf::RectangleShape(sf::Vector2f(rectHorExtraWidth + GLBVRS::HR_MRG * (12.0f / 5.0f), GLBVRS::VRT_MRG * (4.0f / 5.0f)));
+	hudItemSpacing = GLBVRS::HR_MRG * (5.0f / 40.0f);
+	hudItemRectHeight = GLBVRS::VRT_MRG * (6.0f / 10.0f);
+	hudFillBarHeight = hudItemRectHeight * (8.0 / 10.0f);
+	textHorOffset = 10.0f;
+	textVertOffset = hudItemRectHeight / 4.0f;
+	textOffset = sf::Vector2f(textHorOffset, textVertOffset);
+	rectHorExtraWidth = 8.0f;
+	hudOutLineThickness = 1;
+	hudItemOutLineThickness = 1;
+	hudTopLeft = sf::Vector2f(GLBVRS::HR_MRG, GLBVRS::CRT_HGHT + GLBVRS::VRT_MRG * 2.0f - hudOutLineThickness * 3.0f);
+	hudItemsOffset = sf::Vector2f(GLBVRS::HR_MRG * (1.0f / 5.0f), (GLBVRS::VRT_MRG - hudItemRectHeight) / 2.0f);
+	hudItemPosition = hudTopLeft + hudItemsOffset;
 
 	float textAdjustment = (GLBVRS::SCREEN_WIDTH * (1.0f / 1920.0f));
 	float lessAdjustment = ((textAdjustment + 1) / 2.0f);
 	int smallText = 13 * lessAdjustment;
 	int bigText = 23 * lessAdjustment;
 
+
+
+	backGroundRect = sf::RectangleShape(sf::Vector2f(GLBVRS::CRT_WDTH, GLBVRS::VRT_MRG));
+	lvlNumRect = sf::RectangleShape(sf::Vector2f(rectHorExtraWidth + GLBVRS::HR_MRG * (6.0f / 5.0f), hudItemRectHeight));
+
+	healthLabelRect = sf::RectangleShape(sf::Vector2f(rectHorExtraWidth + GLBVRS::HR_MRG * (3.0f / 5.0f), hudItemRectHeight));
+
+	healthRectWidth = rectHorExtraWidth + GLBVRS::HR_MRG * (30.0f / 5.0f);
+	healthSegmentsRect = sf::RectangleShape(sf::Vector2f(healthRectWidth, hudItemRectHeight));
+	specialWeaponRect = sf::RectangleShape(sf::Vector2f(rectHorExtraWidth + GLBVRS::HR_MRG * (12.0f / 5.0f), hudItemRectHeight));
+	specialWeaponCurrChargeRect = sf::RectangleShape(sf::Vector2f(rectHorExtraWidth + GLBVRS::HR_MRG * (12.0f / 5.0f), hudItemRectHeight));
+	timeRemainingRects = sf::RectangleShape(sf::Vector2f(rectHorExtraWidth + GLBVRS::HR_MRG * (7.0f / 5.0f), hudItemRectHeight));
+
 	lvlNumText.setCharacterSize(smallText);
-	timeRemainingText.setCharacterSize(bigText);
-	healthRemainingText.setCharacterSize(smallText);
-	BasicWeaponCharge.setCharacterSize(smallText);
-	specialWeaponAmmo.setCharacterSize(smallText);
-	//lvlNumText.setCharacterSize(15);
-	//timeRemainingText.setCharacterSize(25);
-	//healthRemainingText.setCharacterSize(15);
-	//BasicWeaponCharge.setCharacterSize(15);
-	//specialWeaponAmmo.setCharacterSize(15);
+	timeRemainingText.setCharacterSize(smallText);
+	healthLabelText.setCharacterSize(smallText);
 
+	backGroundRect.setPosition(hudTopLeft);
 
+	lvlNumPositionOffset = sf::Vector2f(hudItemSpacing, 0.0f);
+	lvlNumRect.setPosition(hudItemPosition + lvlNumPositionOffset);
+	lvlNumText.setPosition(hudItemPosition + lvlNumPositionOffset + textOffset);
 
-	lvlNumRect.setPosition(sf::Vector2f(rectHorOffset + GLBVRS::HR_MRG * (1.0f / 5.0f), 0.0f));
-	lvlNumText.setPosition(sf::Vector2f(GLBVRS::HR_MRG * (1.0f / 5.0f), GLBVRS::VRT_MRG * (1.0f / 4.0f)));
+	healthLabelOffset = sf::Vector2f(lvlNumPositionOffset.x + lvlNumRect.getSize().x + hudItemSpacing, 0.0f);
+	healthLabelRect.setPosition(hudItemPosition + healthLabelOffset);
+	healthLabelText.setPosition(hudItemPosition + healthLabelOffset + textOffset);
 
-	healthRemainingRect.setPosition(sf::Vector2f(rectHorOffset + GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (1.0f / 22.0f)), 0.0f));
-	healthRemainingText.setPosition(sf::Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (1.0f / 22.0f)), GLBVRS::VRT_MRG * (1.0f / 4.0f)));
+	healthRemainingPosOffset = sf::Vector2f(healthLabelOffset.x + healthLabelRect.getSize().x + hudItemSpacing, 0.0f);
+	healthSegmentsRect.setPosition(hudItemPosition + healthRemainingPosOffset);
 
-	specialWeaponAmmoRect.setPosition(sf::Vector2f(rectHorOffset + GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (4.0f / 22.0f)), 0.0f));
-	specialWeaponChargeRect.setPosition(sf::Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (4.0f / 22.0f)), 0.0f));
+	specialWeapPosOffset = sf::Vector2f(healthRemainingPosOffset.x + healthSegmentsRect.getSize().x + hudItemSpacing, 0.0f);
+	specialWeaponRect.setPosition(hudItemPosition + specialWeapPosOffset);
+	specialWeaponCurrChargeRect.setPosition(hudItemPosition + specialWeapPosOffset + textOffset);
 
-	specialWeaponAmmo.setPosition(sf::Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (4.0f / 22.0f)), GLBVRS::VRT_MRG * (1.0f / 4.0f)));
+	timeRemPosOffset = sf::Vector2f(specialWeapPosOffset.x + specialWeaponRect.getSize().x + hudItemSpacing, 0.0f);
+	timeRemainingRects.setPosition(hudItemPosition + timeRemPosOffset);
+	timeRemainingText.setPosition(hudItemPosition + timeRemPosOffset + textOffset);
 
-	timeRemainingRects.setPosition(sf::Vector2f(rectHorOffset + (GLBVRS::CRT_WDTH * (20.0f / 22.0f)), 0.0f));
-	timeRemainingText.setPosition(sf::Vector2f(+(GLBVRS::CRT_WDTH * (20.0f / 22.0f)), GLBVRS::VRT_MRG * (1.0f / 5.0f)));
-
-
-
-
-	BasicWeaponCharge.setPosition(sf::Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH) * (3.0f / 5.0f), GLBVRS::VRT_MRG * (1.0f / 4.0f)));
-
-
-
+	backGroundRect.setFillColor(sf::Color::Black);
 	lvlNumRect.setFillColor(sf::Color::Black); 
-	healthRemainingRect.setFillColor(sf::Color::Black);
-	specialWeaponAmmoRect.setFillColor(sf::Color::Black);
-	specialWeaponChargeRect.setFillColor(sf::Color::Red);
+	healthLabelRect.setFillColor(sf::Color::Black);
+	healthSegmentsRect.setFillColor(sf::Color::Black);
+	specialWeaponRect.setFillColor(sf::Color::Black);
+	specialWeaponCurrChargeRect.setFillColor(sf::Color::White);
 	timeRemainingRects.setFillColor(sf::Color::Black);
-	lvlNumRect.setOutlineThickness(5);
-	healthRemainingRect.setOutlineThickness(5);
-	specialWeaponAmmoRect.setOutlineThickness(5);
-	timeRemainingRects.setOutlineThickness(5);
+
+	backGroundRect.setOutlineThickness(hudOutLineThickness);
+	lvlNumRect.setOutlineThickness(hudItemOutLineThickness);
+	healthLabelRect.setOutlineThickness(hudItemOutLineThickness);
+	healthSegmentsRect.setOutlineThickness(hudItemOutLineThickness);
+	specialWeaponRect.setOutlineThickness(hudItemOutLineThickness);
+	timeRemainingRects.setOutlineThickness(hudItemOutLineThickness);
 
 	lvlNumText.setFillColor(sf::Color::White);
+	healthLabelText.setFillColor(sf::Color::White);
 	timeRemainingText.setFillColor(sf::Color::White);
-	healthRemainingText.setFillColor(sf::Color::White);
-	BasicWeaponCharge.setFillColor(sf::Color::White);
-	specialWeaponAmmo.setFillColor(sf::Color::White);
 
 	lvlNumText.setString("LEVEL: INIT");
 	timeRemainingText.setString("TIME: INIT");
-	healthRemainingText.setString("HEALTH: INIT");
-	BasicWeaponCharge.setString("PRIMARY WEAPON: READY");
-	specialWeaponAmmo.setString("SPECIAL WEAPON AMMO: 3");
+	healthLabelText.setString("HULL");
 }
 
 HeadsUpDisplay::~HeadsUpDisplay()
 {
 }
 
-void HeadsUpDisplay::Update(int i_lvlNum, int i_timeRemaining, int i_maxTime, std::shared_ptr<Entity> i_player) {
+void HeadsUpDisplay::Update(int i_lvlNum, int i_timeRemaining, int i_maxTime, PlayerChar* i_player) {
 
 	UpdateAOECHarge(i_player);
-
-
-	PlayerChar* playerPtr = dynamic_cast<PlayerChar*>(i_player.get());
+	UpdateHealth(i_player);
 	std::string level_num_string = "LEVEL " + std::to_string((int)i_lvlNum+1);
 	lvlNumText.setString(level_num_string);
 
@@ -101,59 +106,61 @@ void HeadsUpDisplay::Update(int i_lvlNum, int i_timeRemaining, int i_maxTime, st
 	else {
 		timeRemainingText.setFillColor(sf::Color::Red);
 	}
-
-	std::string balls_str = "HEALTH " + std::to_string((int)playerPtr->GetCurrHealth()) + "/" + std::to_string((int)playerPtr->maxHealth);
-	healthRemainingText.setString(balls_str);
-
-	//	std::string primWeapStr = "PRIMARY WEAPON : " + std::to_string((int)playerPtr->weaponDelay);
-	std::string primWeapStr = "";
-
-	BasicWeaponCharge.setString(primWeapStr);
-
-	std::string secWeapStr = "STUN BLAST " + std::to_string((int)playerPtr->currSpecialAmmo) + "/" + std::to_string((int)playerPtr->maxSpecialAmmo);
-	specialWeaponAmmo.setString(secWeapStr);
-
-
-
 }
 
-void HeadsUpDisplay::UpdateAOECHarge(std::shared_ptr<Entity> i_player)
+void HeadsUpDisplay::UpdateAOECHarge(PlayerChar* i_player)
 {
-	PlayerChar* playerPtr = dynamic_cast<PlayerChar*>(i_player.get());
 	float rectHorOffset = -10.0f;
-	float rectHorExtraWidth = 10.0f;
-	float weaponDelay = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - playerPtr->lastAOEFired)).count() / 1000000.0f;
-	float percentCharged = std::min(weaponDelay / playerPtr->shipRateOfAOE, 1.0f);
-	specialWeaponChargeRect = sf::RectangleShape((sf::Vector2f(rectHorExtraWidth + GLBVRS::HR_MRG * (12.0f / 5.0f) * percentCharged, GLBVRS::VRT_MRG * (4.0f / 5.0f))));
-	specialWeaponChargeRect.setPosition(sf::Vector2f(rectHorOffset + GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (4.0f / 22.0f)), 0.0f));
-	specialWeaponChargeRect.setFillColor(sf::Color::Red);
+	float rectHorExtraWidth = 10.0f; 
+	float weaponDelay = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - i_player->lastAOEFired)).count() / 1000000.0f;
+	float percentCharged = std::min(weaponDelay / i_player->shipRateOfAOE, 1.0f);
+	specialWeaponCurrChargeRect = sf::RectangleShape((sf::Vector2f(GLBVRS::HR_MRG * (12.0f / 5.0f) * percentCharged, hudFillBarHeight)));
+	specialWeaponCurrChargeRect.setPosition(sf::Vector2f(hudItemPosition.x + specialWeapPosOffset.x + rectHorExtraWidth * (1.0f / 2.0f), hudItemPosition.y + specialWeapPosOffset.y + hudItemRectHeight * (1.0 / 10.0f)));
+	//cyan rgb(0,255,255)
+	int gbVals = std::min(weaponDelay / i_player->shipRateOfAOE, 1.0f) * 255;
+	specialWeaponCurrChargeRect.setFillColor(sf::Color(0, gbVals, gbVals));
+}
+
+void HeadsUpDisplay::UpdateHealth(PlayerChar* i_player)
+{
+	int currHealth = i_player->health;
+	int maxHealth = i_player->maxHealth;
+	int segmentMarg = 1;
+	if (currHealth != prevHealth) {
+		prevHealth = currHealth;
+		healthSegments.clear();
+		for (int i = 0; i < currHealth; i++) {
+			sf::RectangleShape healthSegment = sf::RectangleShape(sf::Vector2f(((1.0f/ (float)maxHealth) * healthRectWidth) - segmentMarg, hudFillBarHeight));
+			healthSegment.setPosition(healthSegmentsRect.getPosition().x + ((1.0f/ (float)maxHealth) * healthRectWidth * i), hudItemPosition.y + specialWeapPosOffset.y + hudItemRectHeight * (1.0 / 10.0f));
+			healthSegment.setOutlineThickness(segmentMarg);
+			healthSegment.setFillColor(sf::Color::Green);
+			healthSegment.setOutlineColor(sf::Color::Black);
+			healthSegments.push_back(healthSegment);
+		}
+
+	}
 }
 
 std::vector<sf::Drawable*> HeadsUpDisplay::GetDrawables()
 {
 	std::vector<sf::Drawable*> drawables;
 
+	drawables.push_back(&backGroundRect);
+
 	drawables.push_back(&lvlNumRect);
 	drawables.push_back(&timeRemainingRects);
-	drawables.push_back(&healthRemainingRect);
-	drawables.push_back(&specialWeaponAmmoRect);
-	drawables.push_back(&specialWeaponChargeRect);
+	drawables.push_back(&healthLabelRect);
+	drawables.push_back(&healthLabelText);
+	drawables.push_back(&healthSegmentsRect);
+	drawables.push_back(&specialWeaponRect);
+	drawables.push_back(&specialWeaponCurrChargeRect);
 
 	drawables.push_back(&lvlNumText);
 	drawables.push_back(&timeRemainingText);
-	drawables.push_back(&healthRemainingText);
-	drawables.push_back(&BasicWeaponCharge);
-	//drawables.push_back(&specialWeaponAmmo);
+
+	for (int i = 0; i < healthSegments.size(); i++) {
+		drawables.push_back(&healthSegments[i]);
+	}
 
 	return drawables;
 }
-
-//void HeadsUpDisplay::RenderHUD(sf::RenderWindow * i_window, float i_lerp_fraction, std::shared_ptr<Entity> i_player, Level* i_lvl)
-//{
-//	i_window->draw(lvlNumText);
-//	i_window->draw(timeRemainingText);
-//	i_window->draw(livesRemainingText);
-//	i_window->draw(enemiesRemainingText);
-//
-//	//i_window->display();
-//}

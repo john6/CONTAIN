@@ -238,40 +238,40 @@ void Level::CreateBidirectionalDoor(MapCoord i_coordA, MapCoord i_coordB)
 	if (yDist == 1) { //UP
 		inSide = SCREEN_UP;
 		outSide = SCREEN_DOWN;
-		doorShapeA = std::make_shared<Rectangle>(DOOR_WIDTH, DOOR_HEIGHT);
-		doorShapeB = std::make_shared<Rectangle>(DOOR_WIDTH, DOOR_HEIGHT);
-		startPosA = Vector2f(horizontalMiddle, GLBVRS::VRT_MRG  + GLBVRS::CRT_HGHT + (DOOR_HEIGHT * ( 1.0f / 2.0f)));
-		startPosB = Vector2f(horizontalMiddle, GLBVRS::VRT_MRG - (DOOR_HEIGHT * (1.0f / 2.0f)));
+		doorShapeA = std::make_shared<Rectangle>(GLBVRS::DOOR_WIDTH, GLBVRS::DOOR_HEIGHT);
+		doorShapeB = std::make_shared<Rectangle>(GLBVRS::DOOR_WIDTH, GLBVRS::DOOR_HEIGHT);
+		startPosA = Vector2f(horizontalMiddle, GLBVRS::VRT_MRG  + GLBVRS::CRT_HGHT + (GLBVRS::DOOR_HEIGHT * ( 1.0f / 2.0f)));
+		startPosB = Vector2f(horizontalMiddle, GLBVRS::VRT_MRG - (GLBVRS::DOOR_HEIGHT * (1.0f / 2.0f)));
 		outPosA = Vector2f(horizontalMiddle, GLBVRS::VRT_MRG + doorOutPadding);
 		outPosB = Vector2f(horizontalMiddle, GLBVRS::VRT_MRG + GLBVRS::CRT_HGHT - doorOutPadding);
 	}
 	else if (yDist == -1) { //DOWN
 		inSide = SCREEN_DOWN;
 		outSide = SCREEN_UP;
-		doorShapeA = std::make_shared<Rectangle>(DOOR_WIDTH, DOOR_HEIGHT);
-		doorShapeB = std::make_shared<Rectangle>(DOOR_WIDTH, DOOR_HEIGHT);
-		startPosA = Vector2f(horizontalMiddle, GLBVRS::VRT_MRG - (DOOR_HEIGHT * (1.0f / 2.0f)));
-		startPosB = Vector2f(horizontalMiddle, GLBVRS::VRT_MRG + GLBVRS::CRT_HGHT + (DOOR_HEIGHT * (1.0f / 2.0f)));
+		doorShapeA = std::make_shared<Rectangle>(GLBVRS::DOOR_WIDTH, GLBVRS::DOOR_HEIGHT);
+		doorShapeB = std::make_shared<Rectangle>(GLBVRS::DOOR_WIDTH, GLBVRS::DOOR_HEIGHT);
+		startPosA = Vector2f(horizontalMiddle, GLBVRS::VRT_MRG - (GLBVRS::DOOR_HEIGHT * (1.0f / 2.0f)));
+		startPosB = Vector2f(horizontalMiddle, GLBVRS::VRT_MRG + GLBVRS::CRT_HGHT + (GLBVRS::DOOR_HEIGHT * (1.0f / 2.0f)));
 		outPosA = Vector2f(horizontalMiddle, GLBVRS::VRT_MRG + GLBVRS::CRT_HGHT - doorOutPadding);
 		outPosB = Vector2f(horizontalMiddle, GLBVRS::VRT_MRG + doorOutPadding);
 	}
 	else if (xDist == -1) { //LEFT
 		inSide = SCREEN_LEFT;
 		outSide = SCREEN_RIGHT;
-		doorShapeA = std::make_shared<Rectangle>(DOOR_HEIGHT, DOOR_WIDTH);
-		doorShapeB = std::make_shared<Rectangle>(DOOR_HEIGHT, DOOR_WIDTH);
-		startPosA = Vector2f(GLBVRS::HR_MRG - (DOOR_HEIGHT * (1.0f / 2.0f)), verticleMiddle);
-		startPosB = Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH + (DOOR_HEIGHT * (1.0f / 2.0f)), verticleMiddle);
+		doorShapeA = std::make_shared<Rectangle>(GLBVRS::DOOR_HEIGHT, GLBVRS::DOOR_WIDTH);
+		doorShapeB = std::make_shared<Rectangle>(GLBVRS::DOOR_HEIGHT, GLBVRS::DOOR_WIDTH);
+		startPosA = Vector2f(GLBVRS::HR_MRG - (GLBVRS::DOOR_HEIGHT * (1.0f / 2.0f)), verticleMiddle);
+		startPosB = Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH + (GLBVRS::DOOR_HEIGHT * (1.0f / 2.0f)), verticleMiddle);
 		outPosA = Vector2f(GLBVRS::CRT_WDTH + GLBVRS::HR_MRG - doorOutPadding, verticleMiddle);
 		outPosB = Vector2f(GLBVRS::HR_MRG + doorOutPadding, verticleMiddle);
 	}
 	else if (xDist == 1) { //RIGHT
 		inSide = SCREEN_RIGHT;
 		outSide = SCREEN_LEFT;
-		doorShapeA = std::make_shared<Rectangle>(DOOR_HEIGHT, DOOR_WIDTH);
-		doorShapeB = std::make_shared<Rectangle>(DOOR_HEIGHT, DOOR_WIDTH);
-		startPosA = Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH + (DOOR_HEIGHT * (1.0f / 2.0f)), verticleMiddle);
-		startPosB = Vector2f(GLBVRS::HR_MRG - (DOOR_HEIGHT * (1.0f / 2.0f)), verticleMiddle);
+		doorShapeA = std::make_shared<Rectangle>(GLBVRS::DOOR_HEIGHT, GLBVRS::DOOR_WIDTH);
+		doorShapeB = std::make_shared<Rectangle>(GLBVRS::DOOR_HEIGHT, GLBVRS::DOOR_WIDTH);
+		startPosA = Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH + (GLBVRS::DOOR_HEIGHT * (1.0f / 2.0f)), verticleMiddle);
+		startPosB = Vector2f(GLBVRS::HR_MRG - (GLBVRS::DOOR_HEIGHT * (1.0f / 2.0f)), verticleMiddle);
 		outPosA = Vector2f(GLBVRS::HR_MRG + doorOutPadding, verticleMiddle);
 		outPosB = Vector2f(GLBVRS::CRT_WDTH + GLBVRS::HR_MRG - doorOutPadding, verticleMiddle);
 	}

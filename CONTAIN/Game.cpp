@@ -39,7 +39,8 @@ GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vecto
 	float millisecLag = abs(i_microSecs / MICROSECS_TO_MILLISECS);
 	float timeLeft = timeToComplete - timeElapsed.count();
 	int timeLeftSeconds = timeLeft / 1000000;
-	HUD.Update(currLvl, levels[currLvl]->GetTimeLeftInLevel(), levels[currLvl]->timeToComplete, playerChar);
+	PlayerChar* playerPtr = dynamic_cast<PlayerChar*>(playerChar.get());
+	HUD.Update(currLvl, levels[currLvl]->GetTimeLeftInLevel(), levels[currLvl]->timeToComplete, playerPtr);
 	switch (playState) {
 		case (GENERAL_GAMEPLAY): {
 			return UpdateGeneral(millisecLag, i_mousePos);
@@ -251,7 +252,7 @@ void Game::InitGame(DIFFICULTY i_diff)
 		break;
 	}
 	}
-	playerChar = std::make_shared<PlayerChar>(this, startingHealth, Vector2f(400, 400.0));
+	playerChar = std::make_shared<PlayerChar>(this, startingHealth, Vector2f(400.0f * GLBVRS::SIZE_RAT, 400.0f * GLBVRS::SIZE_RAT));
 	playerChar->rb.transform.orient = 1.0f;
 	beginTime = std::chrono::high_resolution_clock::now();
 	numLvls = 5;

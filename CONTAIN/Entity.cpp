@@ -169,7 +169,7 @@ PlayerChar::PlayerChar(Game* i_gamePtr, int i_strtHealth, Vector2f i_startPositi
 	outlineColor = sf::Color::Red;
 	shipRateOfFire = 0.9f;
 	shipRateOfAOE = 6.0f;
-	shipSpeed = 100;
+	shipSpeed = 100 * std::pow(GLBVRS::SIZE_RAT, 2);
 	lastShotFired = std::chrono::high_resolution_clock::now();
 	lastAOEFired = std::chrono::high_resolution_clock::now();
 	lastDamageReceived = std::chrono::high_resolution_clock::now();
@@ -178,14 +178,14 @@ PlayerChar::PlayerChar(Game* i_gamePtr, int i_strtHealth, Vector2f i_startPositi
 	health = maxHealth;
 	currSpecialAmmo = 3;
 	weaponDelay = shipRateOfFire;
-	wallWidth = 40;
-	wallHeight = 270;
-	BlastRadius = 185;
-	blastStrength = 600.0f;
+	wallWidth = 40 * GLBVRS::SIZE_RAT;
+	wallHeight = 270 * GLBVRS::SIZE_RAT;
+	BlastRadius = 185 * GLBVRS::SIZE_RAT;
+	blastStrength = 600.0f * GLBVRS::SIZE_RAT;
 	blastStunTime = 4.0f;
 	maxSpecialAmmo = 4;
 	currSpecialAmmo = maxSpecialAmmo;
-	weapSpeed = 3000.0f;
+	weapSpeed = 3000.0f * std::pow(GLBVRS::SIZE_RAT, 2);
 	InitLvl();
 	rectPtr = dynamic_cast<Rectangle*>(rb.shape.get());
 }
@@ -399,7 +399,7 @@ void PlayerChar::ShootBasic(Vector2f i_mousePos)
 		Vector2f projDir = i_mousePos - rb.transform.pos;
 		auto width = rectPtr->GetWidth();
 		float halfdiagLength = (SQRT_TWO * width) / 2.0f;
-		float projCenterOffset = halfdiagLength + PROJECTILE_RADIUS;
+		float projCenterOffset = halfdiagLength + GLBVRS::PROJECTILE_RADIUS;
 		projDir.normalize();
 		float prevAngleRads;
 		Vector2f prevDirVect;
@@ -437,7 +437,7 @@ void PlayerChar::ShootWall(Vector2f i_mousePos)
 		std::shared_ptr<Entity> projectile = std::make_shared<Blocker>(
 								rb.transform.pos + (projectileDir * projCenterOffset),
 								RigidBody(std::make_shared<Rectangle>(wallWidth, wallHeight), HEAVYBALL));
-		projectile->rb.ApplyImpulse((projectileDir * 7000.0f), NULL_VECTOR);
+		projectile->rb.ApplyImpulse((projectileDir * 7000.0f * GLBVRS::SIZE_RAT), NULL_VECTOR);
 		projectile->rb.ResetOrientation(projectileDir);
 		gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector)->AddEntPtrToSector(projectile);
 	}
@@ -691,15 +691,15 @@ void Enemy::SetDiffVars(int i_diff)
 {
 	switch (i_diff) {
 	case EASY: {
-		speed = ENEMYSPEEDEASY;
+		speed = GLBVRS::ENEMYSPEEDEASY;
 		break;
 	}
 	case MEDIUM: {
-		speed = ENEMYSPEEDMED;
+		speed = GLBVRS::ENEMYSPEEDMED;
 		break;
 	}
 	case HARD: {
-		speed = ENEMYSPEEDHARD;
+		speed = GLBVRS::ENEMYSPEEDHARD;
 		break;
 	}
 	}
@@ -766,15 +766,15 @@ void CrazyBoi::SetDiffVars(int i_diff)
 {
 	switch (i_diff) {
 	case EASY: {
-		speed = ENEMYSPEEDEASY;
+		speed = GLBVRS::ENEMYSPEEDEASY;
 		break;
 	}
 	case MEDIUM: {
-		speed = ENEMYSPEEDMED;
+		speed = GLBVRS::ENEMYSPEEDMED;
 		break;
 	}
 	case HARD: {
-		speed = ENEMYSPEEDHARD;
+		speed = GLBVRS::ENEMYSPEEDHARD;
 		break;
 	}
 	}
@@ -849,7 +849,7 @@ void BossBurst::shootProj()
 		projDir.normalize();
 		std::shared_ptr<Entity> projectile = std::make_shared<Projectile>(
 			rb.transform.pos + (projDir * (100.0f + (i * 15.0f))), 1);
-		projectile->rb.ApplyImpulse((projDir * 3000.0f), NULL_VECTOR);
+		projectile->rb.ApplyImpulse((projDir * projSpeed), NULL_VECTOR);
 		sectPtr->AddEntPtrToSector(projectile);
 		i++;
 		}
@@ -865,21 +865,24 @@ void BossBurst::SetDiffVars(int i_diff, int i_lvlNum)
 {
 	switch (i_diff) {
 	case EASY: {
-		speed = ENEMYSPEEDEASY;
+		speed = GLBVRS::ENEMYSPEEDEASY;
+		projSpeed = 2800.0f * std::pow(GLBVRS::SIZE_RAT, 2);
 		numShots = 6;
 		maxHealth = 7;
 		health = maxHealth;
 		break;
 	}
 	case MEDIUM: {
-		speed = ENEMYSPEEDMED;
+		speed = GLBVRS::ENEMYSPEEDMED;
+		projSpeed = 3000.0f * std::pow(GLBVRS::SIZE_RAT, 2);
 		numShots = 7;
 		maxHealth = 8;
 		health = maxHealth;
 		break;
 	}
 	case HARD: {
-		speed = ENEMYSPEEDHARD;
+		speed = GLBVRS::ENEMYSPEEDHARD;
+		projSpeed = 3200.0f * std::pow(GLBVRS::SIZE_RAT, 2);
 		numShots = 8;
 		maxHealth = 9;
 		health = maxHealth;
@@ -950,7 +953,7 @@ void BossStream::shootProj()
 			projDir.normalize();
 			std::shared_ptr<Entity> projectile = std::make_shared<Projectile>(
 				rb.transform.pos + (projDir * (100.0f)), 1);
-			projectile->rb.ApplyImpulse((projDir * 3000.0f), NULL_VECTOR);
+			projectile->rb.ApplyImpulse((projDir * projSpeed), NULL_VECTOR);
 			sectPtr->AddEntPtrToSector(projectile);
 	}
 }
@@ -964,21 +967,24 @@ void BossStream::SetDiffVars(int i_diff, int i_lvlNum)
 {
 	switch (i_diff) {
 	case EASY: {
-		speed = ENEMYSPEEDEASY;
+		speed = GLBVRS::ENEMYSPEEDEASY;
+		projSpeed = 2800.0f * std::pow(GLBVRS::SIZE_RAT, 2);
 		numShots = 6;
 		maxHealth = 9;
 		health = maxHealth;
 		break;
 	}
 	case MEDIUM: {
-		speed = ENEMYSPEEDMED;
+		speed = GLBVRS::ENEMYSPEEDMED;
+		projSpeed = 3000.0f * std::pow(GLBVRS::SIZE_RAT, 2);
 		numShots = 7;
 		maxHealth = 10;
 		health = maxHealth;
 		break;
 	}
 	case HARD: {
-		speed = ENEMYSPEEDHARD;
+		speed = GLBVRS::ENEMYSPEEDHARD;
+		projSpeed = 3200.0f * std::pow(GLBVRS::SIZE_RAT, 2);
 		numShots = 8;
 		maxHealth =11;
 		health = maxHealth;
@@ -1060,21 +1066,21 @@ void BossRush::SetDiffVars(int i_diff, int i_lvlNum)
 {
 	switch (i_diff) {
 	case EASY: {
-		speed = ENEMYSPEEDEASY;
+		speed = GLBVRS::ENEMYSPEEDEASY;
 		numShots = 6;
 		maxHealth = 8;
 		health = maxHealth;
 		break;
 	}
 	case MEDIUM: {
-		speed = ENEMYSPEEDMED;
+		speed = GLBVRS::ENEMYSPEEDMED;
 		numShots = 7;
 		maxHealth = 9;
 		health = maxHealth;
 		break;
 	}
 	case HARD: {
-		speed = ENEMYSPEEDHARD;
+		speed = GLBVRS::ENEMYSPEEDHARD;
 		numShots = 8;
 		maxHealth = 10;
 		health = maxHealth;
@@ -1224,21 +1230,21 @@ void BossSplit::SetDiffVars(int i_diff, int i_lvlNum)
 	if (splitsLeft == 4)
 	switch (i_diff) {
 	case EASY: {
-		speed *= ENEMYSPEEDEASY;
+		speed *= GLBVRS::ENEMYSPEEDEASY;
 		numShots = 6;
 		maxHealth = 2;
 		health = maxHealth;
 		break;
 	}
 	case MEDIUM: {
-		speed *= ENEMYSPEEDMED;
+		speed *= GLBVRS::ENEMYSPEEDMED;
 		numShots = 7;
 		maxHealth = 3;
 		health = maxHealth;
 		break;
 	}
 	case HARD: {
-		speed *= ENEMYSPEEDHARD;
+		speed *= GLBVRS::ENEMYSPEEDHARD;
 		numShots = 8;
 		maxHealth = 4;
 		health = maxHealth;
@@ -1248,21 +1254,21 @@ void BossSplit::SetDiffVars(int i_diff, int i_lvlNum)
 	else if (splitsLeft == 3)
 		switch (i_diff) {
 		case EASY: {
-			speed *= ENEMYSPEEDEASY;
+			speed *= GLBVRS::ENEMYSPEEDEASY;
 			numShots = 6;
 			maxHealth = 2;
 			health = maxHealth;
 			break;
 		}
 		case MEDIUM: {
-			speed *= ENEMYSPEEDMED;
+			speed *= GLBVRS::ENEMYSPEEDMED;
 			numShots = 7;
 			maxHealth = 3;
 			health = maxHealth;
 			break;
 		}
 		case HARD: {
-			speed *= ENEMYSPEEDHARD;
+			speed *= GLBVRS::ENEMYSPEEDHARD;
 			numShots = 8;
 			maxHealth = 3;
 			health = maxHealth;
@@ -1272,21 +1278,21 @@ void BossSplit::SetDiffVars(int i_diff, int i_lvlNum)
 	if (splitsLeft == 2)
 		switch (i_diff) {
 		case EASY: {
-			speed *= ENEMYSPEEDEASY;
+			speed *= GLBVRS::ENEMYSPEEDEASY;
 			numShots = 6;
 			maxHealth = 1;
 			health = maxHealth;
 			break;
 		}
 		case MEDIUM: {
-			speed *= ENEMYSPEEDMED;
+			speed *= GLBVRS::ENEMYSPEEDMED;
 			numShots = 7;
 			maxHealth = 2;
 			health = maxHealth;
 			break;
 		}
 		case HARD: {
-			speed *= ENEMYSPEEDHARD;
+			speed *= GLBVRS::ENEMYSPEEDHARD;
 			numShots = 8;
 			maxHealth = 2;
 			health = maxHealth;
@@ -1296,21 +1302,21 @@ void BossSplit::SetDiffVars(int i_diff, int i_lvlNum)
 	if (splitsLeft == 1)
 		switch (i_diff) {
 		case EASY: {
-			speed *= ENEMYSPEEDEASY;
+			speed *= GLBVRS::ENEMYSPEEDEASY;
 			numShots = 6;
 			maxHealth = 1;
 			health = maxHealth;
 			break;
 		}
 		case MEDIUM: {
-			speed *= ENEMYSPEEDMED;
+			speed *= GLBVRS::ENEMYSPEEDMED;
 			numShots = 7;
 			maxHealth = 1;
 			health = maxHealth;
 			break;
 		}
 		case HARD: {
-			speed *= ENEMYSPEEDHARD;
+			speed *= GLBVRS::ENEMYSPEEDHARD;
 			numShots = 8;
 			maxHealth = 1;
 			health = maxHealth;
@@ -1320,21 +1326,21 @@ void BossSplit::SetDiffVars(int i_diff, int i_lvlNum)
 	if (splitsLeft == 0)
 		switch (i_diff) {
 		case EASY: {
-			speed *= ENEMYSPEEDEASY;
+			speed *= GLBVRS::ENEMYSPEEDEASY;
 			numShots = 6;
 			maxHealth = 1;
 			health = maxHealth;
 			break;
 		}
 		case MEDIUM: {
-			speed *= ENEMYSPEEDMED;
+			speed *= GLBVRS::ENEMYSPEEDMED;
 			numShots = 7;
 			maxHealth = 1;
 			health = maxHealth;
 			break;
 		}
 		case HARD: {
-			speed *= ENEMYSPEEDHARD;
+			speed *= GLBVRS::ENEMYSPEEDHARD;
 			numShots = 8;
 			maxHealth = 1;
 			health = maxHealth;

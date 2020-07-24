@@ -1,37 +1,11 @@
 #include "Polygon.h"
 
-//
-//// create an empty shape
-//sf::ConvexShape convex;
-//
-//// resize it to 5 points
-//convex.setPointCount(5);
-//
-//// define the points
-//convex.setPoint(0, sf::Vector2f(0, 0));
-//convex.setPoint(1, sf::Vector2f(150, 10));
-//convex.setPoint(2, sf::Vector2f(120, 90));
-//convex.setPoint(3, sf::Vector2f(30, 100));
-//convex.setPoint(4, sf::Vector2f(0, 50));
-
-
-
-
-
-
-
-
-
-
-
-//Polygon::Polygon()
-//{
-//}
 
 //Poinst must always be in clockwise order
 Polygon::Polygon(std::vector<Vector2f> i_pointArr) : 
 	pointArr { i_pointArr }, numPoints { (int)i_pointArr.size() }
 {
+	ReCenter();
 }
 
 Polygon::~Polygon()
@@ -97,10 +71,6 @@ float Polygon::GetArea()
 
 			area += triangleArea;
 			centroid += triangleArea * k_inv3 * (ptA + ptB);
-			//real intx2 = p1.x * p1.x + p2.x * p1.x + p2.x * p2.x;
-			//real inty2 = p1.y * p1.y + p2.y * p1.y + p2.y * p2.y;
-			//I += (0.25f * k_inv3 * D) * (intx2 + inty2);
-			//Idk what all this shit is but it calculates the moment of inertia
 			float intX2 = ptA.x() * ptA.x() + ptB.x() * ptA.x() + ptB.x() * ptB.x();
 			float inty2 = ptA.y() * ptA.y() + ptB.y() * ptA.y() + ptB.y() * ptB.y();
 			momOfInertia += (0.25f * k_inv3 * Math::CrossProdScalar(ptA, ptB) * (intX2 + inty2));
@@ -131,20 +101,45 @@ float Polygon::GetInertiaCoeff()
 
 		area += triangleArea;
 		centroid += triangleArea * k_inv3 * (ptA + ptB);
-		//real intx2 = p1.x * p1.x + p2.x * p1.x + p2.x * p2.x;
-		//real inty2 = p1.y * p1.y + p2.y * p1.y + p2.y * p2.y;
-		//I += (0.25f * k_inv3 * D) * (intx2 + inty2);
-		//Idk what all this shit is but it calculates the moment of inertia
-		//I = bh3 / 36
-		//float intX2 = ptA.x() * ptA.x() + ptB.x() * ptA.x() + ptB.x() * ptB.x();
-		//float inty2 = ptA.y() * ptA.y() + ptB.y() * ptA.y() + ptB.y() * ptB.y();
 		momOfInertia += abs(0.25f * k_inv3 * Math::CrossProdScalar(ptA, ptB));
 	}
-	//return 166;
 	return momOfInertia;
 }
 
 void Polygon::ChangeSizeOfShape(float i_widthOrRadius, float i_heightOrGarbage)
 {
 	//not gonna worry about this just yet
+}
+
+void Polygon::ReCenter()
+{
+	Vector2f centroid = Vector2f(0.0f, 0.0f);
+	float area = 0.0f;
+	int size = pointArr.size();
+	float momOfInertia = 0.0f;
+	const float k_inv3 = 1.0f / 3.0f;
+	for (int i = 0; i < size; ++i) {
+		int i2 = i + 1 < size ? i + 1 : 0;
+		Vector2f ptA = pointArr[i];
+		Vector2f ptB = pointArr[i2];
+		Vector2f vectFromCentertoA = Vector2f(0.0f, 0.0f) - ptA;
+		float lengthA = vectFromCentertoA.norm();
+		Vector2f vectFromCentertoB = Vector2f(0.0f, 0.0f) - ptB;
+		float lengthB = vectFromCentertoB.norm();
+		Vector2f vectFromCentertoC = ptA - ptB;
+		float lengthC = vectFromCentertoC.norm();
+
+		float perim = (lengthA + lengthB + lengthC) / 2.0f;
+		float triangleArea = sqrt(perim*((perim - lengthA)*(perim - lengthB)*(perim - lengthC)));
+
+		area += triangleArea;
+		centroid += triangleArea * k_inv3 * (ptA + ptB);
+		momOfInertia += abs(0.25f * k_inv3 * Math::CrossProdScalar(ptA, ptB));
+	}
+
+	centroid *= (1.0f / area);
+
+	for (int i = 0; i < numPoints; i++) {
+		pointArr[i] -= centroid;
+	}
 }
