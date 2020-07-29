@@ -1,13 +1,17 @@
 #include "RigidBody.h"
 
 RigidBody::RigidBody(std::shared_ptr<Shape> i_shape, Material i_material) :
-	shape{ i_shape }, mat{ i_material }, transform(), massD(), // TODO I think these default constructors would happen any way idk why they're here, dont wanna fuck with it while Im doing something else tho
-	vel{Vector2f(0.0f ,0.0f)}, force{Vector2f(0.0f ,0.0f)},
-	angVel{0.0f}, torq{0.0f}
+	shape{ i_shape }, mat{ i_material }, vel{Vector2f(0.0f ,0.0f)},
+	force{Vector2f(0.0f ,0.0f)}, angVel{0.0f}, torq{0.0f}
 {
 	ignoreForcesThisStep = false;
 	SetMassData();
 	objVerts = shape->GetPoints();
+	numVerts = objVerts.size(); //TODO
+	for (int i = 0; i < numVerts; i++) {
+		worldVerts.push_back(Vector2f(0.0f, 0.0f));
+		faceNorms.push_back(Vector2f(0.0f, 0.0f));
+	}
 	UpdateVertsAndNorms();
 }
 
@@ -15,21 +19,27 @@ RigidBody::~RigidBody()
 {
 }
 
-RigidBody::RigidBody(const RigidBody & i_rb)
-{
-	ignoreForcesThisStep = false;
-	shape = i_rb.shape;
-	mat = i_rb.mat;
-	transform = i_rb.transform;
-	massD = i_rb.massD;
-	vel = i_rb.vel;
-	force = i_rb.force;
-	angVel = i_rb.angVel;
-	torq = i_rb.torq;
-	SetMassData(); //I think its safe if I just redo this after setting material and shape
-	objVerts = shape->GetPoints();
-	UpdateVertsAndNorms();
-}
+//RigidBody::RigidBody(const RigidBody & i_rb)
+//{
+//	ignoreForcesThisStep = false;
+//	shape = i_rb.shape;
+//	mat = i_rb.mat;
+//	transform = i_rb.transform;
+//	massD = i_rb.massD;
+//	vel = i_rb.vel;
+//	force = i_rb.force;
+//	angVel = i_rb.angVel;
+//	torq = i_rb.torq;
+//	SetMassData(); //I think its safe if I just redo this after setting material and shape
+//	objVerts = shape->GetPoints();
+//	numVerts = objVerts.size(); //TODO
+//	for (int i = 0; i < numVerts; i++) {
+//		worldVerts.push_back(Vector2f(0.0f, 0.0f));
+//		faceNorms.push_back(Vector2f(0.0f, 0.0f));
+//	}
+//	objVerts = shape->GetPoints();
+//	UpdateVertsAndNorms();
+//}
 
 void RigidBody::SetMassData()
 {
@@ -40,81 +50,56 @@ void RigidBody::SetMassData()
 	massD.SetInertia(mass * inertiaCoeff);
 }
 
-//std::unique_ptr<sf::Shape> RigidBody::CreateDrawable(float i_lerp_fraction) {
-//	//for linear interpolation this will now use the previous position and orientation
-//	Vector2f lerpPos = GetLerpPosition(i_lerp_fraction);
-//	float lerpOrient = GetLerpOrient(i_lerp_fraction);
-//	std::unique_ptr<sf::Shape> drawShape = shape->GetSFMLRepr();
-//	drawShape->setOrigin(sf::Vector2f(shape->GetSFMLOriginOffset()(0), shape->GetSFMLOriginOffset()(1)));
-//	drawShape->setPosition(lerpPos(0), lerpPos(1));
-//	drawShape->setRotation((lerpOrient*180.0f)/PI);
-//	drawShape->setOutlineColor(sf::Color::White);
-//	drawShape->setOutlineThickness(3.0f);          //setOutlineColor(sf::Color::White);
-//	drawShape->setFillColor(sf::Color::Black); //TODO: Colors
-//	return drawShape;
-//}
-
-std::vector<Vector2f> RigidBody::RotatePoints(std::vector<Vector2f> i_axisAlignedCoords)
-{
-	Eigen::Rotation2D<float> rotation(transform.orient);
+void RigidBody::RotateVerts()
+{//this must be called every time orientation is changed
+	Eigen::Rotation2D<float> rotation(transform.orient - transform.prevOrient);
 	Matrix2f rotationMatrix = rotation.toRotationMatrix();
-	for (int i = 0; i < i_axisAlignedCoords.size(); ++i) {
-		i_axisAlignedCoords[i] = rotationMatrix * i_axisAlignedCoords[i];
+	int size = objVerts.size();
+	for (int i = 0; i < size; ++i) {
+		objVerts[i] = rotationMatrix * objVerts[i];
 	}
-	return i_axisAlignedCoords;
 }
 
 void RigidBody::UpdateVertsAndNorms()
 {
-	mtx.lock();
-	worldVerts = vertsToWorldSpace(objVerts);
+	//mtx.lock();
+	VertsToWorldSpace();
 	UpdateFaceNorms();
-	mtx.unlock();
+	//mtx.unlock();
 }
 
 void RigidBody::UpdateFaceNorms()
-{
-	std::vector<Vector2f> faceNormals;
+{ //TODO
+	//std::vector<Vector2f> faceNormals;
 	if (shape->GetType() == Shape::ShapeType::RECTANGLE) {
-		std::vector<Vector2f> rotatedPoints = RotatePoints(objVerts);
-		faceNormals.push_back(Vector2f(rotatedPoints[1] - rotatedPoints[0]).unitOrthogonal()); 	//top face normal
-		faceNormals.push_back(Vector2f(rotatedPoints[2] - rotatedPoints[1]).unitOrthogonal()); 	//left face normal
-		faceNormals.push_back(Vector2f(rotatedPoints[3] - rotatedPoints[2]).unitOrthogonal()); 	//right face normal
-		faceNormals.push_back(Vector2f(rotatedPoints[0] - rotatedPoints[3]).unitOrthogonal()); 	//bottom face normal
+		faceNorms[0] = (Vector2f(objVerts[1] - objVerts[0]).unitOrthogonal()); 	//top face normal
+		faceNorms[1] = (Vector2f(objVerts[2] - objVerts[1]).unitOrthogonal()); 	//left face normal
+		faceNorms[2] = (Vector2f(objVerts[3] - objVerts[2]).unitOrthogonal()); 	//right face normal
+		faceNorms[3] = (Vector2f(objVerts[0] - objVerts[3]).unitOrthogonal()); 	//bottom face normal
 	}
 	else if (shape->GetType() == Shape::ShapeType::CIRCLE) {
 		//Do nothing this should return an empty list representing the infinite/nonexistent face normals of a circle
 	}
 	else if (shape->GetType() == Shape::ShapeType::POLYGON) {
-		std::vector<Vector2f> rotatedPoints = RotatePoints(objVerts);
-		int size = rotatedPoints.size();
+		int size = objVerts.size();
 		for (int i = 0; i < size; i++) {
-			//if (i < size - 1) {//might be backwards but idk
-			//	faceNormals.push_back(Vector2f(rotatedPoints[i+1] - rotatedPoints[i]).unitOrthogonal());
-			//}
-			//else {
-			//	faceNormals.push_back(Vector2f(rotatedPoints[0] - rotatedPoints[i]).unitOrthogonal());
-			//}
 			if (i < size - 1) {//might be backwards but idk
-				faceNormals.push_back(Vector2f(rotatedPoints[i + 1] - rotatedPoints[i]).unitOrthogonal());
+				faceNorms[i] = Vector2f(objVerts[i + 1] - objVerts[i]).unitOrthogonal();
 			}
 			else {
-				faceNormals.push_back(Vector2f(rotatedPoints[0] - rotatedPoints[i]).unitOrthogonal());
+				faceNorms[i] = Vector2f(objVerts[0] - objVerts[i]).unitOrthogonal();
 			}
 		}
 	}
-	faceNorms = faceNormals;
 }
 
-std::vector<Vector2f> RigidBody::vertsToWorldSpace(std::vector<Vector2f> i_objectSpaceCoords)
+void RigidBody::VertsToWorldSpace()
 {
-	std::vector<Vector2f> worldSpaceCoords;
-	std::vector<Vector2f> rotatedPoints = RotatePoints(i_objectSpaceCoords);
-	for (Vector2f rotatedCoord : rotatedPoints) {
-		Vector2f worldSpacePoint = transform.pos + rotatedCoord;
-		worldSpaceCoords.push_back(worldSpacePoint);
+	int size = worldVerts.size();
+	for (int i = 0; i < size; i++) {
+		//Vector2f worldSpacePoint = transform.pos + objVerts[i];
+		worldVerts[i] = Vector2f(transform.pos + objVerts[i]);
 	}
-	return worldSpaceCoords;
 }
 
 sf::VertexArray RigidBody::CreatOrientationLine(float i_lerp_fraction) {
@@ -189,12 +174,16 @@ void RigidBody::ResetPosition(Vector2f i_newPos)
 
 void RigidBody::ResetOrientation(float i_orient)
 {
+	transform.prevOrient = transform.orient;
 	transform.orient = i_orient;
+	RotateVerts();
 }
 
 void RigidBody::ResetOrientation(Vector2f i_dirVect)
 {
+	transform.prevOrient = transform.orient;
 	transform.orient = atan2(i_dirVect[1], i_dirVect[0]);
+	RotateVerts();
 }
 
 void RigidBody::IntegrateForces()
@@ -217,9 +206,11 @@ void RigidBody::IntegrateVelocity(float i_deltaTime)
 {
 	transform.prevPos = transform.pos;
 	transform.prevOrient = transform.orient;
+	//Need to rotate points here
 
 	transform.pos += vel * (i_deltaTime / AVG_MILLISEC_PER_UPDATE);
 	transform.orient += angVel * (i_deltaTime / AVG_MILLISEC_PER_UPDATE);
+	RotateVerts();
 	UpdateVertsAndNorms();
 	//GLOBAL DECELERATION
 	vel = vel - (vel * GLOBAL_DECELERATION_LINEAR * (i_deltaTime / AVG_MILLISEC_PER_UPDATE));

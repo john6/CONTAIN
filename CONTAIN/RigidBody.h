@@ -21,12 +21,12 @@ Origin of object space is the center
 class RigidBody
 {
 private:
-	std::mutex mtx;
+	//std::mutex mtx;
 
 public:
 	RigidBody(std::shared_ptr<Shape> i_shape, Material i_material = Material());
 	~RigidBody();
-	RigidBody(const RigidBody &i_rb); //manual copy constructor because mutex is pissed
+	//RigidBody(const RigidBody &i_rb); //manual copy constructor because mutex is pissed
 
 	std::shared_ptr<Shape> shape;
 	std::vector<Vector2f> objVerts;
@@ -40,10 +40,15 @@ public:
 	float angVel;
 	float torq;
 	int layer;
+	int numVerts;
 	bool ignoreForcesThisStep;
 
-	std::vector<Vector2f> RotatePoints(std::vector<Vector2f> i_axisAlignedCoords);
-	std::vector<Vector2f> vertsToWorldSpace(std::vector<Vector2f> i_objectSpaceCoords);
+	//This sucks in a number of ways lul, First I'm copying the vectors into it, and also Im creating arrays like three times,
+	//I think I should just make a "rotateObjectSpacePoint" one that takes and returns a vector2f, I think it has to craete a new one no matter what. 
+	//I guess it can take in a pointer to the original vector to avoid recreating it but then maybe access would take the same amount of time idk
+	void RotateVerts();
+	//Vector2f RotatePoint(Vector2f i_point);
+	void VertsToWorldSpace();
 	void UpdateVertsAndNorms();
 	void UpdateFaceNorms();
 	std::vector<Vector2f> GetVertCords();

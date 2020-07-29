@@ -14,10 +14,10 @@ Vector2f Rectangle::GetSFMLOriginOffset() {
 	return Vector2f(width/2.0f, height/2.0f); 
 }
 
-std::unique_ptr<sf::Shape> Rectangle::GetSFMLRepr() {
-	std::unique_ptr<sf::RectangleShape> rectPtr = std::make_unique<sf::RectangleShape>();
+std::shared_ptr<sf::Shape> Rectangle::GetSFMLRepr() {
+	std::shared_ptr<sf::RectangleShape> rectPtr = std::make_shared<sf::RectangleShape>();
 	rectPtr->setSize(sf::Vector2f(width, height));
-	std::unique_ptr<sf::Shape> shapePtr = move(rectPtr);
+	std::shared_ptr<sf::Shape> shapePtr = move(rectPtr);
 	return shapePtr;
 }
 
@@ -66,4 +66,8 @@ float Rectangle::GetWidth()
 float Rectangle::GetHeight()
 {
 	return height;
+}
+
+void Rectangle::ResetOrigin()
+{
 }

@@ -11,6 +11,9 @@
 class HeadsUpDisplay
 {
 private:
+	float hudHorMargin;
+	float hudHorSize;
+	float hudVertSize;
 	sf::Vector2f  hudTopLeft;
 	sf::Vector2f hudItemsOffset;
 	sf::Vector2f hudItemPosition;
@@ -27,25 +30,29 @@ private:
 	RESOURCES* resources;
 	sf::Font font;
 	sf::Text lvlNumText;
+	sf::Text spclWpLblTxt;
 	sf::Text timeRemainingText;
 
 	sf::RectangleShape backGroundRect;
 	sf::RectangleShape lvlNumRect;
+	sf::RectangleShape spclWpLblRct;
 	sf::RectangleShape specialWeaponRect;
 	sf::RectangleShape specialWeaponCurrChargeRect;
 	sf::RectangleShape timeRemainingRects;
 
 	sf::Vector2f lvlNumPositionOffset;
 	sf::Vector2f healthLabelOffset;
+	sf::Vector2f spclWpLblRctOffset;
 	sf::Vector2f specialWeapPosOffset;
 	sf::Vector2f timeRemPosOffset;
 
 	//HEALTH
 	sf::Vector2f healthRemainingPosOffset;
 	int prevHealth;
-	float healthRectWidth;	
+	float healthRectWidth;
 	sf::RectangleShape healthLabelRect;
 	sf::Text healthLabelText;
+	float segmentMarg;
 	sf::RectangleShape healthSegmentsRect;
 	std::vector<sf::RectangleShape> healthSegments;
 
@@ -54,10 +61,8 @@ public:
 	~HeadsUpDisplay();
 
 	void Update(int i_lvlNum, int i_timeRemaining, int i_maxTime, PlayerChar* i_player);
-	/*
-	void RenderHUD(sf::RenderWindow* i_window, float i_lerp_fraction, std::shared_ptr<Entity> i_player, Level* i_lvl);*/
 
-	void UpdateAOECHarge(PlayerChar* i_player);
+	void UpdateAOECharge(PlayerChar* i_player);
 
 	void UpdateHealth(PlayerChar* i_player);
 

@@ -15,5 +15,4 @@ public:
 
 	static void Render(sf::RenderWindow* i_window, float i_lerp_fraction, std::list<std::shared_ptr<Entity>>* i_entityList,
 		Entity* playerChar, std::vector<sf::Drawable*> i_HUDelem);
-
 };

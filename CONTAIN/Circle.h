@@ -11,7 +11,7 @@ public:
 	float radius;
 
 	Vector2f GetSFMLOriginOffset() override;
-	std::unique_ptr<sf::Shape> GetSFMLRepr() override;
+	std::shared_ptr<sf::Shape> GetSFMLRepr() override;
 	ShapeType GetType() override;
 	float GetDistToEdge() override;
 	std::vector<Vector2f> GetPoints() override;

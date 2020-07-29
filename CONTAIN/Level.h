@@ -44,9 +44,9 @@ public:
 	sf::Color colPalB;
 
 
-	Level(int i_levelNum, DIFFICULTY i_diff, std::shared_ptr<Entity> i_charPtr, RESOURCES* i_resources);
-	Level(std::string i_testStr, std::shared_ptr<Entity> i_charPtr, RESOURCES* i_resources);
-	Level(std::shared_ptr<Entity> i_charPtr, RESOURCES* i_resources);
+	Level(int i_levelNum, DIFFICULTY i_diff);
+	Level(std::string i_testStr);
+	Level();
 	~Level();
 
 	std::shared_ptr<Sector> GetSector(MapCoord i_coord);
@@ -63,8 +63,6 @@ public:
 
 	void SwitchSectorsToPhaseTwo();
 
-	sf::Color GenerateRandomColor();
-
 	void GenerateMapGrip(int i_lvlNum, DIFFICULTY i_diff);
 
 	void ChooseBossRoom();
@@ -72,6 +70,8 @@ public:
 	void FillMapWithRooms(int i_levelNum, DIFFICULTY i_diff);
 
 	void PopulateMapRooms(int i_levelNum, DIFFICULTY i_diff);
+
+	void AddMiniBosses();
 
 	void UpdateLevel();
 };

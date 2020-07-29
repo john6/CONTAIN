@@ -10,25 +10,30 @@ Entity::Entity() :
 	rb { RigidBody(std::make_shared<Rectangle>(100.0f, 100.0f)) }, 
 	typeID{ ENTITY_VIRTUAL }
 {
+	drawables = std::make_shared<std::vector<std::shared_ptr<sf::Drawable>>>();
 	Material defMaterial(0.6f, 0.1f, 0.6f, 0.3f);
 	rb.mat = defMaterial;
 	rb.SetMassData();
 	fillColor = sf::Color::Black;
 	outlineColor = sf::Color::White;
 	fixedPosition = false;
+	canCollide = true;
+	physicalObject = true;
+	hasVisuals = false;
 }
 
 Entity::Entity(Vector2f i_startPosition, RigidBody i_rb, TypeID i_typeID) :
 	rb { i_rb }, typeID{ i_typeID }
 {
-	/*Material defMaterial(0.6f, 0.1f, 0.6f, 0.3f);
-	rb.mat = defMaterial;
-	rb.SetMassData();*/
+	drawables = std::make_shared<std::vector<std::shared_ptr<sf::Drawable>>>();
 	fillColor = sf::Color::Black;
 	outlineColor = sf::Color::White;
 	killMeNextLoop = false;
 	rb.ResetPosition(i_startPosition);
 	intangible = false;
+	physicalObject = true;
+	canCollide = true;
+	hasVisuals = false;
 }
 
 const bool Entity::MarkedForDeath() {
@@ -74,7 +79,7 @@ void Entity::CollideWith(Entity & i_other)
 		auto painWall = dynamic_cast<PainWall*>(&i_other);
 		CollideWithPainWall(painWall);
 	}
-	else if (i_other.GetTypeID() == DOOR_LOCKED) {
+	else if (i_other.GetTypeID() == DOOR) {
 		auto door = dynamic_cast<Door*>(&i_other);
 		CollideWithDoor(door);
 	}
@@ -94,35 +99,33 @@ void Entity::CollideWith(Entity & i_other)
 	}
 }
 
-std::unique_ptr<sf::Shape> Entity::CreateDrawable(float i_lerp_fraction)
+drawablePtrVect Entity::CreateDrawables(float i_lerp_fraction)
 {
-	//for linear interpolation this will now use the previous position and orientation
+	if (drawables->size() > 0) { drawables->clear(); }
+		//for linear interpolation this will now use the previous position and orientation
+		if (physicalObject) {
+			std::shared_ptr<sf::Shape> drawShape = CreateDrawableRB(i_lerp_fraction);
+			drawables->emplace_back(drawShape);
+			return drawables;
+		}
+		if (hasVisuals) {
 
-	if (rb.shape->GetType() == Shape::POLYGON) {
-		Vector2f lerpPos = rb.GetLerpPosition(i_lerp_fraction);
-		float lerpOrient = rb.GetLerpOrient(i_lerp_fraction);
-		std::unique_ptr<sf::Shape> drawShape = rb.shape->GetSFMLRepr();
-		drawShape->setOrigin(sf::Vector2f(rb.shape->GetSFMLOriginOffset()(0), rb.shape->GetSFMLOriginOffset()(1)));
-		drawShape->setPosition(lerpPos(0), lerpPos(1));
-		drawShape->setRotation((lerpOrient*180.0f) / PI);
-		drawShape->setFillColor(fillColor);
-		drawShape->setOutlineColor(outlineColor);
-		drawShape->setOutlineThickness(3.0f);
-		return drawShape;
-	}
-	else {
-		Vector2f lerpPos = rb.GetLerpPosition(i_lerp_fraction);
-		float lerpOrient = rb.GetLerpOrient(i_lerp_fraction);
-		std::unique_ptr<sf::Shape> drawShape = rb.shape->GetSFMLRepr();
-		drawShape->setOrigin(sf::Vector2f(rb.shape->GetSFMLOriginOffset()(0), rb.shape->GetSFMLOriginOffset()(1)));
-		drawShape->setPosition(lerpPos(0), lerpPos(1));
-		drawShape->setRotation((lerpOrient*180.0f) / PI);
-		drawShape->setFillColor(fillColor);
-		drawShape->setOutlineColor(outlineColor);
-		drawShape->setOutlineThickness(3.0f);
-		return drawShape;
-	}
+		}
+		return drawables;
+}
 
+std::shared_ptr<sf::Shape> Entity::CreateDrawableRB(float i_lerp_fraction)
+{
+	Vector2f lerpPos = rb.GetLerpPosition(i_lerp_fraction);
+	float lerpOrient = rb.GetLerpOrient(i_lerp_fraction);
+	std::shared_ptr<sf::Shape> drawShape = rb.shape->GetSFMLRepr();
+	drawShape->setOrigin(sf::Vector2f(rb.shape->GetSFMLOriginOffset()(0), rb.shape->GetSFMLOriginOffset()(1)));
+	drawShape->setPosition(lerpPos(0), lerpPos(1));
+	drawShape->setRotation((lerpOrient*180.0f) / PI);
+	drawShape->setFillColor(fillColor);
+	drawShape->setOutlineColor(outlineColor);
+	drawShape->setOutlineThickness(3.0f);
+	return drawShape;
 }
 
 void Entity::CollideWithPlayer(PlayerChar* i_playerPtr) {}
@@ -160,13 +163,13 @@ Entity::~Entity()
 }
 
 ///////////////////////PlayerChar class ///////////////////////
-PlayerChar::PlayerChar(Game* i_gamePtr, int i_strtHealth, Vector2f i_startPosition, RigidBody i_rb) :
-	Entity(i_startPosition, i_rb, PLAYER), gamePtr{ i_gamePtr },
-	pController{ PlayerController(i_gamePtr->renderWindow) }
+PlayerChar::PlayerChar(int i_strtHealth, Vector2f i_startPosition, RigidBody i_rb) :
+	Entity(i_startPosition, i_rb, PLAYER), pController{ PlayerController(GLBVRS::GPTR->renderWindow) }
 {
+	gamePtr = GLBVRS::GPTR;
 	numShots = 1;
-	fillColor = sf::Color::Yellow;
-	outlineColor = sf::Color::Red;
+	fillColor = GUNMETAL;
+	outlineColor = FORDSILVER;
 	shipRateOfFire = 0.9f;
 	shipRateOfAOE = 6.0f;
 	shipSpeed = 100 * std::pow(GLBVRS::SIZE_RAT, 2);
@@ -311,7 +314,7 @@ void PlayerChar::ReceivePowerUp(UPGRADE_TYPE i_powType)
 			shipLvl[BIG_SHIP] = 3;
 			shipLvl[SMALL_SHIP]++;
 			auto playerRect = dynamic_cast<Rectangle*>(rb.shape.get());
-			rb.ChangeSizeOfShape(playerRect->GetWidth() - 15.0f, playerRect->GetHeight() - 15.0f);
+			//rb.ChangeSizeOfShape(playerRect->GetWidth() - 15.0f, playerRect->GetHeight() - 15.0f);
 		}
 		break;
 	}
@@ -320,7 +323,7 @@ void PlayerChar::ReceivePowerUp(UPGRADE_TYPE i_powType)
 			shipLvl[SMALL_SHIP] = 3;
 			shipLvl[BIG_SHIP]++;
 			auto playerRect = dynamic_cast<Rectangle*>(rb.shape.get());
-			rb.ChangeSizeOfShape(playerRect->GetWidth() + 15.0f, playerRect->GetHeight() + 15.0f);
+			//rb.ChangeSizeOfShape(playerRect->GetWidth() + 15.0f, playerRect->GetHeight() + 15.0f);
 			maxHealth += 6;
 			AddHealth(6);
 			shipSpeed += 20;
@@ -365,8 +368,8 @@ void PlayerChar::CollideWithDoor(Door * i_doorPtr)
 	if (i_doorPtr->open) {
 		gamePtr->levels[gamePtr->currLvl]->GetSector(gamePtr->currSector)->PlaySound(RESOURCES::MAGIC7);
 		rb.ignoreForcesThisStep = true;
-		gamePtr->RequestTravelToSector(i_doorPtr->GetOutCoord());
 		rb.ResetPosition(i_doorPtr->GetOutPos());
+		gamePtr->RequestTravelToSector(i_doorPtr->GetOutCoord());
 	}
 }
 
@@ -396,10 +399,9 @@ void PlayerChar::ShootBasic(Vector2f i_mousePos)
 	if (weaponDelay >= shipRateOfFire) {
 		gamePtr->levels[gamePtr->currLvl]->GetSector(gamePtr->currSector)->PlaySound(RESOURCES::SHOT2);
 		lastShotFired = hiResTime::now();
-		Vector2f projDir = i_mousePos - rb.transform.pos;
-		auto width = rectPtr->GetWidth();
-		float halfdiagLength = (SQRT_TWO * width) / 2.0f;
-		float projCenterOffset = halfdiagLength + GLBVRS::PROJECTILE_RADIUS;
+		Vector2f projDir = i_mousePos - rb.transform.pos; 
+		auto poly = dynamic_cast<Polygon *> (rb.shape.get());
+		float projCenterOffset = poly->GetDistToCorner() + GLBVRS::PROJECTILE_RADIUS;
 		projDir.normalize();
 		float prevAngleRads;
 		Vector2f prevDirVect;
@@ -426,9 +428,8 @@ void PlayerChar::ShootWall(Vector2f i_mousePos)
 {
 	weaponDelay = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastShotFired)).count() / 1000000.0f;
 	if (weaponDelay >= shipRateOfFire) {
-		auto width = rectPtr->GetWidth();
-		float halfdiagLength = (SQRT_TWO * width) / 2.0f;
-		float projCenterOffset = halfdiagLength + (wallWidth / 2.0f) + 5.0f;
+		auto poly = dynamic_cast<Polygon *> (rb.shape.get());
+		float projCenterOffset = poly->GetDistToCorner() + GLBVRS::PROJECTILE_RADIUS;
 		gamePtr->levels[gamePtr->currLvl]->GetSector(gamePtr->currSector)->PlaySound(RESOURCES::SHOOT14);
 		lastShotFired = hiResTime::now();
 		Vector2f projectileDir = i_mousePos - rb.transform.pos;
@@ -467,7 +468,7 @@ void PlayerChar::ShootAOE()
 		--currSpecialAmmo;
 		lastAOEFired = hiResTime::now();
 		std::shared_ptr<Entity> projectile = std::make_shared<Blast>(
-					gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector).get(), this,
+					gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector).get(),
 					rb.transform.pos, 0, blastStrength, blastStunTime, RigidBody(std::make_shared<Circle>(BlastRadius), STATIC));
 		gamePtr->levels[gamePtr->GetCurrLvl()]->GetSector(gamePtr->currSector)->AddEntPtrToSector(projectile);
 	}
@@ -564,12 +565,12 @@ Blocker::~Blocker()
 }
 
 /////////////////////// Blast ///////////////////////
-Blast::Blast(Sector* i_sectPtr, PlayerChar* charP, Vector2f i_startPosition, int i_blastType, float i_strength, float i_stunTime, RigidBody i_rb) :
+Blast::Blast(Sector* i_sectPtr, Vector2f i_startPosition, int i_blastType, float i_strength, float i_stunTime, RigidBody i_rb) :
 	Entity(i_startPosition, i_rb, BLAST_STUN),
 	sectPtr{ i_sectPtr }, blastType{ i_blastType },
-	strength { i_strength }, stunTime { i_stunTime },
-	charP { charP }
+	strength { i_strength }, stunTime { i_stunTime }
 {
+	charP = GLBVRS::PPTR;
 	fillColor = sf::Color(0, 255, 255, 128);
 	outlineColor = sf::Color::Cyan;
 	intangible = true;
@@ -589,9 +590,10 @@ void Blast::Update(float i_stepSize)
 }
 
 ///////////////////////Enemy Class///////////////////////
-Enemy::Enemy(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb, TypeID i_typeID) :
-	Entity(i_startPosition, i_rb, i_typeID), charPtr { i_charPtr }, sectPtr{ i_sectPtr }
+Enemy::Enemy(Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb, TypeID i_typeID) :
+	Entity(i_startPosition, i_rb, i_typeID),sectPtr{ i_sectPtr }
 {
+	charPtr = GLBVRS::PPTR;
 	metal = false;
 	fillColor = MOSS;
 	outlineColor = sf::Color::White;
@@ -632,7 +634,7 @@ Vector2f Enemy::CreateRandomDir()
 
 void Enemy::Destroy() {
 	sectPtr->PlaySound(RESOURCES::OUCH1);
-	//sectPtr->sectEnemyNum -= 1;
+	sectPtr->GenerateDeathEffects(this, ENEMY_BURST_DEATH);
 	killMeNextLoop = true;
 }
 
@@ -671,8 +673,8 @@ void Enemy::CollideWithProjectile(Projectile * i_projPtr)
 void Enemy::UpdateHealth(float i_stepSize)
 {
 	if (health <= 0.0f) {
-		fillColor = sf::Color::Red;
-		outlineColor = sf::Color::Red;
+		//fillColor = sf::Color::Red;
+		//outlineColor = sf::Color::Red;
 		Destroy();
 	}
 }
@@ -716,8 +718,8 @@ void Enemy::TurnToMetal()
 }
 
 /////////////////////// CrazyBoi class ///////////////////////
-CrazyBoi::CrazyBoi(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb) :
-	Enemy(i_charPtr, i_sectPtr, i_diff, i_startPosition, i_rb, ENEMY_RAND)
+CrazyBoi::CrazyBoi(Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb) :
+	Enemy(i_sectPtr, i_diff, i_startPosition, i_rb, ENEMY_RAND)
 {
 	sameDirTime = 0.9;
 	timeTillDirSwitch = 0.0f;
@@ -782,8 +784,8 @@ void CrazyBoi::SetDiffVars(int i_diff)
 }
 
 /////////////////////// Burst Boss class ///////////////////////
-BossBurst::BossBurst(std::shared_ptr<Entity> i_charPtr, Sector * i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb) :
-	Enemy(i_charPtr, i_sectPtr, i_diff, i_startPosition, i_rb, ENEMY_BOSS)
+BossBurst::BossBurst(Sector * i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss, RigidBody i_rb) :
+	Enemy(i_sectPtr, i_diff, i_startPosition, i_rb, ENEMY_BOSS), isMiniBoss{i_isMiniBoss}
 {
 	Stun(0.3f);
 	sameDirTime = 0.3;
@@ -834,6 +836,7 @@ void BossBurst::TakeDamage(float i_dmg)
 void BossBurst::Destroy()
 {
 	sectPtr->PlaySound(RESOURCES::BOSSEXPLODE);
+	sectPtr->GenerateDeathEffects(this, ENEMY_BURST_DEATH);
 	killMeNextLoop = true;
 }
 
@@ -863,44 +866,75 @@ void BossBurst::Stun(float i_stunTime)
 
 void BossBurst::SetDiffVars(int i_diff, int i_lvlNum)
 {
-	switch (i_diff) {
-	case EASY: {
-		speed = GLBVRS::ENEMYSPEEDEASY;
-		projSpeed = 2800.0f * std::pow(GLBVRS::SIZE_RAT, 2);
-		numShots = 6;
-		maxHealth = 7;
-		health = maxHealth;
-		break;
+	if (isMiniBoss) {
+		rb = RigidBody(std::make_shared<Circle>(40 * GLBVRS::SIZE_RAT), WOOD);
+		switch (i_diff) {
+		case EASY: {
+			speed = GLBVRS::ENEMYSPEEDEASY;
+			projSpeed = 2800.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+			numShots = 2;
+			maxHealth = 1;
+			health = maxHealth;
+			break;
+		}
+		case MEDIUM: {
+			speed = GLBVRS::ENEMYSPEEDMED;
+			projSpeed = 3000.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+			numShots = 2;
+			maxHealth = 2;
+			health = maxHealth;
+			break;
+		}
+		case HARD: {
+			speed = GLBVRS::ENEMYSPEEDHARD;
+			projSpeed = 3200.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+			numShots = 3;
+			maxHealth = 3;
+			health = maxHealth;
+			break;
+		}
+		}
+		speed *= 1;
 	}
-	case MEDIUM: {
-		speed = GLBVRS::ENEMYSPEEDMED;
-		projSpeed = 3000.0f * std::pow(GLBVRS::SIZE_RAT, 2);
-		numShots = 7;
-		maxHealth = 8;
-		health = maxHealth;
-		break;
+	else {
+		switch (i_diff) {
+		case EASY: {
+			speed = GLBVRS::ENEMYSPEEDEASY;
+			projSpeed = 2800.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+			numShots = 6;
+			maxHealth = 7;
+			health = maxHealth;
+			break;
+		}
+		case MEDIUM: {
+			speed = GLBVRS::ENEMYSPEEDMED;
+			projSpeed = 3000.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+			numShots = 7;
+			maxHealth = 8;
+			health = maxHealth;
+			break;
+		}
+		case HARD: {
+			speed = GLBVRS::ENEMYSPEEDHARD;
+			projSpeed = 3200.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+			numShots = 8;
+			maxHealth = 9;
+			health = maxHealth;
+			break;
+		}
+		}
+		speed *= 3;
 	}
-	case HARD: {
-		speed = GLBVRS::ENEMYSPEEDHARD;
-		projSpeed = 3200.0f * std::pow(GLBVRS::SIZE_RAT, 2);
-		numShots = 8;
-		maxHealth = 9;
-		health = maxHealth;
-		break;
-	}
-	}
-	speed *= 3;
 }
 
 /////////////////////// Stream Boss class ///////////////////////
-BossStream::BossStream(std::shared_ptr<Entity> i_charPtr, Sector * i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb) :
-	Enemy(i_charPtr, i_sectPtr, i_diff, i_startPosition, i_rb, ENEMY_BOSS)
+BossStream::BossStream(Sector * i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss, RigidBody i_rb) :
+	Enemy(i_sectPtr, i_diff, i_startPosition, i_rb, ENEMY_BOSS), isMiniBoss{ i_isMiniBoss }
 {
 	Stun(0.3f);
 	sameDirTime = 0.2;
 	timeTillDirSwitch = 0.0f;
 	lastShotFired = hiResTime::now();
-	shipRateOfFire = 0.05f;
 	currDir = CreateRandomDir();
 	SetDiffVars(i_diff, i_sectPtr->myLevel->m_lvl_num);
 }
@@ -940,6 +974,7 @@ void BossStream::TakeDamage(float i_dmg)
 void BossStream::Destroy()
 {
 	sectPtr->PlaySound(RESOURCES::BOSSEXPLODE);
+	sectPtr->GenerateDeathEffects(this, ENEMY_BURST_DEATH);
 	killMeNextLoop = true;
 }
 
@@ -965,38 +1000,77 @@ void BossStream::Stun(float i_stunTime)
 
 void BossStream::SetDiffVars(int i_diff, int i_lvlNum)
 {
-	switch (i_diff) {
-	case EASY: {
-		speed = GLBVRS::ENEMYSPEEDEASY;
-		projSpeed = 2800.0f * std::pow(GLBVRS::SIZE_RAT, 2);
-		numShots = 6;
-		maxHealth = 9;
-		health = maxHealth;
-		break;
+	if (isMiniBoss) {
+		rb = RigidBody(std::make_shared<Circle>(30 * GLBVRS::SIZE_RAT), WOOD);
+		switch (i_diff) {
+		case EASY: {
+			speed = GLBVRS::ENEMYSPEEDEASY;
+			projSpeed = 2800.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+			numShots = 6;
+			maxHealth = 1;
+			shipRateOfFire = 0.40f;
+			health = maxHealth;
+			break;
+		}
+		case MEDIUM: {
+			speed = GLBVRS::ENEMYSPEEDMED;
+			projSpeed = 3000.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+			numShots = 7;
+			maxHealth = 2;
+			shipRateOfFire = 0.25f;
+			health = maxHealth;
+			break;
+		}
+		case HARD: {
+			speed = GLBVRS::ENEMYSPEEDHARD;
+			projSpeed = 3200.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+			numShots = 8;
+			maxHealth = 3;
+			shipRateOfFire = 0.15f;
+			health = maxHealth;
+			break;
+		}
+		}
+		speed *= 1;
 	}
-	case MEDIUM: {
-		speed = GLBVRS::ENEMYSPEEDMED;
-		projSpeed = 3000.0f * std::pow(GLBVRS::SIZE_RAT, 2);
-		numShots = 7;
-		maxHealth = 10;
-		health = maxHealth;
-		break;
+	else {
+		switch (i_diff) {
+		case EASY: {
+			speed = GLBVRS::ENEMYSPEEDEASY;
+			projSpeed = 2800.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+			numShots = 6;
+			maxHealth = 9;
+			shipRateOfFire = 0.10f;
+			health = maxHealth;
+			break;
+		}
+		case MEDIUM: {
+			speed = GLBVRS::ENEMYSPEEDMED;
+			projSpeed = 3000.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+			numShots = 7;
+			maxHealth = 10;
+			shipRateOfFire = 0.05f;
+			health = maxHealth;
+			break;
+		}
+		case HARD: {
+			speed = GLBVRS::ENEMYSPEEDHARD;
+			projSpeed = 3200.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+			numShots = 8;
+			maxHealth = 11;
+			shipRateOfFire = 0.04f;
+			health = maxHealth;
+			break;
+		}
+		}
+		speed *= 4;
 	}
-	case HARD: {
-		speed = GLBVRS::ENEMYSPEEDHARD;
-		projSpeed = 3200.0f * std::pow(GLBVRS::SIZE_RAT, 2);
-		numShots = 8;
-		maxHealth =11;
-		health = maxHealth;
-		break;
-	}
-	}
-	speed *= 4;
+
 }
 
 /////////////////////// Rush Boss class ///////////////////////
-BossRush::BossRush(std::shared_ptr<Entity> i_charPtr, Sector * i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb) :
-	Enemy(i_charPtr, i_sectPtr, i_diff, i_startPosition, i_rb, ENEMY_BOSS)
+BossRush::BossRush(Sector * i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss, RigidBody i_rb) :
+	Enemy(i_sectPtr, i_diff, i_startPosition, i_rb, ENEMY_BOSS), isMiniBoss{ i_isMiniBoss }
 {
 	Stun(1.0f);
 	rushTime = 3.0f;
@@ -1044,6 +1118,7 @@ void BossRush::Update(float i_stepSize)
 void BossRush::Destroy()
 {
 	sectPtr->PlaySound(RESOURCES::BOSSEXPLODE);
+	sectPtr->GenerateDeathEffects(this, ENEMY_BURST_DEATH);
 	killMeNextLoop = true;
 }
 
@@ -1064,30 +1139,59 @@ void BossRush::Stun(float i_stunTime)
 
 void BossRush::SetDiffVars(int i_diff, int i_lvlNum)
 {
-	switch (i_diff) {
-	case EASY: {
-		speed = GLBVRS::ENEMYSPEEDEASY;
-		numShots = 6;
-		maxHealth = 8;
-		health = maxHealth;
-		break;
+	if (isMiniBoss) {
+		rb = RigidBody(std::make_shared<Circle>(30 * GLBVRS::SIZE_RAT), LESSBOUNCYBALL);
+		switch (i_diff) {
+		case EASY: {
+			speed = GLBVRS::ENEMYSPEEDEASY;
+			numShots = 6;
+			maxHealth = 1;
+			health = maxHealth;
+			break;
+		}
+		case MEDIUM: {
+			speed = GLBVRS::ENEMYSPEEDMED;
+			numShots = 7;
+			maxHealth = 3;
+			health = maxHealth;
+			break;
+		}
+		case HARD: {
+			speed = GLBVRS::ENEMYSPEEDHARD;
+			numShots = 8;
+			maxHealth = 4;
+			health = maxHealth;
+			break;
+		}
+		}
+		speed *= 4;
 	}
-	case MEDIUM: {
-		speed = GLBVRS::ENEMYSPEEDMED;
-		numShots = 7;
-		maxHealth = 9;
-		health = maxHealth;
-		break;
+	else {
+		switch (i_diff) {
+		case EASY: {
+			speed = GLBVRS::ENEMYSPEEDEASY;
+			numShots = 6;
+			maxHealth = 8;
+			health = maxHealth;
+			break;
+		}
+		case MEDIUM: {
+			speed = GLBVRS::ENEMYSPEEDMED;
+			numShots = 7;
+			maxHealth = 9;
+			health = maxHealth;
+			break;
+		}
+		case HARD: {
+			speed = GLBVRS::ENEMYSPEEDHARD;
+			numShots = 8;
+			maxHealth = 10;
+			health = maxHealth;
+			break;
+		}
+		}
+		speed *= 20;
 	}
-	case HARD: {
-		speed = GLBVRS::ENEMYSPEEDHARD;
-		numShots = 8;
-		maxHealth = 10;
-		health = maxHealth;
-		break;
-	}
-	}
-	speed *= 20;
 }
 
 void BossRush::CollideWithPainWall(PainWall * i_painWallPtr)
@@ -1104,8 +1208,8 @@ void BossRush::CollideWithPlayer(PlayerChar * i_playerPtr)
 }
 
 /////////////////////// Split Boss class ///////////////////////
-BossSplit::BossSplit(std::shared_ptr<Entity> i_charPtr, Sector * i_sectPtr, DIFFICULTY i_diff, int i_splitsLeft, float i_spdFct, bool i_crazy, Vector2f i_startPosition, RigidBody i_rb) :
-	Enemy(i_charPtr, i_sectPtr, i_diff, i_startPosition, i_rb, ENEMY_BOSS), splitsLeft { i_splitsLeft }, diff { i_diff }, crazy {i_crazy}
+BossSplit::BossSplit(Sector * i_sectPtr, DIFFICULTY i_diff, int i_splitsLeft, float i_spdFct, bool i_crazy, Vector2f i_startPosition, RigidBody i_rb) :
+	Enemy(i_sectPtr, i_diff, i_startPosition, i_rb, ENEMY_BOSS), splitsLeft { i_splitsLeft }, diff { i_diff }, crazy {i_crazy}
 {
 	speed = i_spdFct;
 	Stun(0.05f);
@@ -1157,8 +1261,8 @@ void BossSplit::Destroy()
 		std::shared_ptr<Shape> shape2 = std::make_shared<Circle>(100);
 		RigidBody projBody1 = RigidBody(shape1, LESSBOUNCYBALL);
 		RigidBody projBody2 = RigidBody(shape2, LESSBOUNCYBALL);
-		std::shared_ptr<Entity> split1 = std::make_shared<BossSplit>(charPtr, sectPtr, diff, splitsLeft - 1, 4, true, rb.transform.pos, projBody1);
-		std::shared_ptr<Entity> split2 = std::make_shared<BossSplit>(charPtr, sectPtr, diff, splitsLeft - 1, 4, false, rb.transform.pos, projBody2);
+		std::shared_ptr<Entity> split1 = std::make_shared<BossSplit>(sectPtr, diff, splitsLeft - 1, 4, true, rb.transform.pos, projBody1);
+		std::shared_ptr<Entity> split2 = std::make_shared<BossSplit>(sectPtr, diff, splitsLeft - 1, 4, false, rb.transform.pos, projBody2);
 		sectPtr->AddEntPtrToSector(split1);
 		sectPtr->AddEntPtrToSector(split2);
 		killMeNextLoop = true;
@@ -1170,8 +1274,8 @@ void BossSplit::Destroy()
 		std::shared_ptr<Shape> shape2 = std::make_shared<Circle>(75);
 		RigidBody projBody1 = RigidBody(shape1, LESSBOUNCYBALL);
 		RigidBody projBody2 = RigidBody(shape2, LESSBOUNCYBALL);
-		std::shared_ptr<Entity> split1 = std::make_shared<BossSplit>(charPtr, sectPtr, diff, splitsLeft - 1, 3, true, rb.transform.pos, projBody1);
-		std::shared_ptr<Entity> split2 = std::make_shared<BossSplit>(charPtr, sectPtr, diff, splitsLeft - 1, 3, false, rb.transform.pos, projBody2);
+		std::shared_ptr<Entity> split1 = std::make_shared<BossSplit>(sectPtr, diff, splitsLeft - 1, 3, true, rb.transform.pos, projBody1);
+		std::shared_ptr<Entity> split2 = std::make_shared<BossSplit>(sectPtr, diff, splitsLeft - 1, 3, false, rb.transform.pos, projBody2);
 		sectPtr->AddEntPtrToSector(split1);
 		sectPtr->AddEntPtrToSector(split2);
 		killMeNextLoop = true; 
@@ -1183,8 +1287,8 @@ void BossSplit::Destroy()
 		std::shared_ptr<Shape> shape2 = std::make_shared<Circle>(50);
 		RigidBody projBody1 = RigidBody(shape1, LESSBOUNCYBALL);
 		RigidBody projBody2 = RigidBody(shape2, LESSBOUNCYBALL);
-		std::shared_ptr<Entity> split1 = std::make_shared<BossSplit>(charPtr, sectPtr, diff, splitsLeft - 1, 2, true, rb.transform.pos, projBody1);
-		std::shared_ptr<Entity> split2 = std::make_shared<BossSplit>(charPtr, sectPtr, diff, splitsLeft - 1, 2, false, rb.transform.pos, projBody2);
+		std::shared_ptr<Entity> split1 = std::make_shared<BossSplit>(sectPtr, diff, splitsLeft - 1, 2, true, rb.transform.pos, projBody1);
+		std::shared_ptr<Entity> split2 = std::make_shared<BossSplit>(sectPtr, diff, splitsLeft - 1, 2, false, rb.transform.pos, projBody2);
 		sectPtr->AddEntPtrToSector(split1);
 		sectPtr->AddEntPtrToSector(split2);
 		killMeNextLoop = true; 
@@ -1196,8 +1300,8 @@ void BossSplit::Destroy()
 		std::shared_ptr<Shape> shape2 = std::make_shared<Circle>(30);
 		RigidBody projBody1 = RigidBody(shape1, BOUNCYBALL);
 		RigidBody projBody2 = RigidBody(shape2, BOUNCYBALL);
-		std::shared_ptr<Entity> split1 = std::make_shared<BossSplit>(charPtr, sectPtr, diff, splitsLeft - 1, true, 1, rb.transform.pos, projBody1);
-		std::shared_ptr<Entity> split2 = std::make_shared<BossSplit>(charPtr, sectPtr, diff, splitsLeft - 1, false, 1, rb.transform.pos, projBody2);
+		std::shared_ptr<Entity> split1 = std::make_shared<BossSplit>(sectPtr, diff, splitsLeft - 1, true, 1, rb.transform.pos, projBody1);
+		std::shared_ptr<Entity> split2 = std::make_shared<BossSplit>(sectPtr, diff, splitsLeft - 1, false, 1, rb.transform.pos, projBody2);
 		sectPtr->AddEntPtrToSector(split1);
 		sectPtr->AddEntPtrToSector(split2);
 		killMeNextLoop = true;
@@ -1208,7 +1312,7 @@ void BossSplit::Destroy()
 		killMeNextLoop = true;
 	}
 	}
-
+	sectPtr->GenerateDeathEffects(this, ENEMY_BURST_DEATH);
 }
 
 void BossSplit::TakeDamage(float i_dmg)
@@ -1227,31 +1331,33 @@ void BossSplit::Stun(float i_stunTime)
 
 void BossSplit::SetDiffVars(int i_diff, int i_lvlNum)
 {
-	if (splitsLeft == 4)
-	switch (i_diff) {
-	case EASY: {
-		speed *= GLBVRS::ENEMYSPEEDEASY;
-		numShots = 6;
-		maxHealth = 2;
-		health = maxHealth;
-		break;
+	if (splitsLeft == 4) {
+		switch (i_diff) {
+		case EASY: {
+			speed *= GLBVRS::ENEMYSPEEDEASY;
+			numShots = 6;
+			maxHealth = 2;
+			health = maxHealth;
+			break;
+		}
+		case MEDIUM: {
+			speed *= GLBVRS::ENEMYSPEEDMED;
+			numShots = 7;
+			maxHealth = 3;
+			health = maxHealth;
+			break;
+		}
+		case HARD: {
+			speed *= GLBVRS::ENEMYSPEEDHARD;
+			numShots = 8;
+			maxHealth = 4;
+			health = maxHealth;
+			break;
+
+		}
+		}
 	}
-	case MEDIUM: {
-		speed *= GLBVRS::ENEMYSPEEDMED;
-		numShots = 7;
-		maxHealth = 3;
-		health = maxHealth;
-		break;
-	}
-	case HARD: {
-		speed *= GLBVRS::ENEMYSPEEDHARD;
-		numShots = 8;
-		maxHealth = 4;
-		health = maxHealth;
-		break;
-	}
-	}
-	else if (splitsLeft == 3)
+	else if (splitsLeft == 3) {
 		switch (i_diff) {
 		case EASY: {
 			speed *= GLBVRS::ENEMYSPEEDEASY;
@@ -1275,7 +1381,8 @@ void BossSplit::SetDiffVars(int i_diff, int i_lvlNum)
 			break;
 		}
 		}
-	if (splitsLeft == 2)
+	}
+	if (splitsLeft == 2) {
 		switch (i_diff) {
 		case EASY: {
 			speed *= GLBVRS::ENEMYSPEEDEASY;
@@ -1298,8 +1405,10 @@ void BossSplit::SetDiffVars(int i_diff, int i_lvlNum)
 			health = maxHealth;
 			break;
 		}
+
 		}
-	if (splitsLeft == 1)
+	}
+	if (splitsLeft == 1) {
 		switch (i_diff) {
 		case EASY: {
 			speed *= GLBVRS::ENEMYSPEEDEASY;
@@ -1323,7 +1432,8 @@ void BossSplit::SetDiffVars(int i_diff, int i_lvlNum)
 			break;
 		}
 		}
-	if (splitsLeft == 0)
+	}
+	if (splitsLeft == 0) {
 		switch (i_diff) {
 		case EASY: {
 			speed *= GLBVRS::ENEMYSPEEDEASY;
@@ -1347,12 +1457,17 @@ void BossSplit::SetDiffVars(int i_diff, int i_lvlNum)
 			break;
 		}
 		}
+	}
 }
 
 /////////////////////// Spawn Boss class ///////////////////////
-BossSpawn::BossSpawn(std::shared_ptr<Entity> i_charPtr, Sector * i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb) :
-	Enemy(i_charPtr, i_sectPtr, i_diff, i_startPosition, i_rb, ENEMY_BOSS), diff { i_diff }
+BossSpawn::BossSpawn(Sector * i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss, RigidBody i_rb) :
+	Enemy(i_sectPtr, i_diff, i_startPosition, i_rb, ENEMY_BOSS), diff { i_diff }, isMiniBoss{ i_isMiniBoss }
 {
+	if (isMiniBoss) {
+		rb = RigidBody(std::make_shared<Rectangle>(100.0f * GLBVRS::SIZE_RAT, 100.0f * GLBVRS::SIZE_RAT), STATIC);
+		rb.transform.pos = i_startPosition;
+	}
 	invulnerable = true;
 	Stun(0.5f);
 	lastShotFired = hiResTime::now();
@@ -1403,6 +1518,7 @@ void BossSpawn::Update(float i_stepSize)
 void BossSpawn::Destroy()
 {
 	sectPtr->PlaySound(RESOURCES::BOSSEXPLODE);
+	sectPtr->GenerateDeathEffects(this, ENEMY_BURST_DEATH);
 	killMeNextLoop = true;
 }
 
@@ -1434,43 +1550,79 @@ void BossSpawn::Stun(float i_stunTime)
 
 void BossSpawn::SetDiffVars(int i_diff, int i_lvlNum)
 {
-	switch (i_diff) {
-	case EASY: {
-		numShots = 4;
-		maxHealth = 16;
-		sameDirTime = 14.0;
-		timeTillDirSwitch = 0.0f;
-		health = maxHealth;
-		break;
+	if (isMiniBoss) {
+		switch (i_diff) {
+		case EASY: {
+			numShots = 2;
+			maxHealth = 3;
+			sameDirTime = 14.0;
+			timeTillDirSwitch = 0.0f;
+			health = maxHealth;
+			break;
+		}
+		case MEDIUM: {
+			numShots = 3;
+			maxHealth = 4;
+			sameDirTime = 10.0;
+			timeTillDirSwitch = 0.0f;
+			health = maxHealth;
+			break;
+		}
+		case HARD: {
+			numShots = 4;
+			maxHealth = 5;
+			sameDirTime = 8.0;
+			timeTillDirSwitch = 0.0f;
+			health = maxHealth;
+			break;
+		}
+		}
 	}
-	case MEDIUM: {
-		numShots = 5;
-		maxHealth = 18;
-		sameDirTime = 10.0;
-		timeTillDirSwitch = 0.0f;
-		health = maxHealth;
-		break;
-	}
-	case HARD: {
-		numShots = 6;
-		maxHealth = 10;
-		sameDirTime = 8.0;
-		timeTillDirSwitch = 0.0f;
-		health = maxHealth;
-		break;
-	}
+	else {
+		switch (i_diff) {
+		case EASY: {
+			numShots = 4;
+			maxHealth = 16;
+			sameDirTime = 14.0;
+			timeTillDirSwitch = 0.0f;
+			health = maxHealth;
+			break;
+		}
+		case MEDIUM: {
+			numShots = 5;
+			maxHealth = 18;
+			sameDirTime = 10.0;
+			timeTillDirSwitch = 0.0f;
+			health = maxHealth;
+			break;
+		}
+		case HARD: {
+			numShots = 6;
+			maxHealth = 10;
+			sameDirTime = 8.0;
+			timeTillDirSwitch = 0.0f;
+			health = maxHealth;
+			break;
+		}
+		}
 	}
 }
 
-
 /////////////////////// Door Lockable class///////////////////////
 Door::Door(Sector* i_sectPtr, MapCoord i_outCoord, Vector2f i_startPos, Vector2f i_outPos, RigidBody i_rb, SCREEN_SIDE i_side) :
-	Entity(i_startPos, i_rb, DOOR_LOCKED), sectPtr{ i_sectPtr }, outCoord{ i_outCoord }, outPos{ i_outPos }, side { i_side }
+	Entity(i_startPos, i_rb, DOOR), sectPtr{ i_sectPtr }, outCoord{ i_outCoord }, outPos{ i_outPos }, side { i_side }
 {
 	open = false;
 	intangible = true;
-	fillColor = sf::Color::Black;
-	outlineColor = sf::Color::White;
+
+	colorOpen = CYAN;
+	colorClosed = DARKSILVER;
+	colorOpenOutline = CYAN;
+	colorClosedOutline = SILVER;
+	fillColor = colorClosed;
+	outlineColor = colorClosedOutline;
+	disableTimeStamp = hiResTime::now();
+	disabledAmount = 0.0f;
 }
 
 Door::~Door()
@@ -1489,10 +1641,28 @@ const Vector2f Door::GetOutPos()
 
 void Door::Update(float i_stepSize)
 {
-	if (sectPtr->sectEnemyNum <= 0) {
-		open = true;
-		fillColor = sf::Color::Cyan;
+	float timeSinceDisable = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - disableTimeStamp)).count() / 1000000.0f;
+	if (sectPtr->sectEnemyNum > 0) {
+		open = false;
+		fillColor = colorClosed;
+		outlineColor = colorClosedOutline;
 	}
+	else if (timeSinceDisable <= disabledAmount) {
+		open = false;
+		fillColor = colorClosed;
+		outlineColor = colorClosedOutline;
+	}
+	else {
+		open = true;
+		fillColor = colorOpen;
+		outlineColor = colorOpenOutline;
+	}
+}
+
+void Door::Disable(float i_disableTime)
+{
+	disableTimeStamp = hiResTime::now();
+	disabledAmount = i_disableTime;
 }
 
 ///////////////////////Wall Class ///////////////////////
@@ -1500,6 +1670,7 @@ Wall::Wall(Vector2f i_startPosition, Sector* i_sectPtr, RigidBody i_rb,
 			sf::Color i_fillCol, sf::Color i_outCol) :
 	Entity(i_startPosition, i_rb, WALL_BASIC), sectPtr{ i_sectPtr }
 {
+	fixedPosition = true;
 	fillColor = i_fillCol;
 	outlineColor = i_outCol;
 }
@@ -1514,11 +1685,14 @@ PainWall::PainWall(Vector2f i_startPosition, Sector* i_sectPtr, RigidBody i_rb) 
 	Entity(i_startPosition, i_rb, WALL_FIRE), sectPtr{ i_sectPtr }
 {
 	intangible = true;
-	colorSwitchRate = 1.5;
-	timeSinceColorSwitch = 0.0f;
+	fixedPosition = true;
+	colorSwitchRate = 3;
+	lastColorSwitch = hiResTime::now();
 	colorState = true;
-	fillColor = sf::Color::Red;
+	fillColor = VIVIDYELLOW;
 	outlineColor = sf::Color::Black;
+	colorA = MYSTICRED;
+	colorB = VIVIDYELLOW;
 }
 
 PainWall::~PainWall()
@@ -1528,31 +1702,26 @@ PainWall::~PainWall()
 
 void PainWall::Update(float i_stepSize)
 {
-	if (timeSinceColorSwitch < 0) {
-		timeSinceColorSwitch = colorSwitchRate;
-		fillColor = sf::Color::Red;
-		if (colorState) {
-			fillColor = sf::Color::Yellow;
-			colorState = false;
-		}
-		else {
-			fillColor = sf::Color::Red;
-			colorState = true;
-		}
-
+	float colorSwitchCurr = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastColorSwitch)).count() / 1000000.0f;
+	if (colorSwitchCurr >= colorSwitchRate) {
+		lastColorSwitch = hiResTime::now();
 	}
-	else {
-		float secsInUpdate = i_stepSize / 1000.0f;
-		timeSinceColorSwitch -= secsInUpdate;
-	}
+	float colorpercent = (colorSwitchCurr / colorSwitchRate) * 2.0f * PI;
+	float clrPhse = cos(colorpercent);
+	float clrPhseInv = 1.0f - clrPhse;
+	float r = std::min(255.0f, std::max(0.0f, (colorA.r * clrPhse) + (colorB.r * clrPhseInv)));
+	float g = std::min(255.0f, std::max(0.0f, (colorA.g * clrPhse) + (colorB.g * clrPhseInv)));
+	float b = std::min(255.0f, std::max(0.0f, (colorA.b * clrPhse) + (colorB.b * clrPhseInv)));
+	fillColor = sf::Color(r,g,b);
+	float secsInUpdate = i_stepSize / 1000.0f;
 }
 
 /////////////////////// End Object ///////////////////////
 EndObject::EndObject(Sector* i_sectPtr, Vector2f i_startPosition, RigidBody i_rb) :
 	Entity(i_startPosition, i_rb, END_LEVEL), sectPtr{ i_sectPtr }
 {
-	fillColor = sf::Color::Black;
-	outlineColor = sf::Color::White;
+	fillColor = DARKSILVER;
+	outlineColor = SILVER;
 	active = false;
 }
 
@@ -1563,8 +1732,8 @@ EndObject::~EndObject()
 void EndObject::Update(float i_stepSize)
 {
 	if (sectPtr->firstPhase) {
-		fillColor = sf::Color::Black;
-		outlineColor = sf::Color::White;
+		fillColor = DARKSILVER;
+		outlineColor = SILVER;
 		active = false;
 	}
 	else {
@@ -1591,6 +1760,7 @@ PowerUp::PowerUp(Sector * i_sectPtr, Vector2f i_startPosition, UPGRADE_TYPE i_po
 		outlineColor = sf::Color::Magenta;
 		break;
 	}
+	//TODO
 	}
 }
 
@@ -1603,4 +1773,120 @@ PowerUp::~PowerUp()
 void PowerUp::Update(float i_stepSize)
 {
 	rb.angVel = 0.03f;
+}
+
+/////////////////////////////animations ///////////////////////////////////////////////////////////
+
+Anim::Anim(Sector* i_sectPtr, Vector2f i_startPosition, microSec i_lifetime,
+	ANIMTYPE i_aType, Entity* i_entPtr) :
+	Entity(i_startPosition, RigidBody(std::make_shared<Circle>(1.0f)), ANIMATION),
+	birthTime{ hiResTime::now() }, deathTime{ birthTime + i_lifetime }, lifeTime { i_lifetime },
+	aType { i_aType }
+{
+	physicalObject = false;
+	intangible = true;
+	hasVisuals = true;
+	drawables = std::make_shared<std::vector<std::shared_ptr<sf::Drawable>>>();
+	rb.vel *= 0.1;
+	if (aType == CANNED_EXPLOSION) {
+		polys.push_back(Physics::CreateRegularPolygon(5, 100.0f));
+	}
+	else if (i_entPtr != NULL) {
+		fillColor = i_entPtr->fillColor;
+		outlineColor = i_entPtr->outlineColor;
+		rb = i_entPtr->rb;
+		}
+	if (rb.shape->GetType() == Shape::ShapeType::CIRCLE) {
+		auto circle = dynamic_cast<Circle*>(rb.shape.get());
+		origRadius = circle->radius;
+	}
+	if (rb.shape->GetType() == Shape::ShapeType::RECTANGLE) {
+		auto rectangle = dynamic_cast<Rectangle*>(rb.shape.get());
+		origWidth = rectangle->GetWidth();
+		origHeight = rectangle->GetHeight();
+	}
+}
+
+Anim::~Anim()
+{
+}
+
+void Anim::Update(float i_stepSize)
+{
+	//Im gonna make the polygon shrink to !almost! nothing before it dissapears
+	float microSecsAlive = (hiResTime::now() - birthTime).count();
+	float lifeTimeFloat = lifeTime.count();
+	float lifePercent = microSecsAlive / lifeTimeFloat;
+	float lowBound = std::max(lifePercent, 0.1f);
+	float upBound = std::min(1.0f, lowBound);
+	float animPercent = upBound;
+	if (animPercent > 0.99f) {
+		Destroy();
+	}
+	else if (aType == CANNED_EXPLOSION) {
+		for (int i = 0; i < polys.size(); i++) {
+			std::cout << "I am resizing and Im at " + std::to_string(animPercent) + "percent\n";
+			polys[i]->ResetSize(animPercent);
+		}
+	}
+	else if (aType == ENEMY_BURST_DEATH) {
+				if ((rb.shape->GetType() == Shape::ShapeType::CIRCLE)) {
+					auto circle = dynamic_cast<Circle*>(rb.shape.get());
+					float radius = circle->radius;
+					float sizeIncrease = animPercent * (origRadius * 0.5f);
+					circle->ChangeSizeOfShape(origRadius + sizeIncrease, 0.0f);
+				}
+				else if (rb.shape->GetType() == Shape::ShapeType::RECTANGLE) {
+					auto rect = dynamic_cast<Rectangle*>(rb.shape.get());
+					float sizeIncreaseWidth = animPercent * (origWidth * 0.5f);
+					float sizeIncreaseHeight = animPercent * (origHeight * 0.5f);
+					rect->ChangeSizeOfShape(origWidth + sizeIncreaseWidth, origHeight + sizeIncreaseHeight);
+				}
+			}
+}
+
+void Anim::Destroy()
+{
+	killMeNextLoop = true;
+}
+
+drawablePtrVect Anim::CreateDrawables(float i_lerp_fraction)
+{
+	drawables->clear();
+	if (aType != CANNED_EXPLOSION) {
+		std::shared_ptr<sf::Shape> drawShape = CreateDrawableRB(i_lerp_fraction);
+		drawables->emplace_back(drawShape);
+		return drawables;
+	}
+	for (int i = 0; i < polys.size(); i++) {
+		std::shared_ptr<sf::Shape> polyDrawable = polys[i]->GetSFMLRepr();
+		//polyDrawable->setFillColor(sf::Color::Yellow);
+		//polyDrawable->setOutlineColor(sf::Color::Red);
+		polyDrawable->setPosition(sf::Vector2f(rb.transform.pos[0], rb.transform.pos[1]));
+		polyDrawable->setPosition(sf::Vector2f(rb.transform.pos[0], rb.transform.pos[1]));
+		drawables->push_back(polyDrawable);
+	}
+	return drawables;
+}
+
+
+
+/////////////////////// Scenery ///////////////////////
+Scenery::Scenery(Sector * i_sectPtr, Vector2f i_startPosition, std::shared_ptr <sf::Shape> i_drawable,
+	RigidBody i_rb) : Entity(i_startPosition, i_rb, SCENERY), mySect {i_sectPtr}
+{
+	physicalObject = false;
+	intangible = true;
+	hasVisuals = true;
+	drawables = std::make_shared<std::vector<std::shared_ptr<sf::Drawable>>>();
+	drawables->push_back(i_drawable);
+}
+
+Scenery::~Scenery()
+{
+}
+
+drawablePtrVect Scenery::CreateDrawables(float i_lerp_fraction)
+{
+	return drawables;
 }

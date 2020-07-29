@@ -22,7 +22,7 @@ private:
 
 	static bool ResolveRectToCircleCollision(CollisionData* i_data);
 
-	static bool ResolveCircleToRectCollision(CollisionData* i_data);
+	//static bool ResolveCircleToRectCollision(CollisionData* i_data);
 
 	static bool ResolveRectToRectCollision(CollisionData* i_data);
 
@@ -42,7 +42,7 @@ public:
 
 	static std::shared_ptr<Polygon> CreateRegularPolygon(int i_numVerts, float i_size);
 
-	static std::shared_ptr<Polygon> CreateIrregularPolygon(int i_numVerts, float i_size);
+	static std::shared_ptr<Polygon> CreateIrregularPolygon(int i_numVerts, float i_size, float i_minSize =1);
 
-	//static void TimeStepRigidBody(RigidBody* i_entity, float i_stepSize);
+	static sf::Color GenerateRandomColor(int i_min = 0, int i_max = 255);
 };

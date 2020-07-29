@@ -20,24 +20,34 @@ class PainWall;
 class PowerUp;
 class Blast;
 class CrazyBoi;
+//class MiniBossBurst;
+//class MiniBossStream;
+//class MiniBossRush;
+//class MiniBossSplit;
+//class MiniBossSpawn;
 class BossBurst;
 class BossStream;
 class BossRush;
 class BossSpawn;
 class BossSplit;
-//class ChargyBoi;
+class Anim;
+class Scenery;
 
 class Entity
 {
 protected:
-	sf::Color fillColor;
-	sf::Color outlineColor;
 	bool killMeNextLoop;
 	const TypeID typeID;
 
 public:
+	sf::Color fillColor;
+	sf::Color outlineColor;
 	bool intangible;
 	bool fixedPosition;
+	bool physicalObject;
+	bool canCollide;
+	bool hasVisuals;
+	drawablePtrVect drawables;
 
 	Entity();
 	Entity(Vector2f i_startPosition, RigidBody i_rb, TypeID i_typeID);
@@ -55,7 +65,9 @@ public:
 
 	virtual void Destroy();
 
-	std::unique_ptr<sf::Shape> CreateDrawable(float i_lerp_fraction);
+	virtual drawablePtrVect CreateDrawables(float i_lerp_fraction);
+
+	virtual std::shared_ptr<sf::Shape> CreateDrawableRB(float i_lerp_fraction);
 
 	virtual void CollideWithPlayer(PlayerChar* i_playerPtr);
 
@@ -113,7 +125,7 @@ public:
 	int numShots;
 	float weapSpeed;
 
-	PlayerChar(Game* i_gamePtr, int i_strtHealth, Vector2f i_startPosition, 
+	PlayerChar(int i_strtHealth, Vector2f i_startPosition, 
 		RigidBody i_rb = RigidBody(std::make_shared<Rectangle>(100.0f * GLBVRS::SIZE_RAT, 100.0f * GLBVRS::SIZE_RAT), METAL));
 	~PlayerChar();
 
@@ -207,7 +219,7 @@ class Blast : public Entity
 {
 private:
 	Sector* sectPtr;
-	PlayerChar* charP;
+	std::shared_ptr<Entity> charP;
 
 public:
 	int blastType;
@@ -215,7 +227,7 @@ public:
 	float strength;
 	float stunTime;
 
-	Blast(Sector* i_sectPtr, PlayerChar* charP, Vector2f i_startPosition, int i_blastType, float i_strength, float i_stunTime,
+	Blast(Sector* i_sectPtr, Vector2f i_startPosition, int i_blastType, float i_strength, float i_stunTime,
 			RigidBody i_rb = RigidBody(std::make_shared<Circle>(150.0f), STATIC));
 	~Blast();
 
@@ -239,7 +251,7 @@ public:
 	float stunSecs;
 	bool metal;
 
-	Enemy(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb, TypeID i_typeID = ENEMY_SEEK);
+	Enemy(Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb, TypeID i_typeID = ENEMY_SEEK);
 	~Enemy();
 
 	void Update(float i_stepSize) override;
@@ -277,7 +289,7 @@ private:
 	float timeTillDirSwitch;
 
 public:
-	CrazyBoi(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb);
+	CrazyBoi(Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb);
 	~CrazyBoi();
 
 	void Update(float i_stepSize) override;
@@ -298,38 +310,13 @@ private:
 	float shipRateOfFire;
 	float weaponDelay;
 	float projSpeed;
-public:
-	BossBurst(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition,
-		RigidBody i_rb = RigidBody(std::make_shared<Circle>(70 * GLBVRS::SIZE_RAT), LESSBOUNCYBALL));
-
-	void Update(float i_stepSize) override;
-
-	void Destroy() override;
-
-	void TakeDamage(float i_dmg);
-
-	void shootProj();
-
-	void Stun(float i_stunTime) override;
-
-	void SetDiffVars(int i_diff, int i_lvlNum);
-};
-
-class BossStream : public Enemy
-{
-private:
-	Vector2f currDir;
-	float sameDirTime;
-	float timeTillDirSwitch;
-	float numShots;
-	hiRes_time_point lastShotFired;
-	float shipRateOfFire;
-	float weaponDelay;
-	float projSpeed;
+	bool isMiniBoss;
 
 public:
-	BossStream(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, 
-		RigidBody i_rb = RigidBody(std::make_shared<Circle>(70 * GLBVRS::SIZE_RAT), LESSBOUNCYBALL));
+
+
+	BossBurst(Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss = false, 
+		RigidBody i_rb = RigidBody(std::make_shared<Circle>(70 * GLBVRS::SIZE_RAT), WOOD));
 
 	void Update(float i_stepSize) override;
 
@@ -356,9 +343,10 @@ private:
 	hiRes_time_point lastShotFired;
 	float shipRateOfFire;
 	float weaponDelay;
+	bool isMiniBoss;
 
 public:
-	BossRush(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition,
+	BossRush(Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss = false,
 		RigidBody i_rb = RigidBody(std::make_shared<Circle>(75 * GLBVRS::SIZE_RAT), LESSBOUNCYBALL));
 
 	void Update(float i_stepSize) override;
@@ -378,6 +366,36 @@ public:
 	void CollideWithPlayer(PlayerChar* i_playerPtr) override;
 };
 
+class BossStream : public Enemy
+{
+private:
+	Vector2f currDir;
+	float sameDirTime;
+	float timeTillDirSwitch;
+	float numShots;
+	hiRes_time_point lastShotFired;
+	float shipRateOfFire;
+	float weaponDelay;
+	float projSpeed;
+	bool isMiniBoss;
+
+public:
+	BossStream(Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss = false,
+		RigidBody i_rb = RigidBody(std::make_shared<Circle>(70 * GLBVRS::SIZE_RAT), WOOD));
+
+	void Update(float i_stepSize) override;
+
+	void Destroy() override;
+
+	void TakeDamage(float i_dmg);
+
+	void shootProj();
+
+	void Stun(float i_stunTime) override;
+
+	void SetDiffVars(int i_diff, int i_lvlNum);
+};
+
 class BossSplit : public Enemy
 {
 private:
@@ -393,7 +411,7 @@ private:
 	float weaponDelay;
 
 public:
-	BossSplit(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, int i_splitsLeft, float i_spdFct, bool i_crazy,
+	BossSplit(Sector* i_sectPtr, DIFFICULTY i_diff, int i_splitsLeft, float i_spdFct, bool i_crazy,
 			Vector2f i_startPosition, RigidBody i_rb = RigidBody(std::make_shared<Circle>(150.0f * GLBVRS::SIZE_RAT), BOUNCYBALL));
 
 	void Update(float i_stepSize) override;
@@ -420,11 +438,12 @@ private:
 	hiRes_time_point lastShotFired;
 	float shipRateOfFire;
 	float weaponDelay;
+	bool isMiniBoss;
 
 public:
 	bool invulnerable;
 
-	BossSpawn(std::shared_ptr<Entity> i_charPtr, Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition,
+	BossSpawn(Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss = false,
 		RigidBody i_rb = RigidBody(std::make_shared<Rectangle>(100.0f * GLBVRS::SIZE_RAT, 100.0f * GLBVRS::SIZE_RAT), STATIC));
 
 	void Update(float i_stepSize) override;
@@ -448,6 +467,12 @@ private:
 	Sector* sectPtr;
 	Vector2f outPos;
 	MapCoord outCoord;
+	sf::Color colorOpen;
+	sf::Color colorClosed;
+	sf::Color colorOpenOutline;
+	sf::Color colorClosedOutline;
+	hiRes_time_point disableTimeStamp;
+	float disabledAmount;
 
 public:
 	SCREEN_SIDE side;
@@ -463,6 +488,8 @@ public:
 	const Vector2f GetOutPos();
 
 	void Update(float i_stepSize) override;
+
+	void Disable(float i_disableTime);
 };
 
 class Wall :
@@ -481,10 +508,12 @@ class PainWall :
 	public Entity
 {
 private:
-	float timeSinceColorSwitch;
-	float colorSwitchRate;
 	bool colorState;
 	Sector* sectPtr;
+	sf::Color colorA;
+	sf::Color colorB;
+	hiRes_time_point lastColorSwitch;
+	float colorSwitchRate;
 
 public:
 
@@ -526,3 +555,49 @@ public:
 
 	void Update(float i_stepSize) override;
 };
+
+///////////////////////////animations///////////////////////////////////////////////////////////////////////////////////////////////////////////
+class Anim :
+	public Entity
+{
+private:
+	hiRes_time_point birthTime;
+	microSec lifeTime;
+	hiRes_time_point deathTime;
+
+	std::vector<std::shared_ptr<Polygon>> polys;
+	Sector* mySect;
+	ANIMTYPE aType;
+
+	//DUMB ASS SHIT need to generalize
+	float origRadius;
+	float origWidth;
+	float origHeight;
+
+public:
+	Anim(Sector* i_sectPtr, Vector2f i_startPosition, microSec i_lifetime, 
+		ANIMTYPE i_aType = CANNED_EXPLOSION, Entity* i_entPtr = NULL);
+	~Anim();
+
+	void Update(float i_stepSize) override;
+
+	void Destroy() override;
+
+	drawablePtrVect CreateDrawables(float i_lerp_fraction) override;
+};
+
+
+class Scenery : public Entity {
+private:
+	Sector* mySect;
+	drawablePtrVect drawables;
+
+public:
+
+	Scenery(Sector* i_sectPtr, Vector2f i_startPosition, std::shared_ptr <sf::Shape> i_drawable,
+		RigidBody i_rb = RigidBody(std::make_shared<Circle>(1.0f)));
+	~Scenery();
+
+	drawablePtrVect CreateDrawables(float i_lerp_fraction) override;
+};
+

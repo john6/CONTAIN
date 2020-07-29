@@ -44,7 +44,7 @@ public:
 
 	void PopulateEntranceRoom();
 
-	void PopulateBossRoom(int i_lvlNum, DIFFICULTY i_diff);
+	void PopulateBossRoom(int i_lvlNum, DIFFICULTY i_diff, bool i_isMiniBoss = false);
 
 	void PopulateBossRoom(std::string i_tutorial);
 
@@ -61,6 +61,15 @@ public:
 	void SwitchToPhaseTwo();
 
 	void SwitchLevelToPhaseTwo();
+
+	void Awaken();
+
+	void GenerateBackGround();
+
+	void GenerateDeathEffects(Entity* i_entPtr, ANIMTYPE i_animType);
+
+	void GenerateIrregularTerrain(int i_numVerts, int i_maxSize, int i_minSize = 1);
+
 
 	std::vector<std::tuple<Vector2f, Vector2f>> GetScreenAreas(SCREEN_AREA i_area);
 

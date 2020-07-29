@@ -2,11 +2,9 @@
 #include "TuteLib.h"
 
 Game::Game(sf::RenderWindow* i_window, RESOURCES* i_resources, DIFFICULTY i_difficulty)
-	: renderWindow{ i_window }, resources {i_resources}, HUD{ HeadsUpDisplay(i_resources) }, tuteLib{ TuteLib(i_window, i_resources)}
+	: renderWindow{ i_window }, resources {i_resources}, tuteLib{ TuteLib(i_window, i_resources)}, HUD { HeadsUpDisplay(i_resources) }
 {
 	font = resources->GetFont();
-	//InitGame(i_difficulty);
-	//loadTestLevel();
 }
 
 Game::~Game()
@@ -15,10 +13,6 @@ Game::~Game()
 }
 
 GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vector2i i_mousePos) {
-
-	//InfoPopUp begin = InfoPopUp(resources, GLBVRS::CRT_WDTH, GLBVRS::CRT_HGHT);
-	//begin.AddTextBox("Get started bucko");
-	//begin.RenderAndWait(i_window);
 	if (tutorial) {
 		if ((currSector.x == 5) && (currSector.y == 0) && (levels[currLvl]->GetSector(currSector)->sectEnemyNum == 0)) {
 			tuteLib.PlayTutorial(TuteLib::TUTORIALS::ESCAPE);
@@ -31,10 +25,6 @@ GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vecto
 		}
 
 	}
-	//renderWindow->clear();
-	//renderWindow->display();
-
-
 	timeElapsed = std::chrono::duration_cast<std::chrono::seconds>(hiResTime::now() - beginTime);
 	float millisecLag = abs(i_microSecs / MICROSECS_TO_MILLISECS);
 	float timeLeft = timeToComplete - timeElapsed.count();
@@ -132,7 +122,6 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnt
 	for (int i = 0; i < collisions.size(); i++) {
 		parCollisions.push_back(i);
 	}
-
 	std::for_each(std::execution::par, parCollisions.begin(), parCollisions.end(), [&](int index) {
 		collisions[index].entA->CollideWith(*collisions[index].entB);
 		collisions[index].entB->CollideWith(*collisions[index].entA);
@@ -147,13 +136,10 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnt
 		entPVect[index]->rb.IntegrateForces();
 		entPVect[index]->rb.IntegrateVelocity(i_stepSize);
 	});
-
 	std::for_each(std::execution::par, parCollisions.begin(), parCollisions.end(), [&](int index) {
 		Physics::PositionalCorrection(&collisions[index]);
 	});
-
 	levels[currLvl]->GetSector(currSector)->RemoveDestroyedEntities();
-
 	return IN_GAME;
 }
 
@@ -179,7 +165,7 @@ void Game::TestCollision(std::shared_ptr<Entity> entA, std::shared_ptr<Entity> e
 void Game::GenerateLevels(DIFFICULTY i_diff) {
 	DeleteLevels();
 	for (int i = 0; i < numLvls; ++i) {
-		Level* lvl = new Level(i, i_diff, playerChar, resources);
+		Level* lvl = new Level(i, i_diff);
 		levels.push_back(lvl);
 	}
 	currSector = levels[currLvl]->originCoord;
@@ -188,7 +174,7 @@ void Game::GenerateLevels(DIFFICULTY i_diff) {
 void Game::GenerateTutorialLevels()
 {
 	DeleteLevels();
-	Level* lvl = new Level(playerChar, resources);
+	Level* lvl = new Level();
 	levels.push_back(lvl);
 	currSector = levels[currLvl]->originCoord;
 }
@@ -201,16 +187,43 @@ void Game::DeleteLevels() {
 	levels.clear();
 }
 
-const int Game::GetCurrLvl() { return currLvl;  }
-const int Game::GetNumLvls() { return numLvls;  }
+const int Game::GetCurrLvl() 
+{ return currLvl;  }
+
+const int Game::GetNumLvls() 
+{ return numLvls;  }
 
 void Game::RequestTravelToSector(MapCoord i_destSect)
 {
 	currSector = i_destSect;
+	levels[currLvl]->GetSector(currSector)->Awaken();
 }
 
 void Game::CreatePlayerChar()
 {
+	int startingHealth = 7 * (3 - gameDiff);
+	switch (gameDiff) {
+	case EASY: {
+		startingHealth = 20;
+		break;
+	}
+	case MEDIUM: {
+		startingHealth = 16;
+		break;
+	}
+	case HARD: {
+		startingHealth = 12;
+		break;
+	}
+	case TUTORIAL: {
+		startingHealth = 999;
+		break;
+	}
+	}
+	RigidBody rb(Physics::CreateRegularPolygon(6, 75.0f * GLBVRS::SIZE_RAT), METAL);
+	playerChar = std::make_shared<PlayerChar>(startingHealth, Vector2f(400.0f * GLBVRS::SIZE_RAT, 400.0f * GLBVRS::SIZE_RAT), rb);
+	playerChar->rb.transform.orient = 1.0f;
+	GLBVRS::SetGlobalConstants(renderWindow->getSize().x, renderWindow->getSize().y, resources, this, playerChar);
 }
 
 void Game::SpawnProjectile()
@@ -234,26 +247,8 @@ void Game::RequestGoToNextLvl()
 
 void Game::InitGame(DIFFICULTY i_diff)
 {
-	tutorial = false;
 	gameDiff = i_diff;
-	int startingHealth = 7 * (3 - i_diff);
-
-	switch (i_diff) {
-	case EASY: {
-		startingHealth = 20;
-		break;
-	}
-	case MEDIUM: {
-		startingHealth = 16;
-		break;
-	}
-	case HARD: {
-		startingHealth = 12;
-		break;
-	}
-	}
-	playerChar = std::make_shared<PlayerChar>(this, startingHealth, Vector2f(400.0f * GLBVRS::SIZE_RAT, 400.0f * GLBVRS::SIZE_RAT));
-	playerChar->rb.transform.orient = 1.0f;
+	tutorial = false;
 	beginTime = std::chrono::high_resolution_clock::now();
 	numLvls = 5;
 	currLvl = 0;
@@ -262,6 +257,7 @@ void Game::InitGame(DIFFICULTY i_diff)
 	playState = GENERAL_GAMEPLAY;
 	const microSec UPDATE_INTERVAL(16666);
 	playerWon = false;
+	CreatePlayerChar();
 	GenerateLevels(i_diff);
 	PlayRandomSong();
 }
@@ -269,13 +265,7 @@ void Game::InitGame(DIFFICULTY i_diff)
 void Game::InitTutorial()
 {
 	tutorial = true;
-	gameDiff = EASY;
-	int startingHealth = 999999; //6 * (3 - i_diff);
-	playerChar = std::make_shared<PlayerChar>(this, startingHealth, Vector2f(400, 400.0));
-	PlayerChar* playerPtr = dynamic_cast<PlayerChar*>(playerChar.get());
-	playerPtr->maxSpecialAmmo = 999;
-	playerPtr->ResetSpecialAmmo();
-	playerChar->rb.transform.orient = 1.0f;
+	gameDiff = TUTORIAL;
 	beginTime = std::chrono::high_resolution_clock::now();
 	numLvls = 1;
 	currLvl = 0;
@@ -284,108 +274,26 @@ void Game::InitTutorial()
 	playState = GENERAL_GAMEPLAY;
 	const microSec UPDATE_INTERVAL(16666);
 	playerWon = false;
+	CreatePlayerChar();
 	GenerateTutorialLevels();
 	PlayRandomSong();
 }
 
 void Game::loadTestLevel()
 {
-	//custom player
-	std::shared_ptr<Shape> shape = std::make_shared<Circle>(50.0f);
-	Material Metal = Material(1.2f, 0.05f, 0.4f, 0.2f);
-	RigidBody rb(shape, Metal);
-	int startingHealth = 999999;
-	playerChar = std::make_shared<PlayerChar>(PlayerChar(this, startingHealth, Vector2f(GLBVRS::HR_MRG * 10, GLBVRS::VRT_MRG * 2 + 70)));
-	//Default player
-	//playerChar = std::make_shared<PlayerChar>(PlayerChar(this, startingHealth, Vector2f(200, 200.0)));
-	playerChar->rb.transform.orient = 1.0f;
-	//playerChar->rb.ApplyImpulse(Vector2f(0.0f, 160000.0f), Vector2f(0.0f, 0.0f));
 	beginTime = std::chrono::high_resolution_clock::now();
-	numLvls = 5;
+	numLvls = 1;
 	currLvl = 0;
 	timeToComplete = 999999999.0f;
 	playState = GENERAL_GAMEPLAY;
 	const microSec UPDATE_INTERVAL(16666);
 	playerWon = false;
 	//generate levels test version
-	DeleteLevels();
-	for (int i = 0; i < numLvls; ++i) {
-		std::string str = "Test";
-		Level* lvl = new Level(str, playerChar ,resources);
-		levels.push_back(lvl);
-	}
+	std::string str = "Test";
+	CreatePlayerChar();
+	Level* lvl = new Level(str);
+	levels.push_back(lvl);
 	currSector = levels[currLvl]->originCoord;
-	//levels[currLvl]->GetSector(currSector)->AddTerrain(0);
-	//levels[currLvl]->GetSector(currSector)->AddTerrain(1);
-	//levels[currLvl]->GetSector(currSector)->AddTerrain(2);
-	//levels[currLvl]->GetSector(currSector)->AddTerrain(3);
-	//levels[currLvl]->GetSector(currSector)->AddTerrain(4);
-	//levels[currLvl]->GetSector(currSector)->AddTerrain(5);
-	//levels[currLvl]->GetSector(currSector)->AddTerrain(6);
-	//levels[currLvl]->GetSector(currSector)->AddTerrain(7);
-
-
-	std::vector<Vector2f> vector;
-	//counterclockwise
-	vector.push_back(Vector2f(-50.0, -50.0));
-	vector.push_back(Vector2f(-350.0, 30.0));
-	vector.push_back(Vector2f(-200.0, 50.0));
-	vector.push_back(Vector2f(0.0, 50.0));
-	vector.push_back(Vector2f(50.0, -50.0));
-	std::shared_ptr<Shape> shape1 = std::make_shared<Polygon>(vector);
-	RigidBody rb1 = RigidBody(shape1, METAL);
-	std::shared_ptr<Entity> asd5 = std::make_shared<Wall>(
-		Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH / 2.0f), GLBVRS::CRT_HGHT / 2.0)),
-		levels[currLvl]->GetSector(currSector).get(), rb1);
-	levels[currLvl]->GetSector(currSector)->AddEntPtrToSector(asd5);
-
-
-
-
-
-	std::vector<Vector2f> vector2;
-	vector2.push_back(Vector2f(-50.0, -50.0));
-	vector2.push_back(Vector2f(-50.0, 50.0));
-	vector2.push_back(Vector2f(50.0, 50.0));
-	vector2.push_back(Vector2f(50.0, -50.0));
-
-	std::shared_ptr<Shape> shape2 = std::make_shared<Polygon>(vector2);
-	RigidBody rb2 = RigidBody(shape2, METAL);
-	std::shared_ptr<Entity> asd6 = std::make_shared<Wall>(
-		Vector2f(GLBVRS::HR_MRG * 2, GLBVRS::VRT_MRG * 2), levels[currLvl]->GetSector(currSector).get(), rb2);
-	levels[currLvl]->GetSector(currSector)->AddEntPtrToSector(asd6);
-
-
-
-	/*
-	std::shared_ptr<Entity> asd67 = std::make_shared<Wall>(
-		Vector2f(GLBVRS::HR_MRG * 2, GLBVRS::VRT_MRG * 2 + 70), levels[currLvl]->GetSector(currSector).get(), RigidBody(std::make_shared<Rectangle>(100.0f, 100.0f), METAL));
-	asd67->rb.transform.orient = 1.0f;
-	levels[currLvl]->GetSector(currSector)->AddEntPtrToSector(asd67);
-
-
-*/
-	//playerChar = std::make_shared<Blocker>(PlayerChar(this, startingHealth, Vector2f(GLBVRS::HR_MRG * 2, GLBVRS::VRT_MRG * 2 + 70)));
-	////Default player
-	////playerChar = std::make_shared<PlayerChar>(PlayerChar(this, startingHealth, Vector2f(200, 200.0)));
-	//playerChar->rb.transform.orient = 1.0f;
-
-
-
-	std::vector<Vector2f> vector3;
-	//counterclockwise
-	vector3.push_back(Vector2f(-50.0, -50.0));
-	vector3.push_back(Vector2f(-50.0, 50.0));
-	vector3.push_back(Vector2f(200.0, 50.0));
-	vector3.push_back(Vector2f(200.0, -50.0));
-
-
-
-	std::shared_ptr<Shape> shape23 = std::make_shared<Polygon>(vector3);
-	RigidBody rb3 = RigidBody(shape23, METAL);
-	std::shared_ptr<Entity> asd61 = std::make_shared<Wall>(
-		Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH / 2.0f), GLBVRS::CRT_HGHT / 2.0)), levels[currLvl]->GetSector(currSector).get(), rb3);
-	levels[currLvl]->GetSector(currSector)->AddEntPtrToSector(asd61);
 }
 
 void Game::PlayRandomSong()

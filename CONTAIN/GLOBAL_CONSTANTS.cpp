@@ -5,7 +5,7 @@
 //
 //}
 
-void GLBVRS::SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_screenHeight)
+void GLBVRS::SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_screenHeight, RESOURCES* i_resourcesPtr, Game* i_gamePtr, std::shared_ptr<Entity> i_playerPtr)
 {
 	//WINDOW SETTINGS
 	GLBVRS::SCREEN_WIDTH = i_screenWidth;
@@ -34,6 +34,11 @@ void GLBVRS::SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_scree
 	GLBVRS::ENEMYSPEEDEASY = 12.0f * std::pow(GLBVRS::SIZE_RAT, 2);
 	GLBVRS::ENEMYSPEEDMED = 15.0f * std::pow(GLBVRS::SIZE_RAT, 2);
 	GLBVRS::ENEMYSPEEDHARD = 18.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+
+	//UTILITY
+	GLBVRS::RSRCS = i_resourcesPtr;
+	GLBVRS::GPTR = i_gamePtr;
+	GLBVRS::PPTR = i_playerPtr;
 }
 
 int GLBVRS::GetUpgradeMax(UPGRADE_TYPE i_powType)
@@ -103,6 +108,11 @@ float GLBVRS::PROJECTILE_RADIUS = 10.0f;
 float GLBVRS::ENEMYSPEEDEASY = 12.0f;
 float GLBVRS::ENEMYSPEEDMED = 15.0f;
 float GLBVRS::ENEMYSPEEDHARD = 18.0f;
+
+//UTILITY
+RESOURCES* GLBVRS::RSRCS = NULL;
+Game* GLBVRS::GPTR = NULL;
+std::shared_ptr<Entity> GLBVRS::PPTR = NULL;
 
 GLBVRS::~GLBVRS()
 {

@@ -15,12 +15,6 @@
 
 int main()
 {
-	//if (__cplusplus == 201703L) std::cout << "C++17\n";
-	//else if (__cplusplus == 201402L) std::cout << "C++14\n";
-	//else if (__cplusplus == 201103L) std::cout << "C++11\n";
-	//else if (__cplusplus == 199711L) std::cout << "C++98\n";
-	//else std::cout << "pre-standard C++\n";
-
 	//https://eigen.tuxfamily.org/dox//TopicMultiThreading.html
 	Eigen::initParallel();
 	SaveData saveData = SaveData();
@@ -30,11 +24,15 @@ int main()
 	//sf::RenderWindow window(sf::VideoMode(1440, 900), "CONTAIN");
 	//sf::RenderWindow window(sf::VideoMode(1280, 720), "CONTAIN");
 	//sf::RenderWindow window(sf::VideoMode(1920, 1080), "CONTAIN");
-	GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y);
-	int currLvl;
 	RESOURCES resources;
-	DIFFICULTY difficulty = MEDIUM;
+
+	GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, NULL, NULL);
 	Game globalGame = Game(&window, &resources);
+	GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &globalGame, globalGame.playerChar);
+	int currLvl;
+
+	DIFFICULTY difficulty = MEDIUM;
+
 	Menu menu(&resources);
 	YouWonMenu winMenu(&resources);
 	YouLostMenu lostMenu(&resources);
@@ -55,24 +53,19 @@ int main()
 				window.close();
 			}
 			if (currEvent.type == sf::Event::Resized) {
-				GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y);
+				GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &globalGame, globalGame.playerChar);
 			}
 			if (currEvent.type == sf::Event::LostFocus) {
 				window.create(sf::VideoMode(400, 400), "CONTAIN");
-				GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y);
+				GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &globalGame, globalGame.playerChar);
 				notFullScreen = true;
 			}
-			//For some reason this is not working, It never seems to call GetFocus()
-			//if (currEvent.type == sf::Event::GainedFocus) {
-			//	window.create(sf::VideoMode(1920, 1080), "CONTAIN", sf::Style::Fullscreen);
-			//	GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y);
-			//}
 		}
 		if (window.hasFocus()) {
 			if (notFullScreen) {
 				notFullScreen = false;
 				window.create(sf::VideoMode(1920, 1080), "CONTAIN", sf::Style::Fullscreen);
-				GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y);
+				GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &globalGame, globalGame.playerChar);
 			}
 			hiRes_time_point newTime = hiResTime::now();
 			microSec currInterval = std::chrono::duration_cast<microSec>(newTime - currTime);

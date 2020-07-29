@@ -13,7 +13,7 @@ public:
 	~Rectangle();
 
 	Vector2f GetSFMLOriginOffset() override;
-	std::unique_ptr<sf::Shape> GetSFMLRepr() override;
+	std::shared_ptr<sf::Shape> GetSFMLRepr() override;
 	ShapeType GetType() override;
 	float GetDistToEdge() override;
 	std::vector<Vector2f> GetPoints() override;
@@ -22,4 +22,5 @@ public:
 	void ChangeSizeOfShape(float i_widthOrRadius, float i_heightOrGarbage) override;
 	float GetWidth();
 	float GetHeight();
+	void ResetOrigin();
 };

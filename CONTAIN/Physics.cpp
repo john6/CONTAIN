@@ -113,19 +113,7 @@ bool Physics::ResolveCircleToCircleCollision(CollisionData* i_data)
 
 	if (radSqr < collisionNorm.squaredNorm()) { return false; }
 
-	/////////////////////////////////////////
-
-
-	/////////YOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-	// I no longer know what this yo refers to, I should write more specific comments
-
-
-
-
-
-
-	///////////////////////////////////////////////////
-	float dist = sqrt(collisionNorm.squaredNorm());
+	float dist = collisionNorm.norm();
 
 	if (dist == 0.0f) {
 		i_data->pen = circlePtrA->radius;
@@ -284,6 +272,11 @@ std::function<void(void)> Physics::SaveImpulse(RigidBody* body, Vector2f a1, Vec
 
 bool Physics::CheckCollision(CollisionData* i_collision)
 {
+	if ((!i_collision->entA->physicalObject || !i_collision->entB->physicalObject) || 
+	((i_collision->entA->rb.massD.GetMassInv() == 0) && (i_collision->entB->rb.massD.GetMassInv() == 0))){
+		//do not check collisions for graphics-only objects, or against two STATIC objects as they should never collide
+		return false;
+	}
 	Shape::ShapeType shape1 = i_collision->entA->rb.shape->GetType();
 	Shape::ShapeType shape2 = i_collision->entB->rb.shape->GetType();
 	bool collisionOccured = false;
@@ -354,7 +347,7 @@ std::shared_ptr<Polygon> Physics::CreateRegularPolygon(int i_numVerts, float i_s
 	return std::make_shared<Polygon>(vertVect);
 }
 
-std::shared_ptr<Polygon> Physics::CreateIrregularPolygon(int i_numVerts, float i_size)
+std::shared_ptr<Polygon> Physics::CreateIrregularPolygon(int i_numVerts, float i_size, float i_minSize)
 { //GOnna use an algorithm I found here in Java : http://cglab.ca/~sander/misc/ConvexGeneration/convex.html
 	std::vector<Vector2f> points;
 	bool verifiedConvex = false;
@@ -473,7 +466,18 @@ std::shared_ptr<Polygon> Physics::CreateIrregularPolygon(int i_numVerts, float i
 			}
 		}
 	}
-	return std::make_shared<Polygon>(points);
+	std::shared_ptr<Polygon> poly;
+	if (i_minSize != 1) {
+		poly = std::make_shared<Polygon>(points);
+		do  {
+			poly->ResizeMutliple(1.25);
+		} while (poly->GetArea() < i_minSize);
+	}
+	else {
+		return std::make_shared<Polygon>(points);
+	}
+
+	return poly;
 
 	//std::vector<Vector2f> vertVect;
 	////for (int i = 0; i < i_numVerts; ++i) {
@@ -574,4 +578,20 @@ void Physics::CreateCollisionImpulse(CollisionData* i_data) {
 	}
 
 	return;
+}
+
+sf::Color Physics::GenerateRandomColor(int i_min, int i_max)
+{
+	std::random_device rd1;  //Will be used to obtain a seed for the random number engine
+	std::mt19937 gen1(rd1()); //Standard mersenne_twister_engine seeded with rd()
+	std::uniform_int_distribution<> distrib(i_min, i_max); //both boundaries are inclusive
+	int randCol1 = distrib(gen1);
+	int randCol2 = distrib(gen1);
+	int randCol3 = distrib(gen1);
+
+	//std::random_device rdRoomSeed;  //Will be used to obtain a seed for the random number engine
+	//std::mt19937 genRoomSeed(rdRoomSeed()); //Standard mersenne_twister_engine seeded with rd()
+	//std::discrete_distribution<> extraRoomDist({ 25, 50, 25 });
+	//int randExtraRooms = extraRoomDist(genRoomSeed);
+	return sf::Color(randCol1, randCol2, randCol3);
 }

@@ -13,12 +13,14 @@ struct MapNode {
 	int vectIndex;
 };
 
-Level::Level(int i_lvlNum, DIFFICULTY i_diff, std::shared_ptr<Entity> i_charPtr, RESOURCES* i_resources) :
-	charPtr { i_charPtr }, resources { i_resources }, m_lvl_num {i_lvlNum}
+Level::Level(int i_lvlNum, DIFFICULTY i_diff) :
+	m_lvl_num {i_lvlNum}
 {
+	resources = GLBVRS::RSRCS;
+	charPtr = GLBVRS::PPTR;
 	//settings
-	colPalA = GenerateRandomColor();
-	colPalB = GenerateRandomColor();
+	colPalA = Physics::GenerateRandomColor(5, 128);
+	colPalB = Physics::GenerateRandomColor(5, 128);
 	phaseOne = true;
 	timeToComplete = 25.0f + (i_lvlNum * 5) - (i_diff * 5);
 
@@ -27,14 +29,28 @@ Level::Level(int i_lvlNum, DIFFICULTY i_diff, std::shared_ptr<Entity> i_charPtr,
 	PopulateMapRooms(i_lvlNum, i_diff);
 }
 
-Level::Level(std::string i_testStr, std::shared_ptr<Entity> i_charPtr, RESOURCES* i_resources) : charPtr{ i_charPtr }, resources{ i_resources }
+Level::Level(std::string i_testStr)
 {//TEST LEVEL
+	resources = GLBVRS::RSRCS;
+	charPtr = GLBVRS::PPTR;
+	//settings
+	colPalA = Physics::GenerateRandomColor(5, 128);
+	colPalB = Physics::GenerateRandomColor(5, 128);
+	phaseOne = true;
+	timeToComplete = 50;
+
 	dimSize = 1;
 	numSectors = 1;
-
 	sectorMap = std::vector<std::vector<MapNode>>(dimSize, std::vector<MapNode>(dimSize, MapNode()));
 	originCoord = MapCoord(0, 0);
-	CreateSectorAtCoord(originCoord);
+	//CreateSectorAtCoord(originCoord);
+	std::shared_ptr<Sector> newSector = std::make_shared<Sector>(this, resources, colPalA, colPalB, true);
+	sectorVect.push_back(newSector);
+	sectorMap[originCoord.x][originCoord.y].vectIndex = sectorVect.size() - 1;
+	sectorMap[originCoord.x][originCoord.y].isRoom = true;
+	allCoords.push_back(originCoord);
+	//
+	GetSector(originCoord)->GenerateEnemies(25, ENEMY_SEEK_PUSH, CENTER, 1, HARD, 0);
 	//GetSector(originCoord)->AddPainfullWallsToLevel();
 	//GetSector(originCoord)->GenerateLevelCircles(1);
 	//GetSector(originCoord)->GenerateLevelCubes(9);
@@ -53,12 +69,14 @@ Level::Level(std::string i_testStr, std::shared_ptr<Entity> i_charPtr, RESOURCES
 }
 
 
-Level::Level(std::shared_ptr<Entity> i_charPtr, RESOURCES * i_resources) : //TUTORIAL LEVEL
-	charPtr{ i_charPtr }, resources{ i_resources }, m_lvl_num{ 0 }
+Level::Level() : //TUTORIAL LEVEL
+ m_lvl_num{ 0 }
 {
+	resources = GLBVRS::RSRCS;
+	charPtr = GLBVRS::PPTR;
 	//init globals
-	colPalA = GenerateRandomColor();
-	colPalB = GenerateRandomColor();
+	colPalA = Physics::GenerateRandomColor(5, 128);
+	colPalB = Physics::GenerateRandomColor(5, 128);
 	dimSize = 6;
 	numSectors = 6;
 	phaseOne = true;
@@ -95,29 +113,22 @@ Level::Level(std::shared_ptr<Entity> i_charPtr, RESOURCES * i_resources) : //TUT
 	
 	//ROOM 2 LEARN TO SHOOT
 	GetSector(room2)->GenerateEnemies(1, ENEMY_SEEK, MARGINS, 1, (DIFFICULTY)0, 2);
-	//GetSector(room2)->GenerateEnemies(numRandosPhase1, ENEMY_RAND, CENTER, 1, (DIFFICULTY)i_diff, 0);
 	GetSector(room2)->GenerateEnemies(3, ENEMY_SEEK_PUSH, CENTER, 2, (DIFFICULTY)0, 0);
 	GetSector(room2)->GenerateEnemies(3, ENEMY_RAND_PUSH, CORNERS, 2, (DIFFICULTY)0, 0);
 	GetSector(room2)->AddTerrain(0, false);
 	
 	//ROOM 3 LEARN TO USE WALL
-	//GetSector(room3)->GenerateEnemies(1, ENEMY_SEEK, MARGINS, 1, (DIFFICULTY)0, 1);
 	GetSector(room3)->GenerateEnemies(2, ENEMY_SEEK, MARGINS, 1, (DIFFICULTY)0, 1);
-	//GetSector(room2)->GenerateEnemies(numRandosPhase1, ENEMY_RAND, CENTER, 1, (DIFFICULTY)i_diff, 0);
 	GetSector(room3)->GenerateEnemies(3, ENEMY_SEEK_PUSH, CENTER, 2, (DIFFICULTY)0, 0);
 	GetSector(room3)->GenerateEnemies(3, ENEMY_RAND_PUSH, CORNERS, 2, (DIFFICULTY)0, 0);
 
 	//ROOM 4 LEARN TO USE EMP 
 	GetSector(room4)->GenerateEnemies(3, ENEMY_SEEK, MARGINS, 1, (DIFFICULTY)0, 2);
-	//GetSector(room4)->GenerateEnemies(1, ENEMY_RAND, MARGINS, 1, (DIFFICULTY)0, 1);
-	//GetSector(room2)->GenerateEnemies(numRandosPhase1, ENEMY_RAND, CENTER, 1, (DIFFICULTY)i_diff, 0);
 	GetSector(room4)->GenerateEnemies(3, ENEMY_SEEK_PUSH, CENTER, 2, (DIFFICULTY)0, 0);
 	GetSector(room4)->GenerateEnemies(3, ENEMY_RAND_PUSH, CORNERS, 2, (DIFFICULTY)0, 0);
 
 	//ROOM 5 LEARN ABOUT PAIN WALLS
-	//GetSector(room4)->GenerateEnemies(4, ENEMY_SEEK, MARGINS, 1, (DIFFICULTY)0, 1);
 	GetSector(room5)->GenerateEnemies(4, ENEMY_RAND, MARGINS, 1, (DIFFICULTY)0, 1);
-	//GetSector(room2)->GenerateEnemies(numRandosPhase1, ENEMY_RAND, CENTER, 1, (DIFFICULTY)i_diff, 0);
 	GetSector(room5)->GenerateEnemies(3, ENEMY_SEEK_PUSH, CENTER, 2, (DIFFICULTY)0, 0);
 	GetSector(room5)->GenerateEnemies(3, ENEMY_RAND_PUSH, CORNERS, 2, (DIFFICULTY)0, 0);
 	GetSector(room5)->AddRandomPainWall(0);
@@ -127,7 +138,6 @@ Level::Level(std::shared_ptr<Entity> i_charPtr, RESOURCES * i_resources) : //TUT
 	
 	//5 BOSS ROOM
 	GetSector(bossRoom)->PopulateBossRoom("TUTORIAL");
-
 }
 
 Level::~Level()
@@ -141,7 +151,7 @@ std::shared_ptr<Sector> Level::GetSector(MapCoord i_coord)
 
 void Level::CreateSectorAtCoord(MapCoord i_coord)
 {
-	std::shared_ptr<Sector> newSector = std::make_shared<Sector>(this, resources, colPalA, colPalB); //Test SECTOR PARAM IS TRUE
+	std::shared_ptr<Sector> newSector = std::make_shared<Sector>(this, resources, colPalA, colPalB);
 	sectorVect.push_back(newSector);
 	sectorMap[i_coord.x][i_coord.y].vectIndex = sectorVect.size() - 1;
 	sectorMap[i_coord.x][i_coord.y].isRoom = true;
@@ -173,41 +183,56 @@ void Level::PopulateSectorAtCoord(MapCoord i_coord, int i_diff)
 	GetSector(i_coord)->GenerateEnemies(numSeekersPhase2, ENEMY_SEEK_PUSH, DOORS, 2, (DIFFICULTY)i_diff, 0);
 	GetSector(i_coord)->GenerateEnemies(numRandosPhase2, ENEMY_RAND_PUSH, CORNERS, 2, (DIFFICULTY)i_diff, 0);
 
+	std::random_device rdGenA;
+	std::mt19937 genTerrain(rdGenA());
+	std::uniform_int_distribution<> distribTerrain(0, 1);
+	int makeIrregularTerrain = distribTerrain(genTerrain);
+	
+	std::uniform_int_distribution<> distribTerrainVerts(3, 6);
+	int terrainVerts = distribTerrainVerts(genTerrain);
 
-	std::discrete_distribution<> smallTerrainDist({ 40, 50, 5, 5 });
-	std::discrete_distribution<> BigTerrainDist({ 85, 10, 5 });
-	int smallTerrainCount = smallTerrainDist(genRoomSeed);
-	int bigTerrainCount = BigTerrainDist(genRoomSeed);
-	if (i_diff == HARD) {
-		--smallTerrainCount;
-		--bigTerrainCount;
-	}
-	while (smallTerrainCount > 0) {
-		//int rando = distrib(gen1);
-		GetSector(i_coord)->AddTerrain(-1, false);
-		--smallTerrainCount;
-	}
-	//bigTerrainCount = 6;
-	while (bigTerrainCount > 0) {
-		//int rando = distrib(gen1);
-		GetSector(i_coord)->AddTerrain(-1, true);
-		--bigTerrainCount;
-	}
+	std::uniform_int_distribution<> distribTerrainSize(150, 350);
+	int terrainSize = distribTerrainSize(genTerrain);
 
-	std::random_device rdRoomSeed4;
-	std::mt19937 painWallSeed(rdRoomSeed4());
-	std::discrete_distribution<> painWallDist({ 50, 50});
-	int painWallCount = painWallDist(painWallSeed);
-	std::random_device rd6;  //Will be used to obtain a seed for the random number engine
-	std::mt19937 gen6(rd6()); //Standard mersenne_twister_engine seeded with rd()
-	std::uniform_int_distribution<> distrib07(0, 7); //both boundaries are inclusive
-
-	while (painWallCount > 0) {
-		int randPainWall = distrib07(gen6);
-		GetSector(i_coord)->AddRandomPainWall(randPainWall);
-		--painWallCount;
+	//if (makeIrregularTerrain) {
+	if (true) {
+	GetSector(i_coord)->GenerateIrregularTerrain(terrainVerts, terrainSize, 200);
 	}
-	//newSector->GenerateLevelCircles(1);
+	else {
+		std::discrete_distribution<> smallTerrainDist({ 40, 50, 5, 5 });
+		std::discrete_distribution<> BigTerrainDist({ 85, 10, 5 });
+		int smallTerrainCount = smallTerrainDist(genRoomSeed);
+		int bigTerrainCount = BigTerrainDist(genRoomSeed);
+		if (i_diff == HARD) {
+			--smallTerrainCount;
+			--bigTerrainCount;
+		}
+		while (smallTerrainCount > 0) {
+			//int rando = distrib(gen1);
+			GetSector(i_coord)->AddTerrain(-1, false);
+			--smallTerrainCount;
+		}
+		//bigTerrainCount = 6;
+		while (bigTerrainCount > 0) {
+			//int rando = distrib(gen1);
+			GetSector(i_coord)->AddTerrain(-1, true);
+			--bigTerrainCount;
+		}
+
+		std::random_device rdRoomSeed4;
+		std::mt19937 painWallSeed(rdRoomSeed4());
+		std::discrete_distribution<> painWallDist({ 50, 50 });
+		int painWallCount = painWallDist(painWallSeed);
+		std::random_device rd6;  //Will be used to obtain a seed for the random number engine
+		std::mt19937 gen6(rd6()); //Standard mersenne_twister_engine seeded with rd()
+		std::uniform_int_distribution<> distrib07(0, 7); //both boundaries are inclusive
+
+		while (painWallCount > 0) {
+			int randPainWall = distrib07(gen6);
+			GetSector(i_coord)->AddRandomPainWall(randPainWall);
+			--painWallCount;
+		}
+	}
 
 	GetSector(i_coord)->filledIn = true;
 }
@@ -307,22 +332,6 @@ void Level::SwitchSectorsToPhaseTwo()
 	for (auto sectorPtr : sectorVect) {
 		sectorPtr->SwitchToPhaseTwo();
 	}
-}
-
-sf::Color Level::GenerateRandomColor()
-{
-	std::random_device rd1;  //Will be used to obtain a seed for the random number engine
-	std::mt19937 gen1(rd1()); //Standard mersenne_twister_engine seeded with rd()
-	std::uniform_int_distribution<> distrib(1, 128); //both boundaries are inclusive
-	int randCol1 = distrib(gen1);
-	int randCol2 = distrib(gen1);
-	int randCol3 = distrib(gen1);
-
-	//std::random_device rdRoomSeed;  //Will be used to obtain a seed for the random number engine
-	//std::mt19937 genRoomSeed(rdRoomSeed()); //Standard mersenne_twister_engine seeded with rd()
-	//std::discrete_distribution<> extraRoomDist({ 25, 50, 25 });
-	//int randExtraRooms = extraRoomDist(genRoomSeed);
-	return sf::Color(randCol1, randCol2, randCol3);
 }
 
 void Level::GenerateMapGrip(int i_lvlNum, DIFFICULTY i_diff)
@@ -443,6 +452,37 @@ void Level::PopulateMapRooms(int i_levelNum, DIFFICULTY i_diff)
 		if (((coord.x != originCoord.x) || (coord.y != originCoord.y)) &&
 			((coord.x != bossRoom.x) || (coord.y != bossRoom.y))) {
 			PopulateSectorAtCoord(coord, i_diff);
+		}
+	}
+
+	int numMiniBosses;
+	switch (i_diff) {
+	case EASY: {
+		numMiniBosses = 1;
+		break;
+	}
+	case MEDIUM: {
+		numMiniBosses = 2;
+		break;
+	}
+	case HARD: {
+		numMiniBosses = 3;
+		break;
+	}
+	}
+	std::random_device rdRoomSeed;  //Will be used to obtain a seed for the random number engine
+	std::mt19937 genRoomSeed(rdRoomSeed()); //Standard mersenne_twister_engine seeded with rd()
+	std::uniform_int_distribution<> extraRoomDist(1, sectorVect.size() - 2);
+	//int randRoom = extraRoomDist(genRoomSeed);
+	std::vector<int> previouslyChosen;
+	int i = 0;
+	while (i < numMiniBosses) {
+		int randRoom = extraRoomDist(genRoomSeed);
+		if ((std::find(previouslyChosen.begin(), previouslyChosen.end(), randRoom) == previouslyChosen.end()) &&
+		 (previouslyChosen.size() < sectorVect.size() - 2)){
+			sectorVect[randRoom]->PopulateBossRoom(m_lvl_num, i_diff, true);
+			previouslyChosen.push_back(randRoom);
+			i++;
 		}
 	}
 	GetSector(bossRoom)->PopulateBossRoom(m_lvl_num, i_diff);

@@ -3,7 +3,6 @@
 #include <iostream>
 #include <algorithm>
 #include <chrono>
-//#include <thread>
 #include <execution>
 #include <random>
 #include <concurrent_vector.h>
@@ -50,7 +49,6 @@ public:
 	bool tutorial;
 	TuteLib tuteLib;
 	DIFFICULTY gameDiff;
-
 
 	int currRunScore;
 

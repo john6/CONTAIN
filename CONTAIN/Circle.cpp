@@ -13,11 +13,11 @@ Vector2f Circle::GetSFMLOriginOffset()
 	return Vector2f(radius, radius);
 }
 
-std::unique_ptr<sf::Shape> Circle::GetSFMLRepr()
+std::shared_ptr<sf::Shape> Circle::GetSFMLRepr()
 {
-	std::unique_ptr<sf::CircleShape> circlePtr = std::make_unique<sf::CircleShape>();
+	std::shared_ptr<sf::CircleShape> circlePtr = std::make_shared<sf::CircleShape>();
 	circlePtr->setRadius(radius);
-	std::unique_ptr<sf::Shape> shapePtr = move(circlePtr);
+	std::shared_ptr<sf::Shape> shapePtr = move(circlePtr);
 	return shapePtr;
 }
 

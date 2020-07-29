@@ -87,6 +87,27 @@ const Vector2f RIGHT(1.0f, 0.0f);
 const Vector2f NULL_VECTOR(0.0f, 0.0f);
 
 //Colors
+//SHADES OF GRAY ship colors
+const sf::Color WHITE = sf::Color(255, 255, 255);
+const sf::Color BLACK = sf::Color(0, 0, 0);
+const sf::Color OFFBLACK0 = sf::Color(5, 5, 5);
+const sf::Color OFFBLACK1 = sf::Color(10, 10, 10);
+const sf::Color OFFBLACK2 = sf::Color(15, 15, 15);
+const sf::Color OFFBLACK3 = sf::Color(20, 20, 20);
+const sf::Color OFFBLACK4 = sf::Color(25, 25, 25);
+const sf::Color OFFBLACK5 = sf::Color(30, 30, 30);
+const sf::Color OFFBLACK6 = sf::Color(35, 35, 35);
+const sf::Color METALLICSILVER = sf::Color(170, 169, 173);
+const sf::Color SONICSILVER = sf::Color(117, 117, 117);
+const sf::Color DARKSILVER = sf::Color(113, 112, 110);
+const sf::Color DARKCHRYSLERSILVER = sf::Color(108, 122, 134);
+const sf::Color DIMGRAY = sf::Color(105, 105, 105);
+const sf::Color SILVER = sf::Color(192, 192, 192);
+const sf::Color LIGHTSILVER = sf::Color(216, 216, 216);
+const sf::Color FORDSILVER = sf::Color(197, 206, 212);
+const sf::Color SLATEGRAY = sf::Color(112, 128, 144);
+const sf::Color GUNMETAL = sf::Color(42, 52, 57);
+//GREENS - generally an enemy color
 const sf::Color BASIL = sf::Color(82, 89, 19);
 const sf::Color PEAR = sf::Color(82, 146, 41);
 const sf::Color CHARTREUSE = sf::Color(50, 100, 0);
@@ -94,20 +115,25 @@ const sf::Color EMERALD = sf::Color(31, 78, 47);
 const sf::Color PISTACHIO = sf::Color(58, 77, 45);
 const sf::Color SAGE = sf::Color(188, 184, 138);
 const sf::Color MOSS = sf::Color(138, 154, 91);
+//BLUES
 const sf::Color BLUEVIOLET = sf::Color(138, 43, 226);
 const sf::Color INDIGO = sf::Color(75, 0, 130);
 const sf::Color MEDIUMPURPLE = sf::Color(147, 112, 219);
 const sf::Color PURPLE = sf::Color(128, 0, 128);
 const sf::Color DARKVIOLET = sf::Color(148, 0, 211);
-const sf::Color DIMGRAY = sf::Color(105, 105, 105);
-const sf::Color SILVER = sf::Color(192, 192, 192);
-const sf::Color SLATEGRAY = sf::Color(112, 128, 144);
+const sf::Color CYAN = sf::Color(0, 255, 255);
+//YELLOWS
+const sf::Color YELLOWCYBER = sf::Color(255, 211, 0);
+const sf::Color SUNFLOWERYELLOW = sf::Color(227, 187, 28);
 
-//~~DIFFICULTY SETTINGS~~
-////
-//const float ENEMYSPEEDEASY = 12;
-//const float ENEMYSPEEDMED = 15;
-//const float ENEMYSPEEDHARD = 18;
+//REDS
+const sf::Color REDCINNIBAR = sf::Color(246, 65, 45);
+const sf::Color MYSTICRED = sf::Color(255, 86, 7);
+const sf::Color VIVIDGAMBOGE= sf::Color(255, 152, 0);
+const sf::Color AMBER = sf::Color(255, 193, 0);
+const sf::Color VIVIDYELLOW= sf::Color(255, 236, 25);
+
+
 
 //EASY SETTINGS
 //const float SPEED_MULTIPLIER_EASY = 0.40f;
@@ -119,6 +145,7 @@ const sf::Color SLATEGRAY = sf::Color(112, 128, 144);
 //const float SPEED_MULTIPLIER_MEDIUM = 0.7f;
 //const float PLAYER_SPEED_MULTIPLIER_MEDIUM = 0.6f;
 //const float LEVEL_TIME_LIMIT_MEDIUM = 180.0f;
+
 //HARD SETTINGS
 //const float SPEED_MULTIPLIER_HARD = 1.0f;
 //const float PLAYER_SPEED_MULTIPLIER_HARD = 0.9f;
@@ -127,28 +154,37 @@ const sf::Color SLATEGRAY = sf::Color(112, 128, 144);
 //ENUMS
 enum GAME_STATE { MENU, START_GAME, START_TUTORIAL, IN_GAME, EXIT_GAME, WIN, LOSE };
 //Leave WALL_BIG as last upgrade I use it as a terminating condition for InitLvl();
+//This is required because youre not supposed to tierate over enums
+//https://stackoverflow.com/questions/261963/how-can-i-iterate-over-an-enum
 enum UPGRADE_TYPE { NONE, RATE_OF_FIRE, WEAP_SPEED, SCATTER, SMALL_SHIP, BIG_SHIP, BLAST, WALL_BIG };
 enum MOUSE_STATE { MOUSE_UP, MOUSE_DOWN };
-enum DIFFICULTY { EASY, MEDIUM, HARD };
+enum DIFFICULTY { EASY, MEDIUM, HARD, TUTORIAL };
 enum SCREEN_AREA { CORNERS, MARGINS, DOORS, CENTER };
 enum SCREEN_SIDE {SCREEN_UP, SCREEN_RIGHT, SCREEN_DOWN, SCREEN_LEFT };
 enum TERRAIN_AREA { TER_UP, TER_RIGHT, TER_DOWN, TER_LEFT, TER_CENT };
-
-//enum UPGRADE_STATE { EXIT_UP_1, EXIT_UP_2, EXIT_UP_3, CONTINUE };
-//enum ENTITY_TYPE { WALL, DOOR, ENEMY, PLAYER, PROJECTILE};
-//enum MATERIAL_TYPE {ROCK, WOOD, METAL, BOUNCYBALL, SUPERBALL, PILLOW, STATIC, STATICVERYFRICTION, RUBBER, ICE};
 enum TypeID {
 	ENTITY_VIRTUAL, PLAYER, PROJ_BASIC, PROJ_WALL, BLAST_STUN, ENEMY_SEEK,
 	ENEMY_RAND, ENEMY_BOSS, ENEMY_SEEK_PUSH, ENEMY_RAND_PUSH, WALL_BASIC,
-	WALL_FIRE, DOOR_LOCKED, DOOR_OPEN, END_LEVEL, UPGRADE};
+	WALL_FIRE, DOOR, END_LEVEL, UPGRADE, ANIMATION, SCENERY};
+enum ANIMTYPE { CANNED_EXPLOSION, ENEMY_BURST_DEATH};
+
 
 //TIME STUFF
 typedef std::chrono::high_resolution_clock               hiResTime;
 typedef std::chrono::microseconds                        microSec;
 typedef std::chrono::high_resolution_clock::time_point   hiRes_time_point;
 
+
+//TYPEDEFS
+typedef std::shared_ptr<std::vector<std::shared_ptr<sf::Drawable>>> drawablePtrVect;
+
+
 //SCORE STUFF
 const float LEVEL_SCORE_INCREASE = 1000;
+
+class RESOURCES;
+class Game;
+class Entity;
 
 class GLBVRS
 {
@@ -179,15 +215,17 @@ public:
 	static float ENEMYSPEEDMED;
 	static float ENEMYSPEEDHARD;
 
-public:
-	//GLOBAL_CONSTANTS(unsigned int i_screenWidth, unsigned int i_screenHeight);
+	//UTILITY
+	static RESOURCES* RSRCS;
+	static Game* GPTR;
+	static std::shared_ptr<Entity> PPTR;
 
-	static void SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_screenHeight);
+public:
+	static void SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_screenHeight, RESOURCES* i_resourcesPtr, Game* i_gamePtr, std::shared_ptr<Entity> i_playerPtr);
 
 	static int GetUpgradeMax(UPGRADE_TYPE i_powType);
 
 	GLBVRS();
 	~GLBVRS();
-
 
 };
