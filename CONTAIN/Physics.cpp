@@ -45,6 +45,8 @@ std::vector<Vector2f> Physics::FindIncidentFace(RigidBody * i_refEnt, RigidBody 
 		}
 	}
 	//assign face vertices for incident face;
+	//TODO I HONESTLY DONT KNOW HOW BUT THIS WAS -1, THIS HAS NEVER HAPPENED BEFORE I GUESS I CAN PROTECT IT?
+	//THE -1 WAS AN ATTEMPT TO FAIL FAST BUT I GUESS I CAN JUST CHANGE IT IF THIS EVER HAPPENS AGAIN
 	Vector2f incidentFaceVert1 = incidentVerts[incidentFaceIndex];
 	Vector2f incidentFaceVert2 = incidentVerts[(incidentFaceIndex + 1) % incidentVerts.size()];
 	std::vector<Vector2f> incidentFaceVerts = { incidentFaceVert1 , incidentFaceVert2 };
@@ -354,7 +356,9 @@ std::shared_ptr<Polygon> Physics::CreateIrregularPolygon(int i_numVerts, float i
 	while (!verifiedConvex) {
 		std::random_device rd1;
 		std::mt19937 gen1(rd1());
-		std::uniform_int_distribution<> distrib(1, i_size); //both boundaries are inclusive
+		int sizeBounded = std::max((int)i_size, 5);
+		//Might be a rnadom weird bug but i_size was set to 0.0 here TODO
+		std::uniform_int_distribution<> distrib(1, sizeBounded); //both boundaries are inclusive
 
 		std::vector<float> xPool = {};
 		std::vector<float> yPool = {};

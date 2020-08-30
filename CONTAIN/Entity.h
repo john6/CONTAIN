@@ -20,11 +20,6 @@ class PainWall;
 class PowerUp;
 class Blast;
 class CrazyBoi;
-//class MiniBossBurst;
-//class MiniBossStream;
-//class MiniBossRush;
-//class MiniBossSplit;
-//class MiniBossSpawn;
 class BossBurst;
 class BossStream;
 class BossRush;
@@ -47,7 +42,9 @@ public:
 	bool physicalObject;
 	bool canCollide;
 	bool hasVisuals;
+	float borderThickness;
 	drawablePtrVect drawables;
+	drawablePtrVect visuals;
 
 	Entity();
 	Entity(Vector2f i_startPosition, RigidBody i_rb, TypeID i_typeID);
@@ -89,6 +86,7 @@ public:
 
 	virtual void CollideWithBlast(Blast* i_blastPtr);
 
+	virtual void UpdateVisuals(float i_stepSize);
 };
 
 class PlayerChar :
@@ -99,6 +97,8 @@ private:
 	PlayerController pController;
 	hiRes_time_point lastShotFired;
 	float shipRateOfFire;
+	hiRes_time_point lastWallFired;
+	float shipRateOfFireWall;
 	float shipSpeed;
 	float dmgRate;
 	hiRes_time_point lastDamageReceived;
@@ -120,6 +120,7 @@ public:
 	int health;
 
 	float weaponDelay;
+	float wallDelay;
 	int maxSpecialAmmo;
 	int currSpecialAmmo;
 	int numShots;
@@ -161,6 +162,8 @@ public:
 
 	void CollideWithProjectile(Projectile* i_projPtr) override;
 
+	void UpdateVisuals(float i_stepSize) override;
+
 	void ShootBasic(Vector2f i_mousePos);
 
 	void ShootWall(Vector2f i_mousePos);
@@ -176,12 +179,12 @@ class Projectile :
 	public Entity
 {
 private:
-	Sector* lvlPtr;
+	Sector* sectPtr;
 
 public:
 	int projType;
 
-	Projectile(Vector2f i_startPosition, int i_projType = 0, RigidBody i_rb = RigidBody(std::make_shared<Circle>(GLBVRS::PROJECTILE_RADIUS), HEAVYBALL));
+	Projectile(Sector* i_sectPtr, Vector2f i_startPosition, int i_projType = 0, RigidBody i_rb = RigidBody(std::make_shared<Circle>(GLBVRS::PROJECTILE_RADIUS), HEAVYBALL));
 	~Projectile();
 	//projtype 0 is sent from the player,
 	//projType 1 is sent from an enemy
@@ -201,6 +204,8 @@ public:
 	void CollideWithWall(Wall* i_wallPtr) override;
 
 	void CollideWithPainWall(PainWall * i_painWallPtr) override;
+
+	void Explode();
 
 	void CollideWithDoor(Door* i_doorPtr) override;
 };
@@ -243,7 +248,10 @@ protected:
 	Sector* sectPtr;
 	float maxHealth;
 	float health;
-
+	sf::Color origColorFill;
+	sf::Color origColorOutLine;
+	sf::Color deathColorFill;
+	sf::Color deathColorOutLine;
 
 public:
 	std::shared_ptr<Entity> charPtr;
@@ -268,6 +276,8 @@ public:
 
 	void CollideWithProjectile(Projectile* i_projPtr) override;
 
+	void DropPowerUp();
+
 	void UpdateHealth(float i_stepSize);
 
 	virtual void TakeDamage(float i_dmg);
@@ -275,6 +285,8 @@ public:
 	virtual void Stun(float i_stunTime);
 
 	virtual void SetDiffVars(int i_diff);
+
+	void ChangeColorHealth();
 
 	void TurnToMetal();
 };
@@ -316,7 +328,7 @@ public:
 
 
 	BossBurst(Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss = false, 
-		RigidBody i_rb = RigidBody(std::make_shared<Circle>(70 * GLBVRS::SIZE_RAT), WOOD));
+		RigidBody i_rb = RigidBody(std::make_shared<Circle>(70 * GLBVRS::SIZE_RAT), METAL));
 
 	void Update(float i_stepSize) override;
 
@@ -347,7 +359,7 @@ private:
 
 public:
 	BossRush(Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss = false,
-		RigidBody i_rb = RigidBody(std::make_shared<Circle>(75 * GLBVRS::SIZE_RAT), LESSBOUNCYBALL));
+		RigidBody i_rb = RigidBody(std::make_shared<Circle>(75 * GLBVRS::SIZE_RAT), HEAVYBOUNCE));
 
 	void Update(float i_stepSize) override;
 
@@ -381,7 +393,7 @@ private:
 
 public:
 	BossStream(Sector* i_sectPtr, DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss = false,
-		RigidBody i_rb = RigidBody(std::make_shared<Circle>(70 * GLBVRS::SIZE_RAT), WOOD));
+		RigidBody i_rb = RigidBody(std::make_shared<Circle>(70 * GLBVRS::SIZE_RAT), METAL));
 
 	void Update(float i_stepSize) override;
 
@@ -499,8 +511,16 @@ private:
 	Sector* sectPtr;
 
 public:
+	bool breakable;
+	float health;
+
+	void CollideWithProjectile(Projectile* i_projPtr) override;
+
+	void TakeDamage(float i_dmg);
+
 	Wall(Vector2f i_startPosition, Sector* i_sectPtr, RigidBody i_rb,
-		sf::Color i_fillCol = sf::Color::Black, sf::Color i_outCol = sf::Color::White);
+		sf::Color i_fillCol = sf::Color::Black, sf::Color i_outCol = sf::Color::White,
+		bool i_break = false);
 	~Wall();
 };
 
@@ -533,7 +553,7 @@ public:
 	bool active;
 
 	EndObject(Sector* i_sectPtr, Vector2f i_startPosition, RigidBody i_rb = 
-		RigidBody(std::make_shared<Rectangle>(100.0f, 100.0f), STATIC));
+		RigidBody(std::make_shared<Rectangle>(150.0f * GLBVRS::SIZE_RAT, 150.0f * GLBVRS::SIZE_RAT), STATIC));
 	~EndObject();
 
 
@@ -550,7 +570,7 @@ public:
 	UPGRADE_TYPE powType;
 
 	PowerUp(Sector * i_sectPtr, Vector2f i_startPosition, UPGRADE_TYPE i_powType, RigidBody i_rb =
-		RigidBody(std::make_shared<Rectangle>(100.0f, 100.0f), STATIC));
+		RigidBody(std::make_shared<Rectangle>(100.0f * GLBVRS::SIZE_RAT, 100.0f * GLBVRS::SIZE_RAT), STATIC));
 	~PowerUp();
 
 	void Update(float i_stepSize) override;
@@ -573,6 +593,7 @@ private:
 	float origRadius;
 	float origWidth;
 	float origHeight;
+	sf::Vector2f origPosition;
 
 public:
 	Anim(Sector* i_sectPtr, Vector2f i_startPosition, microSec i_lifetime, 

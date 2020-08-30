@@ -13,15 +13,23 @@ private:
 	Button playAgainButton;
 	Button quitButton;
 	sf::Text winText;
+	sf::Text title;
+	bool won;
 
 	int prevScore;
+
 	sf::Text prevScoreText;
-	sf::Text highScoresText;
+	sf::Text highScoreLabelText;
+	sf::RectangleShape highScoreRect;
+	std::vector<int> highScoresList;
+	std::vector<sf::Text> highScoresChart;
+	sf::Vector2f highScoresListStart;
+	float bttnOffsetVert;
 
 public:
 	RESOURCES* resources;
 
-	YouWonMenu(RESOURCES* i_resources);
+	YouWonMenu(RESOURCES* i_resources, bool i_won);
 	~YouWonMenu();
 
 	bool PollInput(sf::Vector2i mousePosition, Button* button, bool stickyButton = false);
@@ -32,6 +40,6 @@ public:
 
 	void SetPrevScore(int i_prevScore);
 
-	void SetHighScores(std::string i_highScores);
+	void SetHighScores(std::list<int> i_highScores);
 };
 

@@ -5,7 +5,7 @@
 //
 //}
 
-void GLBVRS::SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_screenHeight, RESOURCES* i_resourcesPtr, Game* i_gamePtr, std::shared_ptr<Entity> i_playerPtr)
+void GLBVRS::SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_screenHeight, RESOURCES* i_resourcesPtr, Game* i_gamePtr, std::shared_ptr<Entity> i_playerPtr, float i_soundLvl)
 {
 	//WINDOW SETTINGS
 	GLBVRS::SCREEN_WIDTH = i_screenWidth;
@@ -21,8 +21,8 @@ void GLBVRS::SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_scree
 
 
 	//MENU RESOLUTION
-	GLBVRS::BTTN_WDTH = GLBVRS::SCREEN_WIDTH / 3;
-	GLBVRS::BTTN_HGHT = GLBVRS::SCREEN_HEIGHT / 10;
+	GLBVRS::BTTN_WDTH = GLBVRS::CRT_WDTH / 5.0f;
+	GLBVRS::BTTN_HGHT = GLBVRS::CRT_HGHT / 10;
 
 	//OBJECT SIZES
 	GLBVRS::DOOR_WIDTH = 150.0f * GLBVRS::SIZE_RAT;
@@ -31,14 +31,15 @@ void GLBVRS::SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_scree
 	GLBVRS::PROJECTILE_RADIUS = 10.0f * GLBVRS::SIZE_RAT;
 
 	//SPEED ADJUSTMENTS
-	GLBVRS::ENEMYSPEEDEASY = 12.0f * std::pow(GLBVRS::SIZE_RAT, 2);
-	GLBVRS::ENEMYSPEEDMED = 15.0f * std::pow(GLBVRS::SIZE_RAT, 2);
-	GLBVRS::ENEMYSPEEDHARD = 18.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+	GLBVRS::ENEMYSPEEDEASY = 17.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+	GLBVRS::ENEMYSPEEDMED = 20.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+	GLBVRS::ENEMYSPEEDHARD = 28.0f * std::pow(GLBVRS::SIZE_RAT, 2);
 
 	//UTILITY
 	GLBVRS::RSRCS = i_resourcesPtr;
 	GLBVRS::GPTR = i_gamePtr;
 	GLBVRS::PPTR = i_playerPtr;
+	GLBVRS::SOUNDLVL = i_soundLvl;
 }
 
 int GLBVRS::GetUpgradeMax(UPGRADE_TYPE i_powType)
@@ -53,7 +54,7 @@ int GLBVRS::GetUpgradeMax(UPGRADE_TYPE i_powType)
 		break;
 	}
 	case (WEAP_SPEED): { //number of shots
-		return 3;
+		return 2;
 		break;
 	}
 	case (SCATTER): { //number of shots
@@ -61,11 +62,11 @@ int GLBVRS::GetUpgradeMax(UPGRADE_TYPE i_powType)
 		break;
 	}
 	case (SMALL_SHIP): { //number of shots
-		return 3;
+		return 2;
 		break;
 	}
 	case (BIG_SHIP): { //number of shots
-		return 3;
+		return 2;
 		break;
 	}
 	case (BLAST): { //number of shots
@@ -73,11 +74,44 @@ int GLBVRS::GetUpgradeMax(UPGRADE_TYPE i_powType)
 		break;
 	}
 	case (WALL_BIG): { //number of shots
-		return 3;
+		return 2;
 		break;
 	}
 	}
 
+}
+
+sf::VideoMode GLBVRS::GetVideoMode(RSLTN i_res)
+{
+	sf::VideoMode mode;
+	switch (i_res) {
+	case TWLV_SVN: {
+		mode = sf::VideoMode(1280, 720);
+		break;
+	}
+	case FRTN_NNTY : {
+		mode = sf::VideoMode(1440, 900);
+		break;
+	}
+	case NNTN_TN: {
+		mode = sf::VideoMode(1920, 1080);
+		break;
+	}
+	case FLL_SCRN: {
+		sf::VideoMode(1920, 1080);
+		break;
+	}
+	}
+	return mode;
+}
+
+void GLBVRS::SetTextOriginCenter(sf::Text * i_textPtr)
+{
+	auto rect = i_textPtr->getLocalBounds();
+	auto rect2 = i_textPtr->getGlobalBounds();
+	float halfWidth = rect.width / 2.0f;
+	float halfHeight = rect.height / 2.0f;
+	i_textPtr->setOrigin(sf::Vector2f(halfWidth, halfHeight));
 }
 
 GLBVRS::GLBVRS()
@@ -95,8 +129,8 @@ float GLBVRS::HR_MRG = static_cast<float>(GLBVRS::SCREEN_WIDTH / 20.0f);        
 float GLBVRS::VRT_MRG = static_cast<float>(GLBVRS::SCREEN_HEIGHT / 20.0f);       //vertical margin
 
 //MENU RESOLUTION
-float GLBVRS::BTTN_WDTH = GLBVRS::SCREEN_WIDTH / 3;
-float GLBVRS::BTTN_HGHT = GLBVRS::SCREEN_HEIGHT / 10;
+float GLBVRS::BTTN_WDTH = GLBVRS::CRT_WDTH / 4.0f;
+float GLBVRS::BTTN_HGHT = GLBVRS::CRT_HGHT / 10;
 float GLBVRS::SIZE_RAT = 1;
 
 //OBJECT SIZES
@@ -113,6 +147,7 @@ float GLBVRS::ENEMYSPEEDHARD = 18.0f;
 RESOURCES* GLBVRS::RSRCS = NULL;
 Game* GLBVRS::GPTR = NULL;
 std::shared_ptr<Entity> GLBVRS::PPTR = NULL;
+float GLBVRS::SOUNDLVL = 75.0f;
 
 GLBVRS::~GLBVRS()
 {

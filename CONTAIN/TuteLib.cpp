@@ -92,7 +92,7 @@ void TuteLib::InitStatics(sf::RenderWindow* i_windowPtr, RESOURCES* i_resources)
 	 wall.AddTextBox("Those aliens will hurt you if they collide with your ship. \n\nRight click to create an energy wall to stop them.\n\nYour primary lasers will bounce off of them, too!");
 	 wall.PlaceBottomBox();
 	 emp = InfoPopUp(i_resources, GLBVRS::CRT_WDTH, GLBVRS::CRT_HGHT);
-	 emp.AddTextBox("Damn, there's a lot of them in here.\n\nIf you are swarmed by enemies, click the scroll wheel\n or space bar to release an EMP blast.\n\nIt will repulse the aliens, and stun them for a few seconds.");
+	 emp.AddTextBox("Damn, there's a lot of them in here.\n\nIf you are swarmed by enemies, click the scroll wheel\n or space bar to release an stun blast.\n\nIt will repulse the aliens, and stun them for a few seconds.");
 	 emp.PlaceBottomBox();
 	 firewall = InfoPopUp(i_resources, GLBVRS::CRT_WDTH, GLBVRS::CRT_HGHT);
 	 firewall.AddTextBox("Be careful, Captain, That section of the wall is red hot!\n\nLooks like this freighter's still got some power. Steer clear.\n\nIt will hurt the aliens as well.");
@@ -101,13 +101,13 @@ void TuteLib::InitStatics(sf::RenderWindow* i_windowPtr, RESOURCES* i_resources)
 	 boss.AddTextBox("Oh baby, this alien looks like trouble. It sequestered itself\nin the engine room. You're in for a tough fight!\n");
 	 boss.PlaceBottomBox();
 	 escape = InfoPopUp(i_resources, GLBVRS::CRT_WDTH, GLBVRS::CRT_HGHT);
-	 escape.AddTextBox("Ok lol never mind. Turns out that was just a normal guy.\nThat would have been crazy if he was really strong tho.\n\nOnce you defeat the boss, the engine will start heating up\nuntil the freighter explodes,hurry back to the first room!");
+	 escape.AddTextBox("Ok lol never mind. Turns out that was just a normal guy.\nThat would have been crazy if he was really strong though.\n\nOnce you defeat the boss, the engine will start heating up\nuntil the freighter explodes,hurry back to the first room!");
 	 escape.PlaceBottomBox();
 	 pushenemies = InfoPopUp(i_resources, GLBVRS::CRT_WDTH, GLBVRS::CRT_HGHT);
-	 pushenemies.AddTextBox("The aliens are suffering from the heat!\nI don't think they'll hurt you in this state,but they're\nblocking you from the exit.\n\nLooks like the doors are open anway, just get past them.");
+	 pushenemies.AddTextBox("The aliens are suffering from the heat!\nThey won't hurt you in this state,but they're\nblocking you from the exit.\n\nThe doors are all stuck open, just get past them.");
 	 pushenemies.PlaceBottomBox();
 	 end = InfoPopUp(i_resources, GLBVRS::CRT_WDTH, GLBVRS::CRT_HGHT);
-	 end.AddTextBox("Oh wow, you got out just in time!\n\nYou probably can't see it but theres a HUGE explosion. Explode\n more freighters and we'll upgrade your ship as compensation!\n Fare well, Captain Spaceship.\n");
+	 end.AddTextBox("Oh wow, you got out just in time!\n\nYou probably can't see it but there's a HUGE explosion. Explode\n more freighters and we'll upgrade your ship as compensation!\n Fare well, Captain Spaceship.\n");
 	 end.PlaceBottomBox();
 }
 

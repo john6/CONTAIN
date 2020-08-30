@@ -51,6 +51,12 @@ Vector2f PlayerController::RightClick()
 	}
 }
 
+Eigen::Vector2f PlayerController::GetMousePos()
+{
+	sf::Vector2i mPos = sf::Mouse::getPosition(*rWindow);
+	return Eigen::Vector2f(mPos.x, mPos.y);
+}
+
 bool PlayerController::ScrollClick()
 {
 	if ((sf::Mouse::isButtonPressed(sf::Mouse::Middle)) || (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space))) {

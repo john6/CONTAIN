@@ -30,6 +30,8 @@ public:
 	
 	bool phaseOne;
 
+	int enemiesKilled;
+
 	hiRes_time_point beginTime;
 	microSec timeElapsed;
 	float timeToComplete;

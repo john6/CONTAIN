@@ -10,7 +10,7 @@ public:
 	enum BUTTON_STATE { UP, DOWN, HOVER };
 
 private:
-
+	sf::Font* fontPtr;
 	sf::Text m_text;
 	sf::RectangleShape m_positionAndSize;
 	sf::Color m_colorUp;
@@ -20,7 +20,7 @@ private:
 	Button::BUTTON_STATE m_state;
 
 public:
-	Button(std::string string, sf::RectangleShape positionAndSize);
+	Button(std::string string, sf::RectangleShape positionAndSize, sf::Font* i_fontPtr);
 	Button() = default;
 	~Button();
 

@@ -1,7 +1,9 @@
 #include "Button.h"
 
 
-Button::Button(std::string string, sf::RectangleShape positionAndSize) {
+Button::Button(std::string string, sf::RectangleShape positionAndSize, sf::Font* i_fontPtr) :
+	fontPtr{ i_fontPtr }
+ {
 	SetPositionAndSize(positionAndSize);
 	SetText(string);
 	m_state = UP;
@@ -21,11 +23,13 @@ Button::BUTTON_STATE Button::GetState() {
 
 void Button::SetText(std::string s) {
 	m_text.setString(s);
-	int charSize = std::min(30, static_cast<int>(m_positionAndSize.getSize().x / 12.0f));
+	int charSize = std::min(30, static_cast<int>(m_positionAndSize.getSize().x / 14.0f));
 	m_text.setCharacterSize(charSize);
 	m_text.setOutlineThickness(1.0f);
-	m_text.setPosition(sf::Vector2f(m_positionAndSize.getPosition().x + (m_positionAndSize.getSize().x / 3.0f),
-		m_positionAndSize.getPosition().y + (m_positionAndSize.getSize().y / 3.0f)));
+	m_text.setFont(*fontPtr);
+	GLBVRS::SetTextOriginCenter(&m_text);
+	m_text.setPosition(sf::Vector2f(m_positionAndSize.getPosition().x + (m_positionAndSize.getSize().x / 2.0f),
+		m_positionAndSize.getPosition().y + (m_positionAndSize.getSize().y / 2.0f)));
 }
 
 void Button::SetColorsFromState() {
@@ -63,7 +67,7 @@ void Button::SetColorsFromState() {
 
 void Button::SetPositionAndSize(sf::RectangleShape rect) {
 	m_positionAndSize = rect;
-	int outLineThickness = std::min(10, static_cast<int>(rect.getSize().x / 30));
+	int outLineThickness = std::min(10, static_cast<int>(rect.getSize().x / 50));
 	m_positionAndSize.setOutlineThickness(outLineThickness);
 }
 

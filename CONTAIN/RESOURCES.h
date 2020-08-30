@@ -71,10 +71,12 @@ private:
 
 	sf::Sound m_sound;
 	sf::Music music;
+	bool musicIsOn;
 	std::mutex mtx;
 
 public:
 	sf::Font m_font;
+	float soundLvl;
 
 	RESOURCES();
 	~RESOURCES();
@@ -91,4 +93,10 @@ public:
 	void PlaySound(int soundNum);
 
 	void PlayMusicFromFile(int i_songNum);
+
+	void SetSoundLevel(float i_soundLvl);
+
+	void TurnMusicOn(bool i_music);
+
+	void SetTextOriginCenter(sf::Text* i_textPtr);
 };

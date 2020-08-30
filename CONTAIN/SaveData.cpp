@@ -89,4 +89,9 @@ std::string SaveData::GetHighScoresString()
 	return highScoreString;
 }
 
+std::list<int> SaveData::GetHighScoresVect()
+{
+	return highScores;
+}
+
 

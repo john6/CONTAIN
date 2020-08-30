@@ -45,6 +45,7 @@
     <ClCompile Include="RESOURCES.cpp" />
     <ClCompile Include="SaveData.cpp" />
     <ClCompile Include="Sector.cpp" />
+    <ClCompile Include="SettingsMenu.cpp" />
     <ClCompile Include="Shape.cpp" />
     <ClCompile Include="TextBox.cpp" />
     <ClCompile Include="Transform.cpp" />
@@ -60,6 +61,7 @@
     <ClInclude Include="EnemyAI.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="InfoPopUp.h" />
+    <ClInclude Include="main.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="PlayerController.h" />
@@ -80,6 +82,7 @@
     <ClInclude Include="RESOURCES.h" />
     <ClInclude Include="SaveData.h" />
     <ClInclude Include="Sector.h" />
+    <ClInclude Include="SettingsMenu.h" />
     <ClInclude Include="Shape.h" />
     <ClInclude Include="TextBox.h" />
     <ClInclude Include="Transform.h" />

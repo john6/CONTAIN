@@ -4,6 +4,8 @@
 
 RESOURCES::RESOURCES()
 {
+	soundLvl = 75.0f;
+	musicIsOn = true;
 	//font
 	if (!m_font.loadFromFile("Font/kongtext.ttf")) {
 		std::cerr << "error loading font \n";
@@ -180,72 +182,85 @@ RESOURCES::~RESOURCES()
 void RESOURCES::PlayMusicFromFile(int i_songNum)
 {
 	mtx.lock();
-	switch (i_songNum) {
-	case 0: {
-		if (!music.openFromFile("Sounds/Music/BF980.wav")) {
-			std::cerr << "error loading 'Sounds / Music / BF980.wav' \n";
+	if (musicIsOn) {
+		music.setVolume(soundLvl);
+		switch (i_songNum) {
+		case 0: {
+			if (!music.openFromFile("Sounds/Music/BF980.wav")) {
+				std::cerr << "error loading 'Sounds / Music / BF980.wav' \n";
+			}
+			break;
 		}
-		break;
-	}
-	case 1: {
-		if (!music.openFromFile("Sounds/Music/D2PAK.wav")) {
-			std::cerr << "error loading 'Sounds / Music / D2PAK.wav' \n";
+		case 1: {
+			if (!music.openFromFile("Sounds/Music/D2PAK.wav")) {
+				std::cerr << "error loading 'Sounds / Music / D2PAK.wav' \n";
+			}
+			break;
 		}
-		break;
-	}
-	case 2: {
-		if (!music.openFromFile("Sounds/Music/EPROM.wav")) {
-			std::cerr << "error loading 'Sounds / Music / EPROM.wav' \n";
+		case 2: {
+			if (!music.openFromFile("Sounds/Music/EPROM.wav")) {
+				std::cerr << "error loading 'Sounds / Music / EPROM.wav' \n";
+			}
+			break;
 		}
-		break;
-	}
-	case 3: {
-		if (!music.openFromFile("Sounds/Music/FinFET.wav")) {
-			std::cerr << "error loading 'Sounds / Music / finFET.wav' \n";
+		case 3: {
+			if (!music.openFromFile("Sounds/Music/FinFET.wav")) {
+				std::cerr << "error loading 'Sounds / Music / finFET.wav' \n";
+			}
+			break;
 		}
-		break;
-	}
-	case 4: {
-		if (!music.openFromFile("Sounds/Music/MOSFET.wav")) {
-			std::cerr << "error loading 'Sounds / Music / MOSFET.wav' \n";
+		case 4: {
+			if (!music.openFromFile("Sounds/Music/MOSFET.wav")) {
+				std::cerr << "error loading 'Sounds / Music / MOSFET.wav' \n";
+			}
+			break;
 		}
-		break;
-	}
-	case 5: {
-		if (!music.openFromFile("Sounds/Music/TO-3.wav")) {
-			std::cerr << "error loading 'Sounds / Music / TO-3.wav' \n";
+		case 5: {
+			if (!music.openFromFile("Sounds/Music/TO-3.wav")) {
+				std::cerr << "error loading 'Sounds / Music / TO-3.wav' \n";
+			}
+			break;
 		}
-		break;
-	}
-	case 6: {
-		if (!music.openFromFile("Sounds/Music/Vs Excite.wav")) {
-			std::cerr << "error loading 'Sounds / Music / VS Excite.wav' \n";
+		case 6: {
+			if (!music.openFromFile("Sounds/Music/Vs Excite.wav")) {
+				std::cerr << "error loading 'Sounds / Music / VS Excite.wav' \n";
+			}
+			break;
 		}
-		break;
-	}
-	//THESE TWO FILES WONT LOAD:
-			//Failed to open WAV sound file (invalid or unsupported file)
-			//error loading 'Sounds / Music / CMOS.wav'
-			//Failed to play audio stream: sound parameters have not been initialized (call initialize() first)
-	//case 7: {
-	//	if (!music.openFromFile("Sounds/Music/CMOS.wav")) {
-	//		std::cerr << "error loading 'Sounds / Music / CMOS.wav' \n";
-	//	}
-	//	break;
-	//}
+				//THESE TWO FILES WONT LOAD:
+						//Failed to open WAV sound file (invalid or unsupported file)
+						//error loading 'Sounds / Music / CMOS.wav'
+						//Failed to play audio stream: sound parameters have not been initialized (call initialize() first)
+				//case 7: {
+				//	if (!music.openFromFile("Sounds/Music/CMOS.wav")) {
+				//		std::cerr << "error loading 'Sounds / Music / CMOS.wav' \n";
+				//	}
+				//	break;
+				//}
 
-	//case 8: {
-	//	if (!music.openFromFile("Sounds/Music/MITS.wav")) {
-	//		std::cerr << "error loading 'Sounds / Music / MITS.wav' \n";
-	//	}
-	//	break;
-	//}
+				//case 8: {
+				//	if (!music.openFromFile("Sounds/Music/MITS.wav")) {
+				//		std::cerr << "error loading 'Sounds / Music / MITS.wav' \n";
+				//	}
+				//	break;
+				//}
+		}
+		music.setLoop(true);
+		music.play();
 	}
-	music.setLoop(true);
-	music.play();
 	mtx.unlock();
 }
 
+void RESOURCES::SetSoundLevel(float i_soundLvl)
+{
+	m_sound.setVolume(i_soundLvl);
+	soundLvl = i_soundLvl;
+}
+
+void RESOURCES::TurnMusicOn(bool i_music)
+{
+	musicIsOn = i_music;
+}
 
 sf::Font RESOURCES::GetFont() {
 	return m_font;

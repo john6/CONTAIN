@@ -58,6 +58,7 @@ const float SQRT_TWO = 1.4142857;
 const Material ROCK = Material(0.6f, 0.1f, 0.6f, 0.3f);
 const Material WOOD = Material(0.3f, 0.2f, 0.5f, 0.25f);
 const Material METAL = Material(1.2f, 0.05f, 0.4f, 0.2f);
+const Material HEAVYBOUNCE = Material(1.2f, 0.6f, 0.4f, 0.2f);
 const Material DENSE_METAL = Material(2.2f, 0.05f, 0.4f, 0.2f);
 const Material BOUNCYBALL = Material(0.35f, 0.8f, 0.7f, 0.2f);
 const Material LESSBOUNCYBALL = Material(0.35f, 0.6f, 0.7f, 0.2f);
@@ -97,6 +98,9 @@ const sf::Color OFFBLACK3 = sf::Color(20, 20, 20);
 const sf::Color OFFBLACK4 = sf::Color(25, 25, 25);
 const sf::Color OFFBLACK5 = sf::Color(30, 30, 30);
 const sf::Color OFFBLACK6 = sf::Color(35, 35, 35);
+const sf::Color OFFBLACK7 = sf::Color(40, 40, 40);
+const sf::Color OFFBLACK8 = sf::Color(45, 45, 45);
+const sf::Color OFFBLACK9 = sf::Color(50, 50, 50);
 const sf::Color METALLICSILVER = sf::Color(170, 169, 173);
 const sf::Color SONICSILVER = sf::Color(117, 117, 117);
 const sf::Color DARKSILVER = sf::Color(113, 112, 110);
@@ -115,6 +119,10 @@ const sf::Color EMERALD = sf::Color(31, 78, 47);
 const sf::Color PISTACHIO = sf::Color(58, 77, 45);
 const sf::Color SAGE = sf::Color(188, 184, 138);
 const sf::Color MOSS = sf::Color(138, 154, 91);
+const sf::Color MIDNIGHTMOSS = sf::Color(24, 40, 30);
+const sf::Color ARMY = sf::Color(75, 83, 32);
+const sf::Color PARAKEET = sf::Color(182, 215, 44);
+const sf::Color SEAFOAM = sf::Color(113, 238, 184);
 //BLUES
 const sf::Color BLUEVIOLET = sf::Color(138, 43, 226);
 const sf::Color INDIGO = sf::Color(75, 0, 130);
@@ -125,15 +133,23 @@ const sf::Color CYAN = sf::Color(0, 255, 255);
 //YELLOWS
 const sf::Color YELLOWCYBER = sf::Color(255, 211, 0);
 const sf::Color SUNFLOWERYELLOW = sf::Color(227, 187, 28);
-
 //REDS
+const sf::Color RED = sf::Color(255, 0, 0);
+const sf::Color DARKRED = sf::Color(139, 0, 0);
+const sf::Color FIREBRICK = sf::Color(178, 34, 34);
 const sf::Color REDCINNIBAR = sf::Color(246, 65, 45);
 const sf::Color MYSTICRED = sf::Color(255, 86, 7);
 const sf::Color VIVIDGAMBOGE= sf::Color(255, 152, 0);
 const sf::Color AMBER = sf::Color(255, 193, 0);
 const sf::Color VIVIDYELLOW= sf::Color(255, 236, 25);
-
-
+//BROWNS
+const sf::Color SADDLEBROWN = sf::Color(139, 69, 19);
+const sf::Color WHEATBROWN = sf::Color(245, 222, 173);
+const sf::Color BURLYWOODBROWN = sf::Color(222, 184, 135);
+const sf::Color SIENNEBROWN = sf::Color(160, 82, 45);
+const sf::Color UMBERBROWN = sf::Color(39, 32, 28);
+const sf::Color PENNYBROWN = sf::Color(173, 111, 105);
+const sf::Color BONE = sf::Color(227, 218, 201);
 
 //EASY SETTINGS
 //const float SPEED_MULTIPLIER_EASY = 0.40f;
@@ -152,11 +168,11 @@ const sf::Color VIVIDYELLOW= sf::Color(255, 236, 25);
 //const float LEVEL_TIME_LIMIT_HARD = 135.0f;
 
 //ENUMS
-enum GAME_STATE { MENU, START_GAME, START_TUTORIAL, IN_GAME, EXIT_GAME, WIN, LOSE };
+enum GAME_STATE { MENU, SETTINGS, APPLY, START_GAME, START_TUTORIAL, IN_GAME, EXIT_GAME, WIN, LOSE };
 //Leave WALL_BIG as last upgrade I use it as a terminating condition for InitLvl();
 //This is required because youre not supposed to tierate over enums
 //https://stackoverflow.com/questions/261963/how-can-i-iterate-over-an-enum
-enum UPGRADE_TYPE { NONE, RATE_OF_FIRE, WEAP_SPEED, SCATTER, SMALL_SHIP, BIG_SHIP, BLAST, WALL_BIG };
+enum UPGRADE_TYPE { NONE, RATE_OF_FIRE, WEAP_SPEED, SCATTER, SMALL_SHIP, BIG_SHIP, BLAST, TEMP_HEALTH, WALL_BIG };
 enum MOUSE_STATE { MOUSE_UP, MOUSE_DOWN };
 enum DIFFICULTY { EASY, MEDIUM, HARD, TUTORIAL };
 enum SCREEN_AREA { CORNERS, MARGINS, DOORS, CENTER };
@@ -167,6 +183,8 @@ enum TypeID {
 	ENEMY_RAND, ENEMY_BOSS, ENEMY_SEEK_PUSH, ENEMY_RAND_PUSH, WALL_BASIC,
 	WALL_FIRE, DOOR, END_LEVEL, UPGRADE, ANIMATION, SCENERY};
 enum ANIMTYPE { CANNED_EXPLOSION, ENEMY_BURST_DEATH};
+enum SND_LVL { LOW25, MEDIUM50, HIGH75, FULL100};
+enum RSLTN { TWLV_SVN, FRTN_NNTY, NNTN_TN, FLL_SCRN};
 
 
 //TIME STUFF
@@ -219,11 +237,16 @@ public:
 	static RESOURCES* RSRCS;
 	static Game* GPTR;
 	static std::shared_ptr<Entity> PPTR;
+	static float SOUNDLVL;
 
 public:
-	static void SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_screenHeight, RESOURCES* i_resourcesPtr, Game* i_gamePtr, std::shared_ptr<Entity> i_playerPtr);
+	static void SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_screenHeight, RESOURCES* i_resourcesPtr, Game* i_gamePtr, std::shared_ptr<Entity> i_playerPtr, float i_soundLvl);
 
 	static int GetUpgradeMax(UPGRADE_TYPE i_powType);
+
+	static sf::VideoMode GetVideoMode(RSLTN i_res);
+
+	static void SetTextOriginCenter(sf::Text * i_textPtr);
 
 	GLBVRS();
 	~GLBVRS();

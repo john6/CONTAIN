@@ -3,6 +3,8 @@
 UpgradeMenu::UpgradeMenu(RESOURCES * i_resources, DIFFICULTY i_diff, PlayerChar* i_player) :
 	resources{ i_resources }
 {
+	font = resources->GetFont();
+
 	std::random_device rd1;  //Will be used to obtain a seed for the random number engine
 	std::mt19937 gen1(rd1()); //Standard mersenne_twister_engine seeded with rd()
 	std::uniform_int_distribution<> distrib(1, 6); //both boundaries are inclusive
@@ -14,6 +16,12 @@ UpgradeMenu::UpgradeMenu(RESOURCES * i_resources, DIFFICULTY i_diff, PlayerChar*
 			availableUpgrades.push_back((UPGRADE_TYPE)upInt);
 		}
 	}
+	//Erase all temp upgrades!
+	auto eraseTemp = std::find(availableUpgrades.begin(), availableUpgrades.end(), TEMP_HEALTH);
+	availableUpgrades.erase(eraseTemp);
+	//
+	
+
 	upgradeA = availableUpgrades[distrib(gen1)%availableUpgrades.size()];
 	auto iter1 = std::find(availableUpgrades.begin(), availableUpgrades.end(), upgradeA);
 	availableUpgrades.erase(iter1);
@@ -27,28 +35,28 @@ UpgradeMenu::UpgradeMenu(RESOURCES * i_resources, DIFFICULTY i_diff, PlayerChar*
 	sf::RectangleShape nextLevelRect(sf::Vector2f(GLBVRS::BTTN_WDTH, GLBVRS::BTTN_HGHT));
 	nextLevelRect.setPosition(sf::Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH * 0.5f - GLBVRS::BTTN_WDTH * 0.5,
 											GLBVRS::VRT_MRG + GLBVRS::CRT_HGHT * 0.9f));
-	nextLevelButton = Button("Next Level", nextLevelRect);
+	nextLevelButton = Button("Next Level", nextLevelRect, &font);
 	nextLevelButton.SetColors(sf::Color::Black, sf::Color::White, sf::Color(128, 128, 128));
 
 	sf::RectangleShape upgradeRectA(sf::Vector2f(GLBVRS::CRT_WDTH, GLBVRS::BTTN_HGHT));
 	upgradeRectA.setPosition(sf::Vector2f(GLBVRS::HR_MRG, GLBVRS::VRT_MRG + GLBVRS::BTTN_HGHT * 2.0f));
-	upgradeButtonA = Button(GetUpgradeText(static_cast<UPGRADE_TYPE>(upgradeA)), upgradeRectA);
+	upgradeButtonA = Button(GetUpgradeText(static_cast<UPGRADE_TYPE>(upgradeA)), upgradeRectA, &font);
 	upgradeButtonA.SetColors(sf::Color::Green, sf::Color::White, sf::Color(128, 128, 128));
 	upgradeButtonA.SetState(Button::UP);
 
 	sf::RectangleShape upgradeRectB(sf::Vector2f(GLBVRS::CRT_WDTH, GLBVRS::BTTN_HGHT));
 	upgradeRectB.setPosition(sf::Vector2f(GLBVRS::HR_MRG, GLBVRS::VRT_MRG + GLBVRS::BTTN_HGHT * 4.0f));
-	upgradeButtonB = Button(GetUpgradeText(static_cast<UPGRADE_TYPE>(upgradeB)), upgradeRectB);
+	upgradeButtonB = Button(GetUpgradeText(static_cast<UPGRADE_TYPE>(upgradeB)), upgradeRectB, &font);
 	upgradeButtonB.SetColors(sf::Color::Yellow, sf::Color::White, sf::Color(128, 128, 128));
 	upgradeButtonB.SetState(Button::UP);
 
 	sf::RectangleShape upgradeRectC(sf::Vector2f(GLBVRS::CRT_WDTH, GLBVRS::BTTN_HGHT));
 	upgradeRectC.setPosition(sf::Vector2f(GLBVRS::HR_MRG, GLBVRS::VRT_MRG + GLBVRS::BTTN_HGHT * 6.0f));
-	upgradeButtonC = Button(GetUpgradeText(static_cast<UPGRADE_TYPE>(upgradeC)), upgradeRectC);
+	upgradeButtonC = Button(GetUpgradeText(static_cast<UPGRADE_TYPE>(upgradeC)), upgradeRectC, &font);
 	upgradeButtonC.SetColors(sf::Color::Red, sf::Color::White, sf::Color(128, 128, 128));
 	upgradeButtonC.SetState(Button::UP);
 
-	font = resources->GetFont();
+
 
 	upgradeText.setFont(font);
 	upgradeText.setString("Choose and upgrade before advancing to the next level!");
@@ -138,11 +146,11 @@ std::string UpgradeMenu::GetUpgradeText(UPGRADE_TYPE i_type)
 		break;
 	}
 	case BIG_SHIP: {
-		upgradeString = "Increase ship size, increase health";
+		upgradeString = "Increase ship hull";
 		break;
 	}
 	case BLAST : {
-		upgradeString = "Make EMP blast larger and more powerful";
+		upgradeString = "Stun: +radius, +power, +stun time";
 		break;
 	}
 	case WALL_BIG : {
@@ -188,9 +196,9 @@ void UpgradeMenu::Render(sf::RenderWindow * window)
 	sf::Text textB = upgradeButtonB.GetText();
 	sf::Text textC = upgradeButtonC.GetText();
 	nextLevelText.setFont(font);
-	textA.setFont(font);
-	textB.setFont(font);
-	textC.setFont(font);
+	//textA.setFont(font);
+	//textB.setFont(font);
+	//textC.setFont(font);
 
 	window->clear();
 

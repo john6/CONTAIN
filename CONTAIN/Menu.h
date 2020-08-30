@@ -16,6 +16,8 @@ class Menu
 private:
 	DIFFICULTY currDifficulty;
 	sf::Font font;
+	sf::Text title;
+	sf::Text difficultyLabel;
 	sf::Text instructions1;
 	Button playButton;
 	Button playTutorialButton;
@@ -23,6 +25,7 @@ private:
 	Button easyButton;
 	Button mediumButton;
 	Button hardButton;
+	Button settingsButton;
 
 	bool PollInput(sf::Vector2i mousePosition, Button* button, bool stickyButton = false);
 

@@ -27,5 +27,7 @@ public:
 	void SaveDataToFile();
 
 	std::string GetHighScoresString();
+
+	std::list<int> GetHighScoresVect();
 };
 

@@ -42,9 +42,12 @@ GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vecto
 				PlayerChar* playerPtr = dynamic_cast<PlayerChar*>(playerChar.get());
 				playerPtr->ReceivePowerUp(upgradeResult);
 				playState = GENERAL_GAMEPLAY;
+				currRunScore += 5000 * (1 + gameDiff);
+				currRunScore += playerPtr->GetCurrHealth() * 100 * (1 + gameDiff);
+				currRunScore += levels[currLvl]->timeToComplete * 150 * (1 + gameDiff);
+				currRunScore += levels[currLvl]->enemiesKilled * 25 * (1 + gameDiff);
 				++currLvl;
 				currSector = levels[currLvl]->originCoord;
-				currRunScore += LEVEL_SCORE_INCREASE;
 				playerPtr->ResetHealth();
 				playerPtr->ResetSpecialAmmo();
 				playerPtr->rb.ResetPosition(Vector2f(
@@ -96,24 +99,33 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnt
 		entPVect.push_back(entPtr);
 	}
 	std::for_each(std::execution::par, parallelVect.begin(), parallelVect.end(), [&](int index) {
-		std::shared_ptr<Entity> entPtri = entPVect[index];
-		CollisionData collisionData = CollisionData();
-		collisionData.entA = playerChar;
-		collisionData.entB = entPtri;
-		bool collided = Physics::CheckCollision(&collisionData);
-		if (collided) {
-			collisions.push_back(collisionData); }
-	});
-	std::for_each(std::execution::par, parallelVect.begin(), parallelVect.end(), [&](int index) {
-		for (int j = index+1; j<parallelVect.size(); ++j) {
+		//This keeps going one index over what its supposed to, I must be deleting shit when Im not supposed to delete it
+		//this next if statement doesnt solve root problem but its prob gonna stop crashed because of the index out of bounds
+		//TODO
+		if (index < entPVect.size()) {
 			std::shared_ptr<Entity> entPtri = entPVect[index];
-			std::shared_ptr<Entity> entPtrj = entPVect[j];
 			CollisionData collisionData = CollisionData();
-			collisionData.entA = entPtri;
-			collisionData.entB = entPtrj;
+			collisionData.entA = playerChar;
+			collisionData.entB = entPtri;
 			bool collided = Physics::CheckCollision(&collisionData);
 			if (collided) {
-				collisions.push_back(collisionData); 
+				collisions.push_back(collisionData);
+			}
+		}
+	});
+
+	std::for_each(std::execution::par, parallelVect.begin(), parallelVect.end(), [&](int index) {
+		for (int j = index + 1; j < parallelVect.size(); ++j) {
+			if (j < entPVect.size()) {
+				std::shared_ptr<Entity> entPtri = entPVect[index];
+				std::shared_ptr<Entity> entPtrj = entPVect[j];
+				CollisionData collisionData = CollisionData();
+				collisionData.entA = entPtri;
+				collisionData.entB = entPtrj;
+				bool collided = Physics::CheckCollision(&collisionData);
+				if (collided) {
+					collisions.push_back(collisionData);
+				}
 			}
 		}
 	});
@@ -123,9 +135,11 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnt
 		parCollisions.push_back(i);
 	}
 	std::for_each(std::execution::par, parCollisions.begin(), parCollisions.end(), [&](int index) {
-		collisions[index].entA->CollideWith(*collisions[index].entB);
-		collisions[index].entB->CollideWith(*collisions[index].entA);
-		Physics::CreateCollisionImpulse(&collisions[index]);
+		if (index < collisions.size()) {
+			collisions[index].entA->CollideWith(*collisions[index].entB);
+			collisions[index].entB->CollideWith(*collisions[index].entA);
+			Physics::CreateCollisionImpulse(&collisions[index]);
+		}
 	});
 
 	playerChar->rb.IntegrateForces();
@@ -133,11 +147,15 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnt
 	std::cout << "i_stepSize: " << i_stepSize;
 
 	std::for_each(std::execution::par, parallelVect.begin(), parallelVect.end(), [&](int index) {
-		entPVect[index]->rb.IntegrateForces();
-		entPVect[index]->rb.IntegrateVelocity(i_stepSize);
+		if (index < entPVect.size()) {
+			entPVect[index]->rb.IntegrateForces();
+			entPVect[index]->rb.IntegrateVelocity(i_stepSize);
+		}
 	});
 	std::for_each(std::execution::par, parCollisions.begin(), parCollisions.end(), [&](int index) {
-		Physics::PositionalCorrection(&collisions[index]);
+		if (index < parCollisions.size()) {
+			Physics::PositionalCorrection(&collisions[index]);
+		}
 	});
 	levels[currLvl]->GetSector(currSector)->RemoveDestroyedEntities();
 	return IN_GAME;
@@ -223,7 +241,7 @@ void Game::CreatePlayerChar()
 	RigidBody rb(Physics::CreateRegularPolygon(6, 75.0f * GLBVRS::SIZE_RAT), METAL);
 	playerChar = std::make_shared<PlayerChar>(startingHealth, Vector2f(400.0f * GLBVRS::SIZE_RAT, 400.0f * GLBVRS::SIZE_RAT), rb);
 	playerChar->rb.transform.orient = 1.0f;
-	GLBVRS::SetGlobalConstants(renderWindow->getSize().x, renderWindow->getSize().y, resources, this, playerChar);
+	GLBVRS::SetGlobalConstants(renderWindow->getSize().x, renderWindow->getSize().y, resources, this, playerChar, resources->soundLvl);
 }
 
 void Game::SpawnProjectile()

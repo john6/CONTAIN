@@ -4,16 +4,25 @@
 YouLostMenu::YouLostMenu(RESOURCES * i_resources) :
 	resources{ i_resources }
 {
+	font = resources->GetFont();
+
 	resources = i_resources;
+
+	sf::Vector2f topLeft(GLBVRS::HR_MRG * 4.5f, GLBVRS::VRT_MRG * 4.0f);
+	float bttnMrgHr = (GLBVRS::HR_MRG / 4.0f);
+	float bttnMrgVrt = (GLBVRS::VRT_MRG / 3.0f);
+	float bttnOffsetHor = GLBVRS::BTTN_WDTH + bttnMrgHr;
+	float bttnOffsetVert = GLBVRS::BTTN_HGHT + bttnMrgVrt;
+
 	sf::RectangleShape playAgainButtonRect(sf::Vector2f(GLBVRS::BTTN_WDTH, GLBVRS::BTTN_HGHT));
 	playAgainButtonRect.setPosition(sf::Vector2f(100, 100));
-	tryAgainButton = Button("Try Again?", playAgainButtonRect);
+	tryAgainButton = Button("Try Again?", playAgainButtonRect, &font);
 	tryAgainButton.ResizeForText();
 	tryAgainButton.SetColors(sf::Color::Black, sf::Color::White, sf::Color(128, 128, 128));
 
 	sf::RectangleShape quitButtonRect(sf::Vector2f(GLBVRS::BTTN_WDTH, GLBVRS::BTTN_HGHT));
 	quitButtonRect.setPosition(sf::Vector2f(tryAgainButton.GetRect().getSize().x + (GLBVRS::BTTN_WDTH * (0.4f)), 100));
-	quitButton = Button("Exit", quitButtonRect);
+	quitButton = Button("Exit", quitButtonRect, &font);
 	quitButton.SetColors(sf::Color::Black, sf::Color::White, sf::Color(128, 128, 128));
 
 	loseText.setFont(font);
@@ -36,7 +45,7 @@ YouLostMenu::YouLostMenu(RESOURCES * i_resources) :
 	highScoresText.setFillColor(sf::Color::White);
 	highScoresText.setPosition(sf::Vector2f(100, 700));
 
-	font = resources->GetFont();
+
 }
 
 YouLostMenu::~YouLostMenu()

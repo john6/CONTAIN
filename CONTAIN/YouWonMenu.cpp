@@ -1,40 +1,79 @@
 #include "YouWonMenu.h"
 
 
-YouWonMenu::YouWonMenu(RESOURCES * i_resources) :
-	resources{ i_resources }
+YouWonMenu::YouWonMenu(RESOURCES * i_resources, bool i_won) :
+	resources{ i_resources }, won {i_won}
 {
-	sf::RectangleShape playAgainButtonRect(sf::Vector2f(GLBVRS::BTTN_WDTH, GLBVRS::BTTN_HGHT));
-	playAgainButtonRect.setPosition(sf::Vector2f(100, 100));
-	playAgainButton = Button("Play Again?", playAgainButtonRect);
-	playAgainButton.SetColors(sf::Color::Black, sf::Color::White, sf::Color(128, 128, 128));
+	font = resources->GetFont();
 
+	sf::Vector2f topLeft(GLBVRS::HR_MRG * 1.0f, GLBVRS::VRT_MRG * 6.0f);
+	float bttnMrgHr = (GLBVRS::HR_MRG / 4.0f);
+	float bttnMrgVrt = (GLBVRS::VRT_MRG / 3.0f);
+	float bttnOffsetHor = GLBVRS::BTTN_WDTH + bttnMrgHr;
+	bttnOffsetVert = GLBVRS::BTTN_HGHT + bttnMrgVrt;
+	highScoresListStart = topLeft + sf::Vector2f(bttnOffsetHor * 3.5, bttnOffsetVert * 0.5);
+
+	sf::RectangleShape playAgainButtonRect(sf::Vector2f(GLBVRS::BTTN_WDTH, GLBVRS::BTTN_HGHT));
+	playAgainButtonRect.setPosition(topLeft + sf::Vector2f(0.0f, bttnOffsetVert * 5.0f));
+	if (won) {
+		playAgainButton = Button("Play Again?", playAgainButtonRect, &font);
+	}
+	else {
+		playAgainButton = Button("Try Again?", playAgainButtonRect, &font);
+	}
+	playAgainButton.SetColors(sf::Color::Black, sf::Color::White, sf::Color(128, 128, 128));
+	//playAgainButton.SetPosition(topLeft + sf::Vector2f(0, 0));
 	sf::RectangleShape quitButtonRect(sf::Vector2f(GLBVRS::BTTN_WDTH, GLBVRS::BTTN_HGHT));
-	quitButtonRect.setPosition(sf::Vector2f(GLBVRS::BTTN_WDTH * 1.35f, 100));
-	quitButton = Button("Exit", quitButtonRect);
+	quitButtonRect.setPosition(topLeft + sf::Vector2f(bttnOffsetHor, bttnOffsetVert * 5.0f));
+	quitButton = Button("Exit", quitButtonRect, &font);
 	quitButton.SetColors(sf::Color::Black, sf::Color::White, sf::Color(128, 128, 128));
 
 	winText.setFont(font);
-	winText.setString("You beat the game, wow congrats bud!\n");
+	if (won) {
+		winText.setString("You beat the game, wow congrats bud!\n");
+	}
+	else {
+		winText.setString("You lost, Damn u suck!\n");
+	}
 	winText.setCharacterSize(25);
 	winText.setFillColor(sf::Color::White);
-	winText.setPosition(sf::Vector2f(100, 500));
+	winText.setPosition(topLeft + sf::Vector2f(0, 0));
 
 	prevScoreText.setFont(font);
 	std::string finalScoreText = "Your final score was 0!\n";
 	prevScoreText.setString(finalScoreText);
 	prevScoreText.setCharacterSize(25);
 	prevScoreText.setFillColor(sf::Color::White);
-	prevScoreText.setPosition(sf::Vector2f(100, 600));
+	prevScoreText.setPosition(topLeft + sf::Vector2f(0, bttnOffsetVert * 2));
 
-	highScoresText.setFont(font);
-	std::string highScoreListText = "uuuuuh this should have been set woopsies 0!\n";
-	highScoresText.setString(highScoreListText);
-	highScoresText.setCharacterSize(25);
-	highScoresText.setFillColor(sf::Color::White);
-	highScoresText.setPosition(sf::Vector2f(100, 700));
+	title.setFont(font);
+	std::string resultText;
+	if (won) {
+		resultText = "YOU WON\n";
+	}
+	else {
+		resultText = "YOU LOST\n";
+	}
+	title.setString(resultText);
+	title.setCharacterSize(100);
+	GLBVRS::SetTextOriginCenter(&title);
+	title.setFillColor(sf::Color::White);
+	title.setPosition(sf::Vector2f(GLBVRS::HR_MRG  + GLBVRS::CRT_WDTH * 0.5f, GLBVRS::VRT_MRG * 3.0f));
 
-	font = resources->GetFont();
+	highScoreLabelText.setFont(font);
+	highScoreLabelText.setString("High Scores");
+	highScoreLabelText.setCharacterSize(50);
+	GLBVRS::SetTextOriginCenter(&highScoreLabelText);
+	highScoreLabelText.setFillColor(sf::Color::White);
+	highScoreLabelText.setPosition(highScoresListStart + sf::Vector2f(0, -bttnMrgVrt));
+
+	highScoreRect = sf::RectangleShape(sf::Vector2f(highScoreLabelText.getLocalBounds().width * 1.1, bttnOffsetVert * 6.0f));
+	highScoreRect.setFillColor(sf::Color(0.0f, 0.0f, 0.0f, 0.0f));
+	highScoreRect.setOutlineColor(sf::Color::White);
+	highScoreRect.setOutlineThickness(10.0f);
+	highScoreRect.setOrigin(sf::Vector2f(highScoreRect.getSize().x / 2.0f, 0.0f));
+	highScoreRect.setPosition(highScoreLabelText.getPosition() - sf::Vector2f(0.0f, highScoreLabelText.getLocalBounds().height));
+
 }
 
 YouWonMenu::~YouWonMenu()
@@ -72,7 +111,13 @@ GAME_STATE YouWonMenu::Update(float microSeconds, sf::RenderWindow * window, sf:
 		return EXIT_GAME;
 	}
 	else {
-		return WIN;
+		if (won) {
+			return WIN;
+		}
+		else {
+			return LOSE;
+		}
+
 	}
 }
 
@@ -88,34 +133,49 @@ void YouWonMenu::SetPrevScore(int i_prevScore)
 	//prevScoreText.setPosition(sf::Vector2f(100, 600));
 }
 
-void YouWonMenu::SetHighScores(std::string i_highScores)
+void YouWonMenu::SetHighScores(std::list<int> i_highScores)
 {
 	//highScoresText.setFont(font);
-	std::string highScoreListText = i_highScores;
-	highScoresText.setString(highScoreListText);
-	//highScoresText.setCharacterSize(25);
-	//highScoresText.setFillColor(sf::Color::White);
-	//highScoresText.setPosition(sf::Vector2f(100, 700));
+	highScoresList.clear();
+	highScoresChart.clear();
+	for (int score : i_highScores) {
+		highScoresList.push_back(score);
+	}
+	for (int i = 0; i < highScoresList.size(); i++) {
+		sf::Text highScoreText = sf::Text();
+		highScoreText.setFont(font);
+		std::string highScoreListText =  "("+  std::to_string(i) + ")   " + std::to_string(highScoresList[i]) + "\n";
+		highScoreText.setString(highScoreListText);
+		highScoreText.setCharacterSize(25);
+		highScoreText.setFillColor(sf::Color::White);
+		GLBVRS::SetTextOriginCenter(&highScoreText);
+		highScoreText.setPosition(highScoresListStart + sf::Vector2f(0.0f, (i + 1) * bttnOffsetVert / 2.0f));
+		highScoresChart.push_back(highScoreText);
+	}
 }
-
-
 
 void YouWonMenu::Render(sf::RenderWindow * window)
 {
-	sf::Text playAgainText = playAgainButton.GetText();
-	playAgainText.setFont(font);
-	sf::Text quitButtonText = quitButton.GetText();
-	quitButtonText.setFont(font);
+	//sf::Text playAgainText = playAgainButton.GetText();
+	//playAgainText.setFont(font);
+	//sf::Text quitButtonText = quitButton.GetText();
+	//quitButtonText.setFont(font);
 
 	window->clear();
 
+	window->draw(title);
 	window->draw(playAgainButton.GetRect());
-	window->draw(playAgainText);
+	window->draw(playAgainButton.GetText());
 	window->draw(quitButton.GetRect());
-	window->draw(quitButtonText);
+	window->draw(quitButton.GetText());
 	window->draw(winText);
 	window->draw(prevScoreText);
-	window->draw(highScoresText);
+	window->draw(highScoreLabelText);
+	window->draw(highScoreRect);
+
+	for (sf::Text highScore : highScoresChart) {
+		window->draw(highScore);
+	}
 
 	window->display();
 }

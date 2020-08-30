@@ -23,7 +23,7 @@ Level::Level(int i_lvlNum, DIFFICULTY i_diff) :
 	colPalB = Physics::GenerateRandomColor(5, 128);
 	phaseOne = true;
 	timeToComplete = 25.0f + (i_lvlNum * 5) - (i_diff * 5);
-
+	enemiesKilled = 0;
 	GenerateMapGrip(i_lvlNum, i_diff);
 	FillMapWithRooms(i_lvlNum, i_diff);
 	PopulateMapRooms(i_lvlNum, i_diff);
@@ -38,7 +38,7 @@ Level::Level(std::string i_testStr)
 	colPalB = Physics::GenerateRandomColor(5, 128);
 	phaseOne = true;
 	timeToComplete = 50;
-
+	enemiesKilled = 0;
 	dimSize = 1;
 	numSectors = 1;
 	sectorMap = std::vector<std::vector<MapNode>>(dimSize, std::vector<MapNode>(dimSize, MapNode()));
@@ -50,7 +50,7 @@ Level::Level(std::string i_testStr)
 	sectorMap[originCoord.x][originCoord.y].isRoom = true;
 	allCoords.push_back(originCoord);
 	//
-	GetSector(originCoord)->GenerateEnemies(25, ENEMY_SEEK_PUSH, CENTER, 1, HARD, 0);
+	//GetSector(originCoord)->GenerateEnemies(25, ENEMY_SEEK_PUSH, CENTER, 1, HARD, 0);
 	//GetSector(originCoord)->AddPainfullWallsToLevel();
 	//GetSector(originCoord)->GenerateLevelCircles(1);
 	//GetSector(originCoord)->GenerateLevelCubes(9);
@@ -82,7 +82,7 @@ Level::Level() : //TUTORIAL LEVEL
 	phaseOne = true;
 	timeToComplete = 999.0f;
 	sectorMap = std::vector<std::vector<MapNode>>(dimSize, std::vector<MapNode>(dimSize, MapNode()));
-
+	enemiesKilled = 0;
 	//init map coords
 	originCoord = MapCoord(0, 0);
 	CreateSectorAtCoord(originCoord);
@@ -175,7 +175,7 @@ void Level::PopulateSectorAtCoord(MapCoord i_coord, int i_diff)
 	//phase one
 	int numSeekersPhase1 = 2 + (i_diff * 1) + ((m_lvl_num+1)/2);
 	int numRandosPhase1 = (i_diff * 1) + ((m_lvl_num+1)/2);
-	GetSector(i_coord)->GenerateEnemies(numSeekersPhase1, ENEMY_SEEK, MARGINS, 1, (DIFFICULTY)i_diff, 0);
+	GetSector(i_coord)->GenerateEnemies(numSeekersPhase1, ENEMY_SEEK, CORNERS, 1, (DIFFICULTY)i_diff, 0);
 	GetSector(i_coord)->GenerateEnemies(numRandosPhase1, ENEMY_RAND, CENTER, 1, (DIFFICULTY)i_diff, 0);
 	//phase two
 	int numSeekersPhase2 = 4 + (i_diff * 1) + (m_lvl_num * 1);
@@ -185,24 +185,24 @@ void Level::PopulateSectorAtCoord(MapCoord i_coord, int i_diff)
 
 	std::random_device rdGenA;
 	std::mt19937 genTerrain(rdGenA());
-	std::uniform_int_distribution<> distribTerrain(0, 1);
+	std::uniform_int_distribution<> distribTerrain(0, 3);
 	int makeIrregularTerrain = distribTerrain(genTerrain);
 	
-	std::uniform_int_distribution<> distribTerrainVerts(3, 6);
+	std::uniform_int_distribution<> distribTerrainVerts(5, 7);
 	int terrainVerts = distribTerrainVerts(genTerrain);
 
-	std::uniform_int_distribution<> distribTerrainSize(150, 350);
+	std::uniform_int_distribution<> distribTerrainSize(0, 400);
 	int terrainSize = distribTerrainSize(genTerrain);
 
-	//if (makeIrregularTerrain) {
-	if (true) {
-	GetSector(i_coord)->GenerateIrregularTerrain(terrainVerts, terrainSize, 200);
+	std::discrete_distribution<> smallTerrainDist({ 40, 50, 5, 5 });
+	std::discrete_distribution<> BigTerrainDist({ 85, 10, 5 });
+	int smallTerrainCount = smallTerrainDist(genRoomSeed);
+	int bigTerrainCount = BigTerrainDist(genRoomSeed);
+	if (makeIrregularTerrain == 0) {
+		//if (true) {
+	GetSector(i_coord)->GenerateIrregularTerrain(terrainVerts, terrainSize, 3000);
+	//--bigTerrainCount;
 	}
-	else {
-		std::discrete_distribution<> smallTerrainDist({ 40, 50, 5, 5 });
-		std::discrete_distribution<> BigTerrainDist({ 85, 10, 5 });
-		int smallTerrainCount = smallTerrainDist(genRoomSeed);
-		int bigTerrainCount = BigTerrainDist(genRoomSeed);
 		if (i_diff == HARD) {
 			--smallTerrainCount;
 			--bigTerrainCount;
@@ -232,8 +232,6 @@ void Level::PopulateSectorAtCoord(MapCoord i_coord, int i_diff)
 			GetSector(i_coord)->AddRandomPainWall(randPainWall);
 			--painWallCount;
 		}
-	}
-
 	GetSector(i_coord)->filledIn = true;
 }
 
@@ -341,7 +339,7 @@ void Level::GenerateMapGrip(int i_lvlNum, DIFFICULTY i_diff)
 	std::mt19937 genRoomSeed(rdRoomSeed()); //Standard mersenne_twister_engine seeded with rd()
 	std::discrete_distribution<> extraRoomDist({ 13, 25, 25, 25, 12 });
 	int randExtraRooms = extraRoomDist(genRoomSeed);
-	numSectors = 2 + (i_lvlNum * 2) + (i_diff * 2) + randExtraRooms;
+	numSectors = 4 + (i_lvlNum * 2) + (i_diff * 2) + randExtraRooms;
 	dimSize = (int)std::sqrt(numSectors*2);
 	if (dimSize % 2 == 0) { //Gonna make the dimensions always be odd so I can have a center coord
 		dimSize += 1;
@@ -366,7 +364,7 @@ void Level::FillMapWithRooms(int i_levelNum, DIFFICULTY i_diff)
 	int numRoomsTotal = numSectors;
 	std::random_device rd2;
 	std::mt19937 gen2(rd2());
-	std::discrete_distribution<> discreteDist({ 0, 75, 20, 5 }); //percent chance a room will spawn what number of doors
+	std::discrete_distribution<> discreteDist({ 0, 70, 25, 5 }); //percent chance a room will spawn what number of doors
 
 	while ((!fringe.empty()) && (currNumRooms < numRoomsTotal)) {
 		//get coord from fringe, check which directions are possible to build
@@ -484,6 +482,15 @@ void Level::PopulateMapRooms(int i_levelNum, DIFFICULTY i_diff)
 			previouslyChosen.push_back(randRoom);
 			i++;
 		}
+	}
+	//Level "four" aka 3 with zero indexing, mini bosses dont drop health so Ima just put health drops in the level
+	if (m_lvl_num == 3) {
+		std::shared_ptr<Entity> smallShipPOW3 = std::make_shared<PowerUp>(sectorVect[sectorVect.size() - 2].get(),
+			Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (2.0f / 5.0f)), GLBVRS::CRT_HGHT * (3.0f / 4.0f))), TEMP_HEALTH);
+		sectorVect[sectorVect.size() - 2]->AddEntPtrToSector(smallShipPOW3);
+		std::shared_ptr<Entity> smallShipPOW34 = std::make_shared<PowerUp>(sectorVect[sectorVect.size() - 2].get(),
+			Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (3.0f / 5.0f)), GLBVRS::CRT_HGHT * (3.0f / 4.0f))), TEMP_HEALTH);
+		sectorVect[sectorVect.size() - 4]->AddEntPtrToSector(smallShipPOW34);
 	}
 	GetSector(bossRoom)->PopulateBossRoom(m_lvl_num, i_diff);
 }
