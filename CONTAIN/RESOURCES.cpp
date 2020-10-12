@@ -11,166 +11,166 @@ RESOURCES::RESOURCES()
 		std::cerr << "error loading font \n";
 	}
 	//Beeps
-	if (!m_bufferRegularBeep.loadFromFile("Sounds/BeepSounds/RegularBeep.wav")) {
+	if (!m_bufferRegularBeep.loadFromFile("Sounds/BeepSounds/RegularBeep.ogg")) {
 		std::cerr << "error loading RegularBeep \n";
 	}
-	if (!m_bufferNegativeBeep.loadFromFile("Sounds/BeepSounds/NegativeBeep.wav")) {
+	if (!m_bufferNegativeBeep.loadFromFile("Sounds/BeepSounds/NegativeBeep.ogg")) {
 		std::cerr << "error loading NegativeBeep \n";
 	}
-	if (!m_bufferOctaveBeep.loadFromFile("Sounds/BeepSounds/OctaveBeep.wav")) {
+	if (!m_bufferOctaveBeep.loadFromFile("Sounds/BeepSounds/OctaveBeep.ogg")) {
 		std::cerr << "error loading OctaveBeep \n";
 	}
-	if (!m_buffer8BitExplosion.loadFromFile("Sounds/BeepSounds/8BitExplosion.wav")) {
+	if (!m_buffer8BitExplosion.loadFromFile("Sounds/BeepSounds/8BitExplosion.ogg")) {
 		std::cerr << "error loading 8BitExplosion \n";
 	}
-	if (!m_bufferUpwardChromaticBeep.loadFromFile("Sounds/BeepSounds/UpwardChromaticBeep.wav")) {
+	if (!m_bufferUpwardChromaticBeep.loadFromFile("Sounds/BeepSounds/UpwardChromaticBeep.ogg")) {
 		std::cerr << "error loading UpwardChromaticBeep \n";
 	}
 	//playful
-	if (!m_bufferplayfulAttack.loadFromFile("Sounds/PlayFulSounds/Playful_Attack.wav")) {
-		std::cerr << "error loading Playful_Attack.wav \n";
+	if (!m_bufferplayfulAttack.loadFromFile("Sounds/PlayFulSounds/Playful_Attack.ogg")) {
+		std::cerr << "error loading Playful_Attack.ogg \n";
 	}
-	if (!m_bufferplayfulHealing.loadFromFile("Sounds/PlayFulSounds/Playful_Hit.wav")) {
-		std::cerr << "error loading Playful_Hit.wav \n";
+	if (!m_bufferplayfulHealing.loadFromFile("Sounds/PlayFulSounds/Playful_Hit.ogg")) {
+		std::cerr << "error loading Playful_Hit.ogg \n";
 	}
-	if (!m_bufferplayfulLevelUp.loadFromFile("Sounds/PlayFulSounds/Playful_LevelUp.wav")) {
-		std::cerr << "error loading Playful_LevelUp.wav \n";
+	if (!m_bufferplayfulLevelUp.loadFromFile("Sounds/PlayFulSounds/Playful_LevelUp.ogg")) {
+		std::cerr << "error loading Playful_LevelUp.ogg \n";
 	}
-	if (!m_bufferplayfulMajorPickup.loadFromFile("Sounds/PlayFulSounds/Playful_MajorPickup.wav")) {
-		std::cerr << "error loading Playful_MajorPickup.wav \n";
+	if (!m_bufferplayfulMajorPickup.loadFromFile("Sounds/PlayFulSounds/Playful_MajorPickup.ogg")) {
+		std::cerr << "error loading Playful_MajorPickup.ogg \n";
 	}
-	if (!m_bufferplayfulPickup.loadFromFile("Sounds/PlayFulSounds/Playful_Pickup.wav")) {
-		std::cerr << "error loading Playful_Pickup.wav \n";
+	if (!m_bufferplayfulPickup.loadFromFile("Sounds/PlayFulSounds/Playful_Pickup.ogg")) {
+		std::cerr << "error loading Playful_Pickup.ogg \n";
 	}
 	//Yal's Sounds
-	if (!Attack3.loadFromFile("Sounds/YalSounds/Attack3.wav")) {
-		std::cerr << "error loading Attack3.wav \n";
+	if (!Attack3.loadFromFile("Sounds/YalSounds/Attack3.ogg")) {
+		std::cerr << "error loading Attack3.ogg \n";
 	}
-	if (!Attack4.loadFromFile("Sounds/YalSounds/Attack4.wav")) {
-		std::cerr << "error loading Attack4.wav \n";
+	if (!Attack4.loadFromFile("Sounds/YalSounds/Attack4.ogg")) {
+		std::cerr << "error loading Attack4.ogg \n";
 	}
-	if (!bossexplode.loadFromFile("Sounds/YalSounds/bossexplode.wav")) {
-		std::cerr << "error loading bossexplode.wav \n";
+	if (!bossexplode.loadFromFile("Sounds/YalSounds/bossexplode.ogg")) {
+		std::cerr << "error loading bossexplode.ogg \n";
 	}
-	if (!bossexplode2.loadFromFile("Sounds/YalSounds/bossexplode2.wav")) {
-		std::cerr << "error loading bossexplode2.wav \n";
+	if (!bossexplode2.loadFromFile("Sounds/YalSounds/bossexplode2.ogg")) {
+		std::cerr << "error loading bossexplode2.ogg \n";
 	}
-	if (!Buzzer6.loadFromFile("Sounds/YalSounds/Buzzer6.wav")) {
-		std::cerr << "error loading Buzzer6.wav \n";
+	if (!Buzzer6.loadFromFile("Sounds/YalSounds/Buzzer6.ogg")) {
+		std::cerr << "error loading Buzzer6.ogg \n";
 	}
-	if (!Buzzer9.loadFromFile("Sounds/YalSounds/Buzzer9.wav")) {
-		std::cerr << "error loading Buzzer9.wav \n";
+	if (!Buzzer9.loadFromFile("Sounds/YalSounds/Buzzer9.ogg")) {
+		std::cerr << "error loading Buzzer9.ogg \n";
 	}
-	if (!coin3.loadFromFile("Sounds/YalSounds/coin3.wav")) {
-		std::cerr << "error loading coin3.wav \n";
+	if (!coin3.loadFromFile("Sounds/YalSounds/coin3.ogg")) {
+		std::cerr << "error loading coin3.ogg \n";
 	}
-	if (!Explode5.loadFromFile("Sounds/YalSounds/Explode5.wav")) {
-		std::cerr << "error loading .wav \n";
+	if (!Explode5.loadFromFile("Sounds/YalSounds/Explode5.ogg")) {
+		std::cerr << "error loading .ogg \n";
 	}
-	if (!Explode20.loadFromFile("Sounds/YalSounds/Explode20.wav")) {
-		std::cerr << "error loading .wav \n";
+	if (!Explode20.loadFromFile("Sounds/YalSounds/Explode20.ogg")) {
+		std::cerr << "error loading .ogg \n";
 	}
-	if (!Explode20.loadFromFile("Sounds/YalSounds/Fire5.wav")) {
-		std::cerr << "error loading Fire5.wav \n";
+	if (!Explode20.loadFromFile("Sounds/YalSounds/Fire5.ogg")) {
+		std::cerr << "error loading Fire5.ogg \n";
 	}
-	if (!laser14.loadFromFile("Sounds/YalSounds/laser14.wav")) {
-		std::cerr << "error loading .wav \n";
+	if (!laser14.loadFromFile("Sounds/YalSounds/laser14.ogg")) {
+		std::cerr << "error loading .ogg \n";
 	}
-	if (!magic2.loadFromFile("Sounds/YalSounds/magic2.wav")) {
-		std::cerr << "error loading .wav \n";
+	if (!magic2.loadFromFile("Sounds/YalSounds/magic2.ogg")) {
+		std::cerr << "error loading .ogg \n";
 	}
-	if (!magic6.loadFromFile("Sounds/YalSounds/magic6.wav")) {
-		std::cerr << "error loading .wav \n";
+	if (!magic6.loadFromFile("Sounds/YalSounds/magic6.ogg")) {
+		std::cerr << "error loading .ogg \n";
 	}
-	if (!magic7.loadFromFile("Sounds/YalSounds/magic7.wav")) {
-		std::cerr << "error loading .wav \n";
+	if (!magic7.loadFromFile("Sounds/YalSounds/magic7.ogg")) {
+		std::cerr << "error loading .ogg \n";
 	}
-	if (!magic8.loadFromFile("Sounds/YalSounds/magic8.wav")) {
-		std::cerr << "error loading .wav \n";
+	if (!magic8.loadFromFile("Sounds/YalSounds/magic8.ogg")) {
+		std::cerr << "error loading .ogg \n";
 	}
-	if (!magic9.loadFromFile("Sounds/YalSounds/magic9.wav")) {
-		std::cerr << "error loading .wav \n";
+	if (!magic9.loadFromFile("Sounds/YalSounds/magic9.ogg")) {
+		std::cerr << "error loading .ogg \n";
 	}
-	if (!magic10.loadFromFile("Sounds/YalSounds/magic10.wav")) {
-		std::cerr << "error loading magic10.wav \n";
+	if (!magic10.loadFromFile("Sounds/YalSounds/magic10.ogg")) {
+		std::cerr << "error loading magic10.ogg \n";
 	}
-	if (!MenuAccept2.loadFromFile("Sounds/YalSounds/MenuAccept2.wav")) {
-		std::cerr << "error loading MenuAccept2.wav \n";
+	if (!MenuAccept2.loadFromFile("Sounds/YalSounds/MenuAccept2.ogg")) {
+		std::cerr << "error loading MenuAccept2.ogg \n";
 	}
-	if (!MenuAccept3.loadFromFile("Sounds/YalSounds/MenuAccept3.wav")) {
-		std::cerr << "error loading MenuAccept3.wav \n";
+	if (!MenuAccept3.loadFromFile("Sounds/YalSounds/MenuAccept3.ogg")) {
+		std::cerr << "error loading MenuAccept3.ogg \n";
 	}
-	if (!MenuAccept6.loadFromFile("Sounds/YalSounds/MenuAccept6.wav")) {
-		std::cerr << "error loading MenuAccept6.wav \n";
+	if (!MenuAccept6.loadFromFile("Sounds/YalSounds/MenuAccept6.ogg")) {
+		std::cerr << "error loading MenuAccept6.ogg \n";
 	}
-	if (!ouch1.loadFromFile("Sounds/YalSounds/ouch1.wav")) {
-		std::cerr << "error loading ouch1.wav \n";
+	if (!ouch1.loadFromFile("Sounds/YalSounds/ouch1.ogg")) {
+		std::cerr << "error loading ouch1.ogg \n";
 	}
-	if (!ouch3.loadFromFile("Sounds/YalSounds/ouch3.wav")) {
-		std::cerr << "error loading ouch3.wav \n";
+	if (!ouch3.loadFromFile("Sounds/YalSounds/ouch3.ogg")) {
+		std::cerr << "error loading ouch3.ogg \n";
 	}
-	if (!PlayerDie13.loadFromFile("Sounds/YalSounds/PlayerDie13.wav")) {
-		std::cerr << "error loading PlayerDie13.wav \n";
+	if (!PlayerDie13.loadFromFile("Sounds/YalSounds/PlayerDie13.ogg")) {
+		std::cerr << "error loading PlayerDie13.ogg \n";
 	}
-	if (!PlayerDie13.loadFromFile("Sounds/YalSounds/PlayerDie13.wav")) {
-		std::cerr << "error loading PlayerDie13.wav \n";
+	if (!PlayerDie13.loadFromFile("Sounds/YalSounds/PlayerDie13.ogg")) {
+		std::cerr << "error loading PlayerDie13.ogg \n";
 	}
-	if (!Powerup4.loadFromFile("Sounds/YalSounds/Powerup4.wav")) {
-		std::cerr << "error loading Powerup4.wav \n";
+	if (!Powerup4.loadFromFile("Sounds/YalSounds/Powerup4.ogg")) {
+		std::cerr << "error loading Powerup4.ogg \n";
 	}
-	if (!shoot11.loadFromFile("Sounds/YalSounds/shoot11.wav")) {
-		std::cerr << "error loading shoot11.wav \n";
+	if (!shoot11.loadFromFile("Sounds/YalSounds/shoot11.ogg")) {
+		std::cerr << "error loading shoot11.ogg \n";
 	}
-	if (!shoot14.loadFromFile("Sounds/YalSounds/shoot14.wav")) {
-		std::cerr << "error loading shoot14.wav \n";
+	if (!shoot14.loadFromFile("Sounds/YalSounds/shoot14.ogg")) {
+		std::cerr << "error loading shoot14.ogg \n";
 	}
-	if (!shoot23.loadFromFile("Sounds/YalSounds/shoot23.wav")) {
-		std::cerr << "error loading shoot23.wav \n";
+	if (!shoot23.loadFromFile("Sounds/YalSounds/shoot23.ogg")) {
+		std::cerr << "error loading shoot23.ogg \n";
 	}
-	if (!shoot35.loadFromFile("Sounds/YalSounds/shoot35.wav")) {
-		std::cerr << "error loading shoot35.wav \n";
+	if (!shoot35.loadFromFile("Sounds/YalSounds/shoot35.ogg")) {
+		std::cerr << "error loading shoot35.ogg \n";
 	}
-	if (!shot2.loadFromFile("Sounds/YalSounds/shot2.wav")) {
-		std::cerr << "error loading shot2.wav \n";
+	if (!shot2.loadFromFile("Sounds/YalSounds/shot2.ogg")) {
+		std::cerr << "error loading shot2.ogg \n";
 	}
-	if (!shot17.loadFromFile("Sounds/YalSounds/shot17.wav")) {
-		std::cerr << "error loading shot17.wav \n";
+	if (!shot17.loadFromFile("Sounds/YalSounds/shot17.ogg")) {
+		std::cerr << "error loading shot17.ogg \n";
 	}
-	if (!steam3.loadFromFile("Sounds/YalSounds/steam3.wav")) {
-		std::cerr << "error loading steam3.wav \n";
+	if (!steam3.loadFromFile("Sounds/YalSounds/steam3.ogg")) {
+		std::cerr << "error loading steam3.ogg \n";
 	}
-	if (!sword5.loadFromFile("Sounds/YalSounds/sword5.wav")) {
-		std::cerr << "error loading sword5.wav \n";
+	if (!sword5.loadFromFile("Sounds/YalSounds/sword5.ogg")) {
+		std::cerr << "error loading sword5.ogg \n";
 	}
-	if (!warning3.loadFromFile("Sounds/YalSounds/warning3.wav")) {
-		std::cerr << "error loading warning3.wav \n";
+	if (!warning3.loadFromFile("Sounds/YalSounds/warning3.ogg")) {
+		std::cerr << "error loading warning3.ogg \n";
 	}
-	if (!warning7.loadFromFile("Sounds/YalSounds/warning7.wav")) {
-		std::cerr << "error loading warning7.wav \n";
+	if (!warning7.loadFromFile("Sounds/YalSounds/warning7.ogg")) {
+		std::cerr << "error loading warning7.ogg \n";
 	}
-	if (!Whoosh.loadFromFile("Sounds/YalSounds/Whoosh.wav")) {
-		std::cerr << "error loading Whoosh.wav \n";
+	if (!Whoosh.loadFromFile("Sounds/YalSounds/Whoosh.ogg")) {
+		std::cerr << "error loading Whoosh.ogg \n";
 	}
-	if (!Fireball.loadFromFile("Sounds/YalSounds/Fireball.wav")) {
-		std::cerr << "error loading Fireball.wav \n";
+	if (!Fireball.loadFromFile("Sounds/YalSounds/Fireball.ogg")) {
+		std::cerr << "error loading Fireball.ogg \n";
 	}
-	if (!enemyDeath6.loadFromFile("Sounds/YalSounds/Enemy Death 6.wav")) {
-		std::cerr << "error loading Enemy Death 6.wav \n";
+	if (!enemyDeath6.loadFromFile("Sounds/YalSounds/Enemy Death 6.ogg")) {
+		std::cerr << "error loading Enemy Death 6.ogg \n";
 	}
-	if (!playershoot.loadFromFile("Sounds/YalSounds/playershoot.wav")) {
-		std::cerr << "error loading player shoot .wav \n";
+	if (!playershoot.loadFromFile("Sounds/YalSounds/playershoot.ogg")) {
+		std::cerr << "error loading player shoot .ogg \n";
 	}
-	if (!Brake.loadFromFile("Sounds/YalSounds/Brake.wav")) {
-		std::cerr << "error loading Brake.wav \n";
+	if (!Brake.loadFromFile("Sounds/YalSounds/Brake.ogg")) {
+		std::cerr << "error loading Brake.ogg \n";
 	}
-	if (!Plop.loadFromFile("Sounds/YalSounds/Plop.wav")) {
-		std::cerr << "error loading Plop.wav \n";
+	if (!Plop.loadFromFile("Sounds/YalSounds/Plop.ogg")) {
+		std::cerr << "error loading Plop.ogg \n";
 	}
-	if (!PlopBanana.loadFromFile("Sounds/YalSounds/Plop Banana.wav")) {
-		std::cerr << "error loading Plop Banana.wav \n";
+	if (!PlopBanana.loadFromFile("Sounds/YalSounds/Plop Banana.ogg")) {
+		std::cerr << "error loading Plop Banana.ogg \n";
 	}
-	if (!Sword_Clash.loadFromFile("Sounds/YalSounds/Sword Clash.wav")) {
-		std::cerr << "error loading Sword Clash.wav \n";
+	if (!Sword_Clash.loadFromFile("Sounds/YalSounds/Sword Clash.ogg")) {
+		std::cerr << "error loading Sword Clash.ogg \n";
 	}
 }
 
@@ -186,64 +186,59 @@ void RESOURCES::PlayMusicFromFile(int i_songNum)
 		music.setVolume(soundLvl);
 		switch (i_songNum) {
 		case 0: {
-			if (!music.openFromFile("Sounds/Music/BF980.wav")) {
-				std::cerr << "error loading 'Sounds / Music / BF980.wav' \n";
+			if (!music.openFromFile("Sounds/Music/BF980.ogg")) {
+				std::cerr << "error loading 'Sounds / Music / BF980.ogg' \n";
 			}
 			break;
 		}
 		case 1: {
-			if (!music.openFromFile("Sounds/Music/D2PAK.wav")) {
-				std::cerr << "error loading 'Sounds / Music / D2PAK.wav' \n";
+			if (!music.openFromFile("Sounds/Music/CMOS.ogg")) {
+				std::cerr << "error loading 'Sounds / Music / CMOS.ogg' \n";
 			}
 			break;
 		}
 		case 2: {
-			if (!music.openFromFile("Sounds/Music/EPROM.wav")) {
-				std::cerr << "error loading 'Sounds / Music / EPROM.wav' \n";
+			if (!music.openFromFile("Sounds/Music/D2PAK.ogg")) {
+				std::cerr << "error loading 'Sounds / Music / D2PAK.ogg' \n";
 			}
 			break;
 		}
 		case 3: {
-			if (!music.openFromFile("Sounds/Music/FinFET.wav")) {
-				std::cerr << "error loading 'Sounds / Music / finFET.wav' \n";
+			if (!music.openFromFile("Sounds/Music/EPROM.ogg")) {
+				std::cerr << "error loading 'Sounds / Music / EPROM.ogg' \n";
 			}
 			break;
 		}
 		case 4: {
-			if (!music.openFromFile("Sounds/Music/MOSFET.wav")) {
-				std::cerr << "error loading 'Sounds / Music / MOSFET.wav' \n";
+			if (!music.openFromFile("Sounds/Music/FinFET.ogg")) {
+				std::cerr << "error loading 'Sounds / Music / finFET.ogg' \n";
 			}
 			break;
 		}
 		case 5: {
-			if (!music.openFromFile("Sounds/Music/TO-3.wav")) {
-				std::cerr << "error loading 'Sounds / Music / TO-3.wav' \n";
+			if (!music.openFromFile("Sounds/Music/MITS.ogg")) {
+				std::cerr << "error loading 'Sounds / Music / MITS.ogg' \n";
 			}
 			break;
 		}
 		case 6: {
-			if (!music.openFromFile("Sounds/Music/Vs Excite.wav")) {
-				std::cerr << "error loading 'Sounds / Music / VS Excite.wav' \n";
+			if (!music.openFromFile("Sounds/Music/MOSFET.ogg")) {
+				std::cerr << "error loading 'Sounds / Music / MOSFET.ogg' \n";
 			}
 			break;
 		}
-				//THESE TWO FILES WONT LOAD:
-						//Failed to open WAV sound file (invalid or unsupported file)
-						//error loading 'Sounds / Music / CMOS.wav'
-						//Failed to play audio stream: sound parameters have not been initialized (call initialize() first)
-				//case 7: {
-				//	if (!music.openFromFile("Sounds/Music/CMOS.wav")) {
-				//		std::cerr << "error loading 'Sounds / Music / CMOS.wav' \n";
-				//	}
-				//	break;
-				//}
-
-				//case 8: {
-				//	if (!music.openFromFile("Sounds/Music/MITS.wav")) {
-				//		std::cerr << "error loading 'Sounds / Music / MITS.wav' \n";
-				//	}
-				//	break;
-				//}
+		case 7: {
+			if (!music.openFromFile("Sounds/Music/TO-3.ogg")) {
+				std::cerr << "error loading 'Sounds / Music / TO-3.ogg' \n";
+			}
+			break;
+		}
+		case 8: {
+			if (!music.openFromFile("Sounds/Music/Vs Excite.ogg")) {
+				std::cerr << "error loading 'Sounds / Music / VS Excite.ogg' \n";
+			}
+			break;
+		}
 		}
 		music.setLoop(true);
 		music.play();

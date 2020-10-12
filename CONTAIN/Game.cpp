@@ -318,8 +318,7 @@ void Game::PlayRandomSong()
 {
 	std::random_device rd1;  //Will be used to obtain a seed for the random number engine
 	std::mt19937 gen1(rd1()); //Standard mersenne_twister_engine seeded with rd()
-	std::uniform_int_distribution<> distrib(1, 6); //both boundaries are inclusive
+	std::uniform_int_distribution<> distrib(0, 8); //both boundaries are inclusive
 	int randExtra = distrib(gen1);
 	resources->PlayMusicFromFile(randExtra);
-	//resources->PlayMusicFromFile(1);
 }
