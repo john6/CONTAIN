@@ -224,7 +224,7 @@ void PlayerChar::CollideWithPainWall(PainWall * i_painWallPtr)
 
 void PlayerChar::CollideWithDoor(Door * i_doorPtr)
 {
-	if ((!i_doorPtr->locked) && (!i_doorPtr->disabled)) {
+	if (i_doorPtr->IsOpen()) {
 		GLBVRS::RSRCS->PlaySound(RESOURCES::MAGIC7);
 		rb.ignoreForcesThisStep = true;
 		rb.ResetPosition(i_doorPtr->GetOutPos());
@@ -398,12 +398,10 @@ std::map<UPGRADE_TYPE, int>* PlayerChar::GetLvl()
 }
 
 void PlayerChar::ShootAOE()
-{	// AOE is a panic button it should not have a timer on it that kinda defeats the prupose,
-	//JK everything needs a slight timer or else I'll fire them all at once
+{
+	//TODO make some time cast function so I dont have to redo it everywhere
 	weaponDelay = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastAOEFired)).count() / 1000000.0f;
-	//if ((weaponDelay >= shipRateOfAOE) && (currSpecialAmmo > 0)) {
 	if (weaponDelay >= shipRateOfAOE) {
-	//if (currSpecialAmmo > 0) {
 		GLBVRS::RSRCS->PlaySound(RESOURCES::MAGIC10);
 		--currSpecialAmmo;
 		lastAOEFired = hiResTime::now();

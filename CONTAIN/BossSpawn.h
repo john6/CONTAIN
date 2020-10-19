@@ -4,6 +4,7 @@
 class BossSpawn : public Enemy
 {
 private:
+
 	DIFFICULTY diff;
 	Vector2f currDir;
 	float sameDirTime;
@@ -14,6 +15,7 @@ private:
 	float weaponDelay;
 	bool isMiniBoss;
 
+	std::list<std::weak_ptr<Entity>> children;
 public:
 	bool invulnerable;
 
@@ -24,6 +26,7 @@ public:
 
 	void Destroy() override;
 
+	//TODO vulnerable can be made into private too I think I would just put the code into take damage where it just doesnt if its not vulnerable
 	void TakeDamage(float i_dmg);
 
 	void shootProj();
@@ -31,4 +34,9 @@ public:
 	void Stun(float i_stunTime) override;
 
 	void SetDiffVars(int i_diff);
+
+	void SpawnEnemies(int i_numEnems, TypeID enemyType, int i_sizeMod);
+
+	void CheckChildren();
+
 };

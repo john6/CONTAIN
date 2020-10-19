@@ -5,6 +5,8 @@
 PowerUp::PowerUp(Vector2f i_startPosition, UPGRADE_TYPE i_powType, RigidBody i_rb) :
 	Entity(i_startPosition, i_rb, UPGRADE), powType{ i_powType }
 {
+	intangible = true;
+
 	switch (i_powType) {
 	case (RATE_OF_FIRE): {
 		fillColor = sf::Color(255, 128, 128);

@@ -5,6 +5,7 @@
 #include "BossSpawn.h"
 #include "BossSplit.h"
 #include "BossStream.h"
+#include "PowerUp.h"
 
 Sector::Sector(Level* i_lvlPtr, RESOURCES* i_resources, sf::Color i_colA, sf::Color i_colB, bool i_testSector) :
 	myLevel { i_lvlPtr }, resources { i_resources }, colPalA { i_colA }, colPalB { i_colB }
@@ -13,8 +14,7 @@ Sector::Sector(Level* i_lvlPtr, RESOURCES* i_resources, sf::Color i_colA, sf::Co
 	colPalB = Physics::GenerateRandomColor(5, 50);
 
 	if (i_testSector) {
-		emptyTerrainAreas = { TER_UP, TER_RIGHT, TER_DOWN, TER_LEFT }; //, TER_CENT };
-		//AddWallsToLevel();
+		emptyTerrainAreas = { TER_UP, TER_RIGHT, TER_DOWN, TER_LEFT };
 		sectEnemyNum = 0;
 		numBlockers = 0;
 		isBossRoom = false;
@@ -31,7 +31,7 @@ Sector::~Sector()
 }
 
 std::list<std::shared_ptr<Entity>>* Sector::GetSectorEntities()
-{
+{ //TODO wtf is this shit
 	/*if (firstsPhase) {*/
 		return &lvlEntitiesPhase1;
 	/*}
@@ -67,12 +67,19 @@ void Sector::AddEntPtrToSector(std::shared_ptr<Entity> i_entPtr)
 }
 
 void Sector::AddEntsFromSpawnQueues()
-{
+{//TODO Sector needs player pointer so its doesnt have to cast all the time I think
+	auto pPtr = GLBVRS::PPTR;
+	for (auto spawnable : pPtr->spawnVect) {
+		AddEntPtrToSector(spawnable);
+	}
 	for (auto entPtr : lvlEntitiesPhase1) {
 		for (auto spawnable : entPtr->spawnVect) {
 			AddEntPtrToSector(spawnable);
 		}
 	}
+	
+	pPtr->spawnVect.clear();
+
 	for (auto entPtr : lvlEntitiesPhase1) {
 		entPtr->spawnVect.clear();
 	}
@@ -85,7 +92,7 @@ bool Sector::IsBlocker(std::shared_ptr<Entity> i_entPtr)
 }
 
 void Sector::GenerateEnemies(int i_numEnems, TypeID enemyType, SCREEN_AREA i_area, int i_phaseNum, DIFFICULTY i_diff, int i_sizeMod)
-{ //zero is the intended default for the size mod, adding to the size mod will make the enemies larger and decrease difficulty
+{
 	auto screenAreas = GetScreenAreas(i_area);
 	for (int i = 0; i < i_numEnems; ++i) {
 
@@ -147,8 +154,7 @@ void Sector::GenerateEnemies(int i_numEnems, TypeID enemyType, SCREEN_AREA i_are
 			break;
 		}
 		if (i_phaseNum == 1) {
-			sectEnemyNum += 1;
-			lvlEntitiesPhase1.push_back(ent);
+			AddEntPtrToSector(ent);
 		}
 		else {
 			lvlEntitiesPhase2.push_back(ent);
@@ -332,7 +338,7 @@ void Sector::PopulateEntranceRoom()
 {
 	std::shared_ptr<Entity> lowerWall = std::make_shared<EndObject>(
 				Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH / 2.0f), GLBVRS::CRT_HGHT / 2.0)));
-	lvlEntitiesPhase1.push_back(lowerWall);
+	AddEntPtrToSector(lowerWall);
 
 	//std::shared_ptr<Entity> smallShipPOW2 = std::make_shared<PowerUp>(this,
 	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (1.0f / 5.0f)), GLBVRS::CRT_HGHT / 2.0)), BIG_SHIP);
@@ -346,27 +352,27 @@ void Sector::PopulateEntranceRoom()
 	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (3.0f / 5.0f)), GLBVRS::CRT_HGHT / 2.0)), BIG_SHIP);
 	//lvlEntitiesPhase1.push_back(smallShipPOW4);
 
-	//std::shared_ptr<Entity> smallShipPOW5 = std::make_shared<PowerUp>(this,
-	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (4.0f / 5.0f)), GLBVRS::CRT_HGHT / 2.0)), SCATTER);
-	//lvlEntitiesPhase1.push_back(smallShipPOW5);
+	std::shared_ptr<Entity> smallShipPOW5 = std::make_shared<PowerUp>(
+		Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (4.0f / 5.0f)), GLBVRS::CRT_HGHT / 2.0)), SCATTER);
+	lvlEntitiesPhase1.push_back(smallShipPOW5);
 
-	//std::shared_ptr<Entity> asd1 = std::make_shared<PowerUp>(this,
-	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (1.0f / 5.0f)), GLBVRS::CRT_HGHT / 4.0)), RATE_OF_FIRE);
-	//lvlEntitiesPhase1.push_back(asd1);
+	std::shared_ptr<Entity> asd1 = std::make_shared<PowerUp>(
+		Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (1.0f / 5.0f)), GLBVRS::CRT_HGHT / 4.0)), RATE_OF_FIRE);
+	lvlEntitiesPhase1.push_back(asd1);
 
 
 	//AddRandomPainWall(0);
-	//std::shared_ptr<Entity> asd2 = std::make_shared<PowerUp>(this,
-	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (2.0f / 5.0f)), GLBVRS::CRT_HGHT / 4.0)), SCATTER);
-	//lvlEntitiesPhase1.push_back(asd2);
+	std::shared_ptr<Entity> asd2 = std::make_shared<PowerUp>(
+		Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (2.0f / 5.0f)), GLBVRS::CRT_HGHT / 4.0)), SCATTER);
+	lvlEntitiesPhase1.push_back(asd2);
 
-	//std::shared_ptr<Entity> asd3 = std::make_shared<PowerUp>(this,
-	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (3.0f / 5.0f)), GLBVRS::CRT_HGHT / 4.0)), SCATTER);
-	//lvlEntitiesPhase1.push_back(asd3);
+	std::shared_ptr<Entity> asd3 = std::make_shared<PowerUp>(
+		Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (3.0f / 5.0f)), GLBVRS::CRT_HGHT / 4.0)), SCATTER);
+	lvlEntitiesPhase1.push_back(asd3);
 
-	//std::shared_ptr<Entity> asd4 = std::make_shared<PowerUp>(this,
-	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (4.0f / 5.0f)), GLBVRS::CRT_HGHT / 4.0)), RATE_OF_FIRE);
-	//lvlEntitiesPhase1.push_back(asd4);
+	std::shared_ptr<Entity> asd4 = std::make_shared<PowerUp>(
+		Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (4.0f / 5.0f)), GLBVRS::CRT_HGHT / 4.0)), RATE_OF_FIRE);
+	lvlEntitiesPhase1.push_back(asd4);
 
 	//std::vector<Vector2f> vector;
 	//counterclockwise
@@ -668,7 +674,7 @@ void Sector::PlaySound(int i_soundNum)
 }
 
 void Sector::SwitchToPhaseTwo()
-{
+{ //TODO the phase one enemies and phase two names are kind of meaningless. What really happens is that one phase 1 enemies ever appear, phase two is just a bucket of extra enemies to dump in
 	firstPhase = false;
 	std::list<std::shared_ptr<Entity>>::iterator iter = lvlEntitiesPhase1.begin();
 	while (iter != lvlEntitiesPhase1.end()) {
@@ -695,7 +701,11 @@ void Sector::SwitchToPhaseTwo()
 	for (std::shared_ptr<Entity> entPtr : lvlEntitiesPhase2) {
 		auto enemy = dynamic_cast<Enemy*>(entPtr.get());
 		enemy->TurnToMetal();
-		lvlEntitiesPhase1.push_back(entPtr);
+		AddEntPtrToSector(entPtr);
+	}
+
+	if (sectEndObj) {
+		sectEndObj->Unlock();
 	}
 	resources->PlaySound(RESOURCES::WARNING7);
 }
@@ -705,9 +715,6 @@ void Sector::SwitchLevelToPhaseTwo()
 	myLevel->SwitchSectorsToPhaseTwo();
 	for (auto doorPtr : sectDoors) {
 		doorPtr->Unlock();
-	}
-	if (sectEndObj) {
-		sectEndObj->Unlock();
 	}
 }
 
@@ -728,6 +735,10 @@ void Sector::Awaken()
 	}
 	if (closestDoor != NULL) {
 		closestDoor->Disable(2.0f);
+	}
+	//disable all doors if its phase on and enemies
+	if ((sectEnemyNum > 0) && (firstPhase)) {
+		LockRoom();
 	}
 }
 
@@ -962,6 +973,13 @@ void Sector::UnlockRoom()
 	playPtr->lastAOEFired = std::chrono::high_resolution_clock::now() - std::chrono::minutes(1);
 	for (auto doorPtr : sectDoors) {
 		doorPtr->Unlock();
+	}
+}
+
+void Sector::LockRoom()
+{
+	for (auto doorPtr : sectDoors) {
+		doorPtr->Lock();
 	}
 }
 

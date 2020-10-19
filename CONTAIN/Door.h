@@ -8,19 +8,18 @@ private:
 	Vector2f outPos;
 	MapCoord outCoord;
 
-
-
 	sf::Color colorOpen;
 	sf::Color colorClosed;
 	hiRes_time_point disableTimeStamp;
 	float disabledAmount;
 
+	bool open;
+	bool locked;
+	bool disabled;
 	sf::Color colorOpenOutline;
 	sf::Color colorClosedOutline;
 
 public:
-	bool locked;
-	bool disabled;
 	SCREEN_SIDE side;
 
 	Door(MapCoord i_outCoord, Vector2f i_startPos, Vector2f i_outPos, RigidBody i_rb, SCREEN_SIDE i_side);
@@ -36,7 +35,11 @@ public:
 
 	void Unlock();
 
+	void Lock();
+
 	void Open();
+
+	const bool IsOpen();
 
 	void Close();
 };

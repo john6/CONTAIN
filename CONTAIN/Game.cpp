@@ -88,6 +88,9 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnt
 		iter._Ptr->_Myval->Update(i_stepSize);
 		iter++;
 	}
+
+	levels[currLvl]->GetSector(currSector)->AddEntsFromSpawnQueues();
+
 	concurrency::concurrent_vector<CollisionData> collisions;
 
 	std::vector<int> parallelVect;
@@ -159,6 +162,9 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnt
 			Physics::PositionalCorrection(&collisions[index]);
 		}
 	});
+
+
+	levels[currLvl]->GetSector(currSector)->AddEntsFromSpawnQueues();
 	levels[currLvl]->GetSector(currSector)->RemoveDestroyedEntities();
 	return IN_GAME;
 }

@@ -88,6 +88,8 @@ public:
 
 	void UnlockRoom();
 
+	void LockRoom();
+
 	std::vector<std::tuple<Vector2f, Vector2f>> GetScreenAreas(SCREEN_AREA i_area);
 
 	Sector(Level* i_lvlPtr, RESOURCES* i_resources, sf::Color i_colA = sf::Color::Black, sf::Color i_colB = sf::Color::White, bool i_testSector = false);

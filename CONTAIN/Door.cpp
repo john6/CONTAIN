@@ -8,6 +8,7 @@ Door::Door(MapCoord i_outCoord, Vector2f i_startPos, Vector2f i_outPos, RigidBod
 	intangible = true;
 	locked = false;
 	disabled = false;
+	open = false;
 	disableTimeStamp = hiResTime::now();
 	disabledAmount = 0.0f;
 	//color
@@ -54,18 +55,34 @@ void Door::Disable(float i_disableTime)
 }
 
 void Door::Unlock() {
+	locked = false;
+}
+
+void Door::Lock()
+{
 	locked = true;
 }
 
 void Door::Open()
 {
-	fillColor = colorOpen;
-	outlineColor = colorOpenOutline;
+	if (!open) {
+		open = true;
+		fillColor = colorOpen;
+		outlineColor = colorOpenOutline;
+	}
+}
+
+const bool Door::IsOpen()
+{
+	return open;
 }
 
 void Door::Close()
 {
-	fillColor = colorClosed;
-	outlineColor = colorClosedOutline;
+	if (open) {
+		open = false;
+		fillColor = colorClosed;
+		outlineColor = colorClosedOutline;
+	}
 }
 
