@@ -1,5 +1,7 @@
 #include "Game.h"
 #include "TuteLib.h"
+#include "Entity.h"
+//#include "PlayerChar.h"
 
 Game::Game(sf::RenderWindow* i_window, RESOURCES* i_resources, DIFFICULTY i_difficulty)
 	: renderWindow{ i_window }, resources {i_resources}, tuteLib{ TuteLib(i_window, i_resources)}, HUD { HeadsUpDisplay(i_resources) }
@@ -241,7 +243,7 @@ void Game::CreatePlayerChar()
 	RigidBody rb(Physics::CreateRegularPolygon(6, 75.0f * GLBVRS::SIZE_RAT), METAL);
 	playerChar = std::make_shared<PlayerChar>(startingHealth, Vector2f(400.0f * GLBVRS::SIZE_RAT, 400.0f * GLBVRS::SIZE_RAT), rb);
 	playerChar->rb.transform.orient = 1.0f;
-	GLBVRS::SetGlobalConstants(renderWindow->getSize().x, renderWindow->getSize().y, resources, this, playerChar, resources->soundLvl);
+	GLBVRS::SetGlobalConstants(renderWindow->getSize().x, renderWindow->getSize().y, resources, GLBVRS::MBUSPTR, this, playerChar, resources->soundLvl);
 }
 
 void Game::SpawnProjectile()

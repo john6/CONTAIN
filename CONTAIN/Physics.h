@@ -1,11 +1,13 @@
 #pragma once
 #include <algorithm>
-#include "Math.h"
-#include "GLOBAL_CONSTANTS.h"
-#include "RigidBody.h"
-#include "CollisionData.h"
 #include <iostream>
 #include <cstdlib>
+#include "GLOBAL_CONSTANTS.h"
+#include "Math.h"
+#include "Entity.h"
+#include "RigidBody.h"
+#include "CollisionData.h"
+
 
 class Physics
 {

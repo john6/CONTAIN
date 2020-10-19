@@ -3,10 +3,22 @@
 #include <vector>
 #include "GLOBAL_CONSTANTS.h"
 #include "RESOURCES.h"
-#include "Entity.h"
 #include "RigidBody.h"
 #include "Level.h"
 #include "Physics.h"
+
+
+#include "Entity.h"
+#include "Blocker.h"
+#include "PlayerChar.h"
+#include "Enemy.h"
+#include "Wall.h"
+#include "PainWall.h"
+#include "EndObject.h"
+#include "Door.h"
+#include "Scenery.h"
+#include "Anim.h"
+
 
 class Sector
 {
@@ -17,6 +29,8 @@ public:
 
 	std::list<std::shared_ptr<Entity>> lvlEntitiesPhase1;
 	std::list<std::shared_ptr<Entity>> lvlEntitiesPhase2;
+	std::list<std::shared_ptr<Door>> sectDoors;
+	std::shared_ptr<EndObject> sectEndObj;
 
 	bool isBossRoom;
 	bool firstPhase;
@@ -33,6 +47,8 @@ public:
 	std::list<std::shared_ptr<Entity>>* GetSectorEntities();
 
 	void AddEntPtrToSector(std::shared_ptr<Entity> i_entPtr);
+
+	void AddEntsFromSpawnQueues();
 
 	void GenerateEnemies(int i_numEnems, TypeID enemyType, SCREEN_AREA i_area, int i_phaseNum, DIFFICULTY i_diff, int i_randMod);
 
@@ -70,6 +86,7 @@ public:
 
 	void GenerateIrregularTerrain(int i_numVerts, int i_maxSize, int i_minSize = 1);
 
+	void UnlockRoom();
 
 	std::vector<std::tuple<Vector2f, Vector2f>> GetScreenAreas(SCREEN_AREA i_area);
 

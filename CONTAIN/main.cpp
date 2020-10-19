@@ -11,6 +11,7 @@
 #include "YouWonMenu.h"
 #include "YouLostMenu.h"
 #include "SaveData.h"
+#include "MessageBus.h"
 #include "main.h"
 
 //TODO: Contact points should be in local space I think, I never convert them
@@ -33,10 +34,10 @@ int main()
 	//::ShowWindow(window.getSystemHandle(), SW_MAXIMIZE);
 
 	RESOURCES resources;
-
-	GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, NULL, NULL, soundLvl);
+	MessageBus mBus;
+	GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, NULL, NULL, soundLvl);
 	Game globalGame = Game(&window, &resources);
-	GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &globalGame, globalGame.playerChar, soundLvl);
+	GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
 	int currLvl;
 
 	DIFFICULTY difficulty = MEDIUM;
@@ -62,12 +63,12 @@ int main()
 				window.close();
 			}
 			if (currEvent.type == sf::Event::Resized) {
-				GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &globalGame, globalGame.playerChar, soundLvl);
+				GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
 					settingsMenu.ResetButtons();
 			}
 			if (currEvent.type == sf::Event::LostFocus) {
 				//window.create(sf::VideoMode(400, 400), "CONTAIN");
-				GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &globalGame, globalGame.playerChar, soundLvl);
+				GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
 				settingsMenu.ResetButtons();
 				notFullScreen = true;
 			}
@@ -76,7 +77,7 @@ int main()
 			if (notFullScreen) {
 				notFullScreen = false;
 				//window.create(sf::VideoMode(1920, 1080), "CONTAIN", sf::Style::Fullscreen);
-				GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &globalGame, globalGame.playerChar, soundLvl);
+				GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
 			}
 			hiRes_time_point newTime = hiResTime::now();
 			microSec currInterval = std::chrono::duration_cast<microSec>(newTime - currTime);
@@ -111,16 +112,16 @@ int main()
 						settingsMenu.ResetMenu();
 						if (fullScreen) {
 							window.create(GLBVRS::GetVideoMode(resolution), "CONTAIN", sf::Style::Fullscreen);
-							GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &globalGame, globalGame.playerChar, soundLvl);
+							GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
 							settingsMenu.ResetMenu();
 						}
 						else {
 							window.create(GLBVRS::GetVideoMode(resolution), "CONTAIN", sf::Style::Default);
-							GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &globalGame, globalGame.playerChar, soundLvl);
+							GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
 							settingsMenu.ResetMenu();
 						}
 						resources.SetSoundLevel(soundLvl);
-						GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &globalGame, globalGame.playerChar, soundLvl);
+						GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
 						settingsMenu.ResetMenu();
 						state = SETTINGS;
 					}
@@ -134,6 +135,7 @@ int main()
 					hiRes_time_point beforePhysicsUpdate = hiResTime::now();
 					state = globalGame.Update(static_cast<float>(lag.count()), &window, mousePosition);
 					hiRes_time_point afterPhysicsUpdate = hiResTime::now();
+					GLBVRS::MBUSPTR->notify();
 					microSec currInterval = std::chrono::duration_cast<microSec>(afterPhysicsUpdate - beforePhysicsUpdate);
 					std::string str = "Physics update took " + std::to_string(currInterval.count()) + " microseconds \n";
 					std::cout << str;

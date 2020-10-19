@@ -7,18 +7,20 @@
 #include <random>
 #include <concurrent_vector.h>
 #include <SFML/Audio.hpp>
+
 #include "GLOBAL_CONSTANTS.h"
 #include "RESOURCES.h"
+#include "HeadsUpDisplay.h"
+#include "UpgradeMenu.h"
 #include "Physics.h"
 #include "GameRenderer.h"
-#include "HeadsUpDisplay.h"
 #include "Level.h"
 #include "LevelGenerator.h"
-#include "Entity.h"
 #include "QuadTree.h"
-#include "UpgradeMenu.h"
 #include "InfoPopUp.h"
 #include "TuteLib.h"
+
+class playerChar;
 
 enum PLAY_STATE { GENERAL_GAMEPLAY, WON_LEVEL, DEAD, WON_GAME };
 

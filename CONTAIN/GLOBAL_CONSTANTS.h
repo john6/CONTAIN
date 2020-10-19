@@ -203,6 +203,7 @@ const float LEVEL_SCORE_INCREASE = 1000;
 class RESOURCES;
 class Game;
 class Entity;
+class MessageBus;
 
 class GLBVRS
 {
@@ -235,12 +236,14 @@ public:
 
 	//UTILITY
 	static RESOURCES* RSRCS;
+	static MessageBus* MBUSPTR;
 	static Game* GPTR;
 	static std::shared_ptr<Entity> PPTR;
 	static float SOUNDLVL;
 
 public:
-	static void SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_screenHeight, RESOURCES* i_resourcesPtr, Game* i_gamePtr, std::shared_ptr<Entity> i_playerPtr, float i_soundLvl);
+	static void SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_screenHeight, RESOURCES* i_resourcesPtr,
+		MessageBus* i_mBusPtr, Game* i_gamePtr, std::shared_ptr<Entity> i_playerPtr, float i_soundLvl);
 
 	static int GetUpgradeMax(UPGRADE_TYPE i_powType);
 

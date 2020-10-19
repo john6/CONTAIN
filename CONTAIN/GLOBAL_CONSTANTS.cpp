@@ -1,11 +1,15 @@
 #include "GLOBAL_CONSTANTS.h"
+#include "MessageBus.h"
+#include "Message.h"
+#include "BusNode.h"
 
 //GLOBAL_CONSTANTS::GLOBAL_CONSTANTS(unsigned int i_screenWidth, unsigned int i_screenHeight)
 //{
 //
 //}
 
-void GLBVRS::SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_screenHeight, RESOURCES* i_resourcesPtr, Game* i_gamePtr, std::shared_ptr<Entity> i_playerPtr, float i_soundLvl)
+void GLBVRS::SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_screenHeight,
+	RESOURCES* i_resourcesPtr, MessageBus* i_mBusPtr, Game* i_gamePtr, std::shared_ptr<Entity> i_playerPtr, float i_soundLvl)
 {
 	//WINDOW SETTINGS
 	GLBVRS::SCREEN_WIDTH = i_screenWidth;
@@ -18,7 +22,6 @@ void GLBVRS::SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_scree
 	GLBVRS::VRT_MRG = static_cast<float>(GLBVRS::SCREEN_HEIGHT / 20.0f);  //vertical margin
 	GLBVRS::SIZE_RAT = static_cast<float>
 		(std::min( ((float)GLBVRS::SCREEN_WIDTH / 1920.0f ), ((float)GLBVRS::SCREEN_HEIGHT / 1080.0f)));
-
 
 	//MENU RESOLUTION
 	GLBVRS::BTTN_WDTH = GLBVRS::CRT_WDTH / 5.0f;
@@ -37,9 +40,11 @@ void GLBVRS::SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_scree
 
 	//UTILITY
 	GLBVRS::RSRCS = i_resourcesPtr;
+	GLBVRS::MBUSPTR = i_mBusPtr;
 	GLBVRS::GPTR = i_gamePtr;
 	GLBVRS::PPTR = i_playerPtr;
 	GLBVRS::SOUNDLVL = i_soundLvl;
+
 }
 
 int GLBVRS::GetUpgradeMax(UPGRADE_TYPE i_powType)
@@ -145,6 +150,7 @@ float GLBVRS::ENEMYSPEEDHARD = 18.0f;
 
 //UTILITY
 RESOURCES* GLBVRS::RSRCS = NULL;
+MessageBus* GLBVRS::MBUSPTR = NULL;
 Game* GLBVRS::GPTR = NULL;
 std::shared_ptr<Entity> GLBVRS::PPTR = NULL;
 float GLBVRS::SOUNDLVL = 75.0f;

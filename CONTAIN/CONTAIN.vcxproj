@@ -19,17 +19,35 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Anim.cpp" />
+    <ClCompile Include="Blast.cpp" />
+    <ClCompile Include="Blocker.cpp" />
+    <ClCompile Include="BossBurst.cpp" />
+    <ClCompile Include="BossRush.cpp" />
+    <ClCompile Include="BossSpawn.cpp" />
+    <ClCompile Include="BossSplit.cpp" />
+    <ClCompile Include="BossStream.cpp" />
+    <ClCompile Include="BusNode.cpp" />
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="Circle.cpp" />
     <ClCompile Include="CollisionData.cpp" />
-    <ClCompile Include="EnemyAI.cpp" />
+    <ClCompile Include="CrazyBoi.cpp" />
+    <ClCompile Include="Door.cpp" />
+    <ClCompile Include="EndObject.cpp" />
+    <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="GLOBAL_CONSTANTS.cpp" />
     <ClCompile Include="InfoPopUp.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Math.cpp" />
+    <ClCompile Include="Message.cpp" />
+    <ClCompile Include="MessageBus.cpp" />
+    <ClCompile Include="PainWall.cpp" />
+    <ClCompile Include="PlayerChar.cpp" />
     <ClCompile Include="PlayerController.cpp" />
     <ClCompile Include="Polygon.cpp" />
+    <ClCompile Include="PowerUp.cpp" />
+    <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="QuadTree.cpp" />
     <ClCompile Include="RigidBody.cpp" />
     <ClCompile Include="GameRenderer.cpp" />
@@ -44,6 +62,7 @@
     <ClCompile Include="Rectangle.cpp" />
     <ClCompile Include="RESOURCES.cpp" />
     <ClCompile Include="SaveData.cpp" />
+    <ClCompile Include="Scenery.cpp" />
     <ClCompile Include="Sector.cpp" />
     <ClCompile Include="SettingsMenu.cpp" />
     <ClCompile Include="Shape.cpp" />
@@ -51,21 +70,40 @@
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="TuteLib.cpp" />
     <ClCompile Include="UpgradeMenu.cpp" />
+    <ClCompile Include="Wall.cpp" />
     <ClCompile Include="YouLostMenu.cpp" />
     <ClCompile Include="YouWonMenu.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Anim.h" />
+    <ClInclude Include="Blast.h" />
+    <ClInclude Include="Blocker.h" />
+    <ClInclude Include="BossBurst.h" />
+    <ClInclude Include="BossRush.h" />
+    <ClInclude Include="BossSpawn.h" />
+    <ClInclude Include="BossSplit.h" />
+    <ClInclude Include="BossStream.h" />
+    <ClInclude Include="BusNode.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="Circle.h" />
     <ClInclude Include="CollisionData.h" />
-    <ClInclude Include="EnemyAI.h" />
+    <ClInclude Include="CrazyBoi.h" />
+    <ClInclude Include="Door.h" />
+    <ClInclude Include="EndObject.h" />
+    <ClInclude Include="Enemy.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="InfoPopUp.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Math.h" />
+    <ClInclude Include="Message.h" />
+    <ClInclude Include="MessageBus.h" />
+    <ClInclude Include="PainWall.h" />
+    <ClInclude Include="PlayerChar.h" />
     <ClInclude Include="PlayerController.h" />
     <ClInclude Include="Polygon.h" />
+    <ClInclude Include="PowerUp.h" />
+    <ClInclude Include="Projectile.h" />
     <ClInclude Include="QuadTree.h" />
     <ClInclude Include="RigidBody.h" />
     <ClInclude Include="GameRenderer.h" />
@@ -81,6 +119,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="RESOURCES.h" />
     <ClInclude Include="SaveData.h" />
+    <ClInclude Include="Scenery.h" />
     <ClInclude Include="Sector.h" />
     <ClInclude Include="SettingsMenu.h" />
     <ClInclude Include="Shape.h" />
@@ -88,6 +127,7 @@
     <ClInclude Include="Transform.h" />
     <ClInclude Include="TuteLib.h" />
     <ClInclude Include="UpgradeMenu.h" />
+    <ClInclude Include="Wall.h" />
     <ClInclude Include="YouLostMenu.h" />
     <ClInclude Include="YouWonMenu.h" />
   </ItemGroup>

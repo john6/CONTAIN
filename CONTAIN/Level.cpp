@@ -1,4 +1,5 @@
 #include "Level.h"
+#include "PowerUp.h"
 
 struct MapNode {
 	MapNode() : isRoom{ false }, up{ true }, down{ true }, left{ true }, right{ true },
@@ -303,8 +304,8 @@ void Level::CreateBidirectionalDoor(MapCoord i_coordA, MapCoord i_coordB)
 	}
 	RigidBody doorBodyA(doorShapeA);
 	RigidBody doorBodyB(doorShapeB);
-	std::shared_ptr<Door> sectDoorA = std::make_shared<Door>(GetSector(i_coordA).get(), i_coordB, startPosA,outPosA, doorBodyA, inSide);
-	std::shared_ptr<Door> sectDoorB = std::make_shared<Door>(GetSector(i_coordB).get(), i_coordA, startPosB,outPosB, doorBodyB, outSide);
+	std::shared_ptr<Door> sectDoorA = std::make_shared<Door>(i_coordB, startPosA,outPosA, doorBodyA, inSide);
+	std::shared_ptr<Door> sectDoorB = std::make_shared<Door>(i_coordA, startPosB,outPosB, doorBodyB, outSide);
 	GetSector(i_coordA)->AddEntPtrToSector(sectDoorA);
 	GetSector(i_coordB)->AddEntPtrToSector(sectDoorB);
 }
@@ -485,10 +486,10 @@ void Level::PopulateMapRooms(int i_levelNum, DIFFICULTY i_diff)
 	}
 	//Level "four" aka 3 with zero indexing, mini bosses dont drop health so Ima just put health drops in the level
 	if (m_lvl_num == 3) {
-		std::shared_ptr<Entity> smallShipPOW3 = std::make_shared<PowerUp>(sectorVect[sectorVect.size() - 2].get(),
+		std::shared_ptr<Entity> smallShipPOW3 = std::make_shared<PowerUp>(
 			Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (2.0f / 5.0f)), GLBVRS::CRT_HGHT * (3.0f / 4.0f))), TEMP_HEALTH);
 		sectorVect[sectorVect.size() - 2]->AddEntPtrToSector(smallShipPOW3);
-		std::shared_ptr<Entity> smallShipPOW34 = std::make_shared<PowerUp>(sectorVect[sectorVect.size() - 2].get(),
+		std::shared_ptr<Entity> smallShipPOW34 = std::make_shared<PowerUp>(
 			Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (3.0f / 5.0f)), GLBVRS::CRT_HGHT * (3.0f / 4.0f))), TEMP_HEALTH);
 		sectorVect[sectorVect.size() - 4]->AddEntPtrToSector(smallShipPOW34);
 	}

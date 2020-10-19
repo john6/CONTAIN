@@ -6,6 +6,7 @@
 #include <string>
 #include "Button.h"
 #include "Entity.h"
+#include "PlayerChar.h"
 
 class UpgradeMenu
 {

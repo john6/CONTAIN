@@ -1,14 +1,17 @@
 #pragma once
 #include <vector>
-#include "GLOBAL_CONSTANTS.h"
-#include "Entity.h"
 #include <cmath>
-#include "RigidBody.h"
 #include <stdlib.h>
 #include <random>
 #include <queue>
+
+#include "GLOBAL_CONSTANTS.h"
+#include "RigidBody.h"
 #include "Sector.h"
+
 #include "Entity.h"
+//#include "PlayerChar.h"
+//#include "PowerUp.h"
 
 struct MapNode;
 
