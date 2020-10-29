@@ -27,7 +27,7 @@
 
 
 Entity::Entity() :
-	rb { RigidBody(std::make_shared<Rectangle>(100.0f, 100.0f)) }, 
+	rb{ RigidBody(std::make_shared<Rectangle>(100.0f, 100.0f)) },
 	typeID{ ENTITY_VIRTUAL }
 {
 	borderThickness = 3.0f;
@@ -45,7 +45,7 @@ Entity::Entity() :
 }
 
 Entity::Entity(Vector2f i_startPosition, RigidBody i_rb, TypeID i_typeID) :
-	rb { i_rb }, typeID{ i_typeID }
+	rb{ i_rb }, typeID{ i_typeID }
 {
 	borderThickness = 3.0f;
 	drawables = std::make_shared<std::vector<std::shared_ptr<sf::Drawable>>>();
@@ -71,55 +71,76 @@ const TypeID Entity::GetTypeID()
 
 void Entity::CollideWith(Entity & i_other)
 {
-	if (i_other.GetTypeID() == PLAYER) {
+	switch (i_other.GetTypeID()) {
+	case PLAYER:
+	{
 		auto player = reinterpret_cast<PlayerChar*>(&i_other);
 		CollideWithPlayer(player);
+		break;
 	}
-	else if (i_other.GetTypeID() == PROJ_BASIC) {
+	case PROJ_BASIC:
+	{
 		auto projectile = reinterpret_cast<Projectile*>(&i_other);
 		CollideWithProjectile(projectile);
+		break;
 	}
-	else if (i_other.GetTypeID() == PROJ_WALL) {
+	case PROJ_WALL:
+	{
 		auto blocker = reinterpret_cast<Blocker*>(&i_other);
 		CollideWithBlocker(blocker);
+		break;
 	}
-	else if (i_other.GetTypeID() == ENEMY_SEEK) {
+	case ENEMY_SEEK:
+	{
 		auto enemy = reinterpret_cast<Enemy*>(&i_other);
 		CollideWithEnemy(enemy);
+		break; 
 	}
-	else if (i_other.GetTypeID() == ENEMY_RAND) {
+	case ENEMY_RAND: {
 		auto enemy = reinterpret_cast<Enemy*>(&i_other);
 		CollideWithEnemy(enemy);
+		break; 
 	}
-	else if (i_other.GetTypeID() == ENEMY_BOSS) {
+	case ENEMY_BOSS: {
 		auto enemy = reinterpret_cast<Enemy*>(&i_other);
 		CollideWithEnemy(enemy);
+		break;
 	}
-	else if (i_other.GetTypeID() == WALL_BASIC) {
+	case WALL_BASIC: {
 		auto wall = reinterpret_cast<Wall*>(&i_other);
 		CollideWithWall(wall);
+		break; 
 	}
-	else if (i_other.GetTypeID() == WALL_FIRE) {
+	case WALL_FIRE: {
 		auto painWall = reinterpret_cast<PainWall*>(&i_other);
 		CollideWithPainWall(painWall);
+		break;
 	}
-	else if (i_other.GetTypeID() == DOOR) {
+	case DOOR: {
 		auto door = reinterpret_cast<Door*>(&i_other);
 		CollideWithDoor(door);
+		break; 
 	}
-	else if (i_other.GetTypeID() == END_LEVEL) {
+	case END_LEVEL: {
 		auto endObjPtr = reinterpret_cast<EndObject*>(&i_other);
 		CollideWithEndObject(endObjPtr);
+		break; 
 	}
-
-	else if (i_other.GetTypeID() == UPGRADE) {
+	case UPGRADE: {
 		auto powUp = reinterpret_cast<PowerUp*>(&i_other);
 		CollideWithPowUp(powUp);
+		break; 
 	}
-
-	else if (i_other.GetTypeID() == BLAST_STUN) {
+	case BLAST_STUN: {
 		auto blast = reinterpret_cast<Blast*>(&i_other);
 		CollideWithBlast(blast);
+		break; 
+	}
+	default: {
+		std::string str = "Entity type could not be found during collision\n";
+		std::cout << str;
+		break; 
+	}
 	}
 }
 
@@ -127,20 +148,20 @@ drawablePtrVect Entity::CreateDrawables(float i_lerp_fraction)
 {
 	if (drawables->size() > 0) { drawables->clear(); }
 	if (visuals->size() > 0) { visuals->clear(); }
-		//for linear interpolation this will now use the previous position and orientation
-		if (physicalObject) {
-			std::shared_ptr<sf::Shape> drawShape = CreateDrawableRB(i_lerp_fraction);
-			drawables->emplace_back(drawShape);
+	//for linear interpolation this will now use the previous position and orientation
+	if (physicalObject) {
+		std::shared_ptr<sf::Shape> drawShape = CreateDrawableRB(i_lerp_fraction);
+		drawables->emplace_back(drawShape);
+	}
+	if (hasVisuals) {
+		UpdateVisuals(i_lerp_fraction);
+		auto visualIt = visuals->begin();
+		while (visualIt != visuals->end()) {
+			drawables->emplace_back(*visualIt);
+			visualIt++;
 		}
-		if (hasVisuals) {
-			UpdateVisuals(i_lerp_fraction);
-			auto visualIt = visuals->begin();
-			while (visualIt != visuals->end()) {
-				drawables->emplace_back(*visualIt);
-				visualIt++;
-			}
-		}
-		return drawables;
+	}
+	return drawables;
 }
 
 std::shared_ptr<sf::Shape> Entity::CreateDrawableRB(float i_lerp_fraction)

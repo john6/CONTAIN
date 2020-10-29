@@ -4,6 +4,9 @@
 ##############JOHN RUSSELL SPECIFIC GITIGNORE STUFF############
 
 **/Sounds/
+**/CONTAIN_RELEASE/
+**/CONTAIN/SAVEDATA.txt
+**/oldSounds/
 **/oldReleases/
 **/latestRelease/
 **/Release/

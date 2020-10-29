@@ -155,7 +155,10 @@ void BossSpawn::SetDiffVars(int i_diff)
 	}
 }
 
-void BossSpawn::SpawnEnemies(int i_numEnems, TypeID enemyType, int i_sizeMod)
+
+/// <summary>This method will generate the requested number of enemies, allowing the caller to specify enemy type and a size modification. 
+/// The enemy types are limited to basic enemies in order to not overwhelm the player, though it can be expanded if appropriate. </summary>
+void BossSpawn::SpawnEnemies(int i_numEnems, TypeID i_enemyType, int i_sizeMod)
 {
 	for (int i = 0; i < i_numEnems; ++i) {
 		std::random_device sizeSeed;
@@ -163,38 +166,38 @@ void BossSpawn::SpawnEnemies(int i_numEnems, TypeID enemyType, int i_sizeMod)
 		std::discrete_distribution<> widthModDist({ 10, 15, 50, 15, 10 });
 		std::discrete_distribution<> radiusModDist({ 0, 15, 55, 20, 10 });
 		std::discrete_distribution<> heightModDist({ 13, 18, 40, 18, 13 });
-		int rand1 = widthModDist(genRoomSeed);
-		int ranDifwidth = (rand1 - 2 + i_sizeMod) * 10;
-		int rand2 = heightModDist(genRoomSeed);
-		int randDifHeight = (rand2 - 2 + i_sizeMod) * 10;
+		int randWidth = widthModDist(genRoomSeed);
+		int ranDifwidth = (randWidth - 2 + i_sizeMod) * 10;
+		int randHeight = heightModDist(genRoomSeed);
+		int randDifHeight = (randHeight - 2 + i_sizeMod) * 10;
 		int randRad = radiusModDist(genRoomSeed);
 		int randDifRadius = (randRad - 2 + i_sizeMod) * 10;
+		int rectBaseDim = 65;
+		int circBaseRad = 40;
 		std::shared_ptr<Entity> ent;
-		switch (enemyType) {
+		switch (i_enemyType) {
 		case ENEMY_SEEK: {
-			std::shared_ptr<Shape> shape = std::make_shared<Rectangle>((65 + ranDifwidth) * GLBVRS::SIZE_RAT, (65 + randDifHeight) * GLBVRS::SIZE_RAT);
-			//std::shared_ptr<Shape> shape = std::make_shared<Rectangle>(60 + randSizeDiff, 60 + randSizeDiff2);
-			Material Rock = Material(0.6f, 0.1f, 0.6f, 0.3f);
-			RigidBody projBody = RigidBody(shape, Rock);
+			std::shared_ptr<Shape> shape = std::make_shared<Rectangle>(
+				(rectBaseDim + ranDifwidth), (rectBaseDim + randDifHeight));
+			RigidBody projBody = RigidBody(shape, ROCK);
 			ent = std::make_shared<Enemy>(diff, rb.transform.pos, projBody);
 			break;
 		}
 		case ENEMY_RAND: {
-			std::shared_ptr<Shape> shape = std::make_shared<Circle>((40 + randDifRadius) * GLBVRS::SIZE_RAT);
+			std::shared_ptr<Shape> shape = std::make_shared<Circle>((circBaseRad + randDifRadius));
 			RigidBody projBody = RigidBody(shape, ROCK);
 			ent = std::make_shared<CrazyBoi>(diff, rb.transform.pos, projBody);
 			break;
 		}
 		case ENEMY_SEEK_PUSH: {
-			std::shared_ptr<Shape> shape = std::make_shared<Rectangle>((65 + ranDifwidth) * GLBVRS::SIZE_RAT, (65 + randDifHeight) * GLBVRS::SIZE_RAT);
-			//std::shared_ptr<Shape> shape = std::make_shared<Rectangle>(60 + randSizeDiff, 60 + randSizeDiff2);
-			Material Rock = Material(0.6f, 0.1f, 0.6f, 0.3f);
-			RigidBody projBody = RigidBody(shape, Rock);
+			std::shared_ptr<Shape> shape = std::make_shared<Rectangle>(
+				(rectBaseDim + ranDifwidth), (rectBaseDim + randDifHeight));
+			RigidBody projBody = RigidBody(shape, ROCK);
 			ent = std::make_shared<Enemy>(diff, rb.transform.pos, projBody);
 			break;
 		}
 		case ENEMY_RAND_PUSH:
-			std::shared_ptr<Shape> shape = std::make_shared<Circle>((40 + randDifRadius) * GLBVRS::SIZE_RAT);
+			std::shared_ptr<Shape> shape = std::make_shared<Circle>((circBaseRad + randDifRadius));
 			RigidBody projBody = RigidBody(shape, ROCK);
 			ent = std::make_shared<CrazyBoi>(diff, rb.transform.pos, projBody);
 			break;
@@ -215,12 +218,4 @@ void BossSpawn::CheckChildren()
 			++childIter;
 		}
 	}
-	//auto itr = children.begin();
-	//while (itr != children.end()) {
-	//	auto curr = itr++;
-	//	if (itr->expired())
-	//	{
-	//		children.erase(itr--);
-	//	}
-	//}
 }
