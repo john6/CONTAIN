@@ -22,7 +22,7 @@ endif()
 
 include(FindPackageHandleStandardArgs)
 
-find_package_handle_standard_args(VORBIS DEFAULT_MSG VORBIS_LIBRARIES VORBIS_INCLUDE_DIR OGG_INCLUDE_DIR)
+find_package_handle_standard_args(Vorbis DEFAULT_MSG VORBIS_LIBRARIES VORBIS_INCLUDE_DIR OGG_INCLUDE_DIR)
 
 set(VORBIS_INCLUDE_DIRS ${OGG_INCLUDE_DIR} ${VORBIS_INCLUDE_DIR})
 
