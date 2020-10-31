@@ -1,7 +1,7 @@
 project(CONTAIN CXX)
 cmake_minimum_required(VERSION 3.0.0)
 
-add_subdirectory(extlib/)
+add_subdirectory(extlib/ EXCLUDE_FROM_ALL)
 
 file(GLOB CONTAIN_src "${PROJECT_SOURCE_DIR}/src/*.cpp")
 
@@ -9,3 +9,20 @@ add_executable(CONTAIN_exe WIN32 ${CONTAIN_src})
 target_include_directories(CONTAIN_exe PRIVATE ${PROJECT_SOURCE_DIR}/include)
 target_include_directories(CONTAIN_exe PRIVATE ${PROJECT_SOURCE_DIR}/extlib/EIGEN)
 target_link_libraries(CONTAIN_exe sfml-graphics sfml-window sfml-system sfml-audio)
+
+set_target_properties(CONTAIN_exe PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+install(DIRECTORY res/ DESTINATION ${CMAKE_BINARY_DIR}/CONTAIN_RELEASE OPTIONAL)
+install(FILES $<TARGET_FILE:sfml-system> $<TARGET_LINKER_FILE:sfml-system> $<TARGET_SONAME_FILE:sfml-system>
+    DESTINATION ${CMAKE_BINARY_DIR}/CONTAIN_RELEASE/lib OPTIONAL)
+install(FILES $<TARGET_FILE:sfml-graphics> $<TARGET_SONAME_FILE:sfml-graphics> $<TARGET_LINKER_FILE:sfml-graphics>
+    DESTINATION ${CMAKE_BINARY_DIR}/CONTAIN_RELEASE/lib OPTIONAL)
+install(FILES $<TARGET_FILE:sfml-window> $<TARGET_SONAME_FILE:sfml-window> $<TARGET_LINKER_FILE:sfml-window> 
+    DESTINATION ${CMAKE_BINARY_DIR}/CONTAIN_RELEASE/lib OPTIONAL)
+install(FILES $<TARGET_FILE:sfml-audio> $<TARGET_SONAME_FILE:sfml-audio> $<TARGET_LINKER_FILE:sfml-audio>
+    DESTINATION ${CMAKE_BINARY_DIR}/CONTAIN_RELEASE/lib OPTIONAL)
+
+set_target_properties(CONTAIN_exe PROPERTIES 
+    INSTALL_RPATH ${CMAKE_BINARY_DIR}/CONTAIN_RELEASE/lib
+)
+install(TARGETS CONTAIN_exe DESTINATION ${CMAKE_BINARY_DIR}/CONTAIN_RELEASE OPTIONAL)
