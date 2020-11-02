@@ -4,6 +4,7 @@
 #include <SFML/Audio.hpp>
 #include <thread>
 #include <mutex>
+#include "ResourcePath.hpp"
 
 class RESOURCES
 {
