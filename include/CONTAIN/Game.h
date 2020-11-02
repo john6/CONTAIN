@@ -3,7 +3,6 @@
 #include <iostream>
 #include <algorithm>
 #include <chrono>
-#include <execution>
 #include <random>
 #include <SFML/Audio.hpp>
 #include "GLOBAL_CONSTANTS.h"
