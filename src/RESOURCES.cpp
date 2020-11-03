@@ -6,7 +6,7 @@ RESOURCES::RESOURCES()
 	soundLvl = 75.0f;
 	musicIsOn = true;
 	//font
-	if (!m_font.loadFromFile(resourcePath() + "res/Font/kongtext.ttf")) {
+	if (!m_font.loadFromFile("Font/kongtext.ttf")) {
 		std::cerr << "error loading font \n";
 	}
 	//Beeps
