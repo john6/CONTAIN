@@ -8,7 +8,7 @@ public:
 	bool active;
 
 	EndObject(Vector2f i_startPosition, RigidBody i_rb =
-		RigidBody(std::make_shared<Rectangle>(150.0f * GLBVRS::SIZE_RAT, 150.0f * GLBVRS::SIZE_RAT), STATIC));
+		RigidBody(std::make_shared<Rectangle>(150.0f, 150.0f), STATIC));
 	~EndObject();
 
 

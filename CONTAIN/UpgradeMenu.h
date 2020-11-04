@@ -24,8 +24,8 @@ private:
 	bool firstOpen;
 	UPGRADE_TYPE currUpgradeType;
 
-	bool PollInput(sf::Vector2i mousePosition, Button* button, bool stickyButton = false);
-	void  PollButtonTriplet(sf::Vector2i mousePosition);
+	bool PollInput(sf::Vector2f mousePosition, Button* button, bool stickyButton = false);
+	void  PollButtonTriplet(sf::Vector2f mousePosition);
 	void  UpdateButtonTriplet(int i_upgradeSelected);
 
 	std::string GetUpgradeText(UPGRADE_TYPE i_type);
@@ -35,7 +35,7 @@ public:
 	UpgradeMenu(RESOURCES* i_resources, DIFFICULTY i_diff, PlayerChar* i_player);
 	~UpgradeMenu();
 
-	UPGRADE_TYPE Update(float microSeconds, sf::RenderWindow* window, sf::Vector2i i_mousePos);
+	UPGRADE_TYPE Update(float microSeconds, sf::RenderWindow* window, sf::Vector2f i_mousePos);
 
 	void Render(sf::RenderWindow* window);
 };

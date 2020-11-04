@@ -68,7 +68,7 @@ UpgradeMenu::UpgradeMenu(RESOURCES * i_resources, DIFFICULTY i_diff, PlayerChar*
 	currUpgradeType = static_cast<UPGRADE_TYPE>(upgradeA);
 }
 
-bool UpgradeMenu::PollInput(sf::Vector2i mousePosition, Button * button, bool stickyButton)
+bool UpgradeMenu::PollInput(sf::Vector2f mousePosition, Button * button, bool stickyButton)
 {
 	float halfWidth = (button->GetRect().getSize().x / 2);
 	float halfHeight = (button->GetRect().getSize().y / 2);
@@ -87,7 +87,7 @@ bool UpgradeMenu::PollInput(sf::Vector2i mousePosition, Button * button, bool st
 	return false;
 }
 
-void UpgradeMenu::PollButtonTriplet(sf::Vector2i mousePosition)
+void UpgradeMenu::PollButtonTriplet(sf::Vector2f mousePosition)
 {
 	if (PollInput(mousePosition, &upgradeButtonA, true)) { UpdateButtonTriplet(1); }
 	else if (PollInput(mousePosition, &upgradeButtonB, true)) { UpdateButtonTriplet(2); }
@@ -169,7 +169,7 @@ UpgradeMenu::~UpgradeMenu()
 {
 }
 
-UPGRADE_TYPE UpgradeMenu::Update(float microSeconds, sf::RenderWindow * window, sf::Vector2i i_mousePos)
+UPGRADE_TYPE UpgradeMenu::Update(float microSeconds, sf::RenderWindow * window, sf::Vector2f i_mousePos)
 {
 	if (firstOpen) {
 		firstOpen = false;

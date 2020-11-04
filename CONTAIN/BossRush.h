@@ -17,7 +17,7 @@ private:
 
 public:
 	BossRush(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss = false,
-		RigidBody i_rb = RigidBody(std::make_shared<Circle>(75 * GLBVRS::SIZE_RAT), HEAVYBOUNCE));
+		RigidBody i_rb = RigidBody(std::make_shared<Circle>(75), HEAVYBOUNCE));
 
 	void Update(float i_stepSize) override;
 

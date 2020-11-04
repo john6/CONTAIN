@@ -46,7 +46,7 @@ public:
 	float weapSpeed;
 
 	PlayerChar(int i_strtHealth, Vector2f i_startPosition, 
-		RigidBody i_rb = RigidBody(std::make_shared<Rectangle>(100.0f * GLBVRS::SIZE_RAT, 100.0f * GLBVRS::SIZE_RAT), METAL));
+		RigidBody i_rb = RigidBody(std::make_shared<Rectangle>(100.0f, 100.0f), METAL));
 	~PlayerChar();
 
 	void Update(float i_stepSize) override;

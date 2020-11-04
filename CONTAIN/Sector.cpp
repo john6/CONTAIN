@@ -126,7 +126,7 @@ void Sector::GenerateEnemies(int i_numEnems, TypeID enemyType, SCREEN_AREA i_are
 		std::shared_ptr<Entity> ent;
 		switch (enemyType) {
 		case ENEMY_SEEK: {
-			std::shared_ptr<Shape> shape = std::make_shared<Rectangle>((65 + ranDifwidth) * GLBVRS::SIZE_RAT, (65 + randDifHeight) * GLBVRS::SIZE_RAT);
+			std::shared_ptr<Shape> shape = std::make_shared<Rectangle>((65 + ranDifwidth), (65 + randDifHeight));
 			//std::shared_ptr<Shape> shape = std::make_shared<Rectangle>(60 + randSizeDiff, 60 + randSizeDiff2);
 			Material Rock = Material(0.6f, 0.1f, 0.6f, 0.3f);
 			RigidBody projBody = RigidBody(shape, Rock);
@@ -134,13 +134,13 @@ void Sector::GenerateEnemies(int i_numEnems, TypeID enemyType, SCREEN_AREA i_are
 			break;
 		}
 		case ENEMY_RAND:{
-			std::shared_ptr<Shape> shape = std::make_shared<Circle>((40 + randDifRadius) * GLBVRS::SIZE_RAT);
+			std::shared_ptr<Shape> shape = std::make_shared<Circle>((40 + randDifRadius));
 			RigidBody projBody = RigidBody(shape, ROCK);
 			ent = std::make_shared<CrazyBoi>(i_diff, spawnPos, projBody);
 			break;
 		}
 		case ENEMY_SEEK_PUSH: {
-			std::shared_ptr<Shape> shape = std::make_shared<Rectangle>((65 + ranDifwidth) * GLBVRS::SIZE_RAT, (65 + randDifHeight) * GLBVRS::SIZE_RAT);
+			std::shared_ptr<Shape> shape = std::make_shared<Rectangle>((65 + ranDifwidth), (65 + randDifHeight));
 			//std::shared_ptr<Shape> shape = std::make_shared<Rectangle>(60 + randSizeDiff, 60 + randSizeDiff2);
 			Material Rock = Material(0.6f, 0.1f, 0.6f, 0.3f);
 			RigidBody projBody = RigidBody(shape, Rock);
@@ -148,7 +148,7 @@ void Sector::GenerateEnemies(int i_numEnems, TypeID enemyType, SCREEN_AREA i_are
 			break;
 		}
 		case ENEMY_RAND_PUSH:
-			std::shared_ptr<Shape> shape = std::make_shared<Circle>((40 + randDifRadius) * GLBVRS::SIZE_RAT);
+			std::shared_ptr<Shape> shape = std::make_shared<Circle>((40 + randDifRadius));
 			RigidBody projBody = RigidBody(shape, ROCK);
 			ent = std::make_shared<CrazyBoi>(i_diff, spawnPos, projBody);
 			break;

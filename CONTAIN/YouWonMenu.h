@@ -32,9 +32,9 @@ public:
 	YouWonMenu(RESOURCES* i_resources, bool i_won);
 	~YouWonMenu();
 
-	bool PollInput(sf::Vector2i mousePosition, Button* button, bool stickyButton = false);
+	bool PollInput(sf::Vector2f mousePosition, Button* button, bool stickyButton = false);
 
-	GAME_STATE Update(float microSeconds, sf::RenderWindow* window, sf::Vector2i mousePosition);
+	GAME_STATE Update(float microSeconds, sf::RenderWindow* window, sf::Vector2f mousePosition);
 
 	void Render(sf::RenderWindow* window);
 

@@ -82,11 +82,11 @@ void BossStream::Stun(float i_stunTime)
 void BossStream::SetDiffVars(int i_diff)
 {
 	if (isMiniBoss) {
-		rb = RigidBody(std::make_shared<Circle>(60 * GLBVRS::SIZE_RAT), WOOD);
+		rb = RigidBody(std::make_shared<Circle>(60), WOOD);
 		switch (i_diff) {
 		case EASY: {
 			speed = GLBVRS::ENEMYSPEEDEASY;
-			projSpeed = 2800.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+			projSpeed = 2800.0f;
 			numShots = 6;
 			maxHealth = 2;
 			shipRateOfFire = 0.40f;
@@ -95,7 +95,7 @@ void BossStream::SetDiffVars(int i_diff)
 		}
 		case MEDIUM: {
 			speed = GLBVRS::ENEMYSPEEDMED;
-			projSpeed = 3000.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+			projSpeed = 3000.0f;
 			numShots = 7;
 			maxHealth = 3;
 			shipRateOfFire = 0.25f;
@@ -104,7 +104,7 @@ void BossStream::SetDiffVars(int i_diff)
 		}
 		case HARD: {
 			speed = GLBVRS::ENEMYSPEEDHARD;
-			projSpeed = 3200.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+			projSpeed = 3200.0f;
 			numShots = 8;
 			maxHealth = 4;
 			shipRateOfFire = 0.15f;
@@ -118,7 +118,7 @@ void BossStream::SetDiffVars(int i_diff)
 		switch (i_diff) {
 		case EASY: {
 			speed = GLBVRS::ENEMYSPEEDEASY;
-			projSpeed = 2900.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+			projSpeed = 2900.0f;
 			numShots = 6;
 			maxHealth = 10;
 			shipRateOfFire = 0.10f;
@@ -127,7 +127,7 @@ void BossStream::SetDiffVars(int i_diff)
 		}
 		case MEDIUM: {
 			speed = GLBVRS::ENEMYSPEEDMED;
-			projSpeed = 3100.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+			projSpeed = 3100.0f;
 			numShots = 7;
 			maxHealth = 11;
 			shipRateOfFire = 0.05f;
@@ -136,7 +136,7 @@ void BossStream::SetDiffVars(int i_diff)
 		}
 		case HARD: {
 			speed = GLBVRS::ENEMYSPEEDHARD;
-			projSpeed = 3300.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+			projSpeed = 3300.0f;
 			numShots = 8;
 			maxHealth = 12;
 			shipRateOfFire = 0.04f;

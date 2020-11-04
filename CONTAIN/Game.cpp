@@ -14,7 +14,7 @@ Game::~Game()
 	DeleteLevels();
 }
 
-GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vector2i i_mousePos) {
+GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vector2f i_mousePos) {
 	if (tutorial) {
 		if ((currSector.x == 5) && (currSector.y == 0) && (levels[currLvl]->GetSector(currSector)->sectEnemyNum == 0)) {
 			tuteLib.PlayTutorial(TuteLib::TUTORIALS::ESCAPE);
@@ -69,7 +69,7 @@ GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vecto
 	}
 }
 
-GAME_STATE Game::UpdateGeneral(float i_stepSize, sf::Vector2i i_mousePos) {
+GAME_STATE Game::UpdateGeneral(float i_stepSize, sf::Vector2f i_mousePos) {
 	levels[currLvl]->UpdateLevel();
 	UpdateLvlEntities(levels[currLvl]->GetSector(currSector)->GetSectorEntities(), i_stepSize);
 	if (playerWon) {
@@ -246,8 +246,8 @@ void Game::CreatePlayerChar()
 		break;
 	}
 	}
-	RigidBody rb(Physics::CreateRegularPolygon(6, 75.0f * GLBVRS::SIZE_RAT), METAL);
-	playerChar = std::make_shared<PlayerChar>(startingHealth, Vector2f(400.0f * GLBVRS::SIZE_RAT, 400.0f * GLBVRS::SIZE_RAT), rb);
+	RigidBody rb(Physics::CreateRegularPolygon(6, 75.0f), METAL);
+	playerChar = std::make_shared<PlayerChar>(startingHealth, Vector2f(400.0f, 400.0f), rb);
 	playerChar->rb.transform.orient = 1.0f;
 	GLBVRS::SetGlobalConstants(renderWindow->getSize().x, renderWindow->getSize().y, resources, GLBVRS::MBUSPTR, this, playerChar, resources->soundLvl);
 }

@@ -18,7 +18,7 @@ SettingsMenu::SettingsMenu(RESOURCES * i_resources, RSLTN* resolution, bool* ful
 
 
 
-bool SettingsMenu::PollInput(sf::Vector2i mousePosition, Button * button, bool stickyButton)
+bool SettingsMenu::PollInput(sf::Vector2f mousePosition, Button * button, bool stickyButton)
 {
 	float halfWidth = (button->GetRect().getSize().x / 2);
 	float halfHeight = (button->GetRect().getSize().y / 2);
@@ -38,7 +38,7 @@ bool SettingsMenu::PollInput(sf::Vector2i mousePosition, Button * button, bool s
 	return false;
 }
 
-bool SettingsMenu::PollInputToggle(sf::Vector2i mousePosition, Button * button)
+bool SettingsMenu::PollInputToggle(sf::Vector2f mousePosition, Button * button)
 {
 	float halfWidth = (button->GetRect().getSize().x / 2);
 	float halfHeight = (button->GetRect().getSize().y / 2);
@@ -69,7 +69,7 @@ bool SettingsMenu::PollInputToggle(sf::Vector2i mousePosition, Button * button)
 	}
 }
 
-void SettingsMenu::PollSoundQuad(sf::Vector2i mousePosition)
+void SettingsMenu::PollSoundQuad(sf::Vector2f mousePosition)
 {
 	if (PollInput(mousePosition, &sound25P, true)) {
 		somethingWasClicked = true;
@@ -85,7 +85,7 @@ void SettingsMenu::PollSoundQuad(sf::Vector2i mousePosition)
 		UpdateSoundQuad(FULL100); }
 }
 
-void SettingsMenu::PollResoQuad(sf::Vector2i mousePosition)
+void SettingsMenu::PollResoQuad(sf::Vector2f mousePosition)
 {
 	if (PollInput(mousePosition, &screen1272, true)) { 
 		somethingWasClicked = true;
@@ -269,7 +269,7 @@ void SettingsMenu::ResetButtons()
 	screenResolutionText.setPosition(topLeft + sf::Vector2f(0, bttnOffsetVert * 3.5f));
 }
 
-GAME_STATE SettingsMenu::Update(float i_microSecs, sf::RenderWindow * i_window, sf::Vector2i i_mousePos)
+GAME_STATE SettingsMenu::Update(float i_microSecs, sf::RenderWindow * i_window, sf::Vector2f i_mousePos)
 {
 	timeSinceButtonClick = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastButtonPressed)).count() / 1000000.0f;
 	if (timeSinceButtonClick >= buttonClickDelay) {

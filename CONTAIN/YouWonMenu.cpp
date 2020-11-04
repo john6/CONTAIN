@@ -80,7 +80,7 @@ YouWonMenu::~YouWonMenu()
 {
 }
 
-bool YouWonMenu::PollInput(sf::Vector2i mousePosition, Button * button, bool stickyButton){
+bool YouWonMenu::PollInput(sf::Vector2f mousePosition, Button * button, bool stickyButton){
 	float halfWidth = (button->GetRect().getSize().x / 2);
 	float halfHeight = (button->GetRect().getSize().y / 2);
 	float distX = abs(mousePosition.x - (button->GetRect().getPosition().x + halfWidth));
@@ -98,7 +98,7 @@ bool YouWonMenu::PollInput(sf::Vector2i mousePosition, Button * button, bool sti
 	return false;
 }
 
-GAME_STATE YouWonMenu::Update(float microSeconds, sf::RenderWindow * window, sf::Vector2i mousePosition)
+GAME_STATE YouWonMenu::Update(float microSeconds, sf::RenderWindow * window, sf::Vector2f mousePosition)
 {
 	bool playAgainButtonPressed = PollInput(mousePosition, &playAgainButton);
 	bool quitButtonPressed = PollInput(mousePosition, &quitButton);

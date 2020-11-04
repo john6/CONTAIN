@@ -80,7 +80,7 @@ void BossRush::Stun(float i_stunTime)
 void BossRush::SetDiffVars(int i_diff)
 {
 	if (isMiniBoss) {
-		rb = RigidBody(std::make_shared<Circle>(60 * GLBVRS::SIZE_RAT), HEAVYBOUNCE);
+		rb = RigidBody(std::make_shared<Circle>(60), HEAVYBOUNCE);
 		switch (i_diff) {
 		case EASY: {
 			speed = GLBVRS::ENEMYSPEEDEASY;

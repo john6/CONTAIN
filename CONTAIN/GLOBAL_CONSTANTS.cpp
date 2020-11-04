@@ -12,8 +12,8 @@ void GLBVRS::SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_scree
 	RESOURCES* i_resourcesPtr, MessageBus* i_mBusPtr, Game* i_gamePtr, std::shared_ptr<Entity> i_playerPtr, float i_soundLvl)
 {
 	//WINDOW SETTINGS
-	GLBVRS::SCREEN_WIDTH = i_screenWidth;
-	GLBVRS::SCREEN_HEIGHT = i_screenHeight;
+	GLBVRS::SCREEN_WIDTH = 1920;   //i_screenWidth ;
+	GLBVRS::SCREEN_HEIGHT = 1080;    //i_screenHeight;
 
 	//GAME RESOLUTION
 	GLBVRS::CRT_WDTH = static_cast<float>(GLBVRS::SCREEN_WIDTH * 18.0f / 20.0f);
@@ -28,15 +28,15 @@ void GLBVRS::SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_scree
 	GLBVRS::BTTN_HGHT = GLBVRS::CRT_HGHT / 10;
 
 	//OBJECT SIZES
-	GLBVRS::DOOR_WIDTH = 150.0f * GLBVRS::SIZE_RAT;
-	GLBVRS::DOOR_HEIGHT = 50.0f* GLBVRS::SIZE_RAT;
-	GLBVRS::WALL_THICKNESS = 100.0f* GLBVRS::SIZE_RAT;
-	GLBVRS::PROJECTILE_RADIUS = 10.0f * GLBVRS::SIZE_RAT;
+	GLBVRS::DOOR_WIDTH = 150.0f;
+	GLBVRS::DOOR_HEIGHT = 50.0f;
+	GLBVRS::WALL_THICKNESS = 100.0f;
+	GLBVRS::PROJECTILE_RADIUS = 10.0f;
 
 	//SPEED ADJUSTMENTS
-	GLBVRS::ENEMYSPEEDEASY = 17.0f * std::pow(GLBVRS::SIZE_RAT, 2);
-	GLBVRS::ENEMYSPEEDMED = 20.0f * std::pow(GLBVRS::SIZE_RAT, 2);
-	GLBVRS::ENEMYSPEEDHARD = 28.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+	GLBVRS::ENEMYSPEEDEASY = 17.0f;
+	GLBVRS::ENEMYSPEEDMED = 20.0f;
+	GLBVRS::ENEMYSPEEDHARD = 28.0f;
 
 	//UTILITY
 	GLBVRS::RSRCS = i_resourcesPtr;

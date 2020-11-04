@@ -32,8 +32,9 @@ std::vector<PlayerController::Input> PlayerController::PollKeys()
 Vector2f PlayerController::LeftClick()
 {
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-		sf::Vector2i mPos = sf::Mouse::getPosition(*rWindow);
-		return Eigen::Vector2f(mPos.x, mPos.y);
+		sf::Vector2i mScreenPos = sf::Mouse::getPosition(*rWindow);
+		sf::Vector2f mWorldPos = rWindow->mapPixelToCoords(mScreenPos, rWindow->getView());
+		return Eigen::Vector2f(mWorldPos.x, mWorldPos.y);
 	}
 	else {
 		return Eigen::Vector2f(0.0f, 0.0f);
@@ -43,8 +44,9 @@ Vector2f PlayerController::LeftClick()
 Vector2f PlayerController::RightClick()
 {
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
-		sf::Vector2i mPos = sf::Mouse::getPosition(*rWindow);
-		return Eigen::Vector2f(mPos.x, mPos.y);
+		sf::Vector2i mScreenPos = sf::Mouse::getPosition(*rWindow);
+		sf::Vector2f mWorldPos = rWindow->mapPixelToCoords(mScreenPos, rWindow->getView());
+		return Eigen::Vector2f(mWorldPos.x, mWorldPos.y);
 	}
 	else {
 		return Eigen::Vector2f(0.0f, 0.0f);
@@ -53,8 +55,9 @@ Vector2f PlayerController::RightClick()
 
 Eigen::Vector2f PlayerController::GetMousePos()
 {
-	sf::Vector2i mPos = sf::Mouse::getPosition(*rWindow);
-	return Eigen::Vector2f(mPos.x, mPos.y);
+	sf::Vector2i mScreenPos = sf::Mouse::getPosition(*rWindow);
+	sf::Vector2f mWorldPos = rWindow->mapPixelToCoords(mScreenPos, rWindow->getView());
+	return Eigen::Vector2f(mWorldPos.x, mWorldPos.y);
 }
 
 bool PlayerController::ScrollClick()

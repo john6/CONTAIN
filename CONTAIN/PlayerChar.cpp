@@ -17,7 +17,7 @@ PlayerChar::PlayerChar(int i_strtHealth, Vector2f i_startPosition, RigidBody i_r
 	wallDelay = shipRateOfFireWall;
 	weaponDelay = shipRateOfFire;
 	shipRateOfAOE = 6.0f;
-	shipSpeed = 100 * std::pow(GLBVRS::SIZE_RAT, 2);
+	shipSpeed = 100;
 	size_t minutes = 255;
 	lastShotFired = std::chrono::high_resolution_clock::now() - std::chrono::minutes(1);
 	lastWallFired = std::chrono::high_resolution_clock::now() - std::chrono::minutes(1);
@@ -28,14 +28,14 @@ PlayerChar::PlayerChar(int i_strtHealth, Vector2f i_startPosition, RigidBody i_r
 	health = maxHealth;
 	currSpecialAmmo = 3;
 
-	wallWidth = 40 * GLBVRS::SIZE_RAT;
-	wallHeight = 270 * GLBVRS::SIZE_RAT;
-	BlastRadius = 185 * GLBVRS::SIZE_RAT;
-	blastStrength = 600.0f * GLBVRS::SIZE_RAT;
+	wallWidth = 40;
+	wallHeight = 270;
+	BlastRadius = 185;
+	blastStrength = 600.0f;
 	blastStunTime = 4.0f;
 	maxSpecialAmmo = 4;
 	currSpecialAmmo = maxSpecialAmmo;
-	weapSpeed = 3000.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+	weapSpeed = 3000.0f;
 	InitLvl();
 	rectPtr = dynamic_cast<Rectangle*>(rb.shape.get());
 	hasVisuals = true;
@@ -332,7 +332,7 @@ void PlayerChar::ShootWall(Vector2f i_mousePos)
 			std::shared_ptr<Entity> projectile = std::make_shared<Blocker>(
 				rb.transform.pos + (projectileDirFront * projCenterOffset),
 				RigidBody(std::make_shared<Rectangle>(wallWidth, wallHeight), HEAVYBALL));
-			projectile->rb.ApplyImpulse((projectileDirFront * 7000.0f * GLBVRS::SIZE_RAT), NULL_VECTOR);
+			projectile->rb.ApplyImpulse((projectileDirFront * 7000.0f), NULL_VECTOR);
 			projectile->rb.ResetOrientation(projectileDirFront);
 			spawnVect.push_back(projectile);
 		}
@@ -341,14 +341,14 @@ void PlayerChar::ShootWall(Vector2f i_mousePos)
 			std::shared_ptr<Entity> projectile1 = std::make_shared<Blocker>(
 				rb.transform.pos + (projectileDirFront * projCenterOffset),
 				RigidBody(std::make_shared<Rectangle>(wallWidth, wallHeight + (wallWidth * 2.0f)), HEAVYBALL));
-			projectile1->rb.ApplyImpulse((projectileDirFront * 7000.0f * GLBVRS::SIZE_RAT), NULL_VECTOR);
+			projectile1->rb.ApplyImpulse((projectileDirFront * 7000.0f), NULL_VECTOR);
 			projectile1->rb.ResetOrientation(projectileDirFront);
 			spawnVect.push_back(projectile1);
 
 			std::shared_ptr<Entity> projectile2 = std::make_shared<Blocker>(
 				rb.transform.pos + (projectileDirBack * projCenterOffset),
 				RigidBody(std::make_shared<Rectangle>(wallWidth, wallHeight), HEAVYBALL));
-			projectile2->rb.ApplyImpulse((projectileDirBack * 7000.0f * GLBVRS::SIZE_RAT), NULL_VECTOR);
+			projectile2->rb.ApplyImpulse((projectileDirBack * 7000.0f), NULL_VECTOR);
 			projectile2->rb.ResetOrientation(projectileDirBack);
 			spawnVect.push_back(projectile2);
 		}
@@ -356,28 +356,28 @@ void PlayerChar::ShootWall(Vector2f i_mousePos)
 			std::shared_ptr<Entity> projectile1 = std::make_shared<Blocker>(
 				rb.transform.pos + (projectileDirFront * projCenterOffset),
 				RigidBody(std::make_shared<Rectangle>(wallWidth, wallHeight + (wallWidth * 2.0f)), HEAVYBALL));
-			projectile1->rb.ApplyImpulse((projectileDirFront * 7000.0f * GLBVRS::SIZE_RAT), NULL_VECTOR);
+			projectile1->rb.ApplyImpulse((projectileDirFront * 7000.0f), NULL_VECTOR);
 			projectile1->rb.ResetOrientation(projectileDirFront);
 			spawnVect.push_back(projectile1);
 
 			std::shared_ptr<Entity> projectile2 = std::make_shared<Blocker>(
 				rb.transform.pos + (projectileDirBack * projCenterOffset),
 				RigidBody(std::make_shared<Rectangle>(wallWidth, wallHeight + (wallWidth * 2.0f)), HEAVYBALL));
-			projectile2->rb.ApplyImpulse((projectileDirBack * 7000.0f * GLBVRS::SIZE_RAT), NULL_VECTOR);
+			projectile2->rb.ApplyImpulse((projectileDirBack * 7000.0f), NULL_VECTOR);
 			projectile2->rb.ResetOrientation(projectileDirBack);
 			spawnVect.push_back(projectile2);
 
 			std::shared_ptr<Entity> projectile3 = std::make_shared<Blocker>(
 				rb.transform.pos + (projectileDirLeft * projCenterOffset),
 				RigidBody(std::make_shared<Rectangle>(wallWidth, wallHeight - (wallWidth * 2.0f)), HEAVYBALL));
-			projectile3->rb.ApplyImpulse((projectileDirLeft * 7000.0f * GLBVRS::SIZE_RAT), NULL_VECTOR);
+			projectile3->rb.ApplyImpulse((projectileDirLeft * 7000.0f), NULL_VECTOR);
 			projectile3->rb.ResetOrientation(projectileDirLeft);
 			spawnVect.push_back(projectile3);
 
 			std::shared_ptr<Entity> projectile4 = std::make_shared<Blocker>(
 				rb.transform.pos + (projectileDirRight * projCenterOffset),
 				RigidBody(std::make_shared<Rectangle>(wallWidth, wallHeight - (wallWidth * 2.0f)), HEAVYBALL));
-			projectile4->rb.ApplyImpulse((projectileDirRight * 7000.0f * GLBVRS::SIZE_RAT), NULL_VECTOR);
+			projectile4->rb.ApplyImpulse((projectileDirRight * 7000.0f), NULL_VECTOR);
 			projectile4->rb.ResetOrientation(projectileDirRight);
 			spawnVect.push_back(projectile4);
 		}

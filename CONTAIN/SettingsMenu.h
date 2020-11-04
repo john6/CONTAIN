@@ -43,11 +43,11 @@ class SettingsMenu
 	Button apply;
 	Button exit;
 
-	bool PollInput(sf::Vector2i mousePosition, Button* button, bool stickyButton = false);
-	bool PollInputToggle(sf::Vector2i mousePosition, Button* button);
+	bool PollInput(sf::Vector2f mousePosition, Button* button, bool stickyButton = false);
+	bool PollInputToggle(sf::Vector2f mousePosition, Button* button);
 
-	void  PollSoundQuad(sf::Vector2i mousePosition);
-	void  PollResoQuad(sf::Vector2i mousePosition);
+	void  PollSoundQuad(sf::Vector2f mousePosition);
+	void  PollResoQuad(sf::Vector2f mousePosition);
 	void  UpdateSoundQuad(SND_LVL i_soundSelected);
 	void  UpdateResoQuad(RSLTN i_resSelected);
 
@@ -62,7 +62,7 @@ public:
 
 	void ResetButtons();
 
-	GAME_STATE Update(float microSeconds, sf::RenderWindow* window, sf::Vector2i mousePosition);
+	GAME_STATE Update(float microSeconds, sf::RenderWindow* window, sf::Vector2f mousePosition);
 
 	void Render(sf::RenderWindow* window);
 };

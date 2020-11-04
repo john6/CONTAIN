@@ -88,7 +88,7 @@ void Menu::ResetMenu()
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 }
 
-bool Menu::PollInput(sf::Vector2i mousePosition, Button* button, bool stickyButton) {
+bool Menu::PollInput(sf::Vector2f mousePosition, Button* button, bool stickyButton) {
 	float halfWidth = (button->GetRect().getSize().x / 2);
 	float halfHeight = (button->GetRect().getSize().y / 2);
 	float distX = abs(mousePosition.x - (button->GetRect().getPosition().x + halfWidth));
@@ -106,7 +106,7 @@ bool Menu::PollInput(sf::Vector2i mousePosition, Button* button, bool stickyButt
 	return false;
 }
 
-void  Menu::PollButtonTriplet(sf::Vector2i mousePosition) {
+void  Menu::PollButtonTriplet(sf::Vector2f mousePosition) {
 	if (PollInput(mousePosition, &easyButton, true)) { UpdateButtonTriplet(EASY);  }
 	else if (PollInput(mousePosition, &mediumButton, true)) { UpdateButtonTriplet(MEDIUM); }
 	else if (PollInput(mousePosition, &hardButton, true)) { UpdateButtonTriplet(HARD); }
@@ -138,7 +138,7 @@ void  Menu::UpdateButtonTriplet(DIFFICULTY i_difficultySelected) {
 	}
 }
 
-GAME_STATE Menu::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vector2i i_mousePos) {
+GAME_STATE Menu::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vector2f i_mousePos) {
 	PollButtonTriplet(i_mousePos);
 	bool playButtonPressed = PollInput(i_mousePos, &playButton);
 	bool playTutorialButtonPressed = PollInput(i_mousePos, &playTutorialButton);

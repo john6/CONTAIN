@@ -39,7 +39,7 @@ private:
 	microSec timeElapsed;
 	float timeToComplete;
 
-	GAME_STATE UpdateGeneral(float i_stepSize, sf::Vector2i i_mousePos);
+	GAME_STATE UpdateGeneral(float i_stepSize, sf::Vector2f i_mousePos);
 	GAME_STATE UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnts, float i_stepSize);
 	void DeleteLevels();
 	bool playerWon;
@@ -64,7 +64,7 @@ public:
 	Game(sf::RenderWindow* i_window, RESOURCES* i_resources, DIFFICULTY i_difficulty = MEDIUM);
 	~Game();
 
-	GAME_STATE Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vector2i i_mousePos);
+	GAME_STATE Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vector2f i_mousePos);
 
 	void Render(float i_elapsedMilliseconds);
 

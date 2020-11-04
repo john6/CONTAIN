@@ -9,7 +9,7 @@ BossSpawn::BossSpawn(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniB
 	fillColor = origColorFill;
 	outlineColor = origColorOutLine;
 	if (isMiniBoss) {
-		rb = RigidBody(std::make_shared<Rectangle>(100.0f * GLBVRS::SIZE_RAT, 100.0f * GLBVRS::SIZE_RAT), STATIC);
+		rb = RigidBody(std::make_shared<Rectangle>(100.0f, 100.0f), STATIC);
 		rb.transform.pos = i_startPosition;
 	}
 	invulnerable = true;

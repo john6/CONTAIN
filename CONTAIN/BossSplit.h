@@ -17,7 +17,7 @@ private:
 
 public:
 	BossSplit(DIFFICULTY i_diff, int i_splitsLeft, float i_spdFct, bool i_crazy,
-		Vector2f i_startPosition, RigidBody i_rb = RigidBody(std::make_shared<Circle>(150.0f * GLBVRS::SIZE_RAT), BOUNCYBALL));
+		Vector2f i_startPosition, RigidBody i_rb = RigidBody(std::make_shared<Circle>(150.0f), BOUNCYBALL));
 
 	void Update(float i_stepSize) override;
 

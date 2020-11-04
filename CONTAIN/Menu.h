@@ -27,9 +27,9 @@ private:
 	Button hardButton;
 	Button settingsButton;
 
-	bool PollInput(sf::Vector2i mousePosition, Button* button, bool stickyButton = false);
+	bool PollInput(sf::Vector2f mousePosition, Button* button, bool stickyButton = false);
 
-	void  PollButtonTriplet(sf::Vector2i mousePosition);
+	void  PollButtonTriplet(sf::Vector2f mousePosition);
 	void  UpdateButtonTriplet(DIFFICULTY i_difficultySelected);
 
 public:
@@ -42,7 +42,7 @@ public:
 
 	void ResetMenu();
 
-	GAME_STATE Update(float microSeconds, sf::RenderWindow* window, sf::Vector2i mousePosition);
+	GAME_STATE Update(float microSeconds, sf::RenderWindow* window, sf::Vector2f mousePosition);
 
 	void Render(sf::RenderWindow* window);
 };

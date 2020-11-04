@@ -16,7 +16,7 @@ private:
 
 public:
 	BossStream(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss = false,
-		RigidBody i_rb = RigidBody(std::make_shared<Circle>(70 * GLBVRS::SIZE_RAT), METAL));
+		RigidBody i_rb = RigidBody(std::make_shared<Circle>(70), METAL));
 
 	void Update(float i_stepSize) override;
 

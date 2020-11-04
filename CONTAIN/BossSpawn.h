@@ -20,7 +20,7 @@ public:
 	bool invulnerable;
 
 	BossSpawn(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss = false,
-		RigidBody i_rb = RigidBody(std::make_shared<Rectangle>(100.0f * GLBVRS::SIZE_RAT, 100.0f * GLBVRS::SIZE_RAT), STATIC));
+		RigidBody i_rb = RigidBody(std::make_shared<Rectangle>(100.0f, 100.0f), STATIC));
 
 	void Update(float i_stepSize) override;
 

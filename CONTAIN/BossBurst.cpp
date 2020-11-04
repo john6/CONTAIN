@@ -92,11 +92,11 @@ void BossBurst::Stun(float i_stunTime)
 void BossBurst::SetDiffVars(int i_diff)
 {
 	if (isMiniBoss) {
-		rb = RigidBody(std::make_shared<Circle>(60 * GLBVRS::SIZE_RAT), WOOD);
+		rb = RigidBody(std::make_shared<Circle>(60), WOOD);
 		switch (i_diff) {
 		case EASY: {
 			speed = GLBVRS::ENEMYSPEEDEASY;
-			projSpeed = 2800.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+			projSpeed = 2800.0f;
 			numShots = 2;
 			maxHealth = 2;
 			health = maxHealth;
@@ -104,7 +104,7 @@ void BossBurst::SetDiffVars(int i_diff)
 		}
 		case MEDIUM: {
 			speed = GLBVRS::ENEMYSPEEDMED;
-			projSpeed = 3000.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+			projSpeed = 3000.0f;
 			numShots = 2;
 			maxHealth = 3;
 			health = maxHealth;
@@ -112,7 +112,7 @@ void BossBurst::SetDiffVars(int i_diff)
 		}
 		case HARD: {
 			speed = GLBVRS::ENEMYSPEEDHARD;
-			projSpeed = 3200.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+			projSpeed = 3200.0f;
 			numShots = 3;
 			maxHealth = 4;
 			health = maxHealth;
@@ -125,7 +125,7 @@ void BossBurst::SetDiffVars(int i_diff)
 		switch (i_diff) {
 		case EASY: {
 			speed = GLBVRS::ENEMYSPEEDEASY;
-			projSpeed = 2800.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+			projSpeed = 2800.0f;
 			numShots = 7;
 			maxHealth = 8;
 			health = maxHealth;
@@ -133,7 +133,7 @@ void BossBurst::SetDiffVars(int i_diff)
 		}
 		case MEDIUM: {
 			speed = GLBVRS::ENEMYSPEEDMED;
-			projSpeed = 3000.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+			projSpeed = 3000.0f;
 			numShots = 8;
 			maxHealth = 9;
 			health = maxHealth;
@@ -141,7 +141,7 @@ void BossBurst::SetDiffVars(int i_diff)
 		}
 		case HARD: {
 			speed = GLBVRS::ENEMYSPEEDHARD;
-			projSpeed = 3200.0f * std::pow(GLBVRS::SIZE_RAT, 2);
+			projSpeed = 3200.0f;
 			numShots = 9;
 			maxHealth = 10;
 			health = maxHealth;

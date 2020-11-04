@@ -26,6 +26,8 @@ int main()
 	float soundLvl = 50.0f;
 	bool fullScreen = true;
 	sf::RenderWindow window(GLBVRS::GetVideoMode(resolution), "CONTAIN", sf::Style::Fullscreen);
+
+
 	//sf::RenderWindow window(sf::VideoMode(1920, 1080), "CONTAIN");
 	//sf::RenderWindow window(sf::VideoMode(1440, 900), "CONTAIN");
 	//sf::RenderWindow window(sf::VideoMode(1280, 720), "CONTAIN");
@@ -38,6 +40,15 @@ int main()
 	GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, NULL, NULL, soundLvl);
 	Game globalGame = Game(&window, &resources);
 	GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
+
+	//View Code Test
+	sf::View renderView;
+	renderView.reset(sf::FloatRect(0, 0, 1920, 1080));
+	window.setView(renderView);
+	//View Code Test
+	std::cout << "Window Size x: " << window.getSize().x << "\n";
+	std::cout << "Window Size y: " << window.getSize().y << "\n";
+
 	int currLvl;
 
 	DIFFICULTY difficulty = MEDIUM;
@@ -64,7 +75,8 @@ int main()
 			}
 			if (currEvent.type == sf::Event::Resized) {
 				GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
-					settingsMenu.ResetButtons();
+
+				settingsMenu.ResetButtons();
 			}
 			if (currEvent.type == sf::Event::LostFocus) {
 				//window.create(sf::VideoMode(400, 400), "CONTAIN");
@@ -90,7 +102,8 @@ int main()
 			while (lag >= UPDATE_INTERVAL) {
 				switch (state) {
 				case MENU: {
-					sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+					sf::Vector2i mScreenPos = sf::Mouse::getPosition(window);
+					sf::Vector2f mousePosition = window.mapPixelToCoords(mScreenPos, window.getView());
 					if (justSwitchedBackToMenu) {
 						menu.ResetMenu();
 						justSwitchedBackToMenu = false;
@@ -102,27 +115,35 @@ int main()
 					break;
 				}
 				case SETTINGS: {
-					sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+					sf::Vector2i mScreenPos = sf::Mouse::getPosition(window);
+					sf::Vector2f mousePosition = window.mapPixelToCoords(mScreenPos, window.getView());
 					if (justSwitchedBackToMenu) {
 						settingsMenu.ResetMenu();
+						window.setView(renderView);
 						justSwitchedBackToMenu = false;
 					}
 					state = settingsMenu.Update(static_cast<float>(lag.count()), &window, mousePosition);
 					if (state == APPLY) {
 						settingsMenu.ResetMenu();
+						window.setView(renderView);
 						if (fullScreen) {
 							window.create(GLBVRS::GetVideoMode(resolution), "CONTAIN", sf::Style::Fullscreen);
 							GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
+							window.setView(renderView);
 							settingsMenu.ResetMenu();
+							window.setView(renderView);
 						}
 						else {
 							window.create(GLBVRS::GetVideoMode(resolution), "CONTAIN", sf::Style::Default);
 							GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
+							window.setView(renderView);
 							settingsMenu.ResetMenu();
+							window.setView(renderView);
 						}
 						resources.SetSoundLevel(soundLvl);
 						GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
 						settingsMenu.ResetMenu();
+						window.setView(renderView);
 						state = SETTINGS;
 					}
 					if (state == MENU) {
@@ -131,7 +152,8 @@ int main()
 					break;
 				}
 				case IN_GAME: {
-					sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+					sf::Vector2i mScreenPos = sf::Mouse::getPosition(window);
+					sf::Vector2f mousePosition = window.mapPixelToCoords(mScreenPos, window.getView());
 					hiRes_time_point beforePhysicsUpdate = hiResTime::now();
 					state = globalGame.Update(static_cast<float>(lag.count()), &window, mousePosition);
 					hiRes_time_point afterPhysicsUpdate = hiResTime::now();
@@ -152,7 +174,8 @@ int main()
 					break;
 				}
 				case WIN: {
-					sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+					sf::Vector2i mScreenPos = sf::Mouse::getPosition(window);
+					sf::Vector2f mousePosition = window.mapPixelToCoords(mScreenPos, window.getView());
 					state = winMenu.Update(static_cast<float>(lag.count()), &window, mousePosition);
 					if (state == MENU) {
 						justSwitchedBackToMenu = true;
@@ -160,7 +183,8 @@ int main()
 					break;
 				}
 				case LOSE: {
-					sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+					sf::Vector2i mScreenPos = sf::Mouse::getPosition(window);
+					sf::Vector2f mousePosition = window.mapPixelToCoords(mScreenPos, window.getView());
 					state = lostMenu.Update(static_cast<float>(lag.count()), &window, mousePosition);
 					if (state == MENU) {
 						justSwitchedBackToMenu = true;
