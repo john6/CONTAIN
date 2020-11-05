@@ -2,12 +2,10 @@
 
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
-#include <algorithm>
 #include <iostream>
 #include "RESOURCES.h"
 #include "GLOBAL_CONSTANTS.h"
 #include "Button.h"
-#include <thread>
 #include <chrono>
 
 

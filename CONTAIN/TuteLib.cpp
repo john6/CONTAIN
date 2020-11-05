@@ -73,10 +73,6 @@ TuteLib::TuteLib(sf::RenderWindow* i_windowPtr, RESOURCES* i_resources) :
 {
 	InitStatics(i_windowPtr, i_resources);
 }
-//
-//TuteLib::TuteLib()
-//{
-//}
 
 void TuteLib::InitStatics(sf::RenderWindow* i_windowPtr, RESOURCES* i_resources)
 {

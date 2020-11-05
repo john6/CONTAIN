@@ -8,10 +8,7 @@
 #include "GLOBAL_CONSTANTS.h"
 #include "RigidBody.h"
 #include "Sector.h"
-
 #include "Entity.h"
-//#include "PlayerChar.h"
-//#include "PowerUp.h"
 
 struct MapNode;
 

@@ -4,6 +4,8 @@
 #include <Eigen/Dense>
 #include <SFML/Graphics.hpp>
 #include "Material.h"
+#include "MessageBus.h"
+#include "BusNode.h"
 
 //https://www.fluentcpp.com/2019/07/23/how-to-define-a-global-constant-in-cpp/
 //according to this article I should be adding extern here but that means I have to define these variables elsewhere also because I dont use CPP17

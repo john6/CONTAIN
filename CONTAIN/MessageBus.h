@@ -2,7 +2,6 @@
 #include <functional>
 #include <queue>
 #include <vector>
-
 #include "Message.h"
 
 class MessageBus

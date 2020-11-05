@@ -4,9 +4,6 @@ Origin of object space is the center
 */
 
 #pragma once
-#include <thread>
-#include <mutex>
-#include "GLOBAL_CONSTANTS.h"
 #include "Shape.h"
 #include "Circle.h"
 #include "Rectangle.h"
@@ -15,7 +12,6 @@ Origin of object space is the center
 #include "MassData.h"
 #include "Material.h"
 #include "Math.h"
-#include <cmath>
 
 
 class RigidBody

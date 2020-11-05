@@ -1,6 +1,5 @@
 #pragma once
 #include "Enemy.h"
-#include "Entity.h"
 
 class Sector;
 

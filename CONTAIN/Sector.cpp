@@ -1,11 +1,4 @@
 #include "Sector.h"
-#include "CrazyBoi.h"
-#include "BossBurst.h"
-#include "BossRush.h"
-#include "BossSpawn.h"
-#include "BossSplit.h"
-#include "BossStream.h"
-#include "PowerUp.h"
 
 Sector::Sector(Level* i_lvlPtr, RESOURCES* i_resources, sf::Color i_colA, sf::Color i_colB, bool i_testSector) :
 	myLevel { i_lvlPtr }, resources { i_resources }, colPalA { i_colA }, colPalB { i_colB }

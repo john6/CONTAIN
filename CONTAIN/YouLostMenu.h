@@ -1,8 +1,8 @@
 #pragma once
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
-#include "RESOURCES.h"
 #include "GLOBAL_CONSTANTS.h"
+#include "RESOURCES.h"
 #include "Button.h"
 
 class YouLostMenu

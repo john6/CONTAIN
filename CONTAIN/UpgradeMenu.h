@@ -1,9 +1,9 @@
 #pragma once
-#include "RESOURCES.h"
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 #include <random>
 #include <string>
+#include "RESOURCES.h"
 #include "Button.h"
 #include "Entity.h"
 #include "PlayerChar.h"

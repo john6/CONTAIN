@@ -1,6 +1,5 @@
 #pragma once
 #include "Shape.h"
-#include <math.h>
 #include "Math.h"
 
 class Polygon :

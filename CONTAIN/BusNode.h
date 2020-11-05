@@ -1,7 +1,6 @@
 #pragma once
 #include <iostream>
 #include <functional>
-#include "MessageBus.h"
 #include "Message.h"
 
 class BusNode

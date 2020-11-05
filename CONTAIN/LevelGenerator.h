@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 #include "GLOBAL_CONSTANTS.h"
-#include "RigidBody.h"
 
 class LevelGenerator
 {

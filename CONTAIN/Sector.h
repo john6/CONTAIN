@@ -17,6 +17,13 @@
 #include "EndObject.h"
 #include "Door.h"
 #include "Scenery.h"
+#include "CrazyBoi.h"
+#include "BossBurst.h"
+#include "BossRush.h"
+#include "BossSpawn.h"
+#include "BossSplit.h"
+#include "BossStream.h"
+#include "PowerUp.h"
 #include "Anim.h"
 
 

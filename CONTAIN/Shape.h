@@ -1,6 +1,8 @@
 #pragma once
+#include <Eigen/Dense>
+#include <SFML/Graphics.hpp>
+//TODO Im just including Global constants for the typedefs it defines. I feel like that's not ideal
 #include "GLOBAL_CONSTANTS.h"
-
 
 class Shape
 {

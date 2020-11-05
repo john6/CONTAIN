@@ -1,5 +1,4 @@
 #pragma once
-#include "RigidBody.h"
 #include "GLOBAL_CONSTANTS.h"
 
 class Entity;

@@ -19,6 +19,7 @@
 #include "QuadTree.h"
 #include "InfoPopUp.h"
 #include "TuteLib.h"
+#include "Entity.h"
 
 class playerChar;
 

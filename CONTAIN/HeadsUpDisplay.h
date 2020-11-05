@@ -1,11 +1,8 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include "RESOURCES.h"
-#include "Entity.h"
-#include "PlayerChar.h"
-#include "Level.h"
 #include "GLOBAL_CONSTANTS.h"
+#include "PlayerChar.h"
 #include <chrono>
 
 class HeadsUpDisplay

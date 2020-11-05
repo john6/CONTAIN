@@ -1,7 +1,4 @@
 #include "Game.h"
-#include "TuteLib.h"
-#include "Entity.h"
-//#include "PlayerChar.h"
 
 Game::Game(sf::RenderWindow* i_window, RESOURCES* i_resources, DIFFICULTY i_difficulty)
 	: renderWindow{ i_window }, resources {i_resources}, tuteLib{ TuteLib(i_window, i_resources)}, HUD { HeadsUpDisplay(i_resources) }

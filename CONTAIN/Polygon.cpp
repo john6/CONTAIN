@@ -1,6 +1,5 @@
 #include "Polygon.h"
 
-
 void Polygon::CalculateValues()
 {//recalculates shapes area, inertia coefficient, and recenters it around (0,0)
 	Vector2f centroid = Vector2f(0.0f, 0.0f);

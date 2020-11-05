@@ -1,7 +1,6 @@
 #include "BusNode.h"
 
 
-
 BusNode::BusNode()
 {
 	//GLBVRS::MBUSPTR->addReceiver(this->getNotifyFunc());

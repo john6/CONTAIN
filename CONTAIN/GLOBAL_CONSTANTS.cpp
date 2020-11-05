@@ -1,12 +1,4 @@
 #include "GLOBAL_CONSTANTS.h"
-#include "MessageBus.h"
-#include "Message.h"
-#include "BusNode.h"
-
-//GLOBAL_CONSTANTS::GLOBAL_CONSTANTS(unsigned int i_screenWidth, unsigned int i_screenHeight)
-//{
-//
-//}
 
 void GLBVRS::SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_screenHeight,
 	RESOURCES* i_resourcesPtr, MessageBus* i_mBusPtr, Game* i_gamePtr, std::shared_ptr<Entity> i_playerPtr, float i_soundLvl)
@@ -20,8 +12,7 @@ void GLBVRS::SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_scree
 	GLBVRS::CRT_HGHT = static_cast<float>(GLBVRS::SCREEN_HEIGHT * 17.0f / 20.0f);
 	GLBVRS::HR_MRG = static_cast<float>(GLBVRS::SCREEN_WIDTH / 20.0f);     //horizontal margin
 	GLBVRS::VRT_MRG = static_cast<float>(GLBVRS::SCREEN_HEIGHT / 20.0f);  //vertical margin
-	GLBVRS::SIZE_RAT = static_cast<float>
-		(std::min( ((float)GLBVRS::SCREEN_WIDTH / 1920.0f ), ((float)GLBVRS::SCREEN_HEIGHT / 1080.0f)));
+	GLBVRS::SIZE_RAT = 1;  // This is basically depreciated, I am now using the SFML viewport for all scaling
 
 	//MENU RESOLUTION
 	GLBVRS::BTTN_WDTH = GLBVRS::CRT_WDTH / 5.0f;
@@ -124,8 +115,8 @@ GLBVRS::GLBVRS()
 }
 
 //WINDOW SETTINGS
-unsigned int GLBVRS::SCREEN_WIDTH = 0;
-unsigned int GLBVRS::SCREEN_HEIGHT = 0;
+unsigned int GLBVRS::SCREEN_WIDTH = 1920;
+unsigned int GLBVRS::SCREEN_HEIGHT = 1080;
 
 //GAME RESOLUTION
 float GLBVRS::CRT_WDTH = static_cast<float>(GLBVRS::SCREEN_WIDTH * 9.0f / 10.0f);

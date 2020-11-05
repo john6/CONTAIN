@@ -34,6 +34,7 @@ std::vector<Vector2f> Physics::FindIncidentFace(RigidBody * i_refEnt, RigidBody 
 	std::vector<Vector2f> incidentVerts = i_incidentEnt->GetVertCords();
 	std::vector<Vector2f> incidentNormals = i_incidentEnt->GetFaceNorms();
 	//ignoring world to model space stuff right here
+	//Sets the incident face to -1 so that if one isnt found it will cause an error and be potentially easier to trace
 	int incidentFaceIndex = -1;
 	float minProjection = std::numeric_limits<float>::max();
 	for (int i = 0; i < incidentVerts.size(); ++i) {
@@ -45,8 +46,6 @@ std::vector<Vector2f> Physics::FindIncidentFace(RigidBody * i_refEnt, RigidBody 
 		}
 	}
 	//assign face vertices for incident face;
-	//TODO I HONESTLY DONT KNOW HOW BUT THIS WAS -1, THIS HAS NEVER HAPPENED BEFORE I GUESS I CAN PROTECT IT?
-	//THE -1 WAS AN ATTEMPT TO FAIL FAST BUT I GUESS I CAN JUST CHANGE IT IF THIS EVER HAPPENS AGAIN
 	Vector2f incidentFaceVert1 = incidentVerts[incidentFaceIndex];
 	Vector2f incidentFaceVert2 = incidentVerts[(incidentFaceIndex + 1) % incidentVerts.size()];
 	std::vector<Vector2f> incidentFaceVerts = { incidentFaceVert1 , incidentFaceVert2 };
@@ -189,7 +188,6 @@ bool Physics::ResolveRectToCircleCollision(CollisionData* i_data)
 	else {
 		Vector2f normal = normals[collisionFaceIndex];
 		if ((circleBod->transform.pos - rectVert1).dot(normal) > circlePtr->radius) { return false; }
-		//normal = -normal;
 		i_data->norm = -normal;
 		i_data->contactPoints.push_back((i_data->norm * circlePtr->radius) + circleBod->transform.pos);
 	}
@@ -318,14 +316,12 @@ void Physics::InfiniteMassCorrection(CollisionData * i_data)
 
 void Physics::PositionalCorrection(CollisionData * i_data)
 {
-	if (i_data->entA->intangible || i_data->entB->intangible) { // these items have no impulse upon collision
+	if (i_data->entA->intangible || i_data->entB->intangible) { 
+		// these items have no impulse upon collision
 		return;
 	}
 
 	if ((i_data->entA->rb.massD.GetMass() + i_data->entB->rb.massD.GetMass()) == 0.0f) {
-		//Vector2f correction = std::max(i_data->pen - PENETRATION_ALLOWANCE, 0.0f) / 0.5f * i_data->norm * PENETRATION_CORRECTION;
-		//i_data->bodyA->transform.pos = i_data->bodyA->transform.pos - (0.5f * correction);
-		//i_data->bodyB->transform.pos = i_data->bodyB->transform.pos + (0.5f * correction);
 		//Not gonna do anything to correct infinite mass objects touching each other
 		return;
 	}
@@ -483,13 +479,6 @@ std::shared_ptr<Polygon> Physics::CreateIrregularPolygon(int i_numVerts, float i
 
 	return poly;
 
-	//std::vector<Vector2f> vertVect;
-	////for (int i = 0; i < i_numVerts; ++i) {
-	////	float radAngle = ((((float)(i_numVerts - i) / (float)i_numVerts))*2.0f*PI);
-	////	Vector2f vert = Math::AngleToVect(radAngle) * i_size;
-	////	vertVect.push_back(vert);
-	////}
-	////
 }
 
 void Physics::CreateCollisionImpulse(CollisionData* i_data) {
@@ -530,15 +519,13 @@ void Physics::CreateCollisionImpulse(CollisionData* i_data) {
 						   (pow(crossB, 2) * bodyB->massD.GetInertInv());
 
 		float impulseScalar = -(1.0f + std::max(bodyA->mat.rest, bodyB->mat.rest)) * contactRelVel;
-		impulseScalar /= invMassSum; //this seems to be too high
+		impulseScalar /= invMassSum;
 		impulseScalar /= i_data->contactPoints.size();
 
 		Vector2f impulse = i_data->norm * impulseScalar;
 
 		impulseCalls.push_back(SaveImpulse(bodyA, -impulse, contactPtA));
 		impulseCalls.push_back(SaveImpulse(bodyB, impulse, contactPtB));
-		//bodyA->ApplyImpulse(-impulse, contactPtA);
-		//bodyB->ApplyImpulse(impulse, contactPtB);
 
 		relativeVelocity = (bodyB->GetInstVel() + Math::FloatVectCross(bodyB->GetInstAngVel(), contactPtB)) -
 						   (bodyA->GetInstVel() - Math::FloatVectCross(bodyA->GetInstAngVel(), contactPtA));
@@ -561,19 +548,15 @@ void Physics::CreateCollisionImpulse(CollisionData* i_data) {
 
 		if (bodyA->shape->GetType() == Shape::CIRCLE) {
 			impulseCalls.push_back(SaveImpulse(bodyA, tangentImpulse, contactPtA));
-			//bodyA->ApplyImpulse(tangentImpulse, contactPtA);
 		}
 		else {
 			impulseCalls.push_back(SaveImpulse(bodyA, -tangentImpulse, contactPtA));
-			//bodyA->ApplyImpulse(-tangentImpulse, contactPtA);
 		}
 		if (bodyB->shape->GetType() == Shape::CIRCLE) {
 			impulseCalls.push_back(SaveImpulse(bodyB, -tangentImpulse, contactPtB));
-			//bodyB->ApplyImpulse(-tangentImpulse, contactPtB);
 		}
 		else {
 			impulseCalls.push_back(SaveImpulse(bodyB, tangentImpulse, contactPtB));
-			//bodyB->ApplyImpulse(-tangentImpulse, contactPtB);
 		}
 	}
 
@@ -593,9 +576,5 @@ sf::Color Physics::GenerateRandomColor(int i_min, int i_max)
 	int randCol2 = distrib(gen1);
 	int randCol3 = distrib(gen1);
 
-	//std::random_device rdRoomSeed;  //Will be used to obtain a seed for the random number engine
-	//std::mt19937 genRoomSeed(rdRoomSeed()); //Standard mersenne_twister_engine seeded with rd()
-	//std::discrete_distribution<> extraRoomDist({ 25, 50, 25 });
-	//int randExtraRooms = extraRoomDist(genRoomSeed);
 	return sf::Color(randCol1, randCol2, randCol3);
 }

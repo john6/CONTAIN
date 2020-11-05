@@ -4,29 +4,16 @@ InfoPopUp::InfoPopUp(RESOURCES* i_resource, float i_width, float i_height, sf::C
 	resources{ i_resource }, font{ i_resource->GetFont() }, colA{ i_colA }, colB{ i_colB }, colC{ i_colC }
 {
 	background = std::make_shared< sf::RectangleShape>(sf::Vector2f(i_width, i_height));
-	//background->setOrigin();
 	background->setPosition(sf::Vector2f(GLBVRS::HR_MRG, GLBVRS::VRT_MRG));
-	//background->setRotation(0);
 	background->setFillColor(i_colA);
 	background->setOutlineColor(i_colB);
 	background->setOutlineThickness(10.0f);
 	played = false;
-	//PlaceBottomBox();
 }
 
 InfoPopUp::InfoPopUp()
 {
 }
-
-//void InfoPopUp::SetSize(float i_width, float i_height)
-//{
-//
-//}
-
-//void InfoPopUp::SetColorScheme(sf::Color i_colA, sf::Color i_colB, sf::Color i_colC)
-//{
-//
-//}
 
 
 void InfoPopUp::AddTextBox(std::string i_str)
@@ -36,17 +23,13 @@ void InfoPopUp::AddTextBox(std::string i_str)
 	int textOffsetx = 10.0f;
 	int textOffsety = 10.0f;
 	sf::Text text = sf::Text(i_str, font, 20);
-	//textColor = sf::Color::White;
-	//backgroundColor = sf::Color::Green;
 	text.setFillColor(sf::Color::White);
 	text.setOutlineColor(sf::Color::Black);
 	text.setOutlineThickness(1.0f);
 	text.setPosition(sf::Vector2f(topRightCorn.x + textOffsetx, topRightCorn.y + textOffsety));
-	//text.setPosition(topRightCorn);
 	std::shared_ptr<sf::RectangleShape> textBox = std::make_shared< sf::RectangleShape>(size);
 	textBox->setOrigin(sf::Vector2f(0, 0));
 	textBox->setPosition(topRightCorn);
-	//textBox->setRotation(0);
 	textBox->setFillColor(colC);
 	textBox->setOutlineColor(colB);
 	textBox->setOutlineThickness(10.0f);
@@ -61,17 +44,13 @@ void InfoPopUp::PlaceBottomBox()
 	int textOffsety = 10.0f;
 	std::string sapceStr = "Press SPACE to continue";
 	sf::Text text = sf::Text(sapceStr, font, 20);
-	//textColor = sf::Color::White;
-	//backgroundColor = sf::Color::Green;
 	text.setFillColor(sf::Color::White);
 	text.setOutlineColor(sf::Color::Black);
 	text.setOutlineThickness(1.0f);
 	text.setPosition(sf::Vector2f(topRightCorn.x + textOffsetx, topRightCorn.y + textOffsety));
-	//text.setPosition(topRightCorn);
 	std::shared_ptr<sf::RectangleShape> textBox = std::make_shared< sf::RectangleShape>(size);
 	textBox->setOrigin(sf::Vector2f(0, 0));
 	textBox->setPosition(topRightCorn);
-	//textBox->setRotation(0);
 	textBox->setFillColor(colC);
 	textBox->setOutlineColor(colB);
 	textBox->setOutlineThickness(10.0f);

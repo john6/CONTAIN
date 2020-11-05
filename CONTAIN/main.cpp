@@ -21,20 +21,10 @@ int main()
 	//https://eigen.tuxfamily.org/dox//TopicMultiThreading.html
 	Eigen::initParallel();
 	SaveData saveData = SaveData();
-	//16:10 aspect ratio resolutions: 1280×800, 1440×900, 1680×1050, 1920×1200, and 2560×1600.
 	RSLTN resolution = NNTN_TN;
 	float soundLvl = 50.0f;
 	bool fullScreen = true;
 	sf::RenderWindow window(GLBVRS::GetVideoMode(resolution), "CONTAIN", sf::Style::Fullscreen);
-
-
-	//sf::RenderWindow window(sf::VideoMode(1920, 1080), "CONTAIN");
-	//sf::RenderWindow window(sf::VideoMode(1440, 900), "CONTAIN");
-	//sf::RenderWindow window(sf::VideoMode(1280, 720), "CONTAIN");
-	//sf::RenderWindow window(sf::VideoMode(1920, 1080), "CONTAIN");
-
-	//::ShowWindow(window.getSystemHandle(), SW_MAXIMIZE);
-
 	RESOURCES resources;
 	MessageBus mBus;
 	GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, NULL, NULL, soundLvl);
@@ -79,7 +69,6 @@ int main()
 				settingsMenu.ResetButtons();
 			}
 			if (currEvent.type == sf::Event::LostFocus) {
-				//window.create(sf::VideoMode(400, 400), "CONTAIN");
 				GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
 				settingsMenu.ResetButtons();
 				notFullScreen = true;
@@ -88,7 +77,6 @@ int main()
 		if (window.hasFocus()) {
 			if (notFullScreen) {
 				notFullScreen = false;
-				//window.create(sf::VideoMode(1920, 1080), "CONTAIN", sf::Style::Fullscreen);
 				GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
 			}
 			hiRes_time_point newTime = hiResTime::now();
@@ -118,7 +106,6 @@ int main()
 					sf::Vector2i mScreenPos = sf::Mouse::getPosition(window);
 					sf::Vector2f mousePosition = window.mapPixelToCoords(mScreenPos, window.getView());
 					if (justSwitchedBackToMenu) {
-						settingsMenu.ResetMenu();
 						window.setView(renderView);
 						justSwitchedBackToMenu = false;
 					}
@@ -130,19 +117,14 @@ int main()
 							window.create(GLBVRS::GetVideoMode(resolution), "CONTAIN", sf::Style::Fullscreen);
 							GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
 							window.setView(renderView);
-							settingsMenu.ResetMenu();
-							window.setView(renderView);
 						}
 						else {
 							window.create(GLBVRS::GetVideoMode(resolution), "CONTAIN", sf::Style::Default);
 							GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
 							window.setView(renderView);
-							settingsMenu.ResetMenu();
-							window.setView(renderView);
 						}
 						resources.SetSoundLevel(soundLvl);
 						GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
-						settingsMenu.ResetMenu();
 						window.setView(renderView);
 						state = SETTINGS;
 					}
