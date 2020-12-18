@@ -28,6 +28,8 @@ private:
 	void  PollButtonTriplet(sf::Vector2f mousePosition);
 	void  UpdateButtonTriplet(int i_upgradeSelected);
 
+	sf::View upgradeMenuView;
+
 	std::string GetUpgradeText(UPGRADE_TYPE i_type);
 public:
 	RESOURCES* resources;

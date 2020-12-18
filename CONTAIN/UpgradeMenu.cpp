@@ -3,6 +3,9 @@
 UpgradeMenu::UpgradeMenu(RESOURCES * i_resources, DIFFICULTY i_diff, PlayerChar* i_player) :
 	resources{ i_resources }
 {
+
+	upgradeMenuView.reset(sf::FloatRect(0, 0, GLBVRS::SCREEN_WIDTH, GLBVRS::SCREEN_HEIGHT));
+
 	font = resources->GetFont();
 
 	std::random_device rd1;  //Will be used to obtain a seed for the random number engine
@@ -25,9 +28,11 @@ UpgradeMenu::UpgradeMenu(RESOURCES * i_resources, DIFFICULTY i_diff, PlayerChar*
 	upgradeA = availableUpgrades[distrib(gen1)%availableUpgrades.size()];
 	auto iter1 = std::find(availableUpgrades.begin(), availableUpgrades.end(), upgradeA);
 	availableUpgrades.erase(iter1);
+
 	upgradeB = availableUpgrades[distrib(gen1) % availableUpgrades.size()];
 	auto iter2 = std::find(availableUpgrades.begin(), availableUpgrades.end(), upgradeB);
 	availableUpgrades.erase(iter2);
+
 	upgradeC = availableUpgrades[distrib(gen1) % availableUpgrades.size()];
 	auto iter3 = std::find(availableUpgrades.begin(), availableUpgrades.end(), upgradeC);
 	availableUpgrades.erase(iter3);
@@ -201,6 +206,8 @@ void UpgradeMenu::Render(sf::RenderWindow * window)
 	//textC.setFont(font);
 
 	window->clear();
+
+	window->setView(upgradeMenuView);
 
 	window->draw(nextLevelButton.GetRect());
 	window->draw(upgradeButtonA.GetRect());

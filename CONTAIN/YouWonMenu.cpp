@@ -6,6 +6,9 @@ YouWonMenu::YouWonMenu(RESOURCES * i_resources, bool i_won) :
 {
 	font = resources->GetFont();
 
+
+	menuView.reset(sf::FloatRect(0, 0, GLBVRS::SCREEN_WIDTH, GLBVRS::SCREEN_HEIGHT));
+
 	sf::Vector2f topLeft(GLBVRS::HR_MRG * 1.0f, GLBVRS::VRT_MRG * 6.0f);
 	float bttnMrgHr = (GLBVRS::HR_MRG / 4.0f);
 	float bttnMrgVrt = (GLBVRS::VRT_MRG / 3.0f);
@@ -162,6 +165,8 @@ void YouWonMenu::Render(sf::RenderWindow * window)
 	//quitButtonText.setFont(font);
 
 	window->clear();
+
+	window->setView(menuView);
 
 	window->draw(title);
 	window->draw(playAgainButton.GetRect());

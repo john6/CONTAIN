@@ -9,13 +9,20 @@ private:
 
 public:
 	int blastType;
+	float deathTimerMax;
 	float deathTimer;
+	float blastRadius;
 	float strength;
 	float stunTime;
 
-	Blast(Vector2f i_startPosition, int i_blastType, float i_strength, float i_stunTime,
-		RigidBody i_rb = RigidBody(std::make_shared<Circle>(150.0f), STATIC));
+	Blast(Vector2f i_startPosition, int i_blastType, float i_strength, float i_stunTime, float i_blastRadius);
 	~Blast();
 
 	void Update(float i_stepSize) override;
+
+	void CollideWithEnemy(Enemy* i_enemyPtr, CollisionData i_collision) override;
+
+	void CollideWithWall(Wall* i_wallPtr) override;
+
+	void UpdateVisuals(float i_stepSize) override;
 };

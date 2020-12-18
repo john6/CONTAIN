@@ -17,6 +17,11 @@ protected:
 	sf::Color deathColorFill;
 	sf::Color deathColorOutLine;
 
+	//visuals
+	float tendrilSize;
+	Polygon trianglePoly;
+	float tendrilRotation;
+
 public:
 	std::shared_ptr<Entity> charPtr;
 	float speed;
@@ -32,13 +37,13 @@ public:
 
 	void Destroy() override;
 
+	void GenerateDeathEffects(ANIMTYPE animType);
+
 	void CollideWithPainWall(PainWall * i_painWallPtr) override;
 
-	void CollideWithPlayer(PlayerChar* i_playerPtr) override;
-
-	void CollideWithBlast(Blast* i_blastPtr) override;
-
 	void CollideWithProjectile(Projectile* i_projPtr) override;
+
+	void UpdateVisuals(float i_stepSize) override;
 
 	void DropPowerUp();
 
@@ -50,7 +55,10 @@ public:
 
 	virtual void SetDiffVars(int i_diff);
 
+	drawablePtrVect CreateDrawables(float i_lerp_fraction) override;
+
 	void ChangeColorHealth();
 
 	void TurnToMetal();
+
 };

@@ -25,6 +25,12 @@ int main()
 	float soundLvl = 50.0f;
 	bool fullScreen = true;
 	sf::RenderWindow window(GLBVRS::GetVideoMode(resolution), "CONTAIN", sf::Style::Fullscreen);
+
+	sf::Cursor cursor;
+	if (cursor.loadFromSystem(sf::Cursor::Cross)) {
+		window.setMouseCursor(cursor);
+	}
+
 	RESOURCES resources;
 	MessageBus mBus;
 	GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, NULL, NULL, soundLvl);
@@ -32,9 +38,14 @@ int main()
 	GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
 
 	//View Code Test
-	sf::View renderView;
-	renderView.reset(sf::FloatRect(0, 0, 1920, 1080));
-	window.setView(renderView);
+	sf::View mainMenusView;
+	mainMenusView.reset(sf::FloatRect(0, 0, GLBVRS::SCREEN_WIDTH, GLBVRS::SCREEN_HEIGHT));
+	window.setView(mainMenusView);
+
+
+	//sf::View hudView;
+	//hudView.reset(sf::FloatRect(0, 0, 2592, 1458));
+	//window.setView(hudView);
 	//View Code Test
 	std::cout << "Window Size x: " << window.getSize().x << "\n";
 	std::cout << "Window Size y: " << window.getSize().y << "\n";
@@ -53,7 +64,7 @@ int main()
 	hiRes_time_point currTime = hiResTime::now();
 	const microSec UPDATE_INTERVAL(16666);   //16666.66 microseconds ~~ 16 milliseconds == 60 updates per second
 	microSec lag(0);
-
+	Vector2f currSectorDimensions = Vector2f(0.0f ,0.0f );
 	bool notFullScreen = false;
 	while (window.isOpen())
 	{
@@ -106,26 +117,26 @@ int main()
 					sf::Vector2i mScreenPos = sf::Mouse::getPosition(window);
 					sf::Vector2f mousePosition = window.mapPixelToCoords(mScreenPos, window.getView());
 					if (justSwitchedBackToMenu) {
-						window.setView(renderView);
+						window.setView(mainMenusView);
 						justSwitchedBackToMenu = false;
 					}
 					state = settingsMenu.Update(static_cast<float>(lag.count()), &window, mousePosition);
 					if (state == APPLY) {
 						settingsMenu.ResetMenu();
-						window.setView(renderView);
+						window.setView(mainMenusView);
 						if (fullScreen) {
 							window.create(GLBVRS::GetVideoMode(resolution), "CONTAIN", sf::Style::Fullscreen);
 							GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
-							window.setView(renderView);
+							window.setView(mainMenusView);
 						}
 						else {
 							window.create(GLBVRS::GetVideoMode(resolution), "CONTAIN", sf::Style::Default);
 							GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
-							window.setView(renderView);
+							window.setView(mainMenusView);
 						}
 						resources.SetSoundLevel(soundLvl);
 						GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
-						window.setView(renderView);
+						window.setView(mainMenusView);
 						state = SETTINGS;
 					}
 					if (state == MENU) {
@@ -139,6 +150,16 @@ int main()
 					hiRes_time_point beforePhysicsUpdate = hiResTime::now();
 					state = globalGame.Update(static_cast<float>(lag.count()), &window, mousePosition);
 					hiRes_time_point afterPhysicsUpdate = hiResTime::now();
+					
+					Vector2f newFrameDimensions = globalGame.GetCurrSectorDimensions();
+
+					//if ((currSectorDimensions[0] != newFrameDimensions[0]) || (currSectorDimensions[1] != newFrameDimensions[1])){
+					//	currSectorDimensions = newFrameDimensions;
+					//	worldView.setCenter((float)(((int)currSectorDimensions[0]) / 2), (float)(((int)currSectorDimensions[1]) / 2));
+					//	window.setView(worldView);
+					//}
+
+
 					GLBVRS::MBUSPTR->notify();
 					microSec currInterval = std::chrono::duration_cast<microSec>(afterPhysicsUpdate - beforePhysicsUpdate);
 					std::string str = "Physics update took " + std::to_string(currInterval.count()) + " microseconds \n";

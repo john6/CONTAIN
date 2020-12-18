@@ -8,16 +8,22 @@ private:
 	Vector2f outPos;
 	MapCoord outCoord;
 
-	sf::Color colorOpen;
-	sf::Color colorClosed;
+	sf::Color openColor;
+	sf::Color openColorOutline;
+
+	sf::Color closedColor;
+	sf::Color closedColorOutline;
+
+
+
+
+
 	hiRes_time_point disableTimeStamp;
 	float disabledAmount;
 
 	bool open;
 	bool locked;
 	bool disabled;
-	sf::Color colorOpenOutline;
-	sf::Color colorClosedOutline;
 
 public:
 	SCREEN_SIDE side;

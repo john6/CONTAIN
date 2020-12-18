@@ -1,5 +1,6 @@
 #pragma once
 #include "GLOBAL_CONSTANTS.h"
+#include <random>
 
 class Math
 {
@@ -17,5 +18,7 @@ public:
 	static float VectToAngle(Vector2f i_dirVect);
 
 	static Vector2f AngleToVect(float i_angle);
+
+	static Vector2f GetRandomCoordInRect(Vector2f topLeft, Vector2f bottomRight);
 };
 

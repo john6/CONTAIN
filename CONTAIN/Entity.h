@@ -8,6 +8,7 @@
 #include "RigidBody.h"
 #include "BusNode.h"
 #include "MessageBus.h"
+#include "CollisionData.h"
 
 class Game;
 class Level;
@@ -63,7 +64,7 @@ public:
 
 	const TypeID GetTypeID();
 
-	void CollideWith(Entity& i_other);
+	void CollideWith(CollisionData* i_collision);
 
 	virtual void Update(float i_stepSize);
 
@@ -79,7 +80,7 @@ public:
 
 	virtual void CollideWithBlocker(Blocker* i_blockPtr);
 
-	virtual void CollideWithEnemy(Enemy* i_enemyPtr);
+	virtual void CollideWithEnemy(Enemy* i_enemyPtr, CollisionData i_collisionCopy);
 
 	virtual void CollideWithWall(Wall* i_wallPtr);
 

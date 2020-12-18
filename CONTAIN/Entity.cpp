@@ -69,70 +69,78 @@ const TypeID Entity::GetTypeID()
 	return typeID;
 }
 
-void Entity::CollideWith(Entity & i_other)
+void Entity::CollideWith(CollisionData* i_collision)
 {
-	switch (i_other.GetTypeID()) {
+	Entity* other;
+	if (i_collision->entA.get() == this) {
+		other = i_collision->entB.get();
+	}
+	else {
+		other = i_collision->entA.get();
+	}
+
+	switch (other->GetTypeID()) {
 	case PLAYER:
 	{
-		auto player = reinterpret_cast<PlayerChar*>(&i_other);
+		auto player = reinterpret_cast<PlayerChar*>(other);
 		CollideWithPlayer(player);
 		break;
 	}
 	case PROJ_BASIC:
 	{
-		auto projectile = reinterpret_cast<Projectile*>(&i_other);
+		auto projectile = reinterpret_cast<Projectile*>(other);
 		CollideWithProjectile(projectile);
 		break;
 	}
 	case PROJ_WALL:
 	{
-		auto blocker = reinterpret_cast<Blocker*>(&i_other);
+		auto blocker = reinterpret_cast<Blocker*>(other);
 		CollideWithBlocker(blocker);
 		break;
 	}
 	case ENEMY_SEEK:
 	{
-		auto enemy = reinterpret_cast<Enemy*>(&i_other);
-		CollideWithEnemy(enemy);
+		auto enemy = reinterpret_cast<Enemy*>(other);
+		CollideWithEnemy(enemy, *i_collision);
 		break; 
 	}
 	case ENEMY_RAND: {
-		auto enemy = reinterpret_cast<Enemy*>(&i_other);
-		CollideWithEnemy(enemy);
+		auto enemy = reinterpret_cast<Enemy*>(other);
+		CollideWithEnemy(enemy, *i_collision);
 		break; 
 	}
 	case ENEMY_BOSS: {
-		auto enemy = reinterpret_cast<Enemy*>(&i_other);
-		CollideWithEnemy(enemy);
+		auto enemy = reinterpret_cast<Enemy*>(other);
+		CollideWithEnemy(enemy, *i_collision);
 		break;
 	}
 	case WALL_BASIC: {
-		auto wall = reinterpret_cast<Wall*>(&i_other);
+		auto wall = reinterpret_cast<Wall*>(other);
 		CollideWithWall(wall);
 		break; 
 	}
 	case WALL_FIRE: {
-		auto painWall = reinterpret_cast<PainWall*>(&i_other);
+		auto painWall = reinterpret_cast<PainWall*>(other);
 		CollideWithPainWall(painWall);
 		break;
 	}
 	case DOOR: {
-		auto door = reinterpret_cast<Door*>(&i_other);
+		auto door = reinterpret_cast<Door*>(other);
 		CollideWithDoor(door);
 		break; 
 	}
 	case END_LEVEL: {
-		auto endObjPtr = reinterpret_cast<EndObject*>(&i_other);
+		auto endObjPtr = reinterpret_cast<EndObject*>(other);
 		CollideWithEndObject(endObjPtr);
 		break; 
 	}
 	case UPGRADE: {
-		auto powUp = reinterpret_cast<PowerUp*>(&i_other);
+		auto powUp = reinterpret_cast<PowerUp*>(other);
 		CollideWithPowUp(powUp);
 		break; 
 	}
 	case BLAST_STUN: {
-		auto blast = reinterpret_cast<Blast*>(&i_other);
+		auto blast = reinterpret_cast<Blast*>(other);
 		CollideWithBlast(blast);
 		break; 
 	}
@@ -184,7 +192,7 @@ void Entity::CollideWithProjectile(Projectile * i_projPtr) {}
 
 void Entity::CollideWithBlocker(Blocker* i_blockPtr) {}
 
-void Entity::CollideWithEnemy(Enemy* i_enemyPtr) {}
+void Entity::CollideWithEnemy(Enemy* i_enemyPtr, CollisionData i_collisionCopy) {}
 
 void Entity::CollideWithWall(Wall* i_wallPtr) {}
 

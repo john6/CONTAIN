@@ -7,6 +7,15 @@
 #include "MessageBus.h"
 #include "BusNode.h"
 
+
+const bool TESTING = false;
+const int WORLDSIZEWIDTH = 3224;
+const int WORLDSIZEHEIGHT = 1825;
+//0.8 of max world width so theres a margin
+const int MAXSECTORWIDTH = 2496;
+const int MAXSECTORHEIGHT = 1404;
+
+
 //https://www.fluentcpp.com/2019/07/23/how-to-define-a-global-constant-in-cpp/
 //according to this article I should be adding extern here but that means I have to define these variables elsewhere also because I dont use CPP17
 //07/13/2020- I am now using CPP17, things are still working without extern, maybe I should switch it still. TODO
@@ -184,7 +193,7 @@ enum TypeID {
 	ENTITY_VIRTUAL, PLAYER, PROJ_BASIC, PROJ_WALL, BLAST_STUN, ENEMY_SEEK,
 	ENEMY_RAND, ENEMY_BOSS, ENEMY_SEEK_PUSH, ENEMY_RAND_PUSH, WALL_BASIC,
 	WALL_FIRE, DOOR, END_LEVEL, UPGRADE, ANIMATION, SCENERY};
-enum ANIMTYPE { CANNED_EXPLOSION, ENEMY_BURST_DEATH};
+enum ANIMTYPE { CANNED_EXPLOSION, ENEMY_BURST_DEATH, SPARKS };
 enum SND_LVL { LOW25, MEDIUM50, HIGH75, FULL100};
 enum RSLTN { TWLV_SVN, FRTN_NNTY, NNTN_TN, FLL_SCRN};
 

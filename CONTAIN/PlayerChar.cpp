@@ -39,6 +39,19 @@ PlayerChar::PlayerChar(int i_strtHealth, Vector2f i_startPosition, RigidBody i_r
 	InitLvl();
 	rectPtr = dynamic_cast<Rectangle*>(rb.shape.get());
 	hasVisuals = true;
+
+
+	if (TESTING) {
+		ReceivePowerUp(RATE_OF_FIRE);
+		ReceivePowerUp(RATE_OF_FIRE);
+		ReceivePowerUp(RATE_OF_FIRE);
+		ReceivePowerUp(SCATTER);
+		ReceivePowerUp(SCATTER);
+		ReceivePowerUp(SCATTER);
+		ReceivePowerUp(BIG_SHIP);
+		ReceivePowerUp(BIG_SHIP);
+		ReceivePowerUp(BIG_SHIP);
+	}
 }
 
 PlayerChar::~PlayerChar()
@@ -122,7 +135,7 @@ void PlayerChar::AcceptWeaponInput(float i_stepSize)
 	}
 }
 
-void PlayerChar::TakeDamage(float i_dmg)
+void PlayerChar::TakeDamage(float i_dmg) 
 {
 	auto timeSinceDamaged = std::chrono::duration_cast<std::chrono::seconds>(hiResTime::now() - lastDamageReceived);
 	if (timeSinceDamaged.count() >= dmgRate) {
@@ -130,6 +143,15 @@ void PlayerChar::TakeDamage(float i_dmg)
 		lastDamageReceived = hiResTime::now();
 		health -= i_dmg;
 	}
+}
+
+void PlayerChar::GenerateDamageEffects(CollisionData i_collisionCopy)
+{
+	microSec ms(200000000);
+	Vector2f dir(0.0f, 0.0f);
+	Vector2f collisionDir = i_collisionCopy.entA->rb.transform.pos - i_collisionCopy.entB->rb.transform.pos;
+	std::shared_ptr<Entity> anim = std::make_shared<Anim>(i_collisionCopy.norm, i_collisionCopy.contactPoints, ms, 0, 0);
+	spawnVect.push_back(anim);
 }
 
 void PlayerChar::ReceivePowerUp(UPGRADE_TYPE i_powType)
@@ -216,6 +238,17 @@ float PlayerChar::GetCurrHealth()
 	return health;
 }
 
+void PlayerChar::CollideWithEnemy(Enemy* i_enemyPtr, CollisionData i_collisionCopy)
+{
+	auto timeSinceDamaged = std::chrono::duration_cast<std::chrono::seconds>(hiResTime::now() - lastDamageReceived);
+	if (timeSinceDamaged.count() >= dmgRate) {
+		if (!i_enemyPtr->metal) {
+			TakeDamage(1.0f);
+			GenerateDamageEffects(i_collisionCopy);
+		}
+	}
+}
+
 void PlayerChar::CollideWithPainWall(PainWall * i_painWallPtr)
 {
 	GLBVRS::RSRCS->PlaySound(RESOURCES::FIREBALL);
@@ -260,7 +293,7 @@ void PlayerChar::UpdateVisuals(float i_stepSize)
 	std::shared_ptr<sf::Shape> drawShapeShaft = std::make_shared<sf::RectangleShape>(sf::Vector2f(poly->GetDistToCorner(), baseDiam));
 	drawShapeShaft->setOrigin(sf::Vector2f(0.0f, baseDiam / 2.0f));
 	drawShapeShaft->setFillColor(fillColor);
-	drawShapeShaft->setOutlineColor(outlineColor);
+	drawShapeShaft->setOutlineColor(FORDSILVER);
 	drawShapeShaft->setPosition(sf::Vector2f(rb.transform.pos[0], rb.transform.pos[1]));
 	drawShapeShaft->setOutlineThickness(2.0f);
 	Vector2f mosDir = pController.GetMousePos() - rb.transform.pos;
@@ -271,11 +304,20 @@ void PlayerChar::UpdateVisuals(float i_stepSize)
 	float radius = baseDiam * (3.0f / 5.0f);
 	std::shared_ptr<sf::Shape> drawShapeBase = std::make_shared<sf::CircleShape>(radius);
 	drawShapeBase->setOrigin(sf::Vector2f(radius, radius));
-	drawShapeBase->setFillColor(outlineColor);
-	drawShapeBase->setOutlineColor(outlineColor);
+	drawShapeBase->setFillColor(fillColor);
+	drawShapeBase->setOutlineColor(FORDSILVER);
 	drawShapeBase->setPosition(sf::Vector2f(rb.transform.pos[0], rb.transform.pos[1]));
 	drawShapeBase->setOutlineThickness(2.0f);
 	visuals->emplace_back(drawShapeBase);
+
+	weaponDelay = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastAOEFired)).count() / 1000000.0f;
+	if (weaponDelay >= shipRateOfAOE) {
+		outlineColor = CYAN;
+	}
+	else {
+		outlineColor = FORDSILVER;
+	}
+
 }
 
 void PlayerChar::ShootBasic(Vector2f i_mousePos)
@@ -405,8 +447,7 @@ void PlayerChar::ShootAOE()
 		GLBVRS::RSRCS->PlaySound(RESOURCES::MAGIC10);
 		--currSpecialAmmo;
 		lastAOEFired = hiResTime::now();
-		std::shared_ptr<Entity> projectile = std::make_shared<Blast>(
-					rb.transform.pos, 0, blastStrength, blastStunTime, RigidBody(std::make_shared<Circle>(BlastRadius), STATIC));
+		std::shared_ptr<Entity> projectile = std::make_shared<Blast>(rb.transform.pos, 0, blastStrength, blastStunTime, BlastRadius);
 		spawnVect.push_back(projectile);
 	}
 }

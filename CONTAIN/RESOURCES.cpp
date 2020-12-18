@@ -4,8 +4,22 @@
 
 RESOURCES::RESOURCES()
 {
+	//Sound basics
 	soundLvl = 75.0f;
 	musicIsOn = true;
+	
+	sound_arr[0] = sound_1;
+	sound_arr[1] = sound_2;
+	sound_arr[2] = sound_3;
+	sound_arr[3] = sound_4;
+	sound_arr[4] = sound_5;
+	sound_arr[5] = sound_6;
+	sound_arr[6] = sound_7;
+	sound_arr[7] = sound_8;
+	nextSoundIndex = 0;
+
+
+
 	//font
 	if (!m_font.loadFromFile("Font/kongtext.ttf")) {
 		std::cerr << "error loading font \n";
@@ -248,7 +262,11 @@ void RESOURCES::PlayMusicFromFile(int i_songNum)
 
 void RESOURCES::SetSoundLevel(float i_soundLvl)
 {
-	m_sound.setVolume(i_soundLvl);
+	//m_sound.setVolume(i_soundLvl);
+	//soundLvl = i_soundLvl;
+	for (int i = 0; i < 8; i++) {
+		sound_arr[i].setVolume(i_soundLvl);
+	}
 	soundLvl = i_soundLvl;
 }
 
@@ -261,272 +279,275 @@ sf::Font RESOURCES::GetFont() {
 	return m_font;
 }
 
-void RESOURCES::PlaySound(int soundNum) {
+void RESOURCES::PlaySound(int soundNum) { 
+	//getting weird sound errors rn, I think it has to do with the fact that Im switching sound buffers all the time, might be the double access Im gonna turn mutex back on and see if there are still occasional errors
 	mtx.lock();
+	sf::Sound* currSound = &sound_arr[nextSoundIndex];
+	nextSoundIndex = (nextSoundIndex + 1) % 7;
 	switch (soundNum) {
 	case (REGULAR_BEEP): {
-		m_sound.setBuffer(m_bufferRegularBeep);
-		m_sound.play();
+		currSound->setBuffer(m_bufferRegularBeep);
+		currSound->play();
 		break;
 	}
 	case (NEGATIVE_BEEP): {
-		m_sound.setBuffer(m_bufferNegativeBeep);
-		m_sound.play();
+		currSound->setBuffer(m_bufferNegativeBeep);
+		currSound->play();
 		break;
 	}
 	case (OCTAVE_BEEP): {
-		m_sound.setBuffer(m_bufferOctaveBeep);
-		m_sound.play();
+		currSound->setBuffer(m_bufferOctaveBeep);
+		currSound->play();
 		break;
 	}
 	case (EXPLOSION): {
-		m_sound.setBuffer(m_buffer8BitExplosion);
-		m_sound.play();
+		currSound->setBuffer(m_buffer8BitExplosion);
+		currSound->play();
 		break;
 	}
 	case (CHROM_BEEP): {
-		m_sound.setBuffer(m_bufferUpwardChromaticBeep);
-		m_sound.play();
+		currSound->setBuffer(m_bufferUpwardChromaticBeep);
+		currSound->play();
 		break;
 	}
 	case (ATTACK): {
-		m_sound.setBuffer(m_bufferplayfulAttack);
-		m_sound.play();
+		currSound->setBuffer(m_bufferplayfulAttack);
+		currSound->play();
 		break;
 	}
 	case (HEALING): {
-		m_sound.setBuffer(m_bufferplayfulHealing);
-		m_sound.play();
+		currSound->setBuffer(m_bufferplayfulHealing);
+		currSound->play();
 		break;
 	}
 	case (LEVELUP): {
-		m_sound.setBuffer(m_bufferplayfulLevelUp);
-		m_sound.play();
+		currSound->setBuffer(m_bufferplayfulLevelUp);
+		currSound->play();
 		break;
 	}
 	case (PLAYFULPICKUP): {
-		m_sound.setBuffer(m_bufferplayfulPickup);
-		m_sound.play();
+		currSound->setBuffer(m_bufferplayfulPickup);
+		currSound->play();
 		break;
 	}
 	case (MAJORPICKUP): {
-		m_sound.setBuffer(m_bufferplayfulMajorPickup);
-		m_sound.play();
+		currSound->setBuffer(m_bufferplayfulMajorPickup);
+		currSound->play();
 		break;
 	}
 	case (PICKUP): {
-		m_sound.setBuffer(m_bufferplayfulPickup);
-		m_sound.play();
+		currSound->setBuffer(m_bufferplayfulPickup);
+		currSound->play();
 		break;
 	}
 	case (ATTACK3): {
-		m_sound.setBuffer(Attack3);
-		m_sound.play();
+		currSound->setBuffer(Attack3);
+		currSound->play();
 		break;
 	}
 	case (ATTACK4): {
-		m_sound.setBuffer(Attack4);
-		m_sound.play();
+		currSound->setBuffer(Attack4);
+		currSound->play();
 		break;
 	}
 	case (BOSSEXPLODE): {
-		m_sound.setBuffer(bossexplode);
-		m_sound.play();
+		currSound->setBuffer(bossexplode);
+		currSound->play();
 		break;
 	}
 	case (BOSSEXPLODE2): {
-		m_sound.setBuffer(bossexplode2);
-		m_sound.play();
+		currSound->setBuffer(bossexplode2);
+		currSound->play();
 		break;
 	}
 	case (BUZZER6): {
-		m_sound.setBuffer(Buzzer6);
-		m_sound.play();
+		currSound->setBuffer(Buzzer6);
+		currSound->play();
 		break;
 	}
 	case (BUZZER9): {
-		m_sound.setBuffer(Buzzer9);
-		m_sound.play();
+		currSound->setBuffer(Buzzer9);
+		currSound->play();
 		break;
 	}
 	case (COIN3): {
-		m_sound.setBuffer(coin3);
-		m_sound.play();
+		currSound->setBuffer(coin3);
+		currSound->play();
 		break;
 	}
 	case (EXPLODE5): {
-		m_sound.setBuffer(Explode5);
-		m_sound.play();
+		currSound->setBuffer(Explode5);
+		currSound->play();
 		break;
 	}
 	case (EXPLODE20): {
-		m_sound.setBuffer(Explode20);
-		m_sound.play();
+		currSound->setBuffer(Explode20);
+		currSound->play();
 		break;
 	}
 	case (FIRE5): {
-		m_sound.setBuffer(Fire5);
-		m_sound.play();
+		currSound->setBuffer(Fire5);
+		currSound->play();
 		break;
 	}
 	case (LASER14): {
-		m_sound.setBuffer(laser14);
-		m_sound.play();
+		currSound->setBuffer(laser14);
+		currSound->play();
 		break;
 	}
 	case (MAGICAL2): {
-		m_sound.setBuffer(magic2);
-		m_sound.play();
+		currSound->setBuffer(magic2);
+		currSound->play();
 		break;
 	}
 	case (MAGIC6): {
-		m_sound.setBuffer(magic6);
-		m_sound.play();
+		currSound->setBuffer(magic6);
+		currSound->play();
 		break;
 	}
 	case (MAGIC7): {
-		m_sound.setBuffer(magic7);
-		m_sound.play();
+		currSound->setBuffer(magic7);
+		currSound->play();
 		break;
 	}
 	case (MAGIC8): {
-		m_sound.setBuffer(magic8);
-		m_sound.play();
+		currSound->setBuffer(magic8);
+		currSound->play();
 		break;
 	}
 	case (MAGIC9): {
-		m_sound.setBuffer(magic9);
-		m_sound.play();
+		currSound->setBuffer(magic9);
+		currSound->play();
 		break;
 	}
 	case (MAGIC10): {
-		m_sound.setBuffer(magic10);
-		m_sound.play();
+		currSound->setBuffer(magic10);
+		currSound->play();
 		break;
 	}
 	case (MENUACCEPT): {
-		m_sound.setBuffer(MenuAccept);
-		m_sound.play();
+		currSound->setBuffer(MenuAccept);
+		currSound->play();
 		break;
 	}
 	case (MENUACCEPT2): {
-		m_sound.setBuffer(MenuAccept2);
-		m_sound.play();
+		currSound->setBuffer(MenuAccept2);
+		currSound->play();
 		break;
 	}
 	case (MENUACCEPT3): {
-		m_sound.setBuffer(MenuAccept3);
-		m_sound.play();
+		currSound->setBuffer(MenuAccept3);
+		currSound->play();
 		break;
 	}
 	case (MENUACCEPT6): {
-		m_sound.setBuffer(MenuAccept6);
-		m_sound.play();
+		currSound->setBuffer(MenuAccept6);
+		currSound->play();
 		break;
 	}
 	case (OUCH1): {
-		m_sound.setBuffer(ouch1);
-		m_sound.play();
+		currSound->setBuffer(ouch1);
+		currSound->play();
 		break;
 	}
 	case (OUCH3): {
-		m_sound.setBuffer(ouch3);
-		m_sound.play();
+		currSound->setBuffer(ouch3);
+		currSound->play(); 
 		break;
 	}
 	case (PLAYERDIE13): {
-		m_sound.setBuffer(PlayerDie13);
-		m_sound.play();
+		currSound->setBuffer(PlayerDie13);
+		currSound->play();
 		break;
 	}
 	case (POWERUP4): {
-		m_sound.setBuffer(Powerup4);
-		m_sound.play();
+		currSound->setBuffer(Powerup4);
+		currSound->play();
 		break;
 	}
 	case (SHOOT11): {
-		m_sound.setBuffer(shoot11);
-		m_sound.play();
+		currSound->setBuffer(shoot11);
+		currSound->play();
 		break;
 	}
 	case (SHOOT14): {
-		m_sound.setBuffer(shoot14);
-		m_sound.play();
+		currSound->setBuffer(shoot14);
+		currSound->play();
 		break;
 	}
 	case (SHOOT23): {
-		m_sound.setBuffer(shoot23);
-		m_sound.play();
+		currSound->setBuffer(shoot23);
+		currSound->play();
 		break;
 	}
 	case (SHOOT35): {
-		m_sound.setBuffer(shoot35);
-		m_sound.play();
+		currSound->setBuffer(shoot35);
+		currSound->play();
 		break;
 	}
 	case (SHOT2): {
-		m_sound.setBuffer(shot2);
-		m_sound.play();
+		currSound->setBuffer(shot2);
+		currSound->play();
 		break;
 	}
 	case (STEAM3): {
-		m_sound.setBuffer(steam3);
-		m_sound.play();
+		currSound->setBuffer(steam3);
+		currSound->play();
 		break;
 	}
 	case (SWORD5): {
-		m_sound.setBuffer(sword5);
-		m_sound.play();
+		currSound->setBuffer(sword5);
+		currSound->play();
 		break;
 	}
 	case (WARNING3): {
-		m_sound.setBuffer(warning3);
-		m_sound.play();
+		currSound->setBuffer(warning3);
+		currSound->play();
 		break;
 	}
 	case (WHOOSH): {
-		m_sound.setBuffer(Whoosh);
-		m_sound.play();
+		currSound->setBuffer(Whoosh);
+		currSound->play();
 		break;
 	}
 	case (WARNING7): {
-		m_sound.setBuffer(warning7);
-		m_sound.play();
+		currSound->setBuffer(warning7);
+		currSound->play();
 		break;
 	}
 	case (FIREBALL): {
-		m_sound.setBuffer(Fireball);
-		m_sound.play();
+		currSound->setBuffer(Fireball);
+		currSound->play();
 		break;
 	}
 	case (ENEMYDEATH6): {
-		m_sound.setBuffer(enemyDeath6);
-		m_sound.play();
+		currSound->setBuffer(enemyDeath6);
+		currSound->play();
 		break;
 	}
 	case (BRAKE): {
-		m_sound.setBuffer(Brake);
-		m_sound.play();
+		currSound->setBuffer(Brake);
+		currSound->play();
 		break;
 	}	
 	case (PLOPBANANA): {
-		m_sound.setBuffer(PlopBanana);
-		m_sound.play();
+		currSound->setBuffer(PlopBanana);
+		currSound->play();
 		break;
 	}
 	case (PLOP): {
-		m_sound.setBuffer(Plop);
-		m_sound.play();
+		currSound->setBuffer(Plop);
+		currSound->play();
 		break;
 	}
 	case (SWORDCLASH): {
-		m_sound.setBuffer(Sword_Clash);
-		m_sound.play();
+		currSound->setBuffer(Sword_Clash);
+		currSound->play();
 		break;
 	}
 	case (PLAYERSHOOT): {
-		m_sound.setBuffer(Sword_Clash);
-		m_sound.play();
+		currSound->setBuffer(Sword_Clash);
+		currSound->play();
 		break;
 	}
 	

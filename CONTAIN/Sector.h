@@ -25,6 +25,7 @@
 #include "BossStream.h"
 #include "PowerUp.h"
 #include "Anim.h"
+#include "PolyLib.h"
 
 
 class Sector
@@ -39,12 +40,20 @@ public:
 	std::list<std::shared_ptr<Door>> sectDoors;
 	std::shared_ptr<EndObject> sectEndObj;
 
+	PolyLib polyLib;
+
 	bool isBossRoom;
 	bool firstPhase;
 	bool filledIn;
 
 	int numBlockers;
 	int sectEnemyNum;
+
+	int sectorWidth;
+	int sectorHeight;
+	//int doorWidth;
+	//int doorHeight;
+
 	Level* myLevel;
 	sf::Color colPalA;
 	sf::Color colPalB;
@@ -61,9 +70,7 @@ public:
 
 	void AddWallsToLevel();
 
-	void AddPainfullWallsToLevel();
-
-	void AddRandomPainWall(int i_index);
+	void AddPainWall(int i_index);
 
 	void PopulateEntranceRoom();
 
@@ -91,7 +98,7 @@ public:
 
 	void GenerateDeathEffects(Entity* i_entPtr, ANIMTYPE i_animType);
 
-	void GenerateIrregularTerrain(int i_numVerts, int i_maxSize, int i_minSize = 1);
+	void GenerateIrregularTerrain(int i_numVerts, int i_maxSize, int i_minSize = 1, Vector2f originCoord = Vector2f(-100.0f, -100.0f));
 
 	void UnlockRoom();
 
@@ -99,7 +106,7 @@ public:
 
 	std::vector<std::tuple<Vector2f, Vector2f>> GetScreenAreas(SCREEN_AREA i_area);
 
-	Sector(Level* i_lvlPtr, RESOURCES* i_resources, sf::Color i_colA = sf::Color::Black, sf::Color i_colB = sf::Color::White, bool i_testSector = false);
+	Sector(Level* i_lvlPtr, int i_dim_x, int i_dim_y, RESOURCES* i_resources, sf::Color i_colA = sf::Color::Black, sf::Color i_colB = sf::Color::White, bool i_testSector = false);
 	~Sector();
 
 private:

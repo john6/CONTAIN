@@ -1,5 +1,4 @@
 #pragma once
-#include "GLOBAL_CONSTANTS.h"
 #include "PlayerController.h"
 #include "Entity.h"
 
@@ -67,9 +66,13 @@ public:
 
 	void TakeDamage(float i_dmg);
 
+	void GenerateDamageEffects(CollisionData i_collisionCopy);
+
 	void ReceivePowerUp(UPGRADE_TYPE i_powType);
 
 	float GetCurrHealth();
+
+	void CollideWithEnemy(Enemy* i_enemyPtr, CollisionData i_collisionCopy) override;
 
 	void CollideWithPainWall(PainWall * i_painWallPtr) override;
 

@@ -69,7 +69,17 @@ private:
 	sf::SoundBuffer warning7;
 	sf::SoundBuffer Whoosh;
 
-	sf::Sound m_sound;
+	sf::Sound sound_1;
+	sf::Sound sound_2;
+	sf::Sound sound_3;
+	sf::Sound sound_4;
+	sf::Sound sound_5;
+	sf::Sound sound_6;
+	sf::Sound sound_7;
+	sf::Sound sound_8;
+	sf::Sound sound_arr[8];
+	int nextSoundIndex;
+
 	sf::Music music;
 	bool musicIsOn;
 	std::mutex mtx;

@@ -12,12 +12,14 @@ Door::Door(MapCoord i_outCoord, Vector2f i_startPos, Vector2f i_outPos, RigidBod
 	disableTimeStamp = hiResTime::now();
 	disabledAmount = 0.0f;
 	//color
-	colorOpen = CYAN;
-	colorClosed = DARKSILVER;
-	colorOpenOutline = CYAN;
-	colorClosedOutline = SILVER;
-	fillColor = colorClosed;
-	outlineColor = colorClosedOutline;
+	openColor = CYAN;
+	openColorOutline = LIGHTSILVER;
+
+	closedColor = DARKSILVER;
+	closedColorOutline = SILVER;
+
+	fillColor = closedColor;
+	outlineColor = closedColorOutline;
 
 }
 
@@ -67,8 +69,8 @@ void Door::Open()
 {
 	if (!open) {
 		open = true;
-		fillColor = colorOpen;
-		outlineColor = colorOpenOutline;
+		fillColor = openColor;
+		outlineColor = openColorOutline;
 	}
 }
 
@@ -81,8 +83,8 @@ void Door::Close()
 {
 	if (open) {
 		open = false;
-		fillColor = colorClosed;
-		outlineColor = colorClosedOutline;
+		fillColor = closedColor;
+		outlineColor = closedColorOutline;
 	}
 }
 

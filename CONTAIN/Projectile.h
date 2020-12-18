@@ -26,7 +26,7 @@ public:
 
 	void CollideWithBlocker(Blocker* i_blockPtr) override;
 
-	void CollideWithEnemy(Enemy* i_enemyPtr) override;
+	void CollideWithEnemy(Enemy* i_enemyPtr, CollisionData i_collision) override;
 
 	void CollideWithWall(Wall* i_wallPtr) override;
 

@@ -12,14 +12,23 @@ Anim::Anim(Vector2f i_startPosition, microSec i_lifetime,
 	drawables = std::make_shared<std::vector<std::shared_ptr<sf::Drawable>>>();
 	rb.vel *= 0.1;
 
-	rb = i_entPtr->rb;
+	if (i_entPtr) { 
+	rb = i_entPtr->rb; 
 	fillColor = i_entPtr->fillColor;
 	outlineColor = i_entPtr->outlineColor;
+	}
+	else {
+		fillColor = YELLOWCYBER;
+		outlineColor = RED;
+	}
+	rb.transform.pos = i_startPosition; //rb position was overriding the actual inputted position
+
 
 	if (aType == CANNED_EXPLOSION) {
 		rb.angVel = 0;
 		rb.vel = Vector2f(0.0f, 0.0f);
-		origPosition = sf::Vector2f(rb.transform.pos[0], rb.transform.pos[1]);
+		//origPosition = sf::Vector2f(rb.transform.pos[0], rb.transform.pos[1]);
+		origPosition = sf::Vector2f(i_startPosition[0], i_startPosition[1]);
 		auto regPoly1 = Physics::CreateRegularPolygon(5, 30.0f);
 		auto regPoly2 = Physics::CreateRegularPolygon(5, 15.0f);
 		polys.push_back(regPoly1);
@@ -41,6 +50,76 @@ Anim::Anim(Vector2f i_startPosition, microSec i_lifetime,
 	}
 }
 
+
+
+//This constructor is for creating sparks
+Anim::Anim(Vector2f direction, std::vector<Vector2f> i_contactPoints, microSec i_lifetime, int i_number, int i_splashOption) :
+	Entity(i_contactPoints[0], RigidBody(std::make_shared<Circle>(1.0f)), ANIMATION),
+	birthTime{ hiResTime::now() }, deathTime{ birthTime + i_lifetime }, lifeTime{ i_lifetime },
+	aType{ SPARKS }
+{
+	physicalObject = false;
+	intangible = true;
+	hasVisuals = true;
+	drawables = std::make_shared<std::vector<std::shared_ptr<sf::Drawable>>>();
+	rb.vel *= 0.1;
+
+	collisionNormal = direction;
+
+	fillColor = YELLOWCYBER;
+	outlineColor = YELLOWCYBER;
+	rb.transform.pos = i_contactPoints[0];
+
+	spread = 4.0f;
+
+
+		rb.angVel = 0;
+		rb.vel = Vector2f(0.0f, 0.0f);
+		//origPosition = sf::Vector2f(rb.transform.pos[0], rb.transform.pos[1]);
+		origPosition = sf::Vector2f(i_contactPoints[0][0], i_contactPoints[0][1]);
+
+
+		//Physics::CreateRegularPolygon(5, 15.0f);
+		////auto regPoly1 = PolyLib
+		////auto regPoly2 = Physics::CreateRegularPolygon(5, 15.0f);
+		//polys.push_back(regPoly1);
+		//polys.push_back(regPoly2);
+
+
+
+
+		float collisionDir = Math::VectToAngle(collisionNormal);
+
+
+		auto poly1 = std::make_shared<Polygon>(std::vector<Vector2f>({ Vector2f(0.0f, 0.0f), Vector2f(10.0f, 15.0f), Vector2f(20.0f, 0.0f) }));
+		auto rb1 = std::make_shared<RigidBody>(poly1);
+		rb1->ResetOrientation(((collisionDir*180.0f) / PI) + 90.0f);
+		rb1->ResetPosition(i_contactPoints[0]);
+		rbs.push_back(rb1);
+
+
+		auto poly2 = std::make_shared<Polygon>(std::vector<Vector2f>({ Vector2f(0.0f, 0.0f), Vector2f(10.0f, 15.0f), Vector2f(20.0f, 0.0f) }));
+		auto rb2 = std::make_shared<RigidBody>(poly2);
+		rb2->ResetOrientation(((collisionDir*180.0f) / PI) - 90.0f);
+		rb2->ResetPosition(i_contactPoints[0]);
+		rbs.push_back(rb2);
+
+		auto poly3 = std::make_shared<Polygon>(std::vector<Vector2f>({ Vector2f(0.0f, 0.0f), Vector2f(10.0f, 15.0f), Vector2f(20.0f, 0.0f) }));
+		auto rb3 = std::make_shared<RigidBody>(poly3);
+		rb3->ResetOrientation(((collisionDir*180.0f) / PI) + 45.0f);
+		rb3->ResetPosition(i_contactPoints[0]);
+		rbs.push_back(rb3);
+
+		auto poly4 = std::make_shared<Polygon>(std::vector<Vector2f>({ Vector2f(0.0f, 0.0f), Vector2f(10.0f, 15.0f), Vector2f(20.0f, 0.0f) }));
+		auto rb4 = std::make_shared<RigidBody>(poly4);
+		rb4->ResetOrientation(((collisionDir*180.0f) / PI) - 45.0f);
+		rb4->ResetPosition(i_contactPoints[0]);
+		rbs.push_back(rb4);
+}
+
+
+
+
 Anim::~Anim()
 {
 }
@@ -59,9 +138,8 @@ void Anim::Update(float i_stepSize)
 	}
 	else if (aType == CANNED_EXPLOSION) {
 		for (int i = 0; i < polys.size(); i++) {
-			std::cout << "I am resizing and Im at " + std::to_string(animPercent) + "percent\n";
+			//std::cout << "I am resizing and Im at " + std::to_string(animPercent) + "percent\n";
 			polys[i]->ResetSize(animPercent);
-
 		}
 	}
 	else if (aType == ENEMY_BURST_DEATH) {
@@ -78,12 +156,32 @@ void Anim::Update(float i_stepSize)
 			rect->ChangeSizeOfShape(origWidth + sizeIncreaseWidth, origHeight + sizeIncreaseHeight);
 		}
 	}
+	else if (aType == SPARKS) {
+		for (int i = 0; i < rbs.size(); i++) {
+			//std::cout << "I am resizing and Im at " + std::to_string(animPercent) + "percent\n";
+			auto poly = dynamic_cast<Polygon*>(rbs[i]->shape.get());
+			//poly->ResetSize(1 - animPercent);
+			rbs[i]->AdjustPosition(Math::AngleToVect(rbs[i]->transform.orient) * animPercent * -spread);
+
+		}
+	}
 }
 
-void Anim::Destroy()
+void Anim::UpdateCanned(float i_stepSize)
 {
-	killMeNextLoop = true;
+
 }
+
+void Anim::UpdateBurstDeath(float i_stepSize)
+{
+
+}
+
+void Anim::UpdateSparks(float i_stepSize)
+{
+
+}
+
 
 drawablePtrVect Anim::CreateDrawables(float i_lerp_fraction)
 {
@@ -94,30 +192,55 @@ drawablePtrVect Anim::CreateDrawables(float i_lerp_fraction)
 	float upBound = std::min(1.0f, lowBound);
 	float animPercent = upBound;
 	drawables->clear();
-	if (aType != CANNED_EXPLOSION) {
+	if (aType == SPARKS) {
+
+		for (int i = 0; i < rbs.size(); i++) {
+			std::shared_ptr<sf::Shape> polyDrawable = rbs[i]->shape->GetSFMLRepr();
+
+			polyDrawable->setOrigin(sf::Vector2f(rbs[i]->shape->GetSFMLOriginOffset()(0), rbs[i]->shape->GetSFMLOriginOffset()(1)));
+			polyDrawable->setPosition(rbs[i]->transform.pos(0), rbs[i]->transform.pos(1));
+			polyDrawable->setRotation(rbs[i]->transform.orient);
+			if (i % 2 == 0) {
+				polyDrawable->setFillColor(YELLOWCYBER);
+			}
+			else {
+				polyDrawable->setFillColor(YELLOWCYBER);
+			}
+
+			drawables->push_back(polyDrawable);
+		}
+	}
+	if (aType == ENEMY_BURST_DEATH) {
 		std::shared_ptr<sf::Shape> drawShape = CreateDrawableRB(i_lerp_fraction);
 		drawables->emplace_back(drawShape);
 		return drawables;
 	}
-	for (int i = 0; i < polys.size(); i++) {
-		std::shared_ptr<sf::Shape> polyDrawable = polys[i]->GetSFMLRepr();
-		if ((i % 2) == 0) {
-			polyDrawable->setFillColor(fillColor);
-			polyDrawable->setOutlineColor(outlineColor);
-		}
-		else {
-			polyDrawable->setFillColor(outlineColor);
-			polyDrawable->setOutlineColor(fillColor);
-		}
-		polyDrawable->setOutlineThickness(6.0f);
-		polyDrawable->setPosition(origPosition);
-		polyDrawable->setPosition(origPosition);
-		float rotationDir = i == 0 ? 1 : (i * -1);
-		float rotationOffset = i * 36;
-		polyDrawable->setRotation((animPercent * 270 * rotationDir) + rotationOffset);
+	if (aType == CANNED_EXPLOSION) {
+		for (int i = 0; i < polys.size(); i++) {
+			std::shared_ptr<sf::Shape> polyDrawable = polys[i]->GetSFMLRepr();
+			if ((i % 2) == 0) {
+				polyDrawable->setFillColor(fillColor);
+				polyDrawable->setOutlineColor(outlineColor);
+			}
+			else {
+				polyDrawable->setFillColor(outlineColor);
+				polyDrawable->setOutlineColor(fillColor);
+			}
+			polyDrawable->setOutlineThickness(6.0f);
+			polyDrawable->setPosition(origPosition);
+			polyDrawable->setPosition(origPosition);
+			float rotationDir = i == 0 ? 1 : (i * -1);
+			float rotationOffset = i * 36;
+			polyDrawable->setRotation((animPercent * 270 * rotationDir) + rotationOffset);
 
-		drawables->push_back(polyDrawable);
+			drawables->push_back(polyDrawable);
+		}
 	}
+
 	return drawables;
 }
 
+void Anim::Destroy()
+{
+	killMeNextLoop = true;
+}

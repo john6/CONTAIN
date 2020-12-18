@@ -13,6 +13,15 @@ SettingsMenu::SettingsMenu(RESOURCES * i_resources, RSLTN* resolution, bool* ful
 	UpdateSoundQuad(MEDIUM50);
 	FullScreen.SetState(Button::DOWN);
 	music.SetState(Button::DOWN);
+
+
+	//Testing Settings
+	if (TESTING) {
+		UpdateSoundQuad(LOW25);
+		music.SetState(Button::UP);
+		resources->TurnMusicOn(false);
+		resources->SetSoundLevel(0.25f);
+	}
 }
 
 

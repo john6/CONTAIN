@@ -46,6 +46,7 @@
     <ClCompile Include="PlayerChar.cpp" />
     <ClCompile Include="PlayerController.cpp" />
     <ClCompile Include="Polygon.cpp" />
+    <ClCompile Include="PolyLib.cpp" />
     <ClCompile Include="PowerUp.cpp" />
     <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="QuadTree.cpp" />
@@ -102,6 +103,7 @@
     <ClInclude Include="PlayerChar.h" />
     <ClInclude Include="PlayerController.h" />
     <ClInclude Include="Polygon.h" />
+    <ClInclude Include="PolyLib.h" />
     <ClInclude Include="PowerUp.h" />
     <ClInclude Include="Projectile.h" />
     <ClInclude Include="QuadTree.h" />

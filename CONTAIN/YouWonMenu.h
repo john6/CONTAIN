@@ -26,6 +26,8 @@ private:
 	sf::Vector2f highScoresListStart;
 	float bttnOffsetVert;
 
+	sf::View menuView;
+
 public:
 	RESOURCES* resources;
 

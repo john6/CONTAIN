@@ -4,6 +4,7 @@ Game::Game(sf::RenderWindow* i_window, RESOURCES* i_resources, DIFFICULTY i_diff
 	: renderWindow{ i_window }, resources {i_resources}, tuteLib{ TuteLib(i_window, i_resources)}, HUD { HeadsUpDisplay(i_resources) }
 {
 	font = resources->GetFont();
+	gameRenderer = GameRenderer();
 }
 
 Game::~Game()
@@ -50,10 +51,11 @@ GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vecto
 				playerPtr->ResetHealth();
 				playerPtr->ResetSpecialAmmo();
 				playerPtr->rb.ResetPosition(Vector2f(
-					GLBVRS::HR_MRG + GLBVRS::CRT_WDTH / 2.0f, 
-					GLBVRS::VRT_MRG + GLBVRS::CRT_HGHT * (3.0f / 4.0f)));
+					GLBVRS::HR_MRG + levels[currLvl]->GetSector(currSector)->sectorWidth / 2.0f,
+					GLBVRS::VRT_MRG + levels[currLvl]->GetSector(currSector)->sectorHeight * (3.0f / 4.0f)));
 				playerPtr->rb.angVel = 0.0f;
 				playerPtr->rb.vel = Vector2f(0.0f, 0.0f);
+				gameRenderer.ResetWorldSize(levels[currLvl]->GetSector(currSector)->sectorWidth, levels[currLvl]->GetSector(currSector)->sectorHeight);
 				PlayRandomSong();
 			}
 			return IN_GAME;
@@ -138,8 +140,8 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnt
 	}
 	std::for_each(std::execution::par, parCollisions.begin(), parCollisions.end(), [&](int index) {
 		if (index < collisions.size()) {
-			collisions[index].entA->CollideWith(*collisions[index].entB);
-			collisions[index].entB->CollideWith(*collisions[index].entA);
+			collisions[index].entA->CollideWith(&collisions[index]);
+			collisions[index].entB->CollideWith(&collisions[index]);
 			Physics::CreateCollisionImpulse(&collisions[index]);
 		}
 	});
@@ -168,7 +170,7 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnt
 
 void Game::Render(float i_elapsedMilliseconds) {
 	if (playState == GENERAL_GAMEPLAY) {
-		GameRenderer::Render(renderWindow, i_elapsedMilliseconds, levels[currLvl]->GetSector(currSector)->GetSectorEntities(),
+		gameRenderer.Render(renderWindow, i_elapsedMilliseconds, levels[currLvl]->GetSector(currSector)->GetSectorEntities(),
 			playerChar.get(), HUD.GetDrawables());
 	}
 	else if (playState == WON_LEVEL) {
@@ -192,6 +194,7 @@ void Game::GenerateLevels(DIFFICULTY i_diff) {
 		levels.push_back(lvl);
 	}
 	currSector = levels[currLvl]->originCoord;
+	gameRenderer.ResetWorldSize(levels[currLvl]->GetSector(currSector)->sectorWidth, levels[currLvl]->GetSector(currSector)->sectorHeight);
 }
 
 void Game::GenerateTutorialLevels()
@@ -220,6 +223,7 @@ void Game::RequestTravelToSector(MapCoord i_destSect)
 {
 	currSector = i_destSect;
 	levels[currLvl]->GetSector(currSector)->Awaken();
+	gameRenderer.ResetWorldSize(levels[currLvl]->GetSector(currSector)->sectorWidth, levels[currLvl]->GetSector(currSector)->sectorHeight);
 }
 
 void Game::CreatePlayerChar()
@@ -326,4 +330,9 @@ void Game::PlayRandomSong()
 	std::uniform_int_distribution<> distrib(0, 8); //both boundaries are inclusive
 	int randExtra = distrib(gen1);
 	resources->PlayMusicFromFile(randExtra);
+}
+
+Vector2f Game::GetCurrSectorDimensions()
+{
+	return Vector2f(levels[currLvl]->GetSector(currSector)->sectorWidth, levels[currLvl]->GetSector(currSector)->sectorHeight);
 }

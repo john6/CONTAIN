@@ -47,7 +47,6 @@ private:
 
 	std::shared_ptr<UpgradeMenu> currUpgradeMenu;
 
-
 public:
 	bool tutorial;
 	TuteLib tuteLib;
@@ -58,6 +57,7 @@ public:
 	RESOURCES* resources;
 	MapCoord currSector;
 	int currLvl;
+	GameRenderer gameRenderer;
 	sf::RenderWindow* renderWindow;
 	std::vector<Level*> levels;
 	std::shared_ptr<Entity> playerChar;
@@ -94,5 +94,7 @@ public:
 	void loadTestLevel(); 
 
 	void PlayRandomSong();
+
+	Vector2f GetCurrSectorDimensions();
 };
 

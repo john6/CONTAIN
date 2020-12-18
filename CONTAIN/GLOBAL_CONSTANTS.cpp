@@ -4,8 +4,11 @@ void GLBVRS::SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_scree
 	RESOURCES* i_resourcesPtr, MessageBus* i_mBusPtr, Game* i_gamePtr, std::shared_ptr<Entity> i_playerPtr, float i_soundLvl)
 {
 	//WINDOW SETTINGS
-	GLBVRS::SCREEN_WIDTH = 1920;   //i_screenWidth ;
-	GLBVRS::SCREEN_HEIGHT = 1080;    //i_screenHeight;
+	//GLBVRS::SCREEN_WIDTH = 2400;   //i_screenWidth ;
+	//GLBVRS::SCREEN_WIDTH = 2880;   //i_screenWidth ;
+	GLBVRS::SCREEN_WIDTH = i_screenWidth;
+	//GLBVRS::SCREEN_HEIGHT = 1350;    //i_screenHeight;
+	GLBVRS::SCREEN_HEIGHT = i_screenHeight;
 
 	//GAME RESOLUTION
 	GLBVRS::CRT_WDTH = static_cast<float>(GLBVRS::SCREEN_WIDTH * 18.0f / 20.0f);

@@ -28,6 +28,9 @@ protected:
 
 public:
 	
+	float baseLevelWidth;
+	float baseLevelHeight;
+
 	bool phaseOne;
 
 	int enemiesKilled;

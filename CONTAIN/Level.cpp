@@ -10,6 +10,7 @@ struct MapNode {
 	bool down;
 	bool left;
 	bool right;
+	Vector2f dims;
 	std::vector<bool>directionDoors;
 	int vectIndex;
 };
@@ -25,6 +26,11 @@ Level::Level(int i_lvlNum, DIFFICULTY i_diff) :
 	phaseOne = true;
 	timeToComplete = 25.0f + (i_lvlNum * 5) - (i_diff * 5);
 	enemiesKilled = 0;
+	//baseLevelWidth = MAXSECTORWIDTH;
+	//baseLevelHeight = MAXSECTORHEIGHT;
+	baseLevelWidth = MAXSECTORWIDTH;
+	baseLevelHeight = MAXSECTORHEIGHT;
+
 	GenerateMapGrip(i_lvlNum, i_diff);
 	FillMapWithRooms(i_lvlNum, i_diff);
 	PopulateMapRooms(i_lvlNum, i_diff);
@@ -45,14 +51,13 @@ Level::Level(std::string i_testStr)
 	sectorMap = std::vector<std::vector<MapNode>>(dimSize, std::vector<MapNode>(dimSize, MapNode()));
 	originCoord = MapCoord(0, 0);
 	//CreateSectorAtCoord(originCoord);
-	std::shared_ptr<Sector> newSector = std::make_shared<Sector>(this, resources, colPalA, colPalB, true);
+	std::shared_ptr<Sector> newSector = std::make_shared<Sector>(this, 1728, 972, resources, colPalA, colPalB, true);
 	sectorVect.push_back(newSector);
 	sectorMap[originCoord.x][originCoord.y].vectIndex = sectorVect.size() - 1;
 	sectorMap[originCoord.x][originCoord.y].isRoom = true;
 	allCoords.push_back(originCoord);
 	//
 	//GetSector(originCoord)->GenerateEnemies(25, ENEMY_SEEK_PUSH, CENTER, 1, HARD, 0);
-	//GetSector(originCoord)->AddPainfullWallsToLevel();
 	//GetSector(originCoord)->GenerateLevelCircles(1);
 	//GetSector(originCoord)->GenerateLevelCubes(9);
 	//GetSector(originCoord)->AddRandomPainWall(0);
@@ -132,10 +137,10 @@ Level::Level() : //TUTORIAL LEVEL
 	GetSector(room5)->GenerateEnemies(4, ENEMY_RAND, MARGINS, 1, (DIFFICULTY)0, 1);
 	GetSector(room5)->GenerateEnemies(3, ENEMY_SEEK_PUSH, CENTER, 2, (DIFFICULTY)0, 0);
 	GetSector(room5)->GenerateEnemies(3, ENEMY_RAND_PUSH, CORNERS, 2, (DIFFICULTY)0, 0);
-	GetSector(room5)->AddRandomPainWall(0);
-	GetSector(room5)->AddRandomPainWall(1);
-	GetSector(room5)->AddRandomPainWall(4);
-	GetSector(room5)->AddRandomPainWall(5);
+	GetSector(room5)->AddPainWall(0);
+	GetSector(room5)->AddPainWall(1);
+	GetSector(room5)->AddPainWall(4);
+	GetSector(room5)->AddPainWall(5);
 	
 	//5 BOSS ROOM
 	GetSector(bossRoom)->PopulateBossRoom("TUTORIAL");
@@ -152,7 +157,8 @@ std::shared_ptr<Sector> Level::GetSector(MapCoord i_coord)
 
 void Level::CreateSectorAtCoord(MapCoord i_coord)
 {
-	std::shared_ptr<Sector> newSector = std::make_shared<Sector>(this, resources, colPalA, colPalB);
+	std::shared_ptr<Sector> newSector = std::make_shared<Sector>
+		(this, sectorMap[i_coord.x][i_coord.y].dims[0], sectorMap[i_coord.x][i_coord.y].dims[1], resources, colPalA, colPalB);
 	sectorVect.push_back(newSector);
 	sectorMap[i_coord.x][i_coord.y].vectIndex = sectorVect.size() - 1;
 	sectorMap[i_coord.x][i_coord.y].isRoom = true;
@@ -179,7 +185,7 @@ void Level::PopulateSectorAtCoord(MapCoord i_coord, int i_diff)
 	GetSector(i_coord)->GenerateEnemies(numSeekersPhase1, ENEMY_SEEK, CORNERS, 1, (DIFFICULTY)i_diff, 0);
 	GetSector(i_coord)->GenerateEnemies(numRandosPhase1, ENEMY_RAND, CENTER, 1, (DIFFICULTY)i_diff, 0);
 	//phase two
-	int numSeekersPhase2 = 4 + (i_diff * 1) + (m_lvl_num * 1);
+	int numSeekersPhase2 = 5 + (i_diff * 1) + (m_lvl_num * 1);
 	int numRandosPhase2 = 6 + (i_diff * 1) + (m_lvl_num * 1);
 	GetSector(i_coord)->GenerateEnemies(numSeekersPhase2, ENEMY_SEEK_PUSH, DOORS, 2, (DIFFICULTY)i_diff, 0);
 	GetSector(i_coord)->GenerateEnemies(numRandosPhase2, ENEMY_RAND_PUSH, CORNERS, 2, (DIFFICULTY)i_diff, 0);
@@ -230,7 +236,7 @@ void Level::PopulateSectorAtCoord(MapCoord i_coord, int i_diff)
 
 		while (painWallCount > 0) {
 			int randPainWall = distrib07(gen6);
-			GetSector(i_coord)->AddRandomPainWall(randPainWall);
+			GetSector(i_coord)->AddPainWall(randPainWall);
 			--painWallCount;
 		}
 	GetSector(i_coord)->filledIn = true;
@@ -243,8 +249,15 @@ void Level::CreateOneWayDoor(MapCoord i_CoordA, MapCoord i_CoordB)
 void Level::CreateBidirectionalDoor(MapCoord i_coordA, MapCoord i_coordB)
 {
 	float doorOutPadding = 150.0f;
-	float horizontalMiddle = GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH / 2.0f);
-	float verticleMiddle = GLBVRS::VRT_MRG + (GLBVRS::CRT_HGHT / 2.0f);
+
+	float courtWidthA = sectorMap[i_coordA.x][i_coordA.y].dims[0];
+	float courtHeightA = sectorMap[i_coordA.x][i_coordA.y].dims[1];
+	float courtWidthB = sectorMap[i_coordB.x][i_coordB.y].dims[0];
+	float courtHeightB = sectorMap[i_coordB.x][i_coordB.y].dims[1];
+	float horizontalMiddleA = courtWidthA / 2.0f;
+	float horizontalMiddleB = courtWidthB / 2.0f;
+	float verticleMiddleA = courtHeightA / 2.0f;
+	float verticleMiddleB = courtHeightB / 2.0f;
 
 	int yDist = i_coordB.y - i_coordA.y;
 	int xDist = i_coordB.x - i_coordA.x;
@@ -264,48 +277,48 @@ void Level::CreateBidirectionalDoor(MapCoord i_coordA, MapCoord i_coordB)
 		outSide = SCREEN_DOWN;
 		doorShapeA = std::make_shared<Rectangle>(GLBVRS::DOOR_WIDTH, GLBVRS::DOOR_HEIGHT);
 		doorShapeB = std::make_shared<Rectangle>(GLBVRS::DOOR_WIDTH, GLBVRS::DOOR_HEIGHT);
-		startPosA = Vector2f(horizontalMiddle, GLBVRS::VRT_MRG  + GLBVRS::CRT_HGHT + (GLBVRS::DOOR_HEIGHT * ( 1.0f / 2.0f)));
-		startPosB = Vector2f(horizontalMiddle, GLBVRS::VRT_MRG - (GLBVRS::DOOR_HEIGHT * (1.0f / 2.0f)));
-		outPosA = Vector2f(horizontalMiddle, GLBVRS::VRT_MRG + doorOutPadding);
-		outPosB = Vector2f(horizontalMiddle, GLBVRS::VRT_MRG + GLBVRS::CRT_HGHT - doorOutPadding);
+		startPosA = Vector2f(horizontalMiddleA, courtHeightA + (GLBVRS::DOOR_HEIGHT * 0.5f));
+		startPosB = Vector2f(horizontalMiddleB, -(GLBVRS::DOOR_HEIGHT * 0.5f));
+		outPosA = Vector2f(horizontalMiddleB, doorOutPadding);
+		outPosB = Vector2f(horizontalMiddleA, courtHeightA - doorOutPadding);
 	}
 	else if (yDist == -1) { //DOWN
 		inSide = SCREEN_DOWN;
 		outSide = SCREEN_UP;
 		doorShapeA = std::make_shared<Rectangle>(GLBVRS::DOOR_WIDTH, GLBVRS::DOOR_HEIGHT);
 		doorShapeB = std::make_shared<Rectangle>(GLBVRS::DOOR_WIDTH, GLBVRS::DOOR_HEIGHT);
-		startPosA = Vector2f(horizontalMiddle, GLBVRS::VRT_MRG - (GLBVRS::DOOR_HEIGHT * (1.0f / 2.0f)));
-		startPosB = Vector2f(horizontalMiddle, GLBVRS::VRT_MRG + GLBVRS::CRT_HGHT + (GLBVRS::DOOR_HEIGHT * (1.0f / 2.0f)));
-		outPosA = Vector2f(horizontalMiddle, GLBVRS::VRT_MRG + GLBVRS::CRT_HGHT - doorOutPadding);
-		outPosB = Vector2f(horizontalMiddle, GLBVRS::VRT_MRG + doorOutPadding);
+		startPosA = Vector2f(horizontalMiddleA, -(GLBVRS::DOOR_HEIGHT * 0.5f));
+		startPosB = Vector2f(horizontalMiddleB, courtHeightB + (GLBVRS::DOOR_HEIGHT * 0.5));
+		outPosA = Vector2f(horizontalMiddleB, courtHeightB - doorOutPadding);
+		outPosB = Vector2f(horizontalMiddleA, doorOutPadding);
 	}
 	else if (xDist == -1) { //LEFT
 		inSide = SCREEN_LEFT;
 		outSide = SCREEN_RIGHT;
 		doorShapeA = std::make_shared<Rectangle>(GLBVRS::DOOR_HEIGHT, GLBVRS::DOOR_WIDTH);
 		doorShapeB = std::make_shared<Rectangle>(GLBVRS::DOOR_HEIGHT, GLBVRS::DOOR_WIDTH);
-		startPosA = Vector2f(GLBVRS::HR_MRG - (GLBVRS::DOOR_HEIGHT * (1.0f / 2.0f)), verticleMiddle);
-		startPosB = Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH + (GLBVRS::DOOR_HEIGHT * (1.0f / 2.0f)), verticleMiddle);
-		outPosA = Vector2f(GLBVRS::CRT_WDTH + GLBVRS::HR_MRG - doorOutPadding, verticleMiddle);
-		outPosB = Vector2f(GLBVRS::HR_MRG + doorOutPadding, verticleMiddle);
+		startPosA = Vector2f(-(GLBVRS::DOOR_HEIGHT * 0.5f), verticleMiddleA);
+		startPosB = Vector2f(courtWidthB + (GLBVRS::DOOR_HEIGHT * 0.5f), verticleMiddleB);
+		outPosA = Vector2f(courtWidthB - doorOutPadding, verticleMiddleB);
+		outPosB = Vector2f(doorOutPadding, verticleMiddleA);
 	}
 	else if (xDist == 1) { //RIGHT
 		inSide = SCREEN_RIGHT;
 		outSide = SCREEN_LEFT;
 		doorShapeA = std::make_shared<Rectangle>(GLBVRS::DOOR_HEIGHT, GLBVRS::DOOR_WIDTH);
 		doorShapeB = std::make_shared<Rectangle>(GLBVRS::DOOR_HEIGHT, GLBVRS::DOOR_WIDTH);
-		startPosA = Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH + (GLBVRS::DOOR_HEIGHT * (1.0f / 2.0f)), verticleMiddle);
-		startPosB = Vector2f(GLBVRS::HR_MRG - (GLBVRS::DOOR_HEIGHT * (1.0f / 2.0f)), verticleMiddle);
-		outPosA = Vector2f(GLBVRS::HR_MRG + doorOutPadding, verticleMiddle);
-		outPosB = Vector2f(GLBVRS::CRT_WDTH + GLBVRS::HR_MRG - doorOutPadding, verticleMiddle);
+		startPosA = Vector2f(courtWidthA + (GLBVRS::DOOR_HEIGHT * 0.5f), verticleMiddleA);
+		startPosB = Vector2f(-(GLBVRS::DOOR_HEIGHT * 0.5f), verticleMiddleB);
+		outPosA = Vector2f(GLBVRS::HR_MRG + doorOutPadding, verticleMiddleB);
+		outPosB = Vector2f(courtWidthA - doorOutPadding, verticleMiddleA);
 	}
 	else {
 		//wtf these rooms arent adjacent
 	}
 	RigidBody doorBodyA(doorShapeA);
 	RigidBody doorBodyB(doorShapeB);
-	std::shared_ptr<Door> sectDoorA = std::make_shared<Door>(i_coordB, startPosA,outPosA, doorBodyA, inSide);
-	std::shared_ptr<Door> sectDoorB = std::make_shared<Door>(i_coordA, startPosB,outPosB, doorBodyB, outSide);
+	std::shared_ptr<Door> sectDoorA = std::make_shared<Door>(i_coordB, startPosA, outPosA, doorBodyA, inSide);
+	std::shared_ptr<Door> sectDoorB = std::make_shared<Door>(i_coordA, startPosB, outPosB, doorBodyB, outSide);
 	GetSector(i_coordA)->AddEntPtrToSector(sectDoorA);
 	GetSector(i_coordB)->AddEntPtrToSector(sectDoorB);
 }
@@ -345,8 +358,49 @@ void Level::GenerateMapGrip(int i_lvlNum, DIFFICULTY i_diff)
 	if (dimSize % 2 == 0) { //Gonna make the dimensions always be odd so I can have a center coord
 		dimSize += 1;
 	}
-	//initialize map and origin location
+
+	//init sector map
 	sectorMap = std::vector<std::vector<MapNode>>(dimSize, std::vector<MapNode>(dimSize, MapNode()));
+	
+	//set all width values
+	for (int i = 0; i < dimSize; i++) {
+		std::random_device rd1;  //Will be used to obtain a seed for the random number engine
+		std::mt19937 gen1(rd1()); //Standard mersenne_twister_engine seeded with rd()
+		std::discrete_distribution<> distrib({ 6, 9, 13, 23, 15, 15, 7, 5, 5, 2 }); //both boundaries are inclusive
+		int widthDifference = (distrib(gen1) - 5) * (baseLevelWidth * 0.05);
+		int sectorWidth = baseLevelWidth - widthDifference;
+			for (int j = 0; j < dimSize; j++) {
+				//if (i % 2 == 0) { //logic for sector size TODO
+				//	sectorMap[j][i].dims[0] = 1728; //iterate over a column of sectors setting the width of the sectors
+				//}
+				//else {
+				//	sectorMap[j][i].dims[0] = 1200;
+				//}
+				//sectorMap[j][i].dims[0] = 1920;
+				sectorMap[j][i].dims[0] = sectorWidth;
+				//sectorMap[j][i].dims[0] = baseLevelWidth;
+			}
+		}
+	//set all height values
+	for (int i = 0; i < dimSize; i++) {
+		std::random_device rd1;  //Will be used to obtain a seed for the random number engine
+		std::mt19937 gen1(rd1()); //Standard mersenne_twister_engine seeded with rd()
+		std::discrete_distribution<> distrib({ 6, 9, 13, 23, 15, 15, 7, 5, 5, 2 }); //both boundaries are inclusive
+		int heightDifference = (distrib(gen1) - 5) * (baseLevelHeight * 0.05);
+		int sectorHieght = baseLevelHeight - heightDifference;
+		for (int j = 0; j < dimSize; j++) {
+			//if (i % 2 == 0) {
+			//sectorMap[i][j].dims[1] = 972; //iterate over a row of sectors setting the height of the sectors
+			//}
+			//else {
+			//	sectorMap[i][j].dims[1] = 700;
+			//}
+			sectorMap[i][j].dims[1] = sectorHieght;
+			//sectorMap[i][j].dims[1] = baseLevelHeight;
+		}
+	}
+
+	//init Origin sector
 	originCoord = MapCoord((dimSize / 2) + 1, (dimSize / 2) + 1);
 	CreateSectorAtCoord(originCoord);
 	allCoords.push_back(originCoord);
@@ -371,28 +425,16 @@ void Level::FillMapWithRooms(int i_levelNum, DIFFICULTY i_diff)
 		//get coord from fringe, check which directions are possible to build
 		MapCoord currCoord = fringe.front();
 		fringe.pop();
-		if (currCoord.y + 1 >= dimSize) {//UP
+		if ((currCoord.y + 1 >= dimSize) || (sectorMap[currCoord.x][currCoord.y + 1].isRoom)) {//UP
 			sectorMap[currCoord.x][currCoord.y].up = false;
 		}
-		else if (sectorMap[currCoord.x][currCoord.y + 1].isRoom) {
-			sectorMap[currCoord.x][currCoord.y].up = false;
-		}
-		if (currCoord.y - 1 < 0) {//DOWN
+		if ((currCoord.y - 1 < 0) || (sectorMap[currCoord.x][currCoord.y - 1].isRoom)) {//DOWN
 			sectorMap[currCoord.x][currCoord.y].down = false;
 		}
-		else if (sectorMap[currCoord.x][currCoord.y - 1].isRoom) {
-			sectorMap[currCoord.x][currCoord.y].down = false;
-		}
-		if (currCoord.x - 1 < 0) {//LEFT
+		if ((currCoord.x - 1 < 0) || (sectorMap[currCoord.x - 1][currCoord.y].isRoom)) {//LEFT
 			sectorMap[currCoord.x][currCoord.y].left = false;
 		}
-		else if (sectorMap[currCoord.x - 1][currCoord.y].isRoom) {
-			sectorMap[currCoord.x][currCoord.y].left = false;
-		}
-		if (currCoord.x + 1 >= dimSize) {//RIGHT
-			sectorMap[currCoord.x][currCoord.y].right = false;
-		}
-		else if (sectorMap[currCoord.x + 1][currCoord.y].isRoom) {
+		if ((currCoord.x + 1 >= dimSize) || (sectorMap[currCoord.x + 1][currCoord.y].isRoom)) {//RIGHT
 			sectorMap[currCoord.x][currCoord.y].right = false;
 		}
 		//generate number indicating number of doors to make

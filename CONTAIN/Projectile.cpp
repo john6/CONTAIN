@@ -54,7 +54,7 @@ void Projectile::CollideWithBlocker(Blocker * i_blockPtr)
 	}
 }
 
-void Projectile::CollideWithEnemy(Enemy * i_enemyPtr)
+void Projectile::CollideWithEnemy(Enemy * i_enemyPtr, CollisionData i_collision)
 {
 	if (i_enemyPtr->GetTypeID() == ENEMY_BOSS) {
 		if (auto spawnerBoss = dynamic_cast<BossSpawn*>(i_enemyPtr)) {
