@@ -18,6 +18,7 @@ BossSpawn::BossSpawn(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniB
 	shipRateOfFire = 1.0f;
 	currDir = CreateRandomDir();
 	SetDiffVars(i_diff);
+	hasVisuals = false;
 }
 
 void BossSpawn::Update(float i_stepSize)

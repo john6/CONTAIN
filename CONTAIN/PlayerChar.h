@@ -64,6 +64,8 @@ public:
 
 	void AcceptWeaponInput(float i_stepSize);
 
+	void TakeDamage(float i_dmg, CollisionData i_coll);
+
 	void TakeDamage(float i_dmg);
 
 	void GenerateDamageEffects(CollisionData i_collisionCopy);
@@ -72,17 +74,17 @@ public:
 
 	float GetCurrHealth();
 
-	void CollideWithEnemy(Enemy* i_enemyPtr, CollisionData i_collisionCopy) override;
+	void CollideWithEnemy(CollisionData i_coll) override;
 
-	void CollideWithPainWall(PainWall * i_painWallPtr) override;
+	void CollideWithPainWall(CollisionData i_coll) override;
 
-	void CollideWithDoor(Door* i_doorPtr) override;
+	void CollideWithDoor(CollisionData i_coll) override;
 
-	void CollideWithEndObject(EndObject* i_endPtr) override;
+	void CollideWithEndObject(CollisionData i_coll) override;
 
-	void CollideWithPowUp(PowerUp* i_powUpPtr) override;
+	void CollideWithPowUp(CollisionData i_coll) override;
 
-	void CollideWithProjectile(Projectile* i_projPtr) override;
+	void CollideWithProjectile(CollisionData i_coll) override;
 
 	void UpdateVisuals(float i_stepSize) override;
 

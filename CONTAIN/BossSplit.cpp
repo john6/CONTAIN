@@ -16,6 +16,7 @@ BossSplit::BossSplit(DIFFICULTY i_diff, int i_splitsLeft, float i_spdFct, bool i
 	shipRateOfFire = 1.0f;
 	currDir = CreateRandomDir();
 	SetDiffVars(i_diff);
+	hasVisuals = false;
 }
 
 void BossSplit::Update(float i_stepSize)

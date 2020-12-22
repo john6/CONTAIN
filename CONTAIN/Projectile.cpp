@@ -30,7 +30,7 @@ void Projectile::Destroy() {
 	killMeNextLoop = true;
 }
 
-void Projectile::CollideWithPlayer(PlayerChar * i_playerPtr)
+void Projectile::CollideWithPlayer(CollisionData i_coll)
 {
 	if (projType == 1) {
 		Explode();
@@ -38,15 +38,16 @@ void Projectile::CollideWithPlayer(PlayerChar * i_playerPtr)
 	Destroy();
 }
 
-void Projectile::CollideWithProjectile(Projectile * i_projPtr)
+void Projectile::CollideWithProjectile(CollisionData i_coll)
 {
-	if (i_projPtr->projType != projType) {
+	auto projPtr = dynamic_cast<Projectile*>(i_coll.entB.get());
+	if ((projPtr) && (projPtr->projType != projType)) {
 		Explode();
 		Destroy();
 	}
 }
 
-void Projectile::CollideWithBlocker(Blocker * i_blockPtr)
+void Projectile::CollideWithBlocker(CollisionData i_coll)
 {
 	if (projType == 1) {
 		Explode();
@@ -54,10 +55,11 @@ void Projectile::CollideWithBlocker(Blocker * i_blockPtr)
 	}
 }
 
-void Projectile::CollideWithEnemy(Enemy * i_enemyPtr, CollisionData i_collision)
+void Projectile::CollideWithEnemy(CollisionData i_coll)
 {
-	if (i_enemyPtr->GetTypeID() == ENEMY_BOSS) {
-		if (auto spawnerBoss = dynamic_cast<BossSpawn*>(i_enemyPtr)) {
+	auto enemyPtr = dynamic_cast<Enemy*>(i_coll.entB.get());
+	if ((enemyPtr) && (enemyPtr->GetTypeID() == ENEMY_BOSS)) {
+		if (auto spawnerBoss = dynamic_cast<BossSpawn*>(enemyPtr)) {
 			if (spawnerBoss->invulnerable) {
 
 			}
@@ -79,12 +81,12 @@ void Projectile::CollideWithEnemy(Enemy * i_enemyPtr, CollisionData i_collision)
 	Destroy();
 }
 
-void Projectile::CollideWithWall(Wall * i_wallPtr)
+void Projectile::CollideWithWall(CollisionData i_coll)
 {
 	Destroy();
 }
 
-void Projectile::CollideWithPainWall(PainWall * i_painWallPtr)
+void Projectile::CollideWithPainWall(CollisionData i_coll)
 {
 	Explode();
 	Destroy();
@@ -99,7 +101,7 @@ void Projectile::Explode()
 	spawnVect.push_back(anim);
 }
 
-void Projectile::CollideWithDoor(Door * i_doorPtr)
+void Projectile::CollideWithDoor(CollisionData i_coll)
 {
 	Explode();
 	Destroy();

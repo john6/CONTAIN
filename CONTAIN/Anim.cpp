@@ -66,8 +66,16 @@ Anim::Anim(Vector2f direction, std::vector<Vector2f> i_contactPoints, microSec i
 
 	collisionNormal = direction;
 
-	fillColor = YELLOWCYBER;
-	outlineColor = YELLOWCYBER;
+
+	if (i_splashOption == 0) {
+		fillColor = YELLOWCYBER;
+		outlineColor = YELLOWCYBER;
+	}
+	else if (i_splashOption == 1) {
+		fillColor = BASIL;
+		outlineColor = PEAR;
+	}
+	
 	rb.transform.pos = i_contactPoints[0];
 
 	spread = 4.0f;
@@ -201,10 +209,10 @@ drawablePtrVect Anim::CreateDrawables(float i_lerp_fraction)
 			polyDrawable->setPosition(rbs[i]->transform.pos(0), rbs[i]->transform.pos(1));
 			polyDrawable->setRotation(rbs[i]->transform.orient);
 			if (i % 2 == 0) {
-				polyDrawable->setFillColor(YELLOWCYBER);
+				polyDrawable->setFillColor(fillColor);
 			}
 			else {
-				polyDrawable->setFillColor(YELLOWCYBER);
+				polyDrawable->setFillColor(outlineColor);
 			}
 
 			drawables->push_back(polyDrawable);

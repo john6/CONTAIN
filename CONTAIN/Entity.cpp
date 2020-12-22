@@ -71,77 +71,67 @@ const TypeID Entity::GetTypeID()
 
 void Entity::CollideWith(CollisionData* i_collision)
 {
-	Entity* other;
-	if (i_collision->entA.get() == this) {
-		other = i_collision->entB.get();
-	}
-	else {
-		other = i_collision->entA.get();
+	//I dont want to mess with collisions in the middle of the loop, Im gonna operate on a copy of the collision object
+	CollisionData collisionCopy = CollisionData(*i_collision);
+
+	//entA will always be equal to 'this' in the collision functions
+	if (collisionCopy.entB.get() == this) {
+		std::shared_ptr<Entity> myPtr = collisionCopy.entB;
+		collisionCopy.entB = i_collision->entA;
+		collisionCopy.entA = myPtr;
 	}
 
-	switch (other->GetTypeID()) {
+	switch (collisionCopy.entB->GetTypeID()) {
 	case PLAYER:
 	{
-		auto player = reinterpret_cast<PlayerChar*>(other);
-		CollideWithPlayer(player);
+		CollideWithPlayer(collisionCopy);
 		break;
 	}
 	case PROJ_BASIC:
 	{
-		auto projectile = reinterpret_cast<Projectile*>(other);
-		CollideWithProjectile(projectile);
+		CollideWithProjectile(collisionCopy);
 		break;
 	}
 	case PROJ_WALL:
 	{
-		auto blocker = reinterpret_cast<Blocker*>(other);
-		CollideWithBlocker(blocker);
+		CollideWithBlocker(collisionCopy);
 		break;
 	}
 	case ENEMY_SEEK:
 	{
-		auto enemy = reinterpret_cast<Enemy*>(other);
-		CollideWithEnemy(enemy, *i_collision);
+		CollideWithEnemy(collisionCopy);
 		break; 
 	}
 	case ENEMY_RAND: {
-		auto enemy = reinterpret_cast<Enemy*>(other);
-		CollideWithEnemy(enemy, *i_collision);
+		CollideWithEnemy(collisionCopy);
 		break; 
 	}
 	case ENEMY_BOSS: {
-		auto enemy = reinterpret_cast<Enemy*>(other);
-		CollideWithEnemy(enemy, *i_collision);
+		CollideWithEnemy(collisionCopy);
 		break;
 	}
 	case WALL_BASIC: {
-		auto wall = reinterpret_cast<Wall*>(other);
-		CollideWithWall(wall);
+		CollideWithWall(collisionCopy);
 		break; 
 	}
 	case WALL_FIRE: {
-		auto painWall = reinterpret_cast<PainWall*>(other);
-		CollideWithPainWall(painWall);
+		CollideWithPainWall(collisionCopy);
 		break;
 	}
 	case DOOR: {
-		auto door = reinterpret_cast<Door*>(other);
-		CollideWithDoor(door);
+		CollideWithDoor(collisionCopy);
 		break; 
 	}
 	case END_LEVEL: {
-		auto endObjPtr = reinterpret_cast<EndObject*>(other);
-		CollideWithEndObject(endObjPtr);
+		CollideWithEndObject(collisionCopy);
 		break; 
 	}
 	case UPGRADE: {
-		auto powUp = reinterpret_cast<PowerUp*>(other);
-		CollideWithPowUp(powUp);
+		CollideWithPowUp(collisionCopy);
 		break; 
 	}
 	case BLAST_STUN: {
-		auto blast = reinterpret_cast<Blast*>(other);
-		CollideWithBlast(blast);
+		CollideWithBlast(collisionCopy);
 		break; 
 	}
 	default: {
@@ -186,25 +176,25 @@ std::shared_ptr<sf::Shape> Entity::CreateDrawableRB(float i_lerp_fraction)
 	return drawShape;
 }
 
-void Entity::CollideWithPlayer(PlayerChar* i_playerPtr) {}
+void Entity::CollideWithPlayer(CollisionData i_collisionCopy) {}
 
-void Entity::CollideWithProjectile(Projectile * i_projPtr) {}
+void Entity::CollideWithProjectile(CollisionData i_collisionCopy) {}
 
-void Entity::CollideWithBlocker(Blocker* i_blockPtr) {}
+void Entity::CollideWithBlocker(CollisionData i_collisionCopy) {}
 
-void Entity::CollideWithEnemy(Enemy* i_enemyPtr, CollisionData i_collisionCopy) {}
+void Entity::CollideWithEnemy(CollisionData i_collisionCopy) {}
 
-void Entity::CollideWithWall(Wall* i_wallPtr) {}
+void Entity::CollideWithWall(CollisionData i_collisionCopy) {}
 
-void Entity::CollideWithPainWall(PainWall * i_painWallPtr) {}
+void Entity::CollideWithPainWall(CollisionData i_collisionCopy) {}
 
-void Entity::CollideWithDoor(Door* i_doorPtr) {}
+void Entity::CollideWithDoor(CollisionData i_collisionCopy) {}
 
-void Entity::CollideWithEndObject(EndObject * i_endPtr) {}
+void Entity::CollideWithEndObject(CollisionData i_collisionCopy) {}
 
-void Entity::CollideWithPowUp(PowerUp* i_powUpPtr) {}
+void Entity::CollideWithPowUp(CollisionData i_collisionCopy) {}
 
-void Entity::CollideWithBlast(Blast * i_blastPtr)
+void Entity::CollideWithBlast(CollisionData i_collisionCopy)
 {
 }
 

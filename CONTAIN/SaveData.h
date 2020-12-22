@@ -12,22 +12,35 @@ private:
 	std::string saveFileName;
 	std::list<int> highScores;
 
+	std::string settingsFileName;
+	std::vector<int> settingsConfig;
+
 public:
 	SaveData();
 	~SaveData();
 
 	void CheckForSaveFile();
 
+	void CheckForSettingsFile();
+
 	void CreateNewSaveFile();
+
+	void CreateNewSettingsFile();
 
 	void ReadInHighScores();
 
+	void ReadInSettingsConfig();
+
 	void SaveNewHighScore(int i_newScore);
+
+	void EditSettingsConfig(int settingIndex, int newSetting);
 
 	void SaveDataToFile();
 
 	std::string GetHighScoresString();
 
 	std::list<int> GetHighScoresVect();
+
+	std::vector<int> GetSettingsVect();
 };
 

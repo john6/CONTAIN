@@ -61,8 +61,10 @@ PlayerChar::~PlayerChar()
 void PlayerChar::Update(float i_stepSize)
 {
 	UpdateHealth(i_stepSize);
-	UpdateMovement(i_stepSize);
-	AcceptWeaponInput(i_stepSize);
+	if (GLBVRS::canPressButtonsAgain) {
+		UpdateMovement(i_stepSize);
+		AcceptWeaponInput(i_stepSize);
+	}
 }
 
 void PlayerChar::UpdateMovement(float i_stepSize)
@@ -135,7 +137,18 @@ void PlayerChar::AcceptWeaponInput(float i_stepSize)
 	}
 }
 
-void PlayerChar::TakeDamage(float i_dmg) 
+void PlayerChar::TakeDamage(float i_dmg, CollisionData i_coll) 
+{
+	auto timeSinceDamaged = std::chrono::duration_cast<std::chrono::seconds>(hiResTime::now() - lastDamageReceived);
+	if (timeSinceDamaged.count() >= dmgRate) {
+		GLBVRS::RSRCS->PlaySound(3);
+		lastDamageReceived = hiResTime::now();
+		health -= i_dmg;
+		GenerateDamageEffects(i_coll);
+	}
+}
+
+void PlayerChar::TakeDamage(float i_dmg)
 {
 	auto timeSinceDamaged = std::chrono::duration_cast<std::chrono::seconds>(hiResTime::now() - lastDamageReceived);
 	if (timeSinceDamaged.count() >= dmgRate) {
@@ -148,9 +161,8 @@ void PlayerChar::TakeDamage(float i_dmg)
 void PlayerChar::GenerateDamageEffects(CollisionData i_collisionCopy)
 {
 	microSec ms(200000000);
-	Vector2f dir(0.0f, 0.0f);
 	Vector2f collisionDir = i_collisionCopy.entA->rb.transform.pos - i_collisionCopy.entB->rb.transform.pos;
-	std::shared_ptr<Entity> anim = std::make_shared<Anim>(i_collisionCopy.norm, i_collisionCopy.contactPoints, ms, 0, 0);
+	std::shared_ptr<Entity> anim = std::make_shared<Anim>(i_collisionCopy.norm, i_collisionCopy.contactPoints, ms, 0, 1);
 	spawnVect.push_back(anim);
 }
 
@@ -238,50 +250,59 @@ float PlayerChar::GetCurrHealth()
 	return health;
 }
 
-void PlayerChar::CollideWithEnemy(Enemy* i_enemyPtr, CollisionData i_collisionCopy)
+void PlayerChar::CollideWithEnemy(CollisionData i_coll)
 {
+	auto enemyPtr = dynamic_cast<Enemy*>(i_coll.entB.get());
 	auto timeSinceDamaged = std::chrono::duration_cast<std::chrono::seconds>(hiResTime::now() - lastDamageReceived);
-	if (timeSinceDamaged.count() >= dmgRate) {
-		if (!i_enemyPtr->metal) {
-			TakeDamage(1.0f);
-			GenerateDamageEffects(i_collisionCopy);
+	if ((enemyPtr) && (timeSinceDamaged.count() >= dmgRate)) {
+		if (!enemyPtr->metal) {
+			TakeDamage(1.0f, i_coll);
 		}
 	}
 }
 
-void PlayerChar::CollideWithPainWall(PainWall * i_painWallPtr)
+void PlayerChar::CollideWithPainWall(CollisionData i_coll)
 {
-	GLBVRS::RSRCS->PlaySound(RESOURCES::FIREBALL);
-	TakeDamage(1.0f);
-}
-
-void PlayerChar::CollideWithDoor(Door * i_doorPtr)
-{
-	if (i_doorPtr->IsOpen()) {
-		GLBVRS::RSRCS->PlaySound(RESOURCES::MAGIC7);
-		rb.ignoreForcesThisStep = true;
-		rb.ResetPosition(i_doorPtr->GetOutPos());
-		GLBVRS::GPTR->RequestTravelToSector(i_doorPtr->GetOutCoord());
+	auto timeSinceDamaged = std::chrono::duration_cast<std::chrono::seconds>(hiResTime::now() - lastDamageReceived);
+	if (timeSinceDamaged.count() >= dmgRate) {
+		GLBVRS::RSRCS->PlaySound(RESOURCES::FIREBALL);
+		TakeDamage(1.0f, i_coll);
 	}
 }
 
-void PlayerChar::CollideWithEndObject(EndObject * i_endPtr)
+void PlayerChar::CollideWithDoor(CollisionData i_coll)
 {
-	if (i_endPtr->active) {
+	auto doorPtr = dynamic_cast<Door*>(i_coll.entB.get());
+	if ((doorPtr) && (doorPtr->IsOpen())) {
+		GLBVRS::RSRCS->PlaySound(RESOURCES::MAGIC7);
+		rb.ignoreForcesThisStep = true;
+		rb.ResetPosition(doorPtr->GetOutPos());
+		GLBVRS::GPTR->RequestTravelToSector(doorPtr->GetOutCoord());
+	}
+}
+
+void PlayerChar::CollideWithEndObject(CollisionData i_coll)
+{
+	auto endPtr = dynamic_cast<EndObject*>(i_coll.entB.get());
+	if ((endPtr) && (endPtr->active)) {
 		GLBVRS::GPTR->RequestGoToNextLvl();
 	}
 }
 
-void PlayerChar::CollideWithPowUp(PowerUp* i_powUpPtr)
+void PlayerChar::CollideWithPowUp(CollisionData i_coll)
 {
-	ReceivePowerUp(i_powUpPtr->powType);
-	i_powUpPtr->Destroy();
+	auto powPtr = dynamic_cast<PowerUp*>(i_coll.entB.get());
+	if (powPtr) {
+		ReceivePowerUp(powPtr->powType);
+		powPtr->Destroy();
+	}
 }
 
-void PlayerChar::CollideWithProjectile(Projectile * i_projPtr)
+void PlayerChar::CollideWithProjectile(CollisionData i_coll)
 {
-	if (i_projPtr->projType == 1) {
-		TakeDamage(1.0f);
+	auto projPtr = dynamic_cast<Projectile*>(i_coll.entB.get());
+	if ((projPtr) && (projPtr->projType == 1)) {
+		TakeDamage(1.0f, i_coll);
 	}
 }
 

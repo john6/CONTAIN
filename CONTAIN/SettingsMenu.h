@@ -6,6 +6,7 @@
 #include "RESOURCES.h"
 #include "GLOBAL_CONSTANTS.h"
 #include "Button.h"
+#include "SaveData.h"
 
 class SettingsMenu
 {
@@ -14,6 +15,7 @@ class SettingsMenu
 	sf::Text soundLevelText;
 	sf::Text screenResolutionText;
 
+	SaveData* saveDatePtr;
 	RESOURCES* resources;
 	RSLTN* resolutionPtr;
 	bool* fullScreenPtr;
@@ -50,13 +52,14 @@ class SettingsMenu
 	void  UpdateResoQuad(RSLTN i_resSelected);
 
 public:
-	SettingsMenu(RESOURCES* i_resources, RSLTN* resolution, bool* fullScreen);
+	SettingsMenu(RESOURCES* i_resources, RSLTN* resolution, bool* fullScreen, SaveData* i_saveDatePtr);
 	~SettingsMenu();
 
 
 public:
 	void ResetMenu();
 
+	void LoadConfig();
 
 	void ResetButtons();
 

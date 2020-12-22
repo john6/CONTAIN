@@ -31,7 +31,7 @@ public:
 
 	void SetDiffVars(int i_diff);
 
-	void CollideWithPainWall(PainWall * i_painWallPtr) override;
+	void CollideWithPainWall(CollisionData i_coll) override;
 
-	void CollideWithPlayer(PlayerChar* i_playerPtr) override;
+	void CollideWithPlayer(CollisionData i_coll) override;
 };

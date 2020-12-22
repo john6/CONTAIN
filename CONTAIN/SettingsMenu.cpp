@@ -1,27 +1,24 @@
 #include "SettingsMenu.h"
 
-SettingsMenu::SettingsMenu(RESOURCES * i_resources, RSLTN* resolution, bool* fullScreen) :
+SettingsMenu::SettingsMenu(RESOURCES * i_resources, RSLTN* resolution, bool* fullScreen, SaveData* i_saveDataPtr) :
 	resources{ i_resources }, resolutionPtr { resolution }, fullScreenPtr { fullScreen }
 {
+	saveDatePtr = i_saveDataPtr;
 	font = resources->GetFont();
 	ResetButtons();
 	lastButtonPressed = std::chrono::high_resolution_clock::now();
 	buttonClickDelay = 0.9f;
 	timeSinceButtonClick = buttonClickDelay;
 	somethingWasClicked = false;
-	UpdateResoQuad(NNTN_TN);
-	UpdateSoundQuad(MEDIUM50);
-	FullScreen.SetState(Button::DOWN);
-	music.SetState(Button::DOWN);
 
-
+	LoadConfig();
 	//Testing Settings
-	if (TESTING) {
-		UpdateSoundQuad(LOW25);
-		music.SetState(Button::UP);
-		resources->TurnMusicOn(false);
-		resources->SetSoundLevel(0.25f);
-	}
+	//if (TESTING) {
+	//	UpdateSoundQuad(LOW25);
+	//	music.SetState(Button::UP);
+	//	resources->TurnMusicOn(false);
+	//	resources->SetSoundLevel(0.25f);
+	//}
 }
 
 
@@ -82,15 +79,19 @@ void SettingsMenu::PollSoundQuad(sf::Vector2f mousePosition)
 {
 	if (PollInput(mousePosition, &sound25P, true)) {
 		somethingWasClicked = true;
+		saveDatePtr->EditSettingsConfig(0, 0);
 		UpdateSoundQuad(LOW25); }
 	else if (PollInput(mousePosition, &sound50P, true)) { 
 		somethingWasClicked = true;
+		saveDatePtr->EditSettingsConfig(0, 1);
 		UpdateSoundQuad(MEDIUM50); }
 	else if (PollInput(mousePosition, &sound75P, true)) { 
 		somethingWasClicked = true;
+		saveDatePtr->EditSettingsConfig(0, 2);
 		UpdateSoundQuad(HIGH75); }
 	else if (PollInput(mousePosition, &sound100P, true)) { 
 		somethingWasClicked = true;
+		saveDatePtr->EditSettingsConfig(0, 3);
 		UpdateSoundQuad(FULL100); }
 }
 
@@ -98,11 +99,14 @@ void SettingsMenu::PollResoQuad(sf::Vector2f mousePosition)
 {
 	if (PollInput(mousePosition, &screen1272, true)) { 
 		somethingWasClicked = true;
+		saveDatePtr->EditSettingsConfig(2, 0);
 		UpdateResoQuad(TWLV_SVN); }
 	else if (PollInput(mousePosition, &screen1490, true)) { 
 		somethingWasClicked = true;
+		saveDatePtr->EditSettingsConfig(2, 1);
 		UpdateResoQuad(FRTN_NNTY); }
 	else if (PollInput(mousePosition, &screen1910, true)) { 
+		saveDatePtr->EditSettingsConfig(2, 2);
 		somethingWasClicked = true;
 		UpdateResoQuad(NNTN_TN); }
 }
@@ -190,6 +194,61 @@ void SettingsMenu::ResetMenu()
 	//apply.SetState(Button::UP);
 	//exit.SetState(Button::UP);
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+}
+
+void SettingsMenu::LoadConfig()
+{
+	std::vector<int> config = saveDatePtr->GetSettingsVect();
+	//Configload
+	//config 0 is sound setting
+	switch (config[0]) {
+	case 0: {
+		UpdateSoundQuad(LOW25);
+		break;
+	}
+	case 1: {
+		UpdateSoundQuad(MEDIUM50);
+		break;
+	}
+	case 2: {
+		UpdateSoundQuad(HIGH75);
+		break;
+	}
+	case 3: {
+		UpdateSoundQuad(FULL100);
+		break;
+	}
+	}
+	//Music on bool is index 1
+	if (config[1] == 1) {
+		music.SetState(Button::DOWN);
+	}
+	else {
+		music.SetState(Button::UP);
+	}
+	//reso index 2
+	switch (config[2]) {
+	case 0: {
+		UpdateResoQuad(TWLV_SVN);
+		break;
+	}
+	case 1: {
+		UpdateResoQuad(FRTN_NNTY);
+		break;
+	}
+	case 2: {
+		UpdateResoQuad(NNTN_TN);
+		break;
+	}
+	}
+	//fullscreen bool is index 3
+	if (config[3] == 1) {
+		FullScreen.SetState(Button::DOWN);
+	}
+	else {
+		FullScreen.SetState(Button::UP);
+	}
+
 }
 
 void SettingsMenu::ResetButtons()
@@ -284,8 +343,24 @@ GAME_STATE SettingsMenu::Update(float i_microSecs, sf::RenderWindow * i_window, 
 	if (timeSinceButtonClick >= buttonClickDelay) {
 		PollSoundQuad(i_mousePos);
 		PollResoQuad(i_mousePos);
-		*fullScreenPtr = PollInputToggle(i_mousePos, &FullScreen);
-		resources->TurnMusicOn(PollInputToggle(i_mousePos, &music));
+		bool fullScreenBool = PollInputToggle(i_mousePos, &FullScreen);
+		*fullScreenPtr = fullScreenBool;
+		if (fullScreenBool) {
+			saveDatePtr->EditSettingsConfig(3, 1);
+		}
+		else {
+			saveDatePtr->EditSettingsConfig(3, 0);
+		}
+
+		bool musicOnBool = PollInputToggle(i_mousePos, &music);
+		resources->TurnMusicOn(musicOnBool);
+		if (musicOnBool) {
+			saveDatePtr->EditSettingsConfig(1, 1);
+		}
+		else {
+			saveDatePtr->EditSettingsConfig(1, 0);
+		}
+
 		resources->SetSoundLevel(soundLvl);
 		if (somethingWasClicked) {
 			lastButtonPressed = hiResTime::now();

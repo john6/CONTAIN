@@ -17,7 +17,7 @@ public:
 
 	void Update(float i_stepSize) override;
 
-	void CollideWithPainWall(PainWall * i_painWallPtr) override;
+	void CollideWithPainWall(CollisionData i_coll) override;
 
 	void SetDiffVars(int i_diff) override;
 };

@@ -15,26 +15,28 @@ Blast::Blast(Vector2f i_startPosition, int i_blastType, float i_strength, float 
 	hasVisuals = true;
 }
 
-void Blast::CollideWithEnemy(Enemy * i_enemyPtr, CollisionData i_collision)
+void Blast::CollideWithEnemy(CollisionData i_coll)
 {
-	if ((blastType == 0) && (i_enemyPtr->stunSecs <= 0.0)) {
-		i_enemyPtr->Stun(stunTime);
+	auto enemyPtr = dynamic_cast<Enemy*>(i_coll.entB.get());
+	if ((enemyPtr) && (blastType == 0) && (enemyPtr->stunSecs <= 0.0)) {
+		enemyPtr->Stun(stunTime);
 		//Vector2f blastPos = i_blastPtr->rb.transform.pos;
-		Vector2f blastDir = i_enemyPtr->rb.transform.pos - rb.transform.pos;
+		Vector2f blastDir = enemyPtr->rb.transform.pos - rb.transform.pos;
 		float proximityBonus = std::abs(blastDir.norm()) * (strength * (1.0f / 2.0f));
 		blastDir.normalize();
-		i_enemyPtr->rb.ApplyImpulse((blastDir * (strength + proximityBonus)), NULL_VECTOR);
+		enemyPtr->rb.ApplyImpulse((blastDir * (strength + proximityBonus)), NULL_VECTOR);
 	}
 }
 
-void Blast::CollideWithWall(Wall * i_wallPtr)
+void Blast::CollideWithWall(CollisionData i_coll)
 {
-	if ((blastType == 0)) {
+	auto wallPtr = dynamic_cast<Wall*>(i_coll.entB.get());
+	if ((wallPtr) && (blastType == 0)) {
 		//Vector2f blastPos = i_blastPtr->rb.transform.pos;
-		Vector2f blastDir = i_wallPtr->rb.transform.pos - rb.transform.pos;
+		Vector2f blastDir = wallPtr->rb.transform.pos - rb.transform.pos;
 		float proximityBonus = std::abs(blastDir.norm()) * (strength * (1.0f / 2.0f));
 		blastDir.normalize();
-		i_wallPtr->rb.ApplyImpulse((blastDir * (strength + proximityBonus)), NULL_VECTOR);
+		wallPtr->rb.ApplyImpulse((blastDir * (strength + proximityBonus)), NULL_VECTOR);
 	}
 }
 

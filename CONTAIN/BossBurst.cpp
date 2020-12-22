@@ -4,6 +4,9 @@
 BossBurst::BossBurst(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss, RigidBody i_rb) :
 	Enemy(i_diff, i_startPosition, i_rb, ENEMY_BOSS), isMiniBoss{ i_isMiniBoss }
 {
+	if (!i_isMiniBoss) {
+		rb = RigidBody(Physics::CreateRegularPolygon(5, 100.0f), METAL);
+	}
 	origColorFill = PARAKEET;
 	origColorOutLine = EMERALD;
 	fillColor = origColorFill;
@@ -19,6 +22,7 @@ BossBurst::BossBurst(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniB
 
 void BossBurst::Update(float i_stepSize)
 {
+	UpdateTendrilPosition(i_stepSize);
 	UpdateHealth(i_stepSize);
 	if (stunSecs < 0) {
 		//apply impulse towards player

@@ -42,7 +42,6 @@ int main()
 	mainMenusView.reset(sf::FloatRect(0, 0, GLBVRS::SCREEN_WIDTH, GLBVRS::SCREEN_HEIGHT));
 	window.setView(mainMenusView);
 
-
 	//sf::View hudView;
 	//hudView.reset(sf::FloatRect(0, 0, 2592, 1458));
 	//window.setView(hudView);
@@ -55,7 +54,7 @@ int main()
 	DIFFICULTY difficulty = MEDIUM;
 
 	Menu menu(&resources);
-	SettingsMenu settingsMenu(&resources, &resolution, &fullScreen);
+	SettingsMenu settingsMenu(&resources, &resolution, &fullScreen, &saveData);
 	YouWonMenu winMenu(&resources, true);
 	YouWonMenu lostMenu(&resources, false);
 	GAME_STATE state = MENU;
@@ -70,8 +69,7 @@ int main()
 	{
 		sf::Event currEvent;
 		while (window.pollEvent(currEvent)) {
-			if (((currEvent.type == sf::Event::Closed) || (state == EXIT_GAME))
-				|| sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape)) {
+			if ((currEvent.type == sf::Event::Closed) || (state == EXIT_GAME)) {
 				window.close();
 			}
 			if (currEvent.type == sf::Event::Resized) {
@@ -89,6 +87,10 @@ int main()
 			if (notFullScreen) {
 				notFullScreen = false;
 				GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
+			}
+			float timeSinceButtonClick = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - GLBVRS::lastMenuSwitch)).count() / 1000000.0f;
+			if (timeSinceButtonClick >= GLBVRS::buttonDelay) {
+				GLBVRS::canPressButtonsAgain = true;
 			}
 			hiRes_time_point newTime = hiResTime::now();
 			microSec currInterval = std::chrono::duration_cast<microSec>(newTime - currTime);

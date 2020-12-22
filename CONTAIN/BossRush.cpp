@@ -130,19 +130,21 @@ void BossRush::SetDiffVars(int i_diff)
 			break;
 		}
 		}
-		speed *= 28;
+		speed *= 37;
 	}
 }
 
-void BossRush::CollideWithPainWall(PainWall * i_painWallPtr)
+void BossRush::CollideWithPainWall(CollisionData i_coll)
 {
 	//sectPtr->PlaySound(RESOURCES::FIRE5);
 	//TakeDamage(1);
 }
 
-void BossRush::CollideWithPlayer(PlayerChar * i_playerPtr)
+void BossRush::CollideWithPlayer(CollisionData i_coll)
 {
-	i_playerPtr->TakeDamage(1.0f);
+	if (auto player = dynamic_cast<PlayerChar*>(i_coll.entB.get())) {
+		player->TakeDamage(1.0f, i_coll);
+	}
 	//rushing = false;
 	//timeTillDirSwitch = sameDirTime;
 }

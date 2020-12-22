@@ -13,15 +13,33 @@ Game::~Game()
 }
 
 GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vector2f i_mousePos) {
+
+	if ((playState == GENERAL_GAMEPLAY) && (GLBVRS::canPressButtonsAgain) &&
+		(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape))) {
+		tuteLib.SetTutorial(TuteLib::TUTORIALS::PAUSE_MENU);
+		playState = IN_GAME_MENU;
+		GLBVRS::canPressButtonsAgain = false;
+		GLBVRS::lastMenuSwitch = hiResTime::now();
+	}
+
 	if (tutorial) {
 		if ((currSector.x == 5) && (currSector.y == 0) && (levels[currLvl]->GetSector(currSector)->sectEnemyNum == 0)) {
-			tuteLib.PlayTutorial(TuteLib::TUTORIALS::ESCAPE);
+			if (!tuteLib.IsTutorialPlayed(TuteLib::TUTORIALS::ESCAPE)) {
+				tuteLib.SetTutorial(TuteLib::TUTORIALS::ESCAPE);
+				playState = IN_GAME_MENU;
+			}
 		}
 		else if ((currSector.x == 4) && (currSector.y == 0) && (levels[currLvl]->GetSector(currSector)->firstPhase == false)) {
-			tuteLib.PlayTutorial(TuteLib::TUTORIALS::PUSH_ENEMIES);
+			if (!tuteLib.IsTutorialPlayed(TuteLib::TUTORIALS::PUSH_ENEMIES)) {
+				tuteLib.SetTutorial(TuteLib::TUTORIALS::PUSH_ENEMIES);
+				playState = IN_GAME_MENU;
+			}
 		}
 		else {
-			tuteLib.PlayTutorial(tuteLib.GetTuteFromSect(currSector.x, currSector.y));
+			if (!tuteLib.IsTutorialPlayed(tuteLib.GetTuteFromSect(currSector.x, currSector.y))) {
+				tuteLib.SetTutorial(tuteLib.GetTuteFromSect(currSector.x, currSector.y));
+				playState = IN_GAME_MENU;
+			}
 		}
 
 	}
@@ -61,6 +79,28 @@ GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vecto
 			return IN_GAME;
 			break;
 		}
+		case (IN_GAME_MENU): { 
+			if (tuteLib.currActiveTutorial == TuteLib::TUTORIALS::PAUSE_MENU) {
+				if ((GLBVRS::canPressButtonsAgain) && (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape))) {
+					playState = GENERAL_GAMEPLAY;
+					GLBVRS::canPressButtonsAgain = false;
+					GLBVRS::lastMenuSwitch = hiResTime::now();
+					gameRenderer.ResetWorldSize(levels[currLvl]->GetSector(currSector)->sectorWidth, levels[currLvl]->GetSector(currSector)->sectorHeight);
+				}
+				else if ((GLBVRS::canPressButtonsAgain) && (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::BackSpace))) {
+					renderWindow->close();
+				}
+			}
+			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
+				tuteLib.GetCurrPopUp()->played = true;
+				playState = GENERAL_GAMEPLAY;
+				GLBVRS::canPressButtonsAgain = false;
+				GLBVRS::lastMenuSwitch = hiResTime::now();
+				gameRenderer.ResetWorldSize(levels[currLvl]->GetSector(currSector)->sectorWidth, levels[currLvl]->GetSector(currSector)->sectorHeight);
+			}
+			return IN_GAME;
+			break;
+		}
 		default: {
 			return MENU;
 			break;
@@ -72,6 +112,7 @@ GAME_STATE Game::UpdateGeneral(float i_stepSize, sf::Vector2f i_mousePos) {
 	levels[currLvl]->UpdateLevel();
 	UpdateLvlEntities(levels[currLvl]->GetSector(currSector)->GetSectorEntities(), i_stepSize);
 	if (playerWon) {
+		tuteLib = TuteLib(renderWindow, resources);
 		return WIN;
 	}
 	else if (dynamic_cast<PlayerChar*>(playerChar.get())->GetCurrHealth() <= 0) {
@@ -176,6 +217,9 @@ void Game::Render(float i_elapsedMilliseconds) {
 	else if (playState == WON_LEVEL) {
 		currUpgradeMenu->Render(renderWindow);
 	}
+	else if (playState == IN_GAME_MENU) {
+		tuteLib.RenderCurrTutorial();
+	}
 }
 
 void Game::TestCollision(std::shared_ptr<Entity> entA, std::shared_ptr<Entity> entB, std::vector<CollisionData>* collisionList)
@@ -265,8 +309,10 @@ void Game::RequestGoToNextLvl()
 		currUpgradeMenu = std::make_shared<UpgradeMenu>(resources, gameDiff, dynamic_cast<PlayerChar*>(playerChar.get()));
 	}
 	else {
-		if (tutorial) {
-			tuteLib.PlayTutorial(TuteLib::TUTORIALS::TUTORIAL_END);
+		if ((tutorial) && (!tuteLib.IsTutorialPlayed(TuteLib::TUTORIALS::TUTORIAL_END))) {
+			tuteLib.SetTutorial(TuteLib::TUTORIALS::TUTORIAL_END);
+			playState = IN_GAME_MENU;
+			//tuteLib.PlayTutorial(TuteLib::TUTORIALS::TUTORIAL_END);
 		}
 		playerWon = true;
 	}

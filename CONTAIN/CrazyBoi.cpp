@@ -12,6 +12,12 @@ CrazyBoi::CrazyBoi(DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb) 
 	outlineColor = sf::Color::White;
 	currDir = CreateRandomDir();
 	SetDiffVars(i_diff);
+	//compensating for larger size in speed
+	auto circle = dynamic_cast<Circle*>(rb.shape.get());
+	float radiusDiff= circle->radius - 40;
+	//medium speed is 15 for reference
+	speed *= (1 + (radiusDiff / 100.0f));
+	//for each extra ten area I wanna if it .05 speed
 }
 
 CrazyBoi::~CrazyBoi()
@@ -43,10 +49,10 @@ void CrazyBoi::Update(float i_stepSize)
 	}
 }
 
-void CrazyBoi::CollideWithPainWall(PainWall * i_painWallPtr)
+void CrazyBoi::CollideWithPainWall(CollisionData i_coll)
 {
 	//sectPtr->PlaySound(RESOURCES::FIRE5);
-	TakeDamage(1);
+	TakeDamage(1, i_coll);
 }
 
 void CrazyBoi::SetDiffVars(int i_diff)

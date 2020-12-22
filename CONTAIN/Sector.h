@@ -1,6 +1,8 @@
 #pragma once
 #include <list>
 #include <vector>
+#include <algorithm> 
+
 #include "GLOBAL_CONSTANTS.h"
 #include "RESOURCES.h"
 #include "RigidBody.h"

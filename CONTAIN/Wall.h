@@ -14,7 +14,7 @@ public:
 	sf::Color deathColorFill;
 	sf::Color deathColorOutLine;
 
-	void CollideWithProjectile(Projectile* i_projPtr) override;
+	void CollideWithProjectile(CollisionData i_coll) override;
 
 	void TakeDamage(float i_dmg);
 

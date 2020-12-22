@@ -17,17 +17,27 @@ private:
 	  InfoPopUp escape;
 	  InfoPopUp pushenemies;
 	  InfoPopUp end;
+	  InfoPopUp pauseMenu;
 
 public:
-	enum TUTORIALS { TUTORIAL_BEGIN, SHOOTING, WALL, EMP, FIREWALL, BOSS, ESCAPE, PUSH_ENEMIES, TUTORIAL_END };
+	enum TUTORIALS { TUTORIAL_BEGIN, SHOOTING, WALL, EMP, FIREWALL, BOSS, ESCAPE, PUSH_ENEMIES, TUTORIAL_END, PAUSE_MENU };
+	TUTORIALS currActiveTutorial;
 
 	void PlayTutorial(TUTORIALS i_tute);
+
+	void SetTutorial(TUTORIALS i_tute);
+
+	void RenderCurrTutorial();
+
+	InfoPopUp* GetCurrPopUp();
+
+	bool IsTutorialPlayed(TUTORIALS i_tute);
 
 	TUTORIALS GetTuteFromSect(int x, int y);
 
 	void InitStatics(sf::RenderWindow* i_windowPtr, RESOURCES* i_resources);
 
 	TuteLib(sf::RenderWindow* i_windowPtr, RESOURCES* i_resources);
-	//TuteLib();
+
 	~TuteLib();
 };

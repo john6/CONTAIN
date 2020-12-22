@@ -74,25 +74,25 @@ public:
 
 	virtual std::shared_ptr<sf::Shape> CreateDrawableRB(float i_lerp_fraction);
 
-	virtual void CollideWithPlayer(PlayerChar* i_playerPtr);
+	virtual void CollideWithPlayer(CollisionData i_collisionCopy);
 
-	virtual void CollideWithProjectile(Projectile* i_projPtr);
+	virtual void CollideWithProjectile(CollisionData i_collisionCopy);
 
-	virtual void CollideWithBlocker(Blocker* i_blockPtr);
+	virtual void CollideWithBlocker(CollisionData i_collisionCopy);
 
-	virtual void CollideWithEnemy(Enemy* i_enemyPtr, CollisionData i_collisionCopy);
+	virtual void CollideWithEnemy(CollisionData i_collisionCopy);
 
-	virtual void CollideWithWall(Wall* i_wallPtr);
+	virtual void CollideWithWall(CollisionData i_collisionCopy);
 
-	virtual void CollideWithPainWall(PainWall * i_painWallPtr);
+	virtual void CollideWithPainWall(CollisionData i_collisionCopy);
 
-	virtual void CollideWithDoor(Door* i_doorPtr);
+	virtual void CollideWithDoor(CollisionData i_collisionCopy);
 
-	virtual void CollideWithEndObject(EndObject* i_endPtr);
+	virtual void CollideWithEndObject(CollisionData i_collisionCopy);
 
-	virtual void CollideWithPowUp(PowerUp* i_powUpPtr);
+	virtual void CollideWithPowUp(CollisionData i_collisionCopy);
 
-	virtual void CollideWithBlast(Blast* i_blastPtr);
+	virtual void CollideWithBlast(CollisionData i_collisionCopy);
 
 	virtual void UpdateVisuals(float i_stepSize);
 };

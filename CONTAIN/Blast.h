@@ -20,9 +20,9 @@ public:
 
 	void Update(float i_stepSize) override;
 
-	void CollideWithEnemy(Enemy* i_enemyPtr, CollisionData i_collision) override;
+	void CollideWithEnemy(CollisionData i_coll) override;
 
-	void CollideWithWall(Wall* i_wallPtr) override;
+	void CollideWithWall(CollisionData i_coll) override;
 
 	void UpdateVisuals(float i_stepSize) override;
 };

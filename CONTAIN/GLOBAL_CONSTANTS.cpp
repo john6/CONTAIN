@@ -39,6 +39,11 @@ void GLBVRS::SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_scree
 	GLBVRS::PPTR = i_playerPtr;
 	GLBVRS::SOUNDLVL = i_soundLvl;
 
+
+	//Menu Stuff
+	//static hiRes_time_point lastMenuSwitch = hiResTime::now();
+	//static float buttonDelay = 0.8f;
+	//static bool canPressButtonsAgain = true;
 }
 
 int GLBVRS::GetUpgradeMax(UPGRADE_TYPE i_powType)
@@ -148,6 +153,11 @@ MessageBus* GLBVRS::MBUSPTR = NULL;
 Game* GLBVRS::GPTR = NULL;
 std::shared_ptr<Entity> GLBVRS::PPTR = NULL;
 float GLBVRS::SOUNDLVL = 75.0f;
+
+//Menu Stuff
+hiRes_time_point GLBVRS::lastMenuSwitch = hiResTime::now();
+float GLBVRS::buttonDelay = 0.6f;
+bool GLBVRS::canPressButtonsAgain = true;
 
 GLBVRS::~GLBVRS()
 {

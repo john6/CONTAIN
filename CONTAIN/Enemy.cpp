@@ -43,10 +43,7 @@ void Enemy::Update(float i_stepSize)
 		playerDir.normalize();
 		float moveDist = speed * i_stepSize;
 		rb.ApplyImpulse(playerDir * moveDist, NULL_VECTOR);
-		tendrilRotation += .2 / secsInUpdate; 
-		//tendrilRotation += std::abs(rb.vel.norm()) /secsInUpdate;
-		std::string speed = std::to_string(std::abs(rb.vel.norm()) / secsInUpdate);
-		std::cout << "speed" << speed << "\n";
+		UpdateTendrilPosition(i_stepSize);
 	}
 	else {
 		stunSecs -= secsInUpdate;
@@ -64,7 +61,7 @@ Vector2f Enemy::CreateRandomDir()
 }
 
 void Enemy::Destroy() {
-	//GLBVRS::RSRCS->PlaySound(RESOURCES::OUCH1);
+	GLBVRS::RSRCS->PlaySound(RESOURCES::OUCH1);
 	GenerateDeathEffects(ENEMY_BURST_DEATH);
 	killMeNextLoop = true;
 }
@@ -173,22 +170,23 @@ void Enemy::GenerateDeathEffects(ANIMTYPE animType)
 	}
 }
 
-void Enemy::CollideWithPainWall(PainWall * i_painWallPtr)
+void Enemy::CollideWithPainWall(CollisionData i_coll)
 {
 	//GLBVRS::RSRCS->PlaySound(RESOURCES::FIREBALL);
-	TakeDamage(1);
+	TakeDamage(1, i_coll);
 }
 
-void Enemy::CollideWithProjectile(Projectile * i_projPtr)
+void Enemy::CollideWithProjectile(CollisionData i_coll)
 {
-	if (i_projPtr->projType == 0) {
-		TakeDamage(1);
+	auto projPtr = dynamic_cast<Projectile*>(i_coll.entB.get());
+	if ((projPtr) && (projPtr->projType == 0)) {
+		TakeDamage(1, i_coll);
 	}
 }
 
 void Enemy::UpdateVisuals(float i_stepSize)
 {
-	if (visuals->size() == 0) {
+	if ((!metal) && (visuals->size() == 0)) {
 		std::vector<Vector2f> verts = rb.GetVertCords();
 		int numVerts = verts.size();
 		for (int i = 0; i < numVerts; i++) {
@@ -200,12 +198,23 @@ void Enemy::UpdateVisuals(float i_stepSize)
 			sf::Vector2f midPoint((verts[i][0] + verts[nextVert][0]) / 2, (verts[i][1] + verts[nextVert][1]) / 2);
 			drawShapeBase->setPosition(midPoint);
 			//float oppositeRotation = 360 - (((rb.transform.orient - PI) * 180) / PI);
-			drawShapeBase->setRotation(tendrilRotation + (i * 0.3f));
+			drawShapeBase->setRotation(tendrilRotation + (i * 10.0f));
 			drawShapeBase->setOutlineThickness(2.0f);
 			visuals->emplace_back(drawShapeBase);
 		}
 	}
 
+}
+
+void Enemy::UpdateTendrilPosition(float i_stepSize)
+{
+	if ((!metal) && (stunSecs < 0)) {
+		float secsInUpdate = i_stepSize / 1000.0f;
+		tendrilRotation += .2 / secsInUpdate;
+		//tendrilRotation += std::abs(rb.vel.norm()) /secsInUpdate;
+		std::string speed = std::to_string(std::abs(rb.vel.norm()) / secsInUpdate);
+		//std::cout << "speed" << speed << "\n";
+	}
 }
 
 void Enemy::DropPowerUp()
@@ -225,10 +234,19 @@ void Enemy::UpdateHealth(float i_stepSize)
 	}
 }
 
-void Enemy::TakeDamage(float i_dmg)
+void Enemy::GenerateDamageEffects(CollisionData i_collisionCopy)
+{
+	microSec ms(200000000);
+	Vector2f collisionDir = i_collisionCopy.entA->rb.transform.pos - i_collisionCopy.entB->rb.transform.pos;
+	std::shared_ptr<Entity> anim = std::make_shared<Anim>(i_collisionCopy.norm, i_collisionCopy.contactPoints, ms, 0, 1);
+	spawnVect.push_back(anim);
+}
+
+void Enemy::TakeDamage(float i_dmg, CollisionData i_coll)
 {
 	health -= i_dmg;
 	ChangeColorHealth();
+	GenerateDamageEffects(i_coll);
 }
 
 void Enemy::Stun(float i_stunTime)

@@ -264,10 +264,10 @@ void RESOURCES::SetSoundLevel(float i_soundLvl)
 {
 	//m_sound.setVolume(i_soundLvl);
 	//soundLvl = i_soundLvl;
-	for (int i = 0; i < 8; i++) {
-		sound_arr[i].setVolume(i_soundLvl);
-	}
 	soundLvl = i_soundLvl;
+	for (int i = 0; i < 8; i++) {
+		sound_arr[i].setVolume(soundLvl);
+	}
 }
 
 void RESOURCES::TurnMusicOn(bool i_music)

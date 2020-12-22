@@ -39,17 +39,21 @@ public:
 
 	void GenerateDeathEffects(ANIMTYPE animType);
 
-	void CollideWithPainWall(PainWall * i_painWallPtr) override;
+	void CollideWithPainWall(CollisionData i_coll) override;
 
-	void CollideWithProjectile(Projectile* i_projPtr) override;
+	void CollideWithProjectile(CollisionData i_coll) override;
 
 	void UpdateVisuals(float i_stepSize) override;
+
+	void UpdateTendrilPosition(float i_stepSize);
+
+	void GenerateDamageEffects(CollisionData i_collisionCopy);
 
 	void DropPowerUp();
 
 	void UpdateHealth(float i_stepSize);
 
-	virtual void TakeDamage(float i_dmg);
+	virtual void TakeDamage(float i_dmg, CollisionData i_coll);
 
 	virtual void Stun(float i_stunTime);
 

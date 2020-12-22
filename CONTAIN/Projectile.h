@@ -20,19 +20,19 @@ public:
 
 	void Destroy() override;
 
-	void CollideWithPlayer(PlayerChar* i_playerPtr) override;
+	void CollideWithPlayer(CollisionData i_coll) override;
 
-	void CollideWithProjectile(Projectile* i_projPtr) override;
+	void CollideWithProjectile(CollisionData i_coll) override;
 
-	void CollideWithBlocker(Blocker* i_blockPtr) override;
+	void CollideWithBlocker(CollisionData i_coll) override;
 
-	void CollideWithEnemy(Enemy* i_enemyPtr, CollisionData i_collision) override;
+	void CollideWithEnemy(CollisionData i_coll) override;
 
-	void CollideWithWall(Wall* i_wallPtr) override;
+	void CollideWithWall(CollisionData i_coll) override;
 
-	void CollideWithPainWall(PainWall * i_painWallPtr) override;
+	void CollideWithPainWall(CollisionData i_coll) override;
 
 	void Explode();
 
-	void CollideWithDoor(Door* i_doorPtr) override;
+	void CollideWithDoor(CollisionData i_coll) override;
 };

@@ -252,6 +252,11 @@ public:
 	static std::shared_ptr<Entity> PPTR;
 	static float SOUNDLVL;
 
+	//Menu Stuff
+	static hiRes_time_point lastMenuSwitch;
+	static float buttonDelay;
+	static bool canPressButtonsAgain;
+
 public:
 	static void SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_screenHeight, RESOURCES* i_resourcesPtr,
 		MessageBus* i_mBusPtr, Game* i_gamePtr, std::shared_ptr<Entity> i_playerPtr, float i_soundLvl);

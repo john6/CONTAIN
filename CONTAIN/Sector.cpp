@@ -90,19 +90,17 @@ void Sector::GenerateEnemies(int i_numEnems, TypeID enemyType, SCREEN_AREA i_are
 	for (int i = 0; i < i_numEnems; ++i) {
 
 		std::random_device sizeSeed;
-		std::mt19937 genRoomSeed(sizeSeed());
-		std::discrete_distribution<> radiusModDist({ 0, 15, 55, 20, 10 });
+		std::mt19937 genSizeSeed(sizeSeed());
+		std::random_device sizeSeedRandEnemy;
+		std::mt19937 genSizeSeedRandEnemy(sizeSeed());
+		std::discrete_distribution<> radiusModDist({ 1, 4, 3, 2, 1 });
 		//std::discrete_distribution<> widthModDist({ 10, 15, 50, 15, 10 });
 		//std::discrete_distribution<> heightModDist({ 13, 18, 40, 18, 13 });
-		std::discrete_distribution<> sizeIncDist({ 10, 20, 20, 30, 15 });
+		std::discrete_distribution<> sizeIncDist({ 2, 3, 3, 1, 1});
 
-		int randRad = radiusModDist(genRoomSeed);
-		int randDifRadius = (randRad - 2 + i_sizeMod) * 10;
-		//int rand1 = widthModDist(genRoomSeed);
-		//int ranDifwidth = (rand1 - 2 + i_sizeMod) * 10;
-		//int rand2 = heightModDist(genRoomSeed);
-		//int randDifHeight = (rand2 - 2 + i_sizeMod) * 10;
-		float sizeInc = (sizeIncDist(genRoomSeed) - 2) * 0.2f;
+		int randRad = radiusModDist(sizeSeedRandEnemy);
+		int randDifRadius = (randRad + i_sizeMod) * 10;
+		float sizeInc = (sizeIncDist(genSizeSeed) - 1) * 0.2f;
 
 		//Create random spawn position
 		std::shared_ptr<Shape> shape = std::make_shared<Circle>(40);
@@ -299,14 +297,23 @@ void Sector::PopulateEntranceRoom()
 				Vector2f(Vector2f((sectorWidth / 2.0f), sectorHeight / 2.0)));
 	AddEntPtrToSector(lowerWall);
 
-	std::shared_ptr<Entity> smallShipPOW2 = std::make_shared<PowerUp>(
-Vector2f(Vector2f(GLBVRS::HR_MRG + (sectorWidth * (1.0f / 5.0f)), sectorHeight / 2.0)), TEMP_HEALTH);
-	lvlEntitiesPhase1.push_back(smallShipPOW2);
+	if (TESTING) {
+		std::shared_ptr<Entity> smallShipPOW2 = std::make_shared<PowerUp>(
+			Vector2f(Vector2f(GLBVRS::HR_MRG + (sectorWidth * (1.0f / 5.0f)), sectorHeight / 2.0)), TEMP_HEALTH);
+		lvlEntitiesPhase1.push_back(smallShipPOW2);
 
-	//std::shared_ptr<Entity> smallShipPOW3 = std::make_shared<PowerUp>(this,
-	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (sectorWidth * (2.0f / 5.0f)), sectorHeight / 2.0)), SMALL_SHIP);
-	//lvlEntitiesPhase1.push_back(smallShipPOW3);
 
+		//auto ent = std::make_shared<BossSpawn>(MEDIUM, Vector2f(100, 100));
+		//auto ent = std::make_shared<BossSplit>(MEDIUM, 4, 6, false, Vector2f(100, 100));
+
+
+		//auto ent = std::make_shared<BossSplit>(MEDIUM, Vector2f(100, 100));
+		//lvlEntitiesPhase1.push_back(ent);
+		//std::shared_ptr<Entity> smallShipPOW3 = std::make_shared<PowerUp>(this,
+		//	Vector2f(Vector2f(GLBVRS::HR_MRG + (sectorWidth * (2.0f / 5.0f)), sectorHeight / 2.0)), SMALL_SHIP);
+		//lvlEntitiesPhase1.push_back(smallShipPOW3);
+
+	}
 	//std::shared_ptr<Entity> smallShipPOW4 = std::make_shared<PowerUp>(this,
 	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (sectorWidth * (3.0f / 5.0f)), sectorHeight / 2.0)), BIG_SHIP);
 	//lvlEntitiesPhase1.push_back(smallShipPOW4);
@@ -458,16 +465,16 @@ void Sector::PopulateBossRoom(int i_lvlNum, DIFFICULTY i_diff, bool i_isMiniBoss
 		if (!i_isMiniBoss) {
 			//std::shared_ptr<Shape> shape1 = std::make_shared<Circle>(100);
 			//RigidBody projBody1 = RigidBody(shape1, ROCK);
-			ent = std::make_shared<BossSplit>(i_diff, 4, 6, false, spawnPos);
+ent = std::make_shared<BossSplit>(i_diff, 4, 6, false, spawnPos);
 		}
 		else {
-			//std::shared_ptr<Shape> shape1 = std::make_shared<Circle>(30);
-			//RigidBody projBody1 = RigidBody(shape1, ROCK);
+		//std::shared_ptr<Shape> shape1 = std::make_shared<Circle>(30);
+		//RigidBody projBody1 = RigidBody(shape1, ROCK);
 
-			std::shared_ptr<Shape> shape1 = std::make_shared<Circle>(50);
-			RigidBody projBody1 = RigidBody(shape1, LESSBOUNCYBALL);
+		std::shared_ptr<Shape> shape1 = std::make_shared<Circle>(50);
+		RigidBody projBody1 = RigidBody(shape1, LESSBOUNCYBALL);
 
-			ent = std::make_shared<BossSplit>(i_diff, 1, 6, false, spawnPos, projBody1);
+		ent = std::make_shared<BossSplit>(i_diff, 1, 6, false, spawnPos, projBody1);
 		}
 		break;
 	}
@@ -511,7 +518,7 @@ void Sector::RemoveDestroyedEntities() {
 	while (iter != lvlEntitiesPhase1.end()) {
 		if (iter._Ptr->_Myval->MarkedForDeath()) {
 			int entType = iter._Ptr->_Myval->GetTypeID();
-			if ((entType == ENEMY_SEEK) || (entType == ENEMY_RAND) || (entType == ENEMY_SEEK) || 
+			if ((entType == ENEMY_SEEK) || (entType == ENEMY_RAND) || (entType == ENEMY_SEEK) ||
 				(entType == ENEMY_SEEK_PUSH) || (entType == ENEMY_RAND_PUSH) || (entType == ENEMY_BOSS)) {
 				--sectEnemyNum;
 				if ((sectEnemyNum <= 0) && (firstPhase)) {
@@ -523,7 +530,7 @@ void Sector::RemoveDestroyedEntities() {
 		}
 		else { ++iter; }
 	}
-	if 	((isBossRoom) && (sectEnemyNum <= 0) && (firstPhase)) {
+	if ((isBossRoom) && (sectEnemyNum <= 0) && (firstPhase)) {
 		SwitchLevelToPhaseTwo();
 	}
 }
@@ -551,7 +558,20 @@ void Sector::AddTerrain(int i_terrainType, bool terrainBig)
 	float smallWidth = 40.0f;
 	float smallHeight = sectorHeight * 0.25f;
 	float bigWidth = 40.0f;
-	float bigHeight = sectorHeight * 0.666f;
+	// A wall must always be small enough that a ship can fit on either side, player width == 150
+	float bigHeight = std::min((sectorHeight * 0.666f), sectorHeight - 300.0f);
+	//if a wall must be extremely small to fit just dont put it in
+	if (bigHeight < 150) {
+		return;
+	}
+	//also if the player can't squeeze between the terrain and the doors dont put it in
+	if ((sectorWidth * (1.0f / 5.0f)) < 160) {
+		return;
+	}
+	if ((sectorHeight * (1.0f / 5.0f)) < 160) {
+		return;
+	}
+
 	switch (terrType) {
 		//small walls
 	case 0: {
@@ -976,6 +996,7 @@ void Sector::UnlockRoom()
 	auto entPointer = GLBVRS::PPTR;
 	auto playPtr = dynamic_cast<PlayerChar*>(entPointer.get());
 	playPtr->lastAOEFired = std::chrono::high_resolution_clock::now() - std::chrono::minutes(1);
+	PlaySound(RESOURCES::SOUNDS::MENUACCEPT2);
 	for (auto doorPtr : sectDoors) {
 		doorPtr->Unlock();
 	}

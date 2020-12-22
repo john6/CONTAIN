@@ -4,6 +4,9 @@
 BossStream::BossStream(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss, RigidBody i_rb) :
 	Enemy(i_diff, i_startPosition, i_rb, ENEMY_BOSS), isMiniBoss{ i_isMiniBoss }
 {
+	if (!i_isMiniBoss) {
+		rb = RigidBody(Physics::CreateRegularPolygon(8, 90.0f), METAL);
+	}
 	origColorFill = SAGE;
 	origColorOutLine = EMERALD;
 	fillColor = origColorFill;
@@ -18,6 +21,7 @@ BossStream::BossStream(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMin
 
 void BossStream::Update(float i_stepSize)
 {
+	UpdateTendrilPosition(i_stepSize);
 	UpdateHealth(i_stepSize);
 	if (stunSecs < 0) {
 		rb.angVel = 0.03f;
@@ -68,7 +72,7 @@ void BossStream::shootProj()
 		Vector2f projDir = Math::AngleToVect(rb.transform.orient);
 		projDir.normalize();
 		std::shared_ptr<Entity> projectile = std::make_shared<Projectile>(
-			rb.transform.pos + (projDir * (100.0f)), 1);
+			rb.transform.pos + (projDir * (135.0f)), 1);
 		projectile->rb.ApplyImpulse((projDir * projSpeed), NULL_VECTOR);
 		spawnVect.push_back(projectile);
 	}

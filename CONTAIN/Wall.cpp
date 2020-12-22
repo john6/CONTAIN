@@ -18,7 +18,7 @@ Wall::Wall(Vector2f i_startPosition, RigidBody i_rb,
 	outlineColor = origColorOutLine;
 }
 
-void Wall::CollideWithProjectile(Projectile * i_projPtr)
+void Wall::CollideWithProjectile(CollisionData i_coll)
 {
 	if (breakable) {
 		TakeDamage(1.0f);
