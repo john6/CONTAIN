@@ -4,6 +4,8 @@
 #include "PowerUp.h"
 #include "Anim.h"
 #include "Scenery.h"
+#include "Wall.h"
+#include "Blast.h"
 
 Enemy::Enemy(DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb, TypeID i_typeID) :
 	Entity(i_startPosition, i_rb, i_typeID), tendrilSize{ i_rb.shape->GetArea() / 4000.0f },
@@ -18,6 +20,7 @@ trianglePoly{ Polygon({ Vector2f(0.0f, 0.0f), Vector2f(4.5f * tendrilSize, 12.0f
 	SetDiffVars(i_diff);
 	maxHealth = 1;
 	health = maxHealth;
+	isBoss = false;
 
 	//Visuals
 	deathColorFill = UMBERBROWN;
@@ -68,105 +71,122 @@ void Enemy::Destroy() {
 
 void Enemy::GenerateDeathEffects(ANIMTYPE animType)
 {
-	int splatNum = 2;
-	int circleSplatNum = 2;
 
-	std::random_device rd1;  //Will be used to obtain a seed for the random number engine
-	std::mt19937 gen1(rd1()); //Standard mersenne_twister_engine seeded with rd()
+	if (true) {
+		int splatNum = 2;
+		int circleSplatNum = 2;
 
-
-	if (animType == ENEMY_BURST_DEATH) {
-		for (int i = 0; i < splatNum; i++) {
-			microSec ms(100000000);
-			std::shared_ptr<Entity> anim = std::make_shared<Anim>(rb.transform.pos, ms, ENEMY_BURST_DEATH, this);
-			spawnVect.push_back(anim);
-			if (rb.shape->GetType() == Shape::ShapeType::CIRCLE) {
-				auto circle = dynamic_cast<Circle*>(rb.shape.get());
-				std::shared_ptr<sf::Shape> corpse = Physics::CreateIrregularPolygon(5, circle->radius * 3)->GetSFMLRepr();
-				int corpseR = (fillColor.r + 0) / 2;
-				int corpseG = (fillColor.g + 0) / 2;
-				int corpseB = (fillColor.b + 0) / 2;
-				sf::Color corpseCol(corpseR, corpseG, corpseB, 178);
-				corpse->setFillColor(corpseCol);
-				corpse->setOutlineColor(corpseCol);
-				corpse->setPosition(sf::Vector2f(rb.transform.pos.x(), rb.transform.pos.y()));
-				std::shared_ptr<Entity> corpseEnt = std::make_shared<Scenery>(rb.transform.pos, corpse);
-				spawnVect.push_back(corpseEnt);
+		std::random_device rd1;  //Will be used to obtain a seed for the random number engine
+		std::mt19937 gen1(rd1()); //Standard mersenne_twister_engine seeded with rd()
+		if (animType == ENEMY_BURST_DEATH) {
+			for (int i = 0; i < splatNum; i++) {
+				microSec ms(100000000);
+				std::shared_ptr<Entity> anim = std::make_shared<Anim>(rb.transform.pos, ms, ENEMY_BURST_DEATH, this);
+				spawnVect.push_back(anim);
+				if (rb.shape->GetType() == Shape::ShapeType::CIRCLE) {
+					auto circle = dynamic_cast<Circle*>(rb.shape.get());
+					std::shared_ptr<sf::Shape> corpse = Physics::CreateIrregularPolygon(5, circle->radius * 3)->GetSFMLRepr();
+					int corpseR = (fillColor.r + 0) / 2;
+					int corpseG = (fillColor.g + 0) / 2;
+					int corpseB = (fillColor.b + 0) / 2;
+					sf::Color corpseCol(corpseR, corpseG, corpseB, 178);
+					corpse->setFillColor(corpseCol);
+					corpse->setOutlineColor(corpseCol);
+					corpse->setPosition(sf::Vector2f(rb.transform.pos.x(), rb.transform.pos.y()));
+					std::shared_ptr<Entity> corpseEnt = std::make_shared<Scenery>(rb.transform.pos, corpse);
+					spawnVect.push_back(corpseEnt);
+				}
+				else if (rb.shape->GetType() == Shape::ShapeType::RECTANGLE) {
+					auto rectangle = dynamic_cast<Rectangle *> (rb.shape.get());
+					std::shared_ptr<sf::Shape> corpse = Physics::CreateIrregularPolygon(5, (rectangle->GetWidth() + rectangle->GetHeight())*1.0f)->GetSFMLRepr();
+					int corpseR = (fillColor.r + 0) / 2;
+					int corpseG = (fillColor.g + 0) / 2;
+					int corpseB = (fillColor.b + 0) / 2;
+					sf::Color corpseCol(corpseR, corpseG, corpseB, 178);
+					corpse->setFillColor(corpseCol);
+					corpse->setOutlineColor(corpseCol);
+					corpse->setPosition(sf::Vector2f(rb.transform.pos.x(), rb.transform.pos.y()));
+					std::shared_ptr<Entity> corpseEnt = std::make_shared<Scenery>(rb.transform.pos, corpse);
+					spawnVect.push_back(corpseEnt);
+				}
+				else if (rb.shape->GetType() == Shape::ShapeType::POLYGON) {
+					auto poly = dynamic_cast<Polygon *> (rb.shape.get());
+					std::shared_ptr<sf::Shape> corpse = Physics::CreateIrregularPolygon(poly->numPoints + 1, poly->GetDistToCorner() * 2)->GetSFMLRepr();
+					int corpseR = (fillColor.r + 0) / 2;
+					int corpseG = (fillColor.g + 0) / 2;
+					int corpseB = (fillColor.b + 0) / 2;
+					sf::Color corpseCol(corpseR, corpseG, corpseB, 170);
+					corpse->setFillColor(corpseCol);
+					corpse->setOutlineColor(corpseCol);
+					corpse->setPosition(sf::Vector2f(rb.transform.pos.x(), rb.transform.pos.y()));
+					std::shared_ptr<Entity> corpseEnt = std::make_shared<Scenery>(rb.transform.pos, corpse);
+					spawnVect.push_back(corpseEnt);
+				}
 			}
-			else if (rb.shape->GetType() == Shape::ShapeType::RECTANGLE) {
-				auto rectangle = dynamic_cast<Rectangle *> (rb.shape.get());
-				std::shared_ptr<sf::Shape> corpse = Physics::CreateIrregularPolygon(5, (rectangle->GetWidth() + rectangle->GetHeight())*1.0f)->GetSFMLRepr();
-				int corpseR = (fillColor.r + 0) / 2;
-				int corpseG = (fillColor.g + 0) / 2;
-				int corpseB = (fillColor.b + 0) / 2;
-				sf::Color corpseCol(corpseR, corpseG, corpseB, 178);
-				corpse->setFillColor(corpseCol);
-				corpse->setOutlineColor(corpseCol);
-				corpse->setPosition(sf::Vector2f(rb.transform.pos.x(), rb.transform.pos.y()));
-				std::shared_ptr<Entity> corpseEnt = std::make_shared<Scenery>(rb.transform.pos, corpse);
-				spawnVect.push_back(corpseEnt);
-			}
-			else if (rb.shape->GetType() == Shape::ShapeType::POLYGON) {
-				auto poly = dynamic_cast<Polygon *> (rb.shape.get());
-				std::shared_ptr<sf::Shape> corpse = Physics::CreateIrregularPolygon(poly->numPoints + 1, poly->GetDistToCorner() * 2)->GetSFMLRepr();
-				int corpseR = (fillColor.r + 0) / 2;
-				int corpseG = (fillColor.g + 0) / 2;
-				int corpseB = (fillColor.b + 0) / 2;
+			for (int i = 0; i < circleSplatNum; i++) {
+				float circRadius;
+				if (rb.shape->GetType() == Shape::ShapeType::CIRCLE) {
+					auto circle = dynamic_cast<Circle*>(rb.shape.get());
+					circRadius = circle->radius * 0.5;
+				}
+				else if (rb.shape->GetType() == Shape::ShapeType::RECTANGLE) {
+					auto rectangle = dynamic_cast<Rectangle *> (rb.shape.get());
+					circRadius = (rectangle->GetWidth() + rectangle->GetHeight())*0.25f;
+				}
+				else if (rb.shape->GetType() == Shape::ShapeType::POLYGON) {
+					auto poly = dynamic_cast<Polygon *> (rb.shape.get());
+					circRadius = poly->GetDistToCorner() * 0.75f;
+				}
+				std::uniform_int_distribution<> transformDistrib(-(int)circRadius, (int)circRadius); //both boundaries are inclusive
+
+				int randPosDiffX = transformDistrib(gen1);
+				int randPosDiffY = transformDistrib(gen1);
+				int corpseR = ((fillColor.r + 0) / 2); // +(randPosDiffX / 4.0);
+				int corpseG = ((fillColor.g + 0) / 2); // +(randPosDiffX / 4.0);
+				int corpseB = ((fillColor.b + 0) / 2); // +(randPosDiffX / 4.0);
 				sf::Color corpseCol(corpseR, corpseG, corpseB, 170);
+				std::shared_ptr<sf::Shape> corpse;
+				float radius;
+				if (i == 0) {
+					radius = (circRadius * 1.5);
+					corpse = std::make_shared<sf::CircleShape>(radius);
+					corpse->setPosition(sf::Vector2f(rb.transform.pos.x(), rb.transform.pos.y()));
+
+				}
+				else {
+					radius = circRadius * 0.50f + (randPosDiffY * 0.40f);
+					corpse = std::make_shared<sf::CircleShape>(radius);
+					corpse->setPosition(sf::Vector2f(rb.transform.pos.x() + (randPosDiffX * 2.0f), rb.transform.pos.y() + (randPosDiffY * 2.0f)));
+				}
+				corpse->setOrigin(sf::Vector2f(radius * 0.75f, radius * 0.75f));
 				corpse->setFillColor(corpseCol);
 				corpse->setOutlineColor(corpseCol);
-				corpse->setPosition(sf::Vector2f(rb.transform.pos.x(), rb.transform.pos.y()));
+
 				std::shared_ptr<Entity> corpseEnt = std::make_shared<Scenery>(rb.transform.pos, corpse);
 				spawnVect.push_back(corpseEnt);
 			}
 		}
-		for (int i = 0; i < circleSplatNum; i++) {
-			float circRadius;
-			if (rb.shape->GetType() == Shape::ShapeType::CIRCLE) {
-				auto circle = dynamic_cast<Circle*>(rb.shape.get());
-				circRadius = circle->radius * 0.5;
-			}
-			else if (rb.shape->GetType() == Shape::ShapeType::RECTANGLE) {
-				auto rectangle = dynamic_cast<Rectangle *> (rb.shape.get());
-				circRadius = (rectangle->GetWidth() + rectangle->GetHeight())*0.25f;
-			}
-			else if (rb.shape->GetType() == Shape::ShapeType::POLYGON) {
-				auto poly = dynamic_cast<Polygon *> (rb.shape.get());
-				circRadius = poly->GetDistToCorner() * 0.75f;
-			}
-			std::uniform_int_distribution<> transformDistrib(-(int)circRadius, (int)circRadius); //both boundaries are inclusive
-
-			int randPosDiffX = transformDistrib(gen1);
-			int randPosDiffY = transformDistrib(gen1);
-			int corpseR = ((fillColor.r + 0) / 2); // +(randPosDiffX / 4.0);
-			int corpseG = ((fillColor.g + 0) / 2); // +(randPosDiffX / 4.0);
-			int corpseB = ((fillColor.b + 0) / 2); // +(randPosDiffX / 4.0);
-			sf::Color corpseCol(corpseR, corpseG, corpseB, 170);
-			std::shared_ptr<sf::Shape> corpse;
-			float radius;
-			if (i == 0) {
-				radius = (circRadius * 1.5);
-				corpse = std::make_shared<sf::CircleShape>(radius);
-				corpse->setPosition(sf::Vector2f(rb.transform.pos.x(), rb.transform.pos.y()));
-
-			}
-			else {
-				radius = circRadius * 0.50f + (randPosDiffY * 0.40f);
-				corpse = std::make_shared<sf::CircleShape>(radius);
-				corpse->setPosition(sf::Vector2f(rb.transform.pos.x() + (randPosDiffX * 2.0f), rb.transform.pos.y() + (randPosDiffY * 2.0f)));
-			}
-			corpse->setOrigin(sf::Vector2f(radius * 0.75f, radius * 0.75f));
-			corpse->setFillColor(corpseCol);
-			corpse->setOutlineColor(corpseCol);
-
-			std::shared_ptr<Entity> corpseEnt = std::make_shared<Scenery>(rb.transform.pos, corpse);
-			spawnVect.push_back(corpseEnt);
+		if (animType == CANNED_EXPLOSION) {
+			microSec ms(5000000000);
+			std::shared_ptr<Entity> anim = std::make_shared<Anim>(rb.transform.pos, ms, CANNED_EXPLOSION, this);
+			spawnVect.push_back(anim);
 		}
 	}
-	if (animType == CANNED_EXPLOSION) {
-		microSec ms(5000000000);
-		std::shared_ptr<Entity> anim = std::make_shared<Anim>(rb.transform.pos, ms, CANNED_EXPLOSION, this);
-		spawnVect.push_back(anim);
+	if (isBoss) {
+		for (int i = 0; i < 8; i++) {
+			std::shared_ptr<Shape> shape1 = Physics::CreateIrregularPolygon(4, 100, 1);
+			RigidBody fragment1 = RigidBody(shape1, STATIC);
+			std::shared_ptr<Wall> wall1 = std::make_shared<Wall>(
+				rb.transform.pos, fragment1, fillColor, outlineColor, true);
+			wall1->TakeDamage(999);
+			std::shared_ptr<Entity> frag1 = move(wall1);
+			spawnVect.push_back(frag1);
+		}
+
+		std::shared_ptr<Entity> projectile = std::make_shared<Blast>(rb.transform.pos, 1, 700.0f, 0.0f, 150);
+		projectile->fillColor = fillColor;
+		projectile->outlineColor = outlineColor;
+		spawnVect.push_back(projectile);
 	}
 }
 

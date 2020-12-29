@@ -27,7 +27,7 @@ public:
 	void Destroy() override;
 
 	//TODO vulnerable can be made into private too I think I would just put the code into take damage where it just doesnt if its not vulnerable
-	void TakeDamage(float i_dmg);
+	void TakeDamage(float i_dmg, CollisionData i_coll);
 
 	void shootProj();
 

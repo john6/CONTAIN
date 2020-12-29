@@ -1,9 +1,9 @@
 #include "GameRenderer.h"
-
+#include "Scenery.h"
 
 GameRenderer::GameRenderer(){
-	GameRenderer::worldView.reset(sf::FloatRect(0, 0, WORLDSIZEWIDTH, WORLDSIZEHEIGHT));
-	GameRenderer::worldView.setCenter(WORLDSIZEWIDTH * 0.5f, WORLDSIZEHEIGHT * 0.5f);
+	GameRenderer::worldView.reset(sf::FloatRect(0, 0, WORLD_SIZE_WINDOW_WIDTH, WORLD_SIZE_WINDOW_HEIGHT));
+	GameRenderer::worldView.setCenter(WORLD_SIZE_WINDOW_WIDTH * 0.5f, WORLD_SIZE_WINDOW_HEIGHT * 0.5f);
 	GameRenderer::hudView.reset(sf::FloatRect(0, 0, GLBVRS::SCREEN_WIDTH, GLBVRS::SCREEN_HEIGHT));
 }
 
@@ -22,33 +22,72 @@ void GameRenderer::Render(sf::RenderWindow* i_window, float i_lerp_fraction,
 
 	std::vector<const sf::Drawable*> animationDrawables;
 
+
+	//first pass for scenery
 	if (i_entityList->size() != 0) {
 		auto entIt = i_entityList->begin();
-			while (entIt != i_entityList->end()) {
-				//i_window->draw(*it._Ptr->_Myval->CreateDrawable(i_lerp_fraction));
+		while (entIt != i_entityList->end()) {
+			//i_window->draw(*it._Ptr->_Myval->CreateDrawable(i_lerp_fraction));
+			if ((entIt._Ptr->_Myval->GetTypeID() == SCENERY)) {
+				auto scenery = dynamic_cast<Scenery*>(entIt._Ptr->_Myval.get());
+				if (scenery->renderLvl == 0) {
+					drawablePtrVect drawables = entIt._Ptr->_Myval->CreateDrawables(i_lerp_fraction);
+					if (drawables->size() != 0) {
+						auto drawbIt = drawables->begin();
+						while (drawbIt != drawables->end()) {
+							i_window->draw(*drawbIt._Ptr->get());
+							drawbIt++;
+						}
+					}
+				}
+			}
+			entIt++;
+		}
+	}
+
+	//second pass for other shit
+	if (i_entityList->size() != 0) {
+		auto entIt = i_entityList->begin();
+		while (entIt != i_entityList->end()) {
+			//i_window->draw(*it._Ptr->_Myval->CreateDrawable(i_lerp_fraction));
+			if ((entIt._Ptr->_Myval->GetTypeID() == SCENERY)) {
+				auto scenery = dynamic_cast<Scenery*>(entIt._Ptr->_Myval.get());
+				if (scenery->renderLvl == 1) {
+					drawablePtrVect drawables = entIt._Ptr->_Myval->CreateDrawables(i_lerp_fraction);
+					if (drawables->size() != 0) {
+						auto drawbIt = drawables->begin();
+						while (drawbIt != drawables->end()) {
+							i_window->draw(*drawbIt._Ptr->get());
+							drawbIt++;
+						}
+					}
+				}
+			}
+			else if ((entIt._Ptr->_Myval->GetTypeID() == ANIMATION)) {
+				auto scenery = dynamic_cast<Scenery*>(entIt._Ptr->_Myval.get());
+					drawablePtrVect drawables = entIt._Ptr->_Myval->CreateDrawables(i_lerp_fraction);
+					if (drawables->size() != 0) {
+						auto drawbIt = drawables->begin();
+						while (drawbIt != drawables->end()) {
+							animationDrawables.push_back(drawbIt._Ptr->get());
+							drawbIt++;
+						}
+					}
+			}
+			else {
+				auto scenery = dynamic_cast<Scenery*>(entIt._Ptr->_Myval.get());
 				drawablePtrVect drawables = entIt._Ptr->_Myval->CreateDrawables(i_lerp_fraction);
 				if (drawables->size() != 0) {
 					auto drawbIt = drawables->begin();
 					while (drawbIt != drawables->end()) {
-						if (entIt._Ptr->_Myval->GetTypeID() == ANIMATION) {
-							animationDrawables.push_back(drawbIt._Ptr->get());
-						}
-						else {
-							i_window->draw(*drawbIt._Ptr->get());
-						}
-
+						i_window->draw(*drawbIt._Ptr->get());
 						drawbIt++;
 					}
 				}
-				//sf::VertexArray line = entity.rb.CreatOrientationLine(i_lerp_fraction);
-				//i_window->draw(line);
-				//for (sf::CircleShape circle : entity.CreateStructurePoints(i_lerp_fraction)) {
-				//	i_window->draw(circle);
-				//}
-				entIt++;
 			}
+			entIt++;
+		}
 	}
-
 
 	//std::unique_ptr<sf::Shape> shape = playerChar->CreateDrawable(i_lerp_fraction);
 	drawablePtrVect playerDrawables = playerChar->CreateDrawables(i_lerp_fraction);
@@ -84,7 +123,7 @@ void GameRenderer::Render(sf::RenderWindow* i_window, float i_lerp_fraction,
 
 void GameRenderer::ResetWorldSize(int width, int height)
 {
-	GameRenderer::worldView.reset(sf::FloatRect(0, 0, 3744, 2106));
+	GameRenderer::worldView.reset(sf::FloatRect(0, 0, WORLD_SIZE_WINDOW_WIDTH, WORLD_SIZE_WINDOW_HEIGHT));
 	GameRenderer::worldView.setCenter(width / 2, height / 2);
 }
 
@@ -92,3 +131,7 @@ void GameRenderer::SetHudSize(int width, int height)
 {
 	GameRenderer::hudView.reset(sf::FloatRect(0, 0, width, height));
 }
+
+//void GameRenderer::SetView(sf::View renderView) {
+//	i_window->setView(renderView);
+//}

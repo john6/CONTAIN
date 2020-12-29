@@ -67,6 +67,7 @@
     <ClCompile Include="Sector.cpp" />
     <ClCompile Include="SettingsMenu.cpp" />
     <ClCompile Include="Shape.cpp" />
+    <ClCompile Include="SplashScreen.cpp" />
     <ClCompile Include="TextBox.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="TuteLib.cpp" />
@@ -125,6 +126,7 @@
     <ClInclude Include="Sector.h" />
     <ClInclude Include="SettingsMenu.h" />
     <ClInclude Include="Shape.h" />
+    <ClInclude Include="SplashScreen.h" />
     <ClInclude Include="TextBox.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="TuteLib.h" />

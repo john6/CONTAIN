@@ -6,6 +6,8 @@ Menu::Menu(RESOURCES* i_resources, DIFFICULTY i_defaultDiff) :
 {
 	font = resources->GetFont();
 
+
+
 	sf::Vector2f topLeft(GLBVRS::HR_MRG * 4.5f, GLBVRS::VRT_MRG * 4.0f);
 	float bttnMrgHr = (GLBVRS::HR_MRG / 4.0f);
 	float bttnMrgVrt = (GLBVRS::VRT_MRG / 3.0f);
@@ -53,7 +55,6 @@ Menu::Menu(RESOURCES* i_resources, DIFFICULTY i_defaultDiff) :
 
 	currDifficulty = i_defaultDiff;
 	UpdateButtonTriplet(i_defaultDiff);
-
 
 
 	title.setFont(font);
@@ -139,31 +140,34 @@ void  Menu::UpdateButtonTriplet(DIFFICULTY i_difficultySelected) {
 }
 
 GAME_STATE Menu::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vector2f i_mousePos) {
-	PollButtonTriplet(i_mousePos);
-	bool playButtonPressed = PollInput(i_mousePos, &playButton);
-	bool playTutorialButtonPressed = PollInput(i_mousePos, &playTutorialButton);
-	bool exitButtonPressed = PollInput(i_mousePos, &exitButton);
-	bool settingsButtonPressed = PollInput(i_mousePos, &settingsButton);
+	if (GLBVRS::canPressButtonsAgain) {
+		PollButtonTriplet(i_mousePos);
+		bool playButtonPressed = PollInput(i_mousePos, &playButton);
+		bool playTutorialButtonPressed = PollInput(i_mousePos, &playTutorialButton);
+		bool exitButtonPressed = PollInput(i_mousePos, &exitButton);
+		bool settingsButtonPressed = PollInput(i_mousePos, &settingsButton);
 
-	if (playButtonPressed) {
-		resources->PlaySound(RESOURCES::OCTAVE_BEEP);
-		return START_GAME;
+		if (playButtonPressed) {
+			resources->PlaySound(RESOURCES::OCTAVE_BEEP);
+			return START_GAME;
+		}
+		if (playTutorialButtonPressed) {
+			resources->PlaySound(RESOURCES::OCTAVE_BEEP);
+			return START_TUTORIAL;
+		}
+		else if (settingsButtonPressed) {
+			resources->PlaySound(RESOURCES::OCTAVE_BEEP);
+			return SETTINGS;
+		}
+		else if (exitButtonPressed) {
+			resources->PlaySound(RESOURCES::OCTAVE_BEEP);
+			return EXIT_GAME;
+		}
+		else {
+			return MENU;
+		}
 	}
-	if (playTutorialButtonPressed) {
-		resources->PlaySound(RESOURCES::OCTAVE_BEEP);
-		return START_TUTORIAL;
-	}
-	else if (settingsButtonPressed) {
-		resources->PlaySound(RESOURCES::OCTAVE_BEEP);
-		return SETTINGS;
-	}
-	else if (exitButtonPressed) {
-		resources->PlaySound(RESOURCES::OCTAVE_BEEP);
-		return EXIT_GAME;
-	}
-	else { 
-		return MENU; 
-	}
+	else { return MENU; }
 }
 
 void Menu::Render(sf::RenderWindow* window) {

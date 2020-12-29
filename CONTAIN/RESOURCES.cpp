@@ -40,6 +40,10 @@ RESOURCES::RESOURCES()
 	if (!m_bufferUpwardChromaticBeep.loadFromFile("Sounds/BeepSounds/UpwardChromaticBeep.ogg")) {
 		std::cerr << "error loading UpwardChromaticBeep \n";
 	}
+	//16Bit
+	if (!BigEggCollect1.loadFromFile("Sounds/16BitSounds/Big Egg collect 1.ogg")) {
+		std::cerr << "error loading Big Egg collect1.ogg \n";
+	}
 	//playful
 	if (!m_bufferplayfulAttack.loadFromFile("Sounds/PlayFulSounds/Playful_Attack.ogg")) {
 		std::cerr << "error loading Playful_Attack.ogg \n";
@@ -78,14 +82,32 @@ RESOURCES::RESOURCES()
 	if (!coin3.loadFromFile("Sounds/YalSounds/coin3.ogg")) {
 		std::cerr << "error loading coin3.ogg \n";
 	}
+	if (!Explode4.loadFromFile("Sounds/YalSounds/Explode4.ogg")) {
+		std::cerr << "error loading explode4.ogg \n";
+	}
 	if (!Explode5.loadFromFile("Sounds/YalSounds/Explode5.ogg")) {
-		std::cerr << "error loading .ogg \n";
+		std::cerr << "error loading Explode5.ogg \n";
+	}
+	if (!Explode7.loadFromFile("Sounds/YalSounds/Explode7.ogg")) {
+		std::cerr << "error loading Explode7.ogg \n";
+	}
+	if (!Explode17.loadFromFile("Sounds/YalSounds/Explode17.ogg")) {
+		std::cerr << "error loading Explode17.ogg \n";
+	}
+	if (!Explode25.loadFromFile("Sounds/YalSounds/Explode25.ogg")) {
+		std::cerr << "error loading Explode25.ogg \n";
+	}
+	if (!Explode36.loadFromFile("Sounds/YalSounds/Explode36.ogg")) {
+		std::cerr << "error loading Explode36.ogg \n";
 	}
 	if (!Explode20.loadFromFile("Sounds/YalSounds/Explode20.ogg")) {
-		std::cerr << "error loading .ogg \n";
+		std::cerr << "error loading Explode20.ogg \n";
 	}
 	if (!Explode20.loadFromFile("Sounds/YalSounds/Fire5.ogg")) {
 		std::cerr << "error loading Fire5.ogg \n";
+	}
+	if (!GameOver.loadFromFile("Sounds/YalSounds/gameover.ogg")) {
+		std::cerr << "error loading gameover.ogg \n";
 	}
 	if (!laser14.loadFromFile("Sounds/YalSounds/laser14.ogg")) {
 		std::cerr << "error loading .ogg \n";
@@ -153,6 +175,9 @@ RESOURCES::RESOURCES()
 	if (!steam3.loadFromFile("Sounds/YalSounds/steam3.ogg")) {
 		std::cerr << "error loading steam3.ogg \n";
 	}
+	if (!success1.loadFromFile("Sounds/YalSounds/success1.ogg")) {
+		std::cerr << "error loading success1.ogg \n";
+	}
 	if (!sword5.loadFromFile("Sounds/YalSounds/sword5.ogg")) {
 		std::cerr << "error loading sword5.ogg \n";
 	}
@@ -185,6 +210,9 @@ RESOURCES::RESOURCES()
 	}
 	if (!Sword_Clash.loadFromFile("Sounds/YalSounds/Sword Clash.ogg")) {
 		std::cerr << "error loading Sword Clash.ogg \n";
+	}
+	if (!Engine2.loadFromFile("Sounds/YalSounds/Engine2.ogg")) {
+		std::cerr << "error loading Sword Engine.ogg \n";
 	}
 }
 
@@ -268,6 +296,31 @@ void RESOURCES::SetSoundLevel(float i_soundLvl)
 	for (int i = 0; i < 8; i++) {
 		sound_arr[i].setVolume(soundLvl);
 	}
+	repeatEngineSound.setVolume(soundLvl);
+}
+
+void RESOURCES::playEngineSound(bool i_play)
+{
+	if (i_play) {
+		repeatEngineSound.setBuffer(Engine2);
+		repeatEngineSound.setLoop(true);
+		repeatEngineSound.play();
+	}
+	else {
+		repeatEngineSound.stop();
+	}
+}
+
+void RESOURCES::PlayExplosionSound(bool i_play)
+{
+	if (i_play) {
+		repeatExplosionSound.setBuffer(Explode4);
+		repeatExplosionSound.setLoop(true);
+		repeatExplosionSound.play();
+	}
+	else {
+		repeatExplosionSound.stop();
+	}
 }
 
 void RESOURCES::TurnMusicOn(bool i_music)
@@ -297,6 +350,36 @@ void RESOURCES::PlaySound(int soundNum) {
 	}
 	case (OCTAVE_BEEP): {
 		currSound->setBuffer(m_bufferOctaveBeep);
+		currSound->play();
+		break;
+	}
+	case (EXPLODE4): {
+		currSound->setBuffer(Explode4);
+		currSound->play();
+		break;
+	}
+	case (EXPLODE5): {
+		currSound->setBuffer(Explode5);
+		currSound->play();
+		break;
+	}
+	case (EXPLODE7): {
+		currSound->setBuffer(Explode7);
+		currSound->play();
+		break;
+	}
+	case (EXPLODE17): {
+		currSound->setBuffer(Explode17);
+		currSound->play();
+		break;
+	}
+	case (EXPLODE25): {
+		currSound->setBuffer(Explode25);
+		currSound->play();
+		break;
+	}
+	case (EXPLODE36): {
+		currSound->setBuffer(Explode36);
 		currSound->play();
 		break;
 	}
@@ -375,11 +458,6 @@ void RESOURCES::PlaySound(int soundNum) {
 		currSound->play();
 		break;
 	}
-	case (EXPLODE5): {
-		currSound->setBuffer(Explode5);
-		currSound->play();
-		break;
-	}
 	case (EXPLODE20): {
 		currSound->setBuffer(Explode20);
 		currSound->play();
@@ -387,6 +465,11 @@ void RESOURCES::PlaySound(int soundNum) {
 	}
 	case (FIRE5): {
 		currSound->setBuffer(Fire5);
+		currSound->play();
+		break;
+	}
+	case (GAMEOVER): {
+		currSound->setBuffer(GameOver);
 		currSound->play();
 		break;
 	}
@@ -550,7 +633,16 @@ void RESOURCES::PlaySound(int soundNum) {
 		currSound->play();
 		break;
 	}
-	
+	case (SUCCESS1): {
+		currSound->setBuffer(success1);
+		currSound->play();
+		break;
+	}
+	case (BIGEGGCOLLECT1): {
+		currSound->setBuffer(BigEggCollect1);
+		currSound->play();
+		break;
+	}
 	default: {
 		std::cerr << "soundNum not found \n";
 	}

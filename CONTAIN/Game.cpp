@@ -1,7 +1,7 @@
 #include "Game.h"
 
 Game::Game(sf::RenderWindow* i_window, RESOURCES* i_resources, DIFFICULTY i_difficulty)
-	: renderWindow{ i_window }, resources {i_resources}, tuteLib{ TuteLib(i_window, i_resources)}, HUD { HeadsUpDisplay(i_resources) }
+	: renderWindow{ i_window }, resources {i_resources}, tuteLib{ TuteLib(i_window, i_resources)}, HUD { HeadsUpDisplay(i_resources) }, pController{ PlayerController(i_window) }
 {
 	font = resources->GetFont();
 	gameRenderer = GameRenderer();
@@ -15,10 +15,13 @@ Game::~Game()
 GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vector2f i_mousePos) {
 
 	if ((playState == GENERAL_GAMEPLAY) && (GLBVRS::canPressButtonsAgain) &&
-		(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape))) {
+		((sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape)) || (pController.IsStartPressed()))) {
 		tuteLib.SetTutorial(TuteLib::TUTORIALS::PAUSE_MENU);
 		playState = IN_GAME_MENU;
+		GLBVRS::RSRCS->music.pause();
 		GLBVRS::canPressButtonsAgain = false;
+		GLBVRS::RSRCS->PlayExplosionSound(false);
+		GLBVRS::RSRCS->playEngineSound(false);
 		GLBVRS::lastMenuSwitch = hiResTime::now();
 	}
 
@@ -26,12 +29,24 @@ GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vecto
 		if ((currSector.x == 5) && (currSector.y == 0) && (levels[currLvl]->GetSector(currSector)->sectEnemyNum == 0)) {
 			if (!tuteLib.IsTutorialPlayed(TuteLib::TUTORIALS::ESCAPE)) {
 				tuteLib.SetTutorial(TuteLib::TUTORIALS::ESCAPE);
+				GLBVRS::RSRCS->PlayExplosionSound(false);
+				GLBVRS::RSRCS->playEngineSound(false);
 				playState = IN_GAME_MENU;
 			}
 		}
 		else if ((currSector.x == 4) && (currSector.y == 0) && (levels[currLvl]->GetSector(currSector)->firstPhase == false)) {
 			if (!tuteLib.IsTutorialPlayed(TuteLib::TUTORIALS::PUSH_ENEMIES)) {
 				tuteLib.SetTutorial(TuteLib::TUTORIALS::PUSH_ENEMIES);
+				GLBVRS::RSRCS->PlayExplosionSound(false);
+				GLBVRS::RSRCS->playEngineSound(false);
+				playState = IN_GAME_MENU;
+			}
+		}
+		else if ((currSector.x == 0) && (currSector.y == 0) && (levels[currLvl]->GetSector(currSector)->firstPhase == false)) {
+			if (!tuteLib.IsTutorialPlayed(TuteLib::TUTORIALS::TUTORIAL_EXIT)) {
+				tuteLib.SetTutorial(TuteLib::TUTORIALS::TUTORIAL_EXIT);
+				GLBVRS::RSRCS->PlayExplosionSound(false);
+				GLBVRS::RSRCS->playEngineSound(false);
 				playState = IN_GAME_MENU;
 			}
 		}
@@ -39,6 +54,8 @@ GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vecto
 			if (!tuteLib.IsTutorialPlayed(tuteLib.GetTuteFromSect(currSector.x, currSector.y))) {
 				tuteLib.SetTutorial(tuteLib.GetTuteFromSect(currSector.x, currSector.y));
 				playState = IN_GAME_MENU;
+				GLBVRS::RSRCS->PlayExplosionSound(false);
+				GLBVRS::RSRCS->playEngineSound(false);
 			}
 		}
 
@@ -60,11 +77,17 @@ GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vecto
 				PlayerChar* playerPtr = dynamic_cast<PlayerChar*>(playerChar.get());
 				playerPtr->ReceivePowerUp(upgradeResult);
 				playState = GENERAL_GAMEPLAY;
-				currRunScore += 5000 * (1 + gameDiff);
-				currRunScore += playerPtr->GetCurrHealth() * 100 * (1 + gameDiff);
-				currRunScore += levels[currLvl]->timeToComplete * 150 * (1 + gameDiff);
-				currRunScore += levels[currLvl]->enemiesKilled * 25 * (1 + gameDiff);
-				++currLvl;
+
+				if (firstPowerUp) {
+					firstPowerUp = false;
+				}
+				else {
+					++currLvl;
+					currRunScore += 5000 * (1 + gameDiff);
+					currRunScore += playerPtr->GetCurrHealth() * 100 * (1 + gameDiff);
+					currRunScore += levels[currLvl]->timeToComplete * 150 * (1 + gameDiff);
+					currRunScore += levels[currLvl]->enemiesKilled * 25 * (1 + gameDiff);
+				}
 				currSector = levels[currLvl]->originCoord;
 				playerPtr->ResetHealth();
 				playerPtr->ResetSpecialAmmo();
@@ -81,9 +104,10 @@ GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vecto
 		}
 		case (IN_GAME_MENU): { 
 			if (tuteLib.currActiveTutorial == TuteLib::TUTORIALS::PAUSE_MENU) {
-				if ((GLBVRS::canPressButtonsAgain) && (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape))) {
+				if ((GLBVRS::canPressButtonsAgain) && ((sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape)) || (pController.IsStartPressed()))) {
 					playState = GENERAL_GAMEPLAY;
 					GLBVRS::canPressButtonsAgain = false;
+					GLBVRS::RSRCS->music.play();
 					GLBVRS::lastMenuSwitch = hiResTime::now();
 					gameRenderer.ResetWorldSize(levels[currLvl]->GetSector(currSector)->sectorWidth, levels[currLvl]->GetSector(currSector)->sectorHeight);
 				}
@@ -91,9 +115,19 @@ GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vecto
 					renderWindow->close();
 				}
 			}
+			else if ((tutorial) && (tuteLib.currActiveTutorial == TuteLib::TUTORIALS::TUTORIAL_END)) {
+				if ((GLBVRS::canPressButtonsAgain) && ((sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) || (pController.IsStartPressed()))) {
+					playState = WON_GAME;
+					GLBVRS::canPressButtonsAgain = false;
+					//GLBVRS::RSRCS->music.play();
+					GLBVRS::lastMenuSwitch = hiResTime::now();
+					//gameRenderer.ResetWorldSize(levels[currLvl]->GetSector(currSector)->sectorWidth, levels[currLvl]->GetSector(currSector)->sectorHeight);
+					
+				}
+			}
 			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
 				tuteLib.GetCurrPopUp()->played = true;
-				playState = GENERAL_GAMEPLAY;
+  				playState = GENERAL_GAMEPLAY; 
 				GLBVRS::canPressButtonsAgain = false;
 				GLBVRS::lastMenuSwitch = hiResTime::now();
 				gameRenderer.ResetWorldSize(levels[currLvl]->GetSector(currSector)->sectorWidth, levels[currLvl]->GetSector(currSector)->sectorHeight);
@@ -105,18 +139,28 @@ GAME_STATE Game::Update(float i_microSecs, sf::RenderWindow* i_window, sf::Vecto
 			return MENU;
 			break;
 		}
-	}
+	} 
 }
 
 GAME_STATE Game::UpdateGeneral(float i_stepSize, sf::Vector2f i_mousePos) {
 	levels[currLvl]->UpdateLevel();
 	UpdateLvlEntities(levels[currLvl]->GetSector(currSector)->GetSectorEntities(), i_stepSize);
+	if (playerDied) {
+		float timeSinceDead = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - pDeadTime)).count() / 1000000.0f;
+		if (timeSinceDead > 4.0f) {
+			GLBVRS::RSRCS->PlayExplosionSound(false);
+			GLBVRS::RSRCS->music.stop();
+			return LOSE;
+		}
+	}
 	if (playerWon) {
+		GLBVRS::RSRCS->music.stop();
 		tuteLib = TuteLib(renderWindow, resources);
 		return WIN;
 	}
-	else if (dynamic_cast<PlayerChar*>(playerChar.get())->GetCurrHealth() <= 0) {
-		return LOSE;
+	else if ((!playerDied) && (dynamic_cast<PlayerChar*>(playerChar.get())->GetCurrHealth() <= 0)) {
+		playerDied = true;
+		pDeadTime = hiResTime::now();
 	}
 	return IN_GAME;
 }
@@ -189,7 +233,7 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnt
 
 	playerChar->rb.IntegrateForces();
 	playerChar->rb.IntegrateVelocity(i_stepSize);
-	std::cout << "i_stepSize: " << i_stepSize;
+	//std::cout << "i_stepSize: " << i_stepSize;
 
 	std::for_each(std::execution::par, parallelVect.begin(), parallelVect.end(), [&](int index) {
 		if (index < entPVect.size()) {
@@ -294,6 +338,38 @@ void Game::CreatePlayerChar()
 	RigidBody rb(Physics::CreateRegularPolygon(6, 75.0f), METAL);
 	playerChar = std::make_shared<PlayerChar>(startingHealth, Vector2f(400.0f, 400.0f), rb);
 	playerChar->rb.transform.orient = 1.0f;
+	auto pChar = dynamic_cast<PlayerChar*>(playerChar.get());
+	if (GLBVRS::godMode) {
+		pChar->ReceivePowerUp(RATE_OF_FIRE);
+		pChar->ReceivePowerUp(RATE_OF_FIRE);
+		pChar->ReceivePowerUp(RATE_OF_FIRE);
+
+		pChar->ReceivePowerUp(WEAP_SPEED);
+		pChar->ReceivePowerUp(WEAP_SPEED);
+		pChar->ReceivePowerUp(WEAP_SPEED);
+
+		pChar->ReceivePowerUp(BLAST);
+		pChar->ReceivePowerUp(BLAST);
+		pChar->ReceivePowerUp(BLAST);
+
+		pChar->ReceivePowerUp(SCATTER);
+		pChar->ReceivePowerUp(SCATTER);
+		pChar->ReceivePowerUp(SCATTER);
+
+		pChar->ReceivePowerUp(SMALL_SHIP);
+		pChar->ReceivePowerUp(SMALL_SHIP);
+		pChar->ReceivePowerUp(SMALL_SHIP);
+
+		pChar->ReceivePowerUp(BIG_SHIP);
+		pChar->ReceivePowerUp(BIG_SHIP);
+		pChar->ReceivePowerUp(BIG_SHIP);
+
+		pChar->ReceivePowerUp(WALL_BIG);
+		pChar->ReceivePowerUp(WALL_BIG);
+		pChar->ReceivePowerUp(WALL_BIG);
+	}
+	pChar->ResetHealth();
+
 	GLBVRS::SetGlobalConstants(renderWindow->getSize().x, renderWindow->getSize().y, resources, GLBVRS::MBUSPTR, this, playerChar, resources->soundLvl);
 }
 
@@ -303,19 +379,32 @@ void Game::SpawnProjectile()
 
 void Game::RequestGoToNextLvl()
 {
-	if (currLvl < numLvls - 1) {
+	if ((tutorial) && (!tuteLib.IsTutorialPlayed(TuteLib::TUTORIALS::TUTORIAL_END))) {
+		playerDied = false;
+		auto pChar = dynamic_cast<PlayerChar*>(playerChar.get());
+		GLBVRS::RSRCS->PlayExplosionSound(false);
+		GLBVRS::RSRCS->playEngineSound(false);
+		pChar->ResetHealth();
+		tuteLib.SetTutorial(TuteLib::TUTORIALS::TUTORIAL_END);
+		playState = IN_GAME_MENU;
+		//tuteLib.PlayTutorial(TuteLib::TUTORIALS::TUTORIAL_END);
+		}
+	else if (currLvl < numLvls - 1) {
 		resources->PlaySound(RESOURCES::SOUNDS::MENUACCEPT3);
 		playState = WON_LEVEL;
 		currUpgradeMenu = std::make_shared<UpgradeMenu>(resources, gameDiff, dynamic_cast<PlayerChar*>(playerChar.get()));
+		GLBVRS::RSRCS->PlayExplosionSound(false);
+		GLBVRS::RSRCS->playEngineSound(false);
+		playerDied = false;
+		auto pChar = dynamic_cast<PlayerChar*>(playerChar.get());
+		pChar->ResetHealth();
 	}
-	else {
-		if ((tutorial) && (!tuteLib.IsTutorialPlayed(TuteLib::TUTORIALS::TUTORIAL_END))) {
-			tuteLib.SetTutorial(TuteLib::TUTORIALS::TUTORIAL_END);
-			playState = IN_GAME_MENU;
-			//tuteLib.PlayTutorial(TuteLib::TUTORIALS::TUTORIAL_END);
-		}
+	else if (currLvl == numLvls - 1) {
+		GLBVRS::RSRCS->PlayExplosionSound(false);
+		GLBVRS::RSRCS->playEngineSound(false);
 		playerWon = true;
 	}
+
 }
 
 void Game::InitGame(DIFFICULTY i_diff)
@@ -327,12 +416,21 @@ void Game::InitGame(DIFFICULTY i_diff)
 	currLvl = 0;
 	currRunScore = 5;
 	timeToComplete = 999999999.0f;
-	playState = GENERAL_GAMEPLAY;
 	const microSec UPDATE_INTERVAL(16666);
 	playerWon = false;
+	playerDied = false;
 	CreatePlayerChar();
 	GenerateLevels(i_diff);
 	PlayRandomSong();
+	firstPowerUp = true;
+	playState = WON_LEVEL;
+	currUpgradeMenu = std::make_shared<UpgradeMenu>(resources, gameDiff, dynamic_cast<PlayerChar*>(playerChar.get()));
+	//if (i_diff == EASY) {
+	//}
+	//else {
+	//	firstPowerUp = false;
+	//	playState = GENERAL_GAMEPLAY;
+	//}
 }
 
 void Game::InitTutorial()
@@ -347,7 +445,9 @@ void Game::InitTutorial()
 	playState = GENERAL_GAMEPLAY;
 	const microSec UPDATE_INTERVAL(16666);
 	playerWon = false;
+	playerDied = false;
 	CreatePlayerChar();
+	tuteLib.ResetAllTutes();
 	GenerateTutorialLevels();
 	PlayRandomSong();
 }

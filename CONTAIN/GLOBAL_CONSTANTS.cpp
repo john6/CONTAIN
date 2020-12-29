@@ -53,6 +53,10 @@ int GLBVRS::GetUpgradeMax(UPGRADE_TYPE i_powType)
 		return 0;
 		break;
 	}
+	case (NO_UPGRADES_LEFT): { //rate of fire
+		return 0;
+		break;
+	}
 	case (RATE_OF_FIRE): { //rate of fire
 		return 3;
 		break;
@@ -156,8 +160,9 @@ float GLBVRS::SOUNDLVL = 75.0f;
 
 //Menu Stuff
 hiRes_time_point GLBVRS::lastMenuSwitch = hiResTime::now();
-float GLBVRS::buttonDelay = 0.6f;
+float GLBVRS::buttonDelay = 0.3f;
 bool GLBVRS::canPressButtonsAgain = true;
+bool GLBVRS::godMode = false;
 
 GLBVRS::~GLBVRS()
 {

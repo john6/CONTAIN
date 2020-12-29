@@ -20,6 +20,7 @@
 #include "InfoPopUp.h"
 #include "TuteLib.h"
 #include "Entity.h"
+#include "PlayerController.h"
 
 class playerChar;
 
@@ -45,12 +46,18 @@ private:
 	void DeleteLevels();
 	bool playerWon;
 
+	bool playerDied;
+	hiRes_time_point pDeadTime;
+
 	std::shared_ptr<UpgradeMenu> currUpgradeMenu;
 
 public:
+	PlayerController pController;
 	bool tutorial;
 	TuteLib tuteLib;
 	DIFFICULTY gameDiff;
+
+	bool firstPowerUp;
 
 	int currRunScore;
 

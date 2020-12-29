@@ -14,7 +14,6 @@ class PlayerChar :
 	public Entity
 {
 private:
-	PlayerController pController;
 	hiRes_time_point lastShotFired;
 	float shipRateOfFire;
 	hiRes_time_point lastWallFired;
@@ -31,11 +30,15 @@ private:
 	Rectangle* rectPtr;
 
 public:
+	PlayerController pController;
 	hiRes_time_point lastAOEFired;
 	float shipRateOfAOE;
 
 	int maxHealth;
 	int health;
+	hiRes_time_point timeWhenDied;
+	bool hasExploded;
+	bool alreadyDead;
 
 	float weaponDelay;
 	float wallDelay;
@@ -43,6 +46,14 @@ public:
 	int currSpecialAmmo;
 	int numShots;
 	float weapSpeed;
+
+	//thrust visual stuff
+	Vector2f currThrustDirVect;
+	Vector2f lastThrustDirVect;
+	Vector2f lastCannonVect;
+	hiRes_time_point lastThrustDirChange;
+	float timeSinceDirChange;
+
 
 	PlayerChar(int i_strtHealth, Vector2f i_startPosition, 
 		RigidBody i_rb = RigidBody(std::make_shared<Rectangle>(100.0f, 100.0f), METAL));
@@ -86,11 +97,11 @@ public:
 
 	void CollideWithProjectile(CollisionData i_coll) override;
 
-	void UpdateVisuals(float i_stepSize) override;
+	void UpdateVisuals(float i_lerpFraction) override;
 
-	void ShootBasic(Vector2f i_mousePos);
+	void ShootBasic(Vector2f i_projDir);
 
-	void ShootWall(Vector2f i_mousePos);
+	void ShootWall(Vector2f i_projDir);
 
 	void InitLvl();
 

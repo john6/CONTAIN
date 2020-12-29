@@ -6,6 +6,9 @@ class Wall :
 {
 public:
 	bool breakable;
+	bool exploding;
+	hiRes_time_point lastExplosion;
+	float explosionRate;
 	float maxHealth;
 	float currHealth;
 
@@ -21,6 +24,8 @@ public:
 	void ChangeColorHealth();
 
 	void GenerateDeathEffects();
+
+	void Update(float i_stepSize) override;
 
 	Wall(Vector2f i_startPosition, RigidBody i_rb,
 		sf::Color i_fillCol = sf::Color::Black, sf::Color i_outCol = sf::Color::White,

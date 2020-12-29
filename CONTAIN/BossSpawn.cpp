@@ -11,6 +11,10 @@ BossSpawn::BossSpawn(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniB
 	if (isMiniBoss) {
 		rb = RigidBody(std::make_shared<Rectangle>(100.0f, 100.0f), STATIC);
 		rb.transform.pos = i_startPosition;
+		isBoss = false;
+	}
+	else {
+		isBoss = true;
 	}
 	invulnerable = true;
 	Stun(0.5f);
@@ -19,12 +23,13 @@ BossSpawn::BossSpawn(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniB
 	currDir = CreateRandomDir();
 	SetDiffVars(i_diff);
 	hasVisuals = false;
+
 }
 
 void BossSpawn::Update(float i_stepSize)
 {
 	CheckChildren();
-	if (children.size() < 2) {
+	if (children.size() < 1) {
 		invulnerable = false;
 		ChangeColorHealth();
 	}
@@ -36,7 +41,7 @@ void BossSpawn::Update(float i_stepSize)
 	UpdateHealth(i_stepSize);
 	if (stunSecs < 0) {
 		if (timeTillDirSwitch < 0) {
-			if (children.size() < 2) {
+			if (children.size() < 1) {
 				timeTillDirSwitch = sameDirTime;
 				GLBVRS::RSRCS->PlaySound(RESOURCES::BRAKE);
 				SpawnEnemies(numShots, ENEMY_RAND, 0);
@@ -68,9 +73,10 @@ void BossSpawn::Destroy()
 	if (isMiniBoss) {
 		DropPowerUp();
 	}
+	GenerateDeathEffects(ENEMY_BURST_DEATH);
 }
 
-void BossSpawn::TakeDamage(float i_dmg)
+void BossSpawn::TakeDamage(float i_dmg, CollisionData i_coll)
 {
 	if (!invulnerable) {
 		int xasd = 5;
@@ -93,7 +99,7 @@ void BossSpawn::shootProj()
 
 void BossSpawn::Stun(float i_stunTime)
 {
-	stunSecs = i_stunTime / 2.0f;
+	stunSecs = i_stunTime;
 }
 
 void BossSpawn::SetDiffVars(int i_diff)
@@ -130,7 +136,7 @@ void BossSpawn::SetDiffVars(int i_diff)
 		switch (i_diff) {
 		case EASY: {
 			numShots = 4;
-			maxHealth = 28;
+			maxHealth = 26;
 			sameDirTime = 14.0;
 			timeTillDirSwitch = 0.0f;
 			health = maxHealth;
@@ -138,7 +144,7 @@ void BossSpawn::SetDiffVars(int i_diff)
 		}
 		case MEDIUM: {
 			numShots = 5;
-			maxHealth = 22;
+			maxHealth = 28;
 			sameDirTime = 10.0;
 			timeTillDirSwitch = 0.0f;
 			health = maxHealth;
@@ -146,7 +152,7 @@ void BossSpawn::SetDiffVars(int i_diff)
 		}
 		case HARD: {
 			numShots = 6;
-			maxHealth = 26;
+			maxHealth = 30;
 			sameDirTime = 8.0;
 			timeTillDirSwitch = 0.0f;
 			health = maxHealth;

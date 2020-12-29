@@ -125,7 +125,7 @@ void BossSplit::shootProj()
 
 void BossSplit::Stun(float i_stunTime)
 {
-	stunSecs = i_stunTime / 2.0f;
+	stunSecs = i_stunTime;
 }
 
 void BossSplit::SetDiffVars(int i_diff)

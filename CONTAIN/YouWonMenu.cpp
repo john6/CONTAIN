@@ -33,10 +33,10 @@ YouWonMenu::YouWonMenu(RESOURCES * i_resources, bool i_won) :
 
 	winText.setFont(font);
 	if (won) {
-		winText.setString("You beat the game, wow congrats bud!\n");
+		winText.setString("You beat the game!. Wow, congrats bud!\n");
 	}
 	else {
-		winText.setString("You lost, Damn u suck!\n");
+		winText.setString("You were blown to smithereens.\n\nWhat a horrifying way to die! \n");
 	}
 	winText.setCharacterSize(25);
 	winText.setFillColor(sf::Color::White);

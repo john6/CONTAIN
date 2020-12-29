@@ -17,6 +17,12 @@ BossStream::BossStream(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMin
 	lastShotFired = hiResTime::now();
 	currDir = CreateRandomDir();
 	SetDiffVars(i_diff);
+	if (isMiniBoss) {
+		isBoss = false;
+	}
+	else {
+		isBoss = true;
+	}
 }
 
 void BossStream::Update(float i_stepSize)
@@ -61,6 +67,7 @@ void BossStream::Destroy()
 	if (isMiniBoss) {
 		DropPowerUp();
 	}
+	GenerateDeathEffects(ENEMY_BURST_DEATH);
 }
 
 void BossStream::shootProj()
@@ -72,7 +79,7 @@ void BossStream::shootProj()
 		Vector2f projDir = Math::AngleToVect(rb.transform.orient);
 		projDir.normalize();
 		std::shared_ptr<Entity> projectile = std::make_shared<Projectile>(
-			rb.transform.pos + (projDir * (135.0f)), 1);
+			rb.transform.pos + (projDir * (95)), 1);
 		projectile->rb.ApplyImpulse((projDir * projSpeed), NULL_VECTOR);
 		spawnVect.push_back(projectile);
 	}
@@ -80,7 +87,7 @@ void BossStream::shootProj()
 
 void BossStream::Stun(float i_stunTime)
 {
-	stunSecs = i_stunTime / 2.0f;
+	stunSecs = i_stunTime;
 }
 
 void BossStream::SetDiffVars(int i_diff)
@@ -124,7 +131,7 @@ void BossStream::SetDiffVars(int i_diff)
 			speed = GLBVRS::ENEMYSPEEDEASY;
 			projSpeed = 2900.0f;
 			numShots = 6;
-			maxHealth = 10;
+			maxHealth = 13;
 			shipRateOfFire = 0.10f;
 			health = maxHealth;
 			break;
@@ -133,7 +140,7 @@ void BossStream::SetDiffVars(int i_diff)
 			speed = GLBVRS::ENEMYSPEEDMED;
 			projSpeed = 3100.0f;
 			numShots = 7;
-			maxHealth = 11;
+			maxHealth = 15;
 			shipRateOfFire = 0.05f;
 			health = maxHealth;
 			break;
@@ -142,7 +149,7 @@ void BossStream::SetDiffVars(int i_diff)
 			speed = GLBVRS::ENEMYSPEEDHARD;
 			projSpeed = 3300.0f;
 			numShots = 8;
-			maxHealth = 12;
+			maxHealth = 17;
 			shipRateOfFire = 0.04f;
 			health = maxHealth;
 			break;

@@ -9,11 +9,15 @@
 
 
 const bool TESTING = false;
-const int WORLDSIZEWIDTH = 3224;
-const int WORLDSIZEHEIGHT = 1825;
+
+
+const int WORLD_SIZE_WINDOW_WIDTH = 3648;
+const int WORLD_SIZE_WINDOW_HEIGHT = 2052;
 //0.8 of max world width so theres a margin
-const int MAXSECTORWIDTH = 2496;
-const int MAXSECTORHEIGHT = 1404;
+const int MAX_SECTOR_WIDTH = 3494;
+const int MIN_SECTOR_WIDTH = 998;
+const int MAX_SECTOR_HEIGHT = 1684;
+const int MIN_SECTOR_HEIGHT = 561;
 
 
 //https://www.fluentcpp.com/2019/07/23/how-to-define-a-global-constant-in-cpp/
@@ -179,11 +183,11 @@ const sf::Color BONE = sf::Color(227, 218, 201);
 //const float LEVEL_TIME_LIMIT_HARD = 135.0f;
 
 //ENUMS
-enum GAME_STATE { MENU, SETTINGS, APPLY, START_GAME, START_TUTORIAL, IN_GAME, EXIT_GAME, WIN, LOSE };
+enum GAME_STATE { SPLASH, MENU, SETTINGS, APPLY, START_GAME, START_TUTORIAL, IN_GAME, EXIT_GAME, WIN, LOSE };
 //Leave WALL_BIG as last upgrade I use it as a terminating condition for InitLvl();
 //This is required because youre not supposed to tierate over enums
 //https://stackoverflow.com/questions/261963/how-can-i-iterate-over-an-enum
-enum UPGRADE_TYPE { NONE, RATE_OF_FIRE, WEAP_SPEED, SCATTER, SMALL_SHIP, BIG_SHIP, BLAST, TEMP_HEALTH, WALL_BIG };
+enum UPGRADE_TYPE { NO_UPGRADES_LEFT, NONE, RATE_OF_FIRE, WEAP_SPEED, SCATTER, SMALL_SHIP, BIG_SHIP, BLAST, TEMP_HEALTH, WALL_BIG };
 enum MOUSE_STATE { MOUSE_UP, MOUSE_DOWN };
 enum DIFFICULTY { EASY, MEDIUM, HARD, TUTORIAL };
 enum SCREEN_AREA { CORNERS, MARGINS, DOORS, CENTER };
@@ -256,6 +260,7 @@ public:
 	static hiRes_time_point lastMenuSwitch;
 	static float buttonDelay;
 	static bool canPressButtonsAgain;
+	static bool godMode;
 
 public:
 	static void SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_screenHeight, RESOURCES* i_resourcesPtr,

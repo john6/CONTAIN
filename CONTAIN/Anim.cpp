@@ -78,7 +78,7 @@ Anim::Anim(Vector2f direction, std::vector<Vector2f> i_contactPoints, microSec i
 	
 	rb.transform.pos = i_contactPoints[0];
 
-	spread = 4.0f;
+	spread = 7.0f;
 
 
 		rb.angVel = 0;
@@ -99,26 +99,26 @@ Anim::Anim(Vector2f direction, std::vector<Vector2f> i_contactPoints, microSec i
 		float collisionDir = Math::VectToAngle(collisionNormal);
 
 
-		auto poly1 = std::make_shared<Polygon>(std::vector<Vector2f>({ Vector2f(0.0f, 0.0f), Vector2f(10.0f, 15.0f), Vector2f(20.0f, 0.0f) }));
+		auto poly1 = std::make_shared<Polygon>(std::vector<Vector2f>({ Vector2f(0.0f, 0.0f), Vector2f(20.0f, 30.0f), Vector2f(40.0f, 0.0f) }));
 		auto rb1 = std::make_shared<RigidBody>(poly1);
 		rb1->ResetOrientation(((collisionDir*180.0f) / PI) + 90.0f);
 		rb1->ResetPosition(i_contactPoints[0]);
 		rbs.push_back(rb1);
 
 
-		auto poly2 = std::make_shared<Polygon>(std::vector<Vector2f>({ Vector2f(0.0f, 0.0f), Vector2f(10.0f, 15.0f), Vector2f(20.0f, 0.0f) }));
+		auto poly2 = std::make_shared<Polygon>(std::vector<Vector2f>({ Vector2f(0.0f, 0.0f), Vector2f(20.0f, 30.0f), Vector2f(40.0f, 0.0f) }));
 		auto rb2 = std::make_shared<RigidBody>(poly2);
 		rb2->ResetOrientation(((collisionDir*180.0f) / PI) - 90.0f);
 		rb2->ResetPosition(i_contactPoints[0]);
 		rbs.push_back(rb2);
 
-		auto poly3 = std::make_shared<Polygon>(std::vector<Vector2f>({ Vector2f(0.0f, 0.0f), Vector2f(10.0f, 15.0f), Vector2f(20.0f, 0.0f) }));
+		auto poly3 = std::make_shared<Polygon>(std::vector<Vector2f>({ Vector2f(0.0f, 0.0f), Vector2f(20.0f, 30.0f), Vector2f(40.0f, 0.0f) }));
 		auto rb3 = std::make_shared<RigidBody>(poly3);
 		rb3->ResetOrientation(((collisionDir*180.0f) / PI) + 45.0f);
 		rb3->ResetPosition(i_contactPoints[0]);
 		rbs.push_back(rb3);
 
-		auto poly4 = std::make_shared<Polygon>(std::vector<Vector2f>({ Vector2f(0.0f, 0.0f), Vector2f(10.0f, 15.0f), Vector2f(20.0f, 0.0f) }));
+		auto poly4 = std::make_shared<Polygon>(std::vector<Vector2f>({ Vector2f(0.0f, 0.0f), Vector2f(20.0f, 30.0f), Vector2f(40.0f, 0.0f) }));
 		auto rb4 = std::make_shared<RigidBody>(poly4);
 		rb4->ResetOrientation(((collisionDir*180.0f) / PI) - 45.0f);
 		rb4->ResetPosition(i_contactPoints[0]);
@@ -240,6 +240,13 @@ drawablePtrVect Anim::CreateDrawables(float i_lerp_fraction)
 			float rotationDir = i == 0 ? 1 : (i * -1);
 			float rotationOffset = i * 36;
 			polyDrawable->setRotation((animPercent * 270 * rotationDir) + rotationOffset);
+			if (animPercent > 0.8f) {
+				float fadeOutPercent = 1 - ((animPercent - 0.8f) * 5);
+				sf::Color newFillColor = sf::Color(fillColor.r, fillColor.g, fillColor.b, fadeOutPercent * 250);
+				sf::Color newOutlineColor = sf::Color(outlineColor.r, outlineColor.g, outlineColor.b, fadeOutPercent* 250);
+				polyDrawable->setFillColor(newFillColor);
+				polyDrawable->setOutlineColor(newOutlineColor);
+			}
 
 			drawables->push_back(polyDrawable);
 		}

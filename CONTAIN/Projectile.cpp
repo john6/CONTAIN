@@ -1,7 +1,10 @@
 #include "Projectile.h"
 #include "Entity.h"
 #include "Enemy.h"
+#include "BossBurst.h"
+#include "BossStream.h"
 #include "BossSpawn.h"
+#include "BossRush.h"
 #include "Anim.h"
 
 Projectile::Projectile(Vector2f i_startPosition, int i_projType, RigidBody i_rb) :
@@ -70,15 +73,32 @@ void Projectile::CollideWithEnemy(CollisionData i_coll)
 				Destroy();
 			}
 		}
-		else {
+		else if (auto burstBoss = dynamic_cast<BossBurst*>(enemyPtr)) {
+				if (projType == 0) {
+					Explode();
+					Destroy();
+				}
+		}
+		else if (auto spawnerBoss = dynamic_cast<BossStream*>(enemyPtr)) {
 			if (projType == 0) {
 				Explode();
+				Destroy();
 			}
-			Destroy();
 		}
+		else if (auto spawnerBoss = dynamic_cast<BossRush*>(enemyPtr)) {
+			if (projType == 0) {
+				Explode();
+				Destroy();
+			}
+		}
+
 	}
-	Explode();
-	Destroy();
+	else {
+		if (projType == 0) {
+			Explode();
+		}
+		Destroy();
+	}
 }
 
 void Projectile::CollideWithWall(CollisionData i_coll)

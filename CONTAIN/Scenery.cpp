@@ -2,8 +2,8 @@
 #include "Entity.h"
 
 
-Scenery::Scenery(Vector2f i_startPosition, std::shared_ptr <sf::Shape> i_drawable,
-	RigidBody i_rb) : Entity(i_startPosition, i_rb, SCENERY)
+Scenery::Scenery(Vector2f i_startPosition, std::shared_ptr <sf::Shape> i_drawable, int i_renderLvl,
+	RigidBody i_rb) : Entity(i_startPosition, i_rb, SCENERY), renderLvl { i_renderLvl }
 {
 	physicalObject = false;
 	intangible = true;

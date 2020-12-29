@@ -6,8 +6,9 @@ private:
 	drawablePtrVect drawables;
 
 public:
+	int renderLvl;
 
-	Scenery(Vector2f i_startPosition, std::shared_ptr <sf::Shape> i_drawable,
+	Scenery(Vector2f i_startPosition, std::shared_ptr <sf::Shape> i_drawable, int i_renderLvl = 0,
 		RigidBody i_rb = RigidBody(std::make_shared<Circle>(1.0f)));
 	~Scenery();
 

@@ -27,6 +27,7 @@ public:
 	float speed;
 	float stunSecs;
 	bool metal;
+	bool isBoss;
 
 	Enemy(DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb, TypeID i_typeID = ENEMY_SEEK);
 	~Enemy();

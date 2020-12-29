@@ -17,7 +17,8 @@ PlayerChar::PlayerChar(int i_strtHealth, Vector2f i_startPosition, RigidBody i_r
 	wallDelay = shipRateOfFireWall;
 	weaponDelay = shipRateOfFire;
 	shipRateOfAOE = 6.0f;
-	shipSpeed = 100;
+	//Ship speed was 100 before I normalized input direction, it was basicallyu doubled whenever the player was moving diagonally, will compensate now
+	shipSpeed = 150;
 	size_t minutes = 255;
 	lastShotFired = std::chrono::high_resolution_clock::now() - std::chrono::minutes(1);
 	lastWallFired = std::chrono::high_resolution_clock::now() - std::chrono::minutes(1);
@@ -27,11 +28,14 @@ PlayerChar::PlayerChar(int i_strtHealth, Vector2f i_startPosition, RigidBody i_r
 	maxHealth = i_strtHealth;
 	health = maxHealth;
 	currSpecialAmmo = 3;
+	hasExploded = false;
+	alreadyDead = false;
 
 	wallWidth = 40;
 	wallHeight = 270;
-	BlastRadius = 185;
-	blastStrength = 600.0f;
+	BlastRadius = 230;
+	//used to be 600
+	blastStrength = 30000.0f;
 	blastStunTime = 4.0f;
 	maxSpecialAmmo = 4;
 	currSpecialAmmo = maxSpecialAmmo;
@@ -61,49 +65,101 @@ PlayerChar::~PlayerChar()
 void PlayerChar::Update(float i_stepSize)
 {
 	UpdateHealth(i_stepSize);
-	if (GLBVRS::canPressButtonsAgain) {
+	if ((GLBVRS::canPressButtonsAgain) && (health > 0.0f)) {
 		UpdateMovement(i_stepSize);
 		AcceptWeaponInput(i_stepSize);
+	}
+	else {
+		currThrustDirVect = Vector2f(0.0f, 0.0f);
+		GLBVRS::RSRCS->playEngineSound(false);
 	}
 }
 
 void PlayerChar::UpdateMovement(float i_stepSize)
 {
+	currThrustDirVect = Vector2f(0.0f, 0.0f);
 	float moveDist = shipSpeed * i_stepSize;
-	std::vector<PlayerController::Input> inputVect = pController.PollKeys();
-	for (PlayerController::Input input : inputVect) {
-		switch (input) {
-		case PlayerController::Input::UP: {
-			rb.ApplyImpulse(DOWN * moveDist, NULL_VECTOR);
-			break;
-		}
-		case PlayerController::Input::LEFT: {
-			rb.ApplyImpulse(LEFT * moveDist, NULL_VECTOR);
-			break;
-		}
-		case PlayerController::Input::DOWN: {
-			rb.ApplyImpulse(UP * moveDist, NULL_VECTOR);
-			break;
-		}
-		case PlayerController::Input::RIGHT: {
-			rb.ApplyImpulse(RIGHT * moveDist, NULL_VECTOR);
-			break;
-		}
-		}
+	currThrustDirVect = pController.GetMovementDir();
+	rb.ApplyImpulse(currThrustDirVect * moveDist, NULL_VECTOR);
+
+	if ((std::abs(currThrustDirVect[0]) > 0.005) || (std::abs(currThrustDirVect[1]) > 0.005)) {
+		GLBVRS::RSRCS->playEngineSound(true);
 	}
+	else {
+		GLBVRS::RSRCS->playEngineSound(false);
+	}
+	currThrustDirVect.normalize();
+	if ((currThrustDirVect[0] != lastThrustDirVect[0]) || (currThrustDirVect[1] != lastThrustDirVect[1])) {
+		lastThrustDirChange = hiResTime::now();
+		timeSinceDirChange = 0.0f;
+	}
+	else {
+		float secondsSinceThrustChange = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastThrustDirChange)).count() / 1000000.0f;
+		timeSinceDirChange = secondsSinceThrustChange;
+	}
+	lastThrustDirVect = currThrustDirVect;
 }
 
 void PlayerChar::UpdateHealth(float i_stepSize)
 {
-	if (health <= 0.0f) {
-		fillColor = sf::Color::Red;
-		outlineColor = sf::Color::Red;
+	auto timeSinceDied = std::chrono::duration_cast<std::chrono::milliseconds>(hiResTime::now() - timeWhenDied);
+	float splosionTimerMilli = 2400.0f;
+	if ((health <= 0.0f) && (timeSinceDied.count() < splosionTimerMilli)) {
+		fillColor = PENNYBROWN;
+		outlineColor = FIREBRICK;
+		microSec microSec(250000000);
+		std::vector<Vector2f> shapePoints = rb.GetVertCords();
+		float minX = INT_MAX;
+		float minY = INT_MAX;
+		float maxX = INT_MIN;
+		float maxY = INT_MIN;
+		for (int i = 0; i < shapePoints.size(); i++) {
+			if (shapePoints[i][0] < minX) { minX = shapePoints[i][0]; }
+			if (shapePoints[i][0] > maxX) { maxX = shapePoints[i][0]; }
+
+			if (shapePoints[i][1] < minY) { minY = shapePoints[i][1]; }
+			if (shapePoints[i][1] > maxY) { maxY = shapePoints[i][1]; }
+		}
+
+		Vector2f topLeft(minX, minY);
+		Vector2f bottomRight(maxX, maxY);
+
+		for (int i = 0; i < 2; i++) {
+			Vector2f spawnPos = Math::GetRandomCoordInRect(topLeft, bottomRight);
+			std::shared_ptr<Entity> anim = std::make_shared<Anim>(spawnPos, microSec);
+			spawnVect.push_back(anim);
+		}
+	}
+	else if ((health <= 0.0f) && (timeSinceDied.count() >= 2.0) && (!hasExploded)) {
+		hasExploded = true;
+		physicalObject = false;
+		hasVisuals = false;
+
+		GLBVRS::RSRCS->PlayExplosionSound(false);
+		GLBVRS::RSRCS->PlaySound(RESOURCES::EXPLODE7);
+
+		for (int i = 0; i < 8; i++) {
+			std::shared_ptr<Shape> shape1 = Physics::CreateIrregularPolygon(4, 150, 300);
+			RigidBody fragment1 = RigidBody(shape1, STATIC);
+			std::shared_ptr<Wall> wall1 = std::make_shared<Wall>(
+				rb.transform.pos, fragment1, PENNYBROWN, FIREBRICK, true);
+			wall1->TakeDamage(999);
+			std::shared_ptr<Entity> frag1 = move(wall1);
+			spawnVect.push_back(frag1);
+		}
+
+		std::shared_ptr<Entity> projectile = std::make_shared<Blast>(rb.transform.pos, 0, 4000, blastStunTime, 300);
+		projectile->fillColor = sf::Color(255, 236, 25, 128);
+		projectile->outlineColor = sf::Color(139, 0, 0, 128);
+		spawnVect.push_back(projectile);
 	}
 }
 
 void PlayerChar::ResetHealth()
 {
 	health = maxHealth;
+	fillColor = GUNMETAL;
+	outlineColor = FORDSILVER;
 }
 
 void PlayerChar::ResetSpecialAmmo()
@@ -123,38 +179,66 @@ void PlayerChar::AddHealth(int i_healthUp)
 
 void PlayerChar::AcceptWeaponInput(float i_stepSize)
 {
-	Vector2f leftMousePos = pController.LeftClick();
-	if (!leftMousePos.isZero()) {
-		ShootBasic(leftMousePos);
+	if (!pController.IsControllerConnected()) {
+		Vector2f leftMousePos = pController.LeftClick();
+		if (!leftMousePos.isZero()) {
+			Vector2f projDir = leftMousePos - rb.transform.pos;
+			projDir.normalize();
+			ShootBasic(projDir);
+		}
+		Vector2f rightMousePos = pController.RightClick();
+		if (!rightMousePos.isZero()) {
+			Vector2f projDir = rightMousePos - rb.transform.pos;
+			projDir.normalize();
+			ShootWall(projDir);
+		}
+		bool scrollClick = pController.ScrollClick();
+		if (scrollClick) {
+			ShootAOE();
+		}
 	}
-	Vector2f rightMousePos = pController.RightClick();
-	if (!rightMousePos.isZero()) {
-		ShootWall(rightMousePos);
-	}
-	bool scrollClick = pController.ScrollClick();
-	if (scrollClick) {
-		ShootAOE();
+	else {
+		if (pController.IsRightTriggerPressed()) {
+			ShootBasic(pController.GetRightStickVect());
+		}
+		if (pController.IsLeftTriggerPressed()) {
+			ShootWall(pController.GetRightStickVect());
+		}
+		bool scrollClick = pController.IsRightStickPressed();
+		if (scrollClick) {
+			ShootAOE();
+		}
 	}
 }
 
 void PlayerChar::TakeDamage(float i_dmg, CollisionData i_coll) 
 {
 	auto timeSinceDamaged = std::chrono::duration_cast<std::chrono::seconds>(hiResTime::now() - lastDamageReceived);
-	if (timeSinceDamaged.count() >= dmgRate) {
-		GLBVRS::RSRCS->PlaySound(3);
+	if ((!alreadyDead) && (timeSinceDamaged.count() >= dmgRate)) {
+		GLBVRS::RSRCS->PlaySound(RESOURCES::SOUNDS::EXPLOSION);
 		lastDamageReceived = hiResTime::now();
 		health -= i_dmg;
 		GenerateDamageEffects(i_coll);
+		if (health <= 0.0f) {
+			alreadyDead = true;
+			timeWhenDied = hiResTime::now();
+			GLBVRS::RSRCS->PlayExplosionSound(true);
+		}
 	}
 }
 
 void PlayerChar::TakeDamage(float i_dmg)
 {
 	auto timeSinceDamaged = std::chrono::duration_cast<std::chrono::seconds>(hiResTime::now() - lastDamageReceived);
-	if (timeSinceDamaged.count() >= dmgRate) {
-		GLBVRS::RSRCS->PlaySound(3);
+	if ((!alreadyDead) && (timeSinceDamaged.count() >= dmgRate)) {
+		GLBVRS::RSRCS->PlaySound(RESOURCES::SOUNDS::EXPLOSION);
 		lastDamageReceived = hiResTime::now();
 		health -= i_dmg;
+		if (health <= 0.0f) {
+			alreadyDead = true;
+			timeWhenDied = hiResTime::now();
+			GLBVRS::RSRCS->PlayExplosionSound(true);
+		}
 	}
 }
 
@@ -162,7 +246,7 @@ void PlayerChar::GenerateDamageEffects(CollisionData i_collisionCopy)
 {
 	microSec ms(200000000);
 	Vector2f collisionDir = i_collisionCopy.entA->rb.transform.pos - i_collisionCopy.entB->rb.transform.pos;
-	std::shared_ptr<Entity> anim = std::make_shared<Anim>(i_collisionCopy.norm, i_collisionCopy.contactPoints, ms, 0, 1);
+	std::shared_ptr<Entity> anim = std::make_shared<Anim>(i_collisionCopy.norm, i_collisionCopy.contactPoints, ms, 0, 0);
 	spawnVect.push_back(anim);
 }
 
@@ -193,7 +277,7 @@ void PlayerChar::ReceivePowerUp(UPGRADE_TYPE i_powType)
 	}
 	case (SMALL_SHIP): { //number of shots
 		if (shipLvl.at(SMALL_SHIP) < GLBVRS::GetUpgradeMax(SMALL_SHIP)) {
-			shipLvl[BIG_SHIP] = 3;
+			//shipLvl[BIG_SHIP] = 3;
 			shipLvl[SMALL_SHIP]++;
 			auto playerPoly = dynamic_cast<Polygon*>(rb.shape.get());
 			playerPoly->ResizeMutliple(0.80f);
@@ -205,12 +289,16 @@ void PlayerChar::ReceivePowerUp(UPGRADE_TYPE i_powType)
 	}
 	case (BIG_SHIP): { //number of shots
 		if (shipLvl.at(BIG_SHIP) < GLBVRS::GetUpgradeMax(BIG_SHIP)) {
-			shipLvl[SMALL_SHIP] = 3;
+			//shipLvl[SMALL_SHIP] = 3;
 			shipLvl[BIG_SHIP]++;
+			//rb.ResetOrientation(0.0f);
+			//rb.vel = Vector2f(0.0f, 0.0f);
+			//rb.force = Vector2f(0.0f, 0.0f);
+			//rb.angVel = 0.0f;
 			auto playerPoly = dynamic_cast<Polygon*>(rb.shape.get());
 			playerPoly->ResizeMutliple(1.10f);
-			rb.SetMassData();
 			rb.objVerts = playerPoly->GetPoints();
+			rb.SetMassData();
 			maxHealth += 7;
 			AddHealth(6);
 			shipSpeed *= 1.3;
@@ -220,7 +308,7 @@ void PlayerChar::ReceivePowerUp(UPGRADE_TYPE i_powType)
 	case (BLAST): { //number of shots
 		if (shipLvl.at(BLAST) < GLBVRS::GetUpgradeMax(BLAST)) {
 			shipLvl[BLAST]++;
-			BlastRadius *= 1.3f;
+			BlastRadius *= 1.2f;
 			blastStrength *= 1.3f;
 			blastStunTime *= 1.3f;
 			//maxSpecialAmmo += 2;
@@ -240,6 +328,12 @@ void PlayerChar::ReceivePowerUp(UPGRADE_TYPE i_powType)
 			//wallWidth += 10;
 			//wallHeight += 60;
 		}
+		break;
+	}
+	case (NO_UPGRADES_LEFT): {
+		break;
+	}
+	default : {
 		break;
 	}
 	}
@@ -306,50 +400,130 @@ void PlayerChar::CollideWithProjectile(CollisionData i_coll)
 	}
 }
 
-void PlayerChar::UpdateVisuals(float i_stepSize)
+void PlayerChar::UpdateVisuals(float i_lerpFraction)
 {
+	Vector2f lerpPos = rb.GetLerpPosition(i_lerpFraction);
+	float lerpOrient = rb.GetLerpOrient(i_lerpFraction);
+
 	auto poly = dynamic_cast<Polygon *> (rb.shape.get());
 	float baseDiam = poly->GetDistToCorner() * (3.0f / 12.0f);
+
+
+	//Thrusters
+
+	//jetshape
+	Polygon* polyPtr = dynamic_cast<Polygon*>(rb.shape.get());
+	std::vector<Vector2f> verts = polyPtr->pointArr;
+
+	//lerped vertices
+	Eigen::Rotation2D<float> rotation(rb.transform.orient);
+	Matrix2f rotationMatrix = rotation.toRotationMatrix();
+	int size = verts.size();
+	for (int i = 0; i < size; ++i) {
+		verts[i] = rotationMatrix * verts[i];
+	}
+
+	int vertNum = verts.size();
+	float thrusterRadius = 6.0f;
+	for (int i = 0; i < vertNum; i++) {
+		//fireshape
+		//must check to see that the direction of thrust is not opposite to angle from the center to the vert
+		float angleInDegrees = ((Math::VectToAngle(-currThrustDirVect)*180.0f) / PI);
+		float vertAngleinDegrees = ((Math::VectToAngle(verts[i])*180.0f) / PI);
+		float angularDiff = abs(angleInDegrees - vertAngleinDegrees);
+		angularDiff = std::min(angularDiff, 360 - angularDiff);
+		if ((currThrustDirVect.norm() > 0) && (angularDiff < 100)) {
+			float thrustFireLength = std::min((timeSinceDirChange * 15), 30.0f);
+			std::vector<Vector2f> flamePoints = { Vector2f(0.0f, 0.0f), Vector2f(2.5f, 5.0f), Vector2f(15.0f + thrustFireLength, 0.0f), Vector2f(2.5f, -5.0f) };
+			//std::shared_ptr<Polygon> firePolyShape = std::make_shared<Polygon>(irregPoly1);
+			std::shared_ptr<sf::ConvexShape> polyPtr = std::make_shared<sf::ConvexShape>(4);
+			for (int i = 0; i < flamePoints.size(); ++i) {
+				sf::Vector2f vect = sf::Vector2f(flamePoints[i][0], flamePoints[i][1]);
+				polyPtr->setPoint(i, vect);
+			}
+			std::shared_ptr<sf::Shape> flameShapePtr = move(polyPtr);
+			flameShapePtr->setFillColor(RED);
+			flameShapePtr->setOutlineColor(YELLOWCYBER);
+			flameShapePtr->setPosition(sf::Vector2f(lerpPos[0] + verts[i][0], lerpPos[1] + verts[i][1]));
+			
+			float flameOutLineIntensity = 4.0f + -((int)((timeSinceDirChange * 2.0f)+i) % 2);
+
+			flameShapePtr->setOutlineThickness(flameOutLineIntensity);
+			//rotation
+			flameShapePtr->setRotation(angleInDegrees);
+			visuals->emplace_back(flameShapePtr);
+		}
+
+
+		//cirlces 
+		std::shared_ptr<sf::CircleShape> circlePtr = std::make_shared<sf::CircleShape>();
+		circlePtr->setRadius(thrusterRadius);
+		std::shared_ptr<sf::Shape> shapePtr = move(circlePtr);
+		shapePtr->setOrigin(sf::Vector2f(thrusterRadius, thrusterRadius));
+		shapePtr->setFillColor(outlineColor);
+		shapePtr->setOutlineColor(outlineColor);
+		shapePtr->setPosition(sf::Vector2f(lerpPos[0] + verts[i][0], lerpPos[1] + verts[i][1]));
+		shapePtr->setOutlineThickness(2.0f);
+		visuals->emplace_back(shapePtr);
+	}
+
 	//Cannon Shaft
 	std::shared_ptr<sf::Shape> drawShapeShaft = std::make_shared<sf::RectangleShape>(sf::Vector2f(poly->GetDistToCorner(), baseDiam));
 	drawShapeShaft->setOrigin(sf::Vector2f(0.0f, baseDiam / 2.0f));
 	drawShapeShaft->setFillColor(fillColor);
-	drawShapeShaft->setOutlineColor(FORDSILVER);
-	drawShapeShaft->setPosition(sf::Vector2f(rb.transform.pos[0], rb.transform.pos[1]));
+	drawShapeShaft->setOutlineColor(outlineColor);
+	drawShapeShaft->setPosition(sf::Vector2f(lerpPos[0], lerpPos[1]));
 	drawShapeShaft->setOutlineThickness(2.0f);
-	Vector2f mosDir = pController.GetMousePos() - rb.transform.pos;
+	Vector2f mosDir;
+	if (!pController.IsControllerConnected()) {
+		mosDir = pController.GetMousePos() - lerpPos;
+	}
+	else {
+		Vector2f stickDir = pController.GetRightStickVect();
+		if ((stickDir[0] != 0.0f) && (stickDir[1] != 0.0f)) {
+			mosDir = stickDir;
+			lastCannonVect = stickDir;
+		}
+		else {
+			mosDir = lastCannonVect;
+		}
+	}
 	float shootDir = Math::VectToAngle((mosDir).normalized()) * 57.2958;
 	drawShapeShaft->setRotation(shootDir);
 	visuals->emplace_back(drawShapeShaft);
+
 	//Center Circle
 	float radius = baseDiam * (3.0f / 5.0f);
 	std::shared_ptr<sf::Shape> drawShapeBase = std::make_shared<sf::CircleShape>(radius);
 	drawShapeBase->setOrigin(sf::Vector2f(radius, radius));
-	drawShapeBase->setFillColor(fillColor);
-	drawShapeBase->setOutlineColor(FORDSILVER);
-	drawShapeBase->setPosition(sf::Vector2f(rb.transform.pos[0], rb.transform.pos[1]));
-	drawShapeBase->setOutlineThickness(2.0f);
-	visuals->emplace_back(drawShapeBase);
-
+	//Burst Charge indicator
 	weaponDelay = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastAOEFired)).count() / 1000000.0f;
+	sf::Color centerColorFill;
+	sf::Color centerColorOutLine;
 	if (weaponDelay >= shipRateOfAOE) {
-		outlineColor = CYAN;
+		centerColorFill = CYAN;
+		centerColorOutLine = CYAN;
 	}
 	else {
-		outlineColor = FORDSILVER;
+		centerColorFill = FORDSILVER;
+		centerColorOutLine = FORDSILVER;
 	}
-
+	drawShapeBase->setFillColor(centerColorFill);
+	drawShapeBase->setOutlineColor(centerColorOutLine);
+	drawShapeBase->setPosition(sf::Vector2f(lerpPos[0], lerpPos[1]));
+	drawShapeBase->setOutlineThickness(2.0f);
+	visuals->emplace_back(drawShapeBase);
 }
 
-void PlayerChar::ShootBasic(Vector2f i_mousePos)
+void PlayerChar::ShootBasic(Vector2f i_projDir)
 {
 	weaponDelay = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastShotFired)).count() / 1000000.0f;
 	if (weaponDelay >= shipRateOfFire) {
 		GLBVRS::RSRCS->PlaySound(RESOURCES::SHOT2);
 		lastShotFired = hiResTime::now();
-		Vector2f projDir = i_mousePos - rb.transform.pos; 
+		Vector2f projDir = i_projDir;
 		auto poly = dynamic_cast<Polygon *> (rb.shape.get());
-		float projCenterOffset = poly->GetDistToCorner() + GLBVRS::PROJECTILE_RADIUS;
+		float projCenterOffset = poly->GetDistToCorner() + GLBVRS::PROJECTILE_RADIUS + 10.0f;
 		projDir.normalize();
 		float prevAngleRads;
 		Vector2f prevDirVect;
@@ -357,6 +531,7 @@ void PlayerChar::ShootBasic(Vector2f i_mousePos)
 		float currAngleRads = mouseAngleRad - (0.0872665 * (numShots - 1));
 		//Original angle is shifted back so cluster is still centered on cursor
 		Vector2f currDirVect = Math::AngleToVect(currAngleRads);
+		//currDirVect.normalize();
 		int i = 0;
 		while (i < numShots) {
 			std::shared_ptr<Entity> projectile = std::make_shared<Projectile>(
@@ -369,10 +544,13 @@ void PlayerChar::ShootBasic(Vector2f i_mousePos)
 			currDirVect = Math::AngleToVect(currAngleRads);
 			i++;
 		}
+		if ((shipLvl.at(SCATTER) >= 3) && (numShots < 3)) {
+			std::cout << "wtf\n";
+		}
 	}
 }
 
-void PlayerChar::ShootWall(Vector2f i_mousePos)
+void PlayerChar::ShootWall(Vector2f i_projDir)
 {
 	wallDelay = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastWallFired)).count() / 1000000.0f;
 	if (wallDelay >= shipRateOfFireWall) {
@@ -380,14 +558,14 @@ void PlayerChar::ShootWall(Vector2f i_mousePos)
 		auto poly = dynamic_cast<Polygon *> (rb.shape.get());
 		float projCenterOffset = poly->GetDistToCorner() + GLBVRS::PROJECTILE_RADIUS;
 		GLBVRS::RSRCS->PlaySound(RESOURCES::SHOOT14);
-		Vector2f projectileDirFront = (i_mousePos - rb.transform.pos);
+		Vector2f projectileDirFront = i_projDir;
 		projectileDirFront.normalize();
-		Vector2f projectileDirBack = -1 * (i_mousePos - rb.transform.pos);
+		Vector2f projectileDirBack = -1 * i_projDir;
 		projectileDirBack.normalize();
-		Vector2f projectileDirLeft = (i_mousePos - rb.transform.pos);
+		Vector2f projectileDirLeft = i_projDir;
 		projectileDirLeft = Vector2f(projectileDirLeft[1], -1 * projectileDirLeft[0]);
 		projectileDirLeft.normalize();
-		Vector2f projectileDirRight = (i_mousePos - rb.transform.pos);
+		Vector2f projectileDirRight = i_projDir;
 		projectileDirRight = Vector2f(-1 * projectileDirRight[1], projectileDirRight[0]);
 		projectileDirRight.normalize();
 

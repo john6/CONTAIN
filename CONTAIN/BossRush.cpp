@@ -16,7 +16,13 @@ BossRush::BossRush(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBos
 	lastShotFired = hiResTime::now();
 	shipRateOfFire = 1.0f;
 	currDir = CreateRandomDir();
-	SetDiffVars(i_diff);
+	SetDiffVars(i_diff);	
+	if (isMiniBoss) {
+	isBoss = false;
+	}
+	else {
+	isBoss = true;
+	}
 }
 
 void BossRush::Update(float i_stepSize)
@@ -59,6 +65,7 @@ void BossRush::Destroy()
 	if (isMiniBoss) {
 		DropPowerUp();
 	}
+	GenerateDeathEffects(ENEMY_BURST_DEATH);
 }
 
 void BossRush::TakeDamage(float i_dmg)
@@ -74,7 +81,7 @@ void BossRush::shootProj()
 
 void BossRush::Stun(float i_stunTime)
 {
-	stunSecs = i_stunTime / 2.0f;
+	stunSecs = i_stunTime;
 }
 
 void BossRush::SetDiffVars(int i_diff)
@@ -111,21 +118,21 @@ void BossRush::SetDiffVars(int i_diff)
 		case EASY: {
 			speed = GLBVRS::ENEMYSPEEDEASY;
 			numShots = 6;
-			maxHealth = 9;
+			maxHealth = 10;
 			health = maxHealth;
 			break;
 		}
 		case MEDIUM: {
 			speed = GLBVRS::ENEMYSPEEDMED;
 			numShots = 7;
-			maxHealth = 10;
+			maxHealth = 12;
 			health = maxHealth;
 			break;
 		}
 		case HARD: {
 			speed = GLBVRS::ENEMYSPEEDHARD;
 			numShots = 8;
-			maxHealth = 11;
+			maxHealth = 14;
 			health = maxHealth;
 			break;
 		}

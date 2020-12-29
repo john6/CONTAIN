@@ -3,12 +3,13 @@
 
 ##############JOHN RUSSELL SPECIFIC GITIGNORE STUFF############
 **/CONTAIN_RELEASE/
+**/CONTAIN_Windows/
 **/CONTAIN/SAVEDATA.txt
 **/oldSounds/
 **/oldReleases/
 **/latestRelease/
 **/Release/
-
+**/Sounds/
 
 ###############################################################
 

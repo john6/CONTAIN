@@ -25,18 +25,26 @@ private:
 	//Yal's Sounds
 	sf::SoundBuffer Attack3;
 	sf::SoundBuffer Attack4;
+	sf::SoundBuffer Explode4;
+	sf::SoundBuffer Explode5;
+	sf::SoundBuffer Explode7;
+	sf::SoundBuffer Explode17;
+	sf::SoundBuffer Explode25;
+	sf::SoundBuffer Explode36;
 	sf::SoundBuffer bossexplode;
 	sf::SoundBuffer bossexplode2;
+	sf::SoundBuffer BigEggCollect1;
 	sf::SoundBuffer Buzzer6;
 	sf::SoundBuffer Buzzer9;
 	sf::SoundBuffer Brake;
 	sf::SoundBuffer coin3;
-	sf::SoundBuffer Explode5;
 	sf::SoundBuffer Explode20;
 	sf::SoundBuffer Explode37;
+	sf::SoundBuffer Engine2;
 	sf::SoundBuffer enemyDeath6;
 	sf::SoundBuffer Fire5;
 	sf::SoundBuffer Fireball;
+	sf::SoundBuffer GameOver;
 	sf::SoundBuffer laser14;
 	sf::SoundBuffer magic2;
 	sf::SoundBuffer magic6;
@@ -63,6 +71,7 @@ private:
 	sf::SoundBuffer shot2;
 	sf::SoundBuffer shot17;
 	sf::SoundBuffer steam3;
+	sf::SoundBuffer success1;
 	sf::SoundBuffer sword5;
 	sf::SoundBuffer Sword_Clash;
 	sf::SoundBuffer warning3;
@@ -80,23 +89,26 @@ private:
 	sf::Sound sound_arr[8];
 	int nextSoundIndex;
 
-	sf::Music music;
+	sf::Sound repeatEngineSound;
+	sf::Sound repeatExplosionSound;
+
 	bool musicIsOn;
 	std::mutex mtx;
 
 public:
+	sf::Music music;
 	sf::Font m_font;
 	float soundLvl;
 
 	RESOURCES();
 	~RESOURCES();
 
-	enum SOUNDS { REGULAR_BEEP, NEGATIVE_BEEP, OCTAVE_BEEP, EXPLOSION, CHROM_BEEP, ATTACK,
+	enum SOUNDS { REGULAR_BEEP, NEGATIVE_BEEP, OCTAVE_BEEP, EXPLODE4, BIGEGGCOLLECT1, EXPLOSION, EXPLODE5, EXPLODE7, EXPLODE17, EXPLODE25, EXPLODE36, ENGINE2, CHROM_BEEP, ATTACK,
 		HEALING, BRAKE, LEVELUP, PLAYFULPICKUP, MAJORPICKUP, PICKUP, ATTACK3, ATTACK4, BOSSEXPLODE, 
-		BOSSEXPLODE2, BUZZER6, BUZZER9, COIN3, EXPLODE5, EXPLODE20, ENEMYDEATH6, FIRE5, FIREBALL, LASER14, MAGICAL2,
+		BOSSEXPLODE2, BUZZER6, BUZZER9, COIN3, EXPLODE20, ENEMYDEATH6, FIRE5, FIREBALL, GAMEOVER, LASER14, MAGICAL2,
 		MAGIC6, MAGIC7, MAGIC8, MAGIC9, MAGIC10, MENUACCEPT, MENUACCEPT2, MENUACCEPT3, MENUACCEPT6, 
 		OUCH1, OUCH3, PLAYERSHOOT, PLAYERDIE13, POWERUP4, SHOOT11, SHOOT14, SHOOT23, 
-		SHOOT35, SHOOT3, SHOT2, STEAM3, SWORD5, WARNING3, WARNING7, WHOOSH, PLOPBANANA, PLOP, SWORDCLASH};
+		SHOOT35, SHOOT3, SHOT2, STEAM3, SUCCESS1, SWORD5, WARNING3, WARNING7, WHOOSH, PLOPBANANA, PLOP, SWORDCLASH};
 
 	sf::Font GetFont();
 
@@ -106,7 +118,9 @@ public:
 
 	void SetSoundLevel(float i_soundLvl);
 
-	void TurnMusicOn(bool i_music);
+	void playEngineSound(bool i_play);
 
-	void SetTextOriginCenter(sf::Text* i_textPtr);
+	void PlayExplosionSound(bool i_play);
+
+	void TurnMusicOn(bool i_music);
 };

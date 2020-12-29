@@ -3,6 +3,7 @@
 SettingsMenu::SettingsMenu(RESOURCES * i_resources, RSLTN* resolution, bool* fullScreen, SaveData* i_saveDataPtr) :
 	resources{ i_resources }, resolutionPtr { resolution }, fullScreenPtr { fullScreen }
 {
+	godMode = false;
 	saveDatePtr = i_saveDataPtr;
 	font = resources->GetFont();
 	ResetButtons();
@@ -318,6 +319,11 @@ void SettingsMenu::ResetButtons()
 	exit = Button("Main Menu", playButtonRect10, &font);
 	exit.SetColors(sf::Color::Black, sf::Color::White, sf::Color(128, 128, 128));
 
+	sf::RectangleShape playButtonRect11(sf::Vector2f(GLBVRS::BTTN_WDTH, GLBVRS::BTTN_HGHT));
+	playButtonRect11.setPosition(topLeft + sf::Vector2f(bttnOffsetHor * 3.0f, bttnOffsetVert * 7.0f));
+	godModeButton = Button("God Mode", playButtonRect11, &font);
+	godModeButton.SetColors(sf::Color::Black, sf::Color::White, sf::Color(128, 128, 128));
+
 	title.setString("Settings");
 	title.setCharacterSize(50);
 	title.setFillColor(sf::Color::White);
@@ -337,10 +343,10 @@ void SettingsMenu::ResetButtons()
 	screenResolutionText.setPosition(topLeft + sf::Vector2f(0, bttnOffsetVert * 3.5f));
 }
 
-GAME_STATE SettingsMenu::Update(float i_microSecs, sf::RenderWindow * i_window, sf::Vector2f i_mousePos)
+GAME_STATE SettingsMenu::Update(float i_microSecs, sf::RenderWindow * i_window, sf::Vector2f i_mousePos, bool i_forceUpdate)
 {
 	timeSinceButtonClick = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastButtonPressed)).count() / 1000000.0f;
-	if (timeSinceButtonClick >= buttonClickDelay) {
+	if ((timeSinceButtonClick >= buttonClickDelay) || (i_forceUpdate)) {
 		PollSoundQuad(i_mousePos);
 		PollResoQuad(i_mousePos);
 		bool fullScreenBool = PollInputToggle(i_mousePos, &FullScreen);
@@ -351,6 +357,9 @@ GAME_STATE SettingsMenu::Update(float i_microSecs, sf::RenderWindow * i_window, 
 		else {
 			saveDatePtr->EditSettingsConfig(3, 0);
 		}
+
+		bool godModeBool = PollInputToggle(i_mousePos, &godModeButton);
+		GLBVRS::godMode = godModeBool;
 
 		bool musicOnBool = PollInputToggle(i_mousePos, &music);
 		resources->TurnMusicOn(musicOnBool);
@@ -395,6 +404,7 @@ void SettingsMenu::Render(sf::RenderWindow * window)
 	window->draw(FullScreen.GetRect());
 	window->draw(apply.GetRect());
 	window->draw(exit.GetRect());
+	window->draw(godModeButton.GetRect());
 
 	sf::Text sound25PText = sound25P.GetText();
 	sf::Text sound50PText = sound50P.GetText();
@@ -407,6 +417,7 @@ void SettingsMenu::Render(sf::RenderWindow * window)
 	sf::Text FullScreenText = FullScreen.GetText();
 	sf::Text applyText = apply.GetText();
 	sf::Text exitText = exit.GetText();
+	sf::Text godModeButtonText = godModeButton.GetText();
 
 	//sound25PText.setFont(font);
 	//sound50PText.setFont(font);
@@ -434,6 +445,7 @@ void SettingsMenu::Render(sf::RenderWindow * window)
 	window->draw(title);
 	window->draw(soundLevelText);
 	window->draw(screenResolutionText);
+	window->draw(godModeButtonText);
 
 	window->display();
 }

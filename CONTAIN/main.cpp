@@ -10,6 +10,7 @@
 #include "SettingsMenu.h"
 #include "YouWonMenu.h"
 #include "YouLostMenu.h"
+#include "SplashScreen.h"
 #include "SaveData.h"
 #include "MessageBus.h"
 #include "main.h"
@@ -40,6 +41,7 @@ int main()
 	//View Code Test
 	sf::View mainMenusView;
 	mainMenusView.reset(sf::FloatRect(0, 0, GLBVRS::SCREEN_WIDTH, GLBVRS::SCREEN_HEIGHT));
+	mainMenusView.setCenter(GLBVRS::SCREEN_WIDTH / 2, GLBVRS::SCREEN_HEIGHT / 2);
 	window.setView(mainMenusView);
 
 	//sf::View hudView;
@@ -54,10 +56,30 @@ int main()
 	DIFFICULTY difficulty = MEDIUM;
 
 	Menu menu(&resources);
+
 	SettingsMenu settingsMenu(&resources, &resolution, &fullScreen, &saveData);
+	settingsMenu.Update(100.0f, &window, sf::Vector2f(0.0f, 0.0f), true);
+
+	//applying settings config
+	resources.SetSoundLevel(soundLvl);
+	bool musicOnBool = saveData.GetSettingsVect()[1];
+	resources.TurnMusicOn(musicOnBool);
+	if (fullScreen) {
+		window.create(GLBVRS::GetVideoMode(resolution), "CONTAIN", sf::Style::Fullscreen);
+		GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
+		window.setView(mainMenusView);
+	}
+	else {
+		window.create(GLBVRS::GetVideoMode(resolution), "CONTAIN", sf::Style::Default);
+		GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
+		window.setView(mainMenusView);
+	}
+	////
 	YouWonMenu winMenu(&resources, true);
 	YouWonMenu lostMenu(&resources, false);
-	GAME_STATE state = MENU;
+	SplashScreen splash = SplashScreen(&resources);
+	hiRes_time_point splashStartTime = hiResTime::now();
+	GAME_STATE state = SPLASH;
 	bool justSwitchedBackToMenu = false;
 	int lastRunScore = 0;
 	hiRes_time_point currTime = hiResTime::now();
@@ -65,6 +87,8 @@ int main()
 	microSec lag(0);
 	Vector2f currSectorDimensions = Vector2f(0.0f ,0.0f );
 	bool notFullScreen = false;
+
+	window.setMouseCursor(cursor);
 	while (window.isOpen())
 	{
 		sf::Event currEvent;
@@ -74,13 +98,14 @@ int main()
 			}
 			if (currEvent.type == sf::Event::Resized) {
 				GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
-
 				settingsMenu.ResetButtons();
+				window.setMouseCursor(cursor);
 			}
 			if (currEvent.type == sf::Event::LostFocus) {
 				GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
 				settingsMenu.ResetButtons();
 				notFullScreen = true;
+				window.setMouseCursor(cursor);
 			}
 		}
 		if (window.hasFocus()) {
@@ -102,7 +127,18 @@ int main()
 			}
 			while (lag >= UPDATE_INTERVAL) {
 				switch (state) {
+				case SPLASH: {
+					float timeSinceSplashStart = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - splashStartTime)).count() / 1000000.0f;
+					splash.Render(&window);
+					if ((timeSinceSplashStart > 10.0f) || (currEvent.type == sf::Event::TextEntered) || (currEvent.type == sf::Event::MouseButtonPressed)) {
+						state = MENU;
+						GLBVRS::canPressButtonsAgain = false;
+						GLBVRS::lastMenuSwitch = hiResTime::now();
+					}
+					break;
+				}
 				case MENU: {
+					window.setView(mainMenusView);
 					sf::Vector2i mScreenPos = sf::Mouse::getPosition(window);
 					sf::Vector2f mousePosition = window.mapPixelToCoords(mScreenPos, window.getView());
 					if (justSwitchedBackToMenu) {
@@ -139,6 +175,7 @@ int main()
 						resources.SetSoundLevel(soundLvl);
 						GLBVRS::SetGlobalConstants(window.getSize().x, window.getSize().y, &resources, &mBus, &globalGame, globalGame.playerChar, soundLvl);
 						window.setView(mainMenusView);
+						window.setMouseCursor(cursor);
 						state = SETTINGS;
 					}
 					if (state == MENU) {
@@ -164,17 +201,19 @@ int main()
 
 					GLBVRS::MBUSPTR->notify();
 					microSec currInterval = std::chrono::duration_cast<microSec>(afterPhysicsUpdate - beforePhysicsUpdate);
-					std::string str = "Physics update took " + std::to_string(currInterval.count()) + " microseconds \n";
-					std::cout << str;
+					//std::string str = "Physics update took " + std::to_string(currInterval.count()) + " microseconds \n";
+					//std::cout << str;
 					if (state == LOSE) {
 						saveData.SaveNewHighScore(globalGame.currRunScore);
 						lostMenu.SetPrevScore(globalGame.currRunScore);
 						lostMenu.SetHighScores(saveData.GetHighScoresVect());
+						GLBVRS::RSRCS->PlaySound(RESOURCES::SOUNDS::GAMEOVER);
 					}
 					else if (state == WIN) {
 						saveData.SaveNewHighScore(globalGame.currRunScore);
 						winMenu.SetPrevScore(globalGame.currRunScore);
 						winMenu.SetHighScores(saveData.GetHighScoresVect());
+						GLBVRS::RSRCS->PlaySound(RESOURCES::SOUNDS::BIGEGGCOLLECT1);
 					}
 					break;
 				}
@@ -222,8 +261,8 @@ int main()
 				globalGame.Render(percentUpdateElapsed);
 				hiRes_time_point afterPhysicsUpdate = hiResTime::now();
 				microSec currInterval = std::chrono::duration_cast<microSec>(afterPhysicsUpdate - beforePhysicsUpdate);
-				std::string str = "Render took " + std::to_string(currInterval.count()) + " microseconds \n \n";
-				std::cout << str;
+				//std::string str = "Render took " + std::to_string(currInterval.count()) + " microseconds \n \n";
+				//std::cout << str;
 				break;
 			}
 			case MENU: {

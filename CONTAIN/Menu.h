@@ -31,6 +31,8 @@ private:
 	void  UpdateButtonTriplet(DIFFICULTY i_difficultySelected);
 
 public:
+	sf::View menuView;
+
 	RESOURCES* resources;
 
 	Menu(RESOURCES* i_resources, DIFFICULTY i_defaultDiff = MEDIUM);

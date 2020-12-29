@@ -22,20 +22,29 @@ UpgradeMenu::UpgradeMenu(RESOURCES * i_resources, DIFFICULTY i_diff, PlayerChar*
 	//Erase all temp upgrades!
 	auto eraseTemp = std::find(availableUpgrades.begin(), availableUpgrades.end(), TEMP_HEALTH);
 	availableUpgrades.erase(eraseTemp);
+
+	//auto eraseOutOfStock = std::find(availableUpgrades.begin(), availableUpgrades.end(), NO_UPGRADES_LEFT);
+	//availableUpgrades.erase(eraseOutOfStock);
 	//
-	
+	upgrades = std::vector<int>({ 0, 0, 0 });
+	if (availableUpgrades.size() >= 3) {
+		upgrades[0] = availableUpgrades[distrib(gen1) % availableUpgrades.size()];
+		auto iter1 = std::find(availableUpgrades.begin(), availableUpgrades.end(), upgrades[0]);
+		availableUpgrades.erase(iter1);
 
-	upgradeA = availableUpgrades[distrib(gen1)%availableUpgrades.size()];
-	auto iter1 = std::find(availableUpgrades.begin(), availableUpgrades.end(), upgradeA);
-	availableUpgrades.erase(iter1);
+		upgrades[1] = availableUpgrades[distrib(gen1) % availableUpgrades.size()];
+		auto iter2 = std::find(availableUpgrades.begin(), availableUpgrades.end(), upgrades[1]);
+		availableUpgrades.erase(iter2);
 
-	upgradeB = availableUpgrades[distrib(gen1) % availableUpgrades.size()];
-	auto iter2 = std::find(availableUpgrades.begin(), availableUpgrades.end(), upgradeB);
-	availableUpgrades.erase(iter2);
-
-	upgradeC = availableUpgrades[distrib(gen1) % availableUpgrades.size()];
-	auto iter3 = std::find(availableUpgrades.begin(), availableUpgrades.end(), upgradeC);
-	availableUpgrades.erase(iter3);
+		upgrades[2] = availableUpgrades[distrib(gen1) % availableUpgrades.size()];
+		auto iter3 = std::find(availableUpgrades.begin(), availableUpgrades.end(), upgrades[2]);
+		availableUpgrades.erase(iter3);
+	}
+	else {
+		for (int upgrade = 0; upgrade < availableUpgrades.size(); upgrade++) {
+			upgrades[upgrade] = availableUpgrades[upgrade];
+		}
+	}
 
 	sf::RectangleShape nextLevelRect(sf::Vector2f(GLBVRS::BTTN_WDTH, GLBVRS::BTTN_HGHT));
 	nextLevelRect.setPosition(sf::Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH * 0.5f - GLBVRS::BTTN_WDTH * 0.5,
@@ -43,21 +52,21 @@ UpgradeMenu::UpgradeMenu(RESOURCES * i_resources, DIFFICULTY i_diff, PlayerChar*
 	nextLevelButton = Button("Next Level", nextLevelRect, &font);
 	nextLevelButton.SetColors(sf::Color::Black, sf::Color::White, sf::Color(128, 128, 128));
 
-	sf::RectangleShape upgradeRectA(sf::Vector2f(GLBVRS::CRT_WDTH, GLBVRS::BTTN_HGHT));
-	upgradeRectA.setPosition(sf::Vector2f(GLBVRS::HR_MRG, GLBVRS::VRT_MRG + GLBVRS::BTTN_HGHT * 2.0f));
-	upgradeButtonA = Button(GetUpgradeText(static_cast<UPGRADE_TYPE>(upgradeA)), upgradeRectA, &font);
+	sf::RectangleShape upgradeRectA(sf::Vector2f(GLBVRS::CRT_WDTH * 0.6f, GLBVRS::BTTN_HGHT));
+	upgradeRectA.setPosition(sf::Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * 0.2f), GLBVRS::VRT_MRG + GLBVRS::BTTN_HGHT * 2.0f));
+	upgradeButtonA = Button(GetUpgradeText(static_cast<UPGRADE_TYPE>(upgrades[0])), upgradeRectA, &font);
 	upgradeButtonA.SetColors(sf::Color::Green, sf::Color::White, sf::Color(128, 128, 128));
 	upgradeButtonA.SetState(Button::UP);
 
-	sf::RectangleShape upgradeRectB(sf::Vector2f(GLBVRS::CRT_WDTH, GLBVRS::BTTN_HGHT));
-	upgradeRectB.setPosition(sf::Vector2f(GLBVRS::HR_MRG, GLBVRS::VRT_MRG + GLBVRS::BTTN_HGHT * 4.0f));
-	upgradeButtonB = Button(GetUpgradeText(static_cast<UPGRADE_TYPE>(upgradeB)), upgradeRectB, &font);
+	sf::RectangleShape upgradeRectB(sf::Vector2f(GLBVRS::CRT_WDTH * 0.6f, GLBVRS::BTTN_HGHT));
+	upgradeRectB.setPosition(sf::Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * 0.2f), GLBVRS::VRT_MRG + GLBVRS::BTTN_HGHT * 4.0f));
+	upgradeButtonB = Button(GetUpgradeText(static_cast<UPGRADE_TYPE>(upgrades[1])), upgradeRectB, &font);
 	upgradeButtonB.SetColors(sf::Color::Yellow, sf::Color::White, sf::Color(128, 128, 128));
 	upgradeButtonB.SetState(Button::UP);
 
-	sf::RectangleShape upgradeRectC(sf::Vector2f(GLBVRS::CRT_WDTH, GLBVRS::BTTN_HGHT));
-	upgradeRectC.setPosition(sf::Vector2f(GLBVRS::HR_MRG, GLBVRS::VRT_MRG + GLBVRS::BTTN_HGHT * 6.0f));
-	upgradeButtonC = Button(GetUpgradeText(static_cast<UPGRADE_TYPE>(upgradeC)), upgradeRectC, &font);
+	sf::RectangleShape upgradeRectC(sf::Vector2f(GLBVRS::CRT_WDTH * 0.6f, GLBVRS::BTTN_HGHT));
+	upgradeRectC.setPosition(sf::Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * 0.2f), GLBVRS::VRT_MRG + GLBVRS::BTTN_HGHT * 6.0f));
+	upgradeButtonC = Button(GetUpgradeText(static_cast<UPGRADE_TYPE>(upgrades[2])), upgradeRectC, &font);
 	upgradeButtonC.SetColors(sf::Color::Red, sf::Color::White, sf::Color(128, 128, 128));
 	upgradeButtonC.SetState(Button::UP);
 
@@ -65,12 +74,12 @@ UpgradeMenu::UpgradeMenu(RESOURCES * i_resources, DIFFICULTY i_diff, PlayerChar*
 
 	upgradeText.setFont(font);
 	upgradeText.setString("Choose and upgrade before advancing to the next level!");
-	upgradeText.setCharacterSize(25);
+	upgradeText.setCharacterSize(20);
 	upgradeText.setFillColor(sf::Color::White);
 	upgradeText.setPosition(sf::Vector2f(GLBVRS::HR_MRG, GLBVRS::VRT_MRG));
 	
 	firstOpen = true;
-	currUpgradeType = static_cast<UPGRADE_TYPE>(upgradeA);
+	currUpgradeType = static_cast<UPGRADE_TYPE>(upgrades[0]);
 }
 
 bool UpgradeMenu::PollInput(sf::Vector2f mousePosition, Button * button, bool stickyButton)
@@ -103,21 +112,21 @@ void UpgradeMenu::UpdateButtonTriplet(int i_upgradeSelected)
 {
 	switch (i_upgradeSelected) {
 	case 1: {
-		currUpgradeType = static_cast<UPGRADE_TYPE>(upgradeA);
+		currUpgradeType = static_cast<UPGRADE_TYPE>(upgrades[0]);
 		upgradeButtonA.SetState(Button::DOWN);
 		upgradeButtonB.SetState(Button::UP);
 		upgradeButtonC.SetState(Button::UP);
 		break;
 	}
 	case 2: {
-		currUpgradeType = static_cast<UPGRADE_TYPE>(upgradeB);
+		currUpgradeType = static_cast<UPGRADE_TYPE>(upgrades[1]);
 		upgradeButtonA.SetState(Button::UP);
 		upgradeButtonB.SetState(Button::DOWN);
 		upgradeButtonC.SetState(Button::UP);
 		break;
 	}
 	case 3: {
-		currUpgradeType = static_cast<UPGRADE_TYPE>(upgradeC);
+		currUpgradeType = static_cast<UPGRADE_TYPE>(upgrades[2]);
 		upgradeButtonA.SetState(Button::UP);
 		upgradeButtonB.SetState(Button::UP);
 		upgradeButtonC.SetState(Button::DOWN);
@@ -143,11 +152,11 @@ std::string UpgradeMenu::GetUpgradeText(UPGRADE_TYPE i_type)
 			break;
 		}
 	case SCATTER : {
-		upgradeString = "Add one bullet to burst";
+		upgradeString = "Add one bullet per shot";
 		break;
 	}
 	case SMALL_SHIP: {
-		upgradeString = "Decrease ship size, increase speed";
+		upgradeString = "Smaller and faster ship";
 		break;
 	}
 	case BIG_SHIP: {
@@ -155,11 +164,19 @@ std::string UpgradeMenu::GetUpgradeText(UPGRADE_TYPE i_type)
 		break;
 	}
 	case BLAST : {
-		upgradeString = "Stun: +radius, +power, +stun time";
+		upgradeString = "Improve Stun Blast";
 		break;
 	}
 	case WALL_BIG : {
-		upgradeString = "Increase wall size";
+		upgradeString = "Improve deployed walls";
+		break;
+	}
+	case NO_UPGRADES_LEFT: {
+		upgradeString = "[No upgrades left]";
+		break;
+	}
+	defualt : {
+		upgradeString = "[No upgrades left]";
 		break;
 	}
 	//case WALL_HURT: {

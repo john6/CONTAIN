@@ -44,7 +44,7 @@ void SaveData::CreateNewSaveFile()
 void SaveData::CreateNewSettingsFile()
 {
 	std::ofstream SaveFileOut("SETTINGS.txt");
-	SaveFileOut << "SETTINGS_FILE_DONT_TOUCH_PLZ\n 0\n 0\n 0\n 0\n";
+	SaveFileOut << "SETTINGS_FILE_DONT_TOUCH_PLZ\n 1\n 1\n 2\n 1\n";
 	SaveFileOut.close();
 }
 

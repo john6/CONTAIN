@@ -6,6 +6,10 @@ BossBurst::BossBurst(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniB
 {
 	if (!i_isMiniBoss) {
 		rb = RigidBody(Physics::CreateRegularPolygon(5, 100.0f), METAL);
+		isBoss = true;
+	}
+	else {
+		isBoss = false;
 	}
 	origColorFill = PARAKEET;
 	origColorOutLine = EMERALD;
@@ -67,6 +71,7 @@ void BossBurst::Destroy()
 	if (isMiniBoss) {
 		DropPowerUp();
 	}
+	GenerateDeathEffects(ENEMY_BURST_DEATH);
 }
 
 void BossBurst::shootProj()
@@ -80,7 +85,7 @@ void BossBurst::shootProj()
 			Vector2f projDir = CreateRandomDir();
 			projDir.normalize();
 			std::shared_ptr<Entity> projectile = std::make_shared<Projectile>(
-				rb.transform.pos + (projDir * (100.0f + (i * 15.0f))), 1);
+				rb.transform.pos + (projDir * (100.0f)), 1);
 			projectile->rb.ApplyImpulse((projDir * projSpeed), NULL_VECTOR);
 			spawnVect.push_back(projectile);
 			i++;
@@ -90,7 +95,7 @@ void BossBurst::shootProj()
 
 void BossBurst::Stun(float i_stunTime)
 {
-	stunSecs = i_stunTime / 2.0f;
+	stunSecs = i_stunTime;
 }
 
 void BossBurst::SetDiffVars(int i_diff)
@@ -139,7 +144,7 @@ void BossBurst::SetDiffVars(int i_diff)
 			speed = GLBVRS::ENEMYSPEEDMED;
 			projSpeed = 3000.0f;
 			numShots = 8;
-			maxHealth = 9;
+			maxHealth = 10;
 			health = maxHealth;
 			break;
 		}
@@ -147,7 +152,7 @@ void BossBurst::SetDiffVars(int i_diff)
 			speed = GLBVRS::ENEMYSPEEDHARD;
 			projSpeed = 3200.0f;
 			numShots = 9;
-			maxHealth = 10;
+			maxHealth = 12;
 			health = maxHealth;
 			break;
 		}

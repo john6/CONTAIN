@@ -15,7 +15,7 @@ class SettingsMenu
 	sf::Text soundLevelText;
 	sf::Text screenResolutionText;
 
-	SaveData* saveDatePtr;
+
 	RESOURCES* resources;
 	RSLTN* resolutionPtr;
 	bool* fullScreenPtr;
@@ -42,6 +42,7 @@ class SettingsMenu
 	//Navigation
 	Button apply;
 	Button exit;
+	Button godModeButton;
 
 	bool PollInput(sf::Vector2f mousePosition, Button* button, bool stickyButton = false);
 	bool PollInputToggle(sf::Vector2f mousePosition, Button* button);
@@ -57,13 +58,17 @@ public:
 
 
 public:
+	bool godMode;
+
+	SaveData* saveDatePtr;
+
 	void ResetMenu();
 
 	void LoadConfig();
 
 	void ResetButtons();
 
-	GAME_STATE Update(float microSeconds, sf::RenderWindow* window, sf::Vector2f mousePosition);
+	GAME_STATE Update(float microSeconds, sf::RenderWindow* window, sf::Vector2f mousePosition, bool i_forceUpdate = false);
 
 	void Render(sf::RenderWindow* window);
 };

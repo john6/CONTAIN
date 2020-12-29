@@ -24,12 +24,12 @@ Level::Level(int i_lvlNum, DIFFICULTY i_diff) :
 	colPalA = Physics::GenerateRandomColor(5, 128);
 	colPalB = Physics::GenerateRandomColor(5, 128);
 	phaseOne = true;
-	timeToComplete = 28.0f + (i_lvlNum * 5) - (i_diff * 5);
+	timeToComplete = 29.0f + (i_lvlNum * 5) - (i_diff * 5);
 	enemiesKilled = 0;
 	//baseLevelWidth = MAXSECTORWIDTH;
 	//baseLevelHeight = MAXSECTORHEIGHT;
-	baseLevelWidth = MAXSECTORWIDTH;
-	baseLevelHeight = MAXSECTORHEIGHT;
+	baseLevelWidth = (MAX_SECTOR_WIDTH + MIN_SECTOR_WIDTH) / 2;
+	baseLevelHeight = (MAX_SECTOR_HEIGHT + MIN_SECTOR_HEIGHT) / 2;
 
 	GenerateMapGrip(i_lvlNum, i_diff);
 	FillMapWithRooms(i_lvlNum, i_diff);
@@ -82,8 +82,8 @@ Level::Level() : //TUTORIAL LEVEL
 	charPtr = GLBVRS::PPTR;
 
 
-	baseLevelWidth = MAXSECTORWIDTH;
-	baseLevelHeight = MAXSECTORHEIGHT;
+	baseLevelWidth = MAX_SECTOR_WIDTH;
+	baseLevelHeight = MAX_SECTOR_HEIGHT;
 	//init globals
 	colPalA = Physics::GenerateRandomColor(5, 128);
 	colPalB = Physics::GenerateRandomColor(5, 128);
@@ -380,47 +380,25 @@ void Level::GenerateMapGrip(int i_lvlNum, DIFFICULTY i_diff)
 	
 	//set all width values
 	for (int i = 0; i < dimSize; i++) {
-		std::random_device rd1;  //Will be used to obtain a seed for the random number engine
-		std::mt19937 gen1(rd1()); //Standard mersenne_twister_engine seeded with rd()
-		std::discrete_distribution<> distrib({ 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1}); //both boundaries are inclusive
-		int widthDifference = (distrib(gen1) - 10) * (baseLevelWidth * 0.05);
-		//int widthDifference = -10 * (baseLevelWidth * 0.05);
-		//Min is -10, tbh I think its kind of weird and fun, didn't seem to be anything game breaking about the small sectors
-		//Max is +8 before hit boundary
-		//range is -10 to +8 aka 18
-		int sectorWidth = baseLevelWidth + widthDifference;
+		std::random_device rd1;
+		std::mt19937 gen1(rd1());
+		std::discrete_distribution<> distrib({ 1, 1, 2, 3, 6, 6, 6, 8, 8, 8, 6, 5, 3, 2, 1, 1});// [0,16]
+		float ratio = (float)distrib(gen1) / 16.0f;
+		int randomSectorWidth = (MIN_SECTOR_WIDTH * ratio) + (MAX_SECTOR_WIDTH * (1.0f - ratio));
 			for (int j = 0; j < dimSize; j++) {
-				//if (i % 2 == 0) { //logic for sector size TODO
-				//	sectorMap[j][i].dims[0] = 1728; //iterate over a column of sectors setting the width of the sectors
-				//}
-				//else {
-				//	sectorMap[j][i].dims[0] = 1200;
-				//}
-				//sectorMap[j][i].dims[0] = 1920;
-				sectorMap[j][i].dims[0] = sectorWidth;
-				//sectorMap[j][i].dims[0] = baseLevelWidth;
+				sectorMap[j][i].dims[0] = randomSectorWidth;
 			}
 		}
 	//set all height values
 	for (int i = 0; i < dimSize; i++) {
-		std::random_device rd1;  //Will be used to obtain a seed for the random number engine
-		std::mt19937 gen1(rd1()); //Standard mersenne_twister_engine seeded with rd()
-		std::discrete_distribution<> distrib({ 1, 2, 5, 6, 7, 7, 7, 7, 6, 5, 1 }); //both boundaries are inclusive
-		int heightDifference = (distrib(gen1) -8) * (baseLevelHeight * 0.1);
-		//int heightDifference = -7 * (baseLevelHeight * 0.1);
-		//Max is +3 for height
-		//Min is -8, otherwise you get a little squeezed with certain terrians
-		//range is -8 to +4 aka 12 options
-		int sectorHieght = baseLevelHeight + heightDifference;
+		std::random_device rd1;
+		std::mt19937 gen1(rd1());
+		std::discrete_distribution<> distrib({ 1, 1, 2, 3, 6, 6, 6, 8, 8, 8, 6, 5, 3, 2, 1, 1 });// [0,16]
+		float ratio = (float)distrib(gen1) / 16.0f;
+		int randomSectorHeight = (MIN_SECTOR_HEIGHT * ratio) + (MAX_SECTOR_HEIGHT * (1.0f - ratio));
+		int sectorHieght = randomSectorHeight;
 		for (int j = 0; j < dimSize; j++) {
-			//if (i % 2 == 0) {
-			//sectorMap[i][j].dims[1] = 972; //iterate over a row of sectors setting the height of the sectors
-			//}
-			//else {
-			//	sectorMap[i][j].dims[1] = 700;
-			//}
 			sectorMap[i][j].dims[1] = sectorHieght;
-			//sectorMap[i][j].dims[1] = baseLevelHeight;
 		}
 	}
 

@@ -23,6 +23,7 @@ private:
 	Button nextLevelButton;
 	bool firstOpen;
 	UPGRADE_TYPE currUpgradeType;
+	std::vector<int> upgrades;
 
 	bool PollInput(sf::Vector2f mousePosition, Button* button, bool stickyButton = false);
 	void  PollButtonTriplet(sf::Vector2f mousePosition);

@@ -146,7 +146,16 @@ void HeadsUpDisplay::UpdateHealth(PlayerChar* i_player)
 			sf::RectangleShape healthSegment = sf::RectangleShape(sf::Vector2f(((1.0f/ (float)maxHealth) * healthRectWidth) - segmentMarg, hudFillBarHeight));
 			healthSegment.setPosition(healthSegmentsRect.getPosition().x + ((1.0f/ (float)maxHealth) * healthRectWidth * i) + (segmentMarg * 2.0f), hudItemPosition.y + specialWeapPosOffset.y + hudItemRectHeight * (1.0 / 10.0f));
 			healthSegment.setOutlineThickness(segmentMarg);
-			healthSegment.setFillColor(sf::Color::Green);
+			float amountRemaining = (float)currHealth / (float)maxHealth;
+			if (amountRemaining > 0.667) {
+				healthSegment.setFillColor(sf::Color::Green);
+			}
+			else if (amountRemaining > 0.334) {
+				healthSegment.setFillColor(sf::Color::Yellow);
+			}
+			else {
+				healthSegment.setFillColor(sf::Color::Red);
+			}
 			healthSegment.setOutlineColor(sf::Color::Black);
 			healthSegments.push_back(healthSegment);
 		}

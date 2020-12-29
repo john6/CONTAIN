@@ -7,7 +7,6 @@ class Polygon :
 {
 private:
 
-	std::vector<Vector2f> pointArr;
 	float currSizeRat;
 	float area;
 	float inertiaCoeff;
@@ -15,6 +14,8 @@ private:
 	void CalculateValues();
 
 public:
+	std::vector<Vector2f> pointArr;
+
 	int numPoints;
 
 	Polygon(std::vector<Vector2f> i_pointArr);

@@ -6,6 +6,9 @@ Wall::Wall(Vector2f i_startPosition, RigidBody i_rb,
 	sf::Color i_fillCol, sf::Color i_outCol, bool i_break) :
 	Entity(i_startPosition, i_rb, WALL_BASIC), breakable{ i_break }
 {
+	lastExplosion = std::chrono::high_resolution_clock::now() - std::chrono::minutes(1);
+	explosionRate = 1.5f;
+	exploding = false;
 	maxHealth = 10;
 	currHealth = maxHealth;
 	fixedPosition = true;
@@ -74,6 +77,41 @@ void Wall::GenerateDeathEffects()
 		Vector2f spawnPos = Math::GetRandomCoordInRect(topLeft, bottomRight);
 		std::shared_ptr<Entity> anim = std::make_shared<Anim>(spawnPos, microSec);
 		spawnVect.push_back(anim);
+	}
+}
+
+void Wall::Update(float i_stepSize)
+{
+
+	if ((!breakable) && (exploding)) {
+		float weaponDelay = (std::chrono::duration_cast<std::chrono::microseconds>(hiResTime::now() - lastExplosion)).count() / 1000000.0f;
+		if (weaponDelay >= explosionRate) {
+			lastExplosion = std::chrono::high_resolution_clock::now();
+			microSec microSec(6000000000);
+			std::vector<Vector2f> shapePoints = rb.GetVertCords();
+			float minX = INT_MAX;
+			float minY = INT_MAX;
+			float maxX = INT_MIN;
+			float maxY = INT_MIN;
+			for (int i = 0; i < shapePoints.size(); i++) {
+				if (shapePoints[i][0] < minX) { minX = shapePoints[i][0]; }
+				if (shapePoints[i][0] > maxX) { maxX = shapePoints[i][0]; }
+
+				if (shapePoints[i][1] < minY) { minY = shapePoints[i][1]; }
+				if (shapePoints[i][1] > maxY) { maxY = shapePoints[i][1]; }
+			}
+
+			Vector2f topLeft(minX, minY);
+			Vector2f bottomRight(maxX, maxY);
+
+			for (int i = 0; i < 3; i++) {
+				Vector2f spawnPos = Math::GetRandomCoordInRect(topLeft, bottomRight);
+				std::shared_ptr<Entity> anim = std::make_shared<Anim>(spawnPos, microSec);
+				spawnVect.push_back(anim);
+			}
+		}
+
+
 	}
 }
 
