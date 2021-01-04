@@ -87,7 +87,7 @@ void BossStream::shootProj()
 
 void BossStream::Stun(float i_stunTime)
 {
-	stunSecs = i_stunTime;
+	stunSecs = i_stunTime * 0.6f;
 }
 
 void BossStream::SetDiffVars(int i_diff)

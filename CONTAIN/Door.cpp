@@ -13,10 +13,10 @@ Door::Door(MapCoord i_outCoord, Vector2f i_startPos, Vector2f i_outPos, RigidBod
 	disabledAmount = 0.0f;
 	//color
 	openColor = CYAN;
-	openColorOutline = LIGHTSILVER;
+	openColorOutline = DIMGRAY;
 
 	closedColor = DARKSILVER;
-	closedColorOutline = SILVER;
+	closedColorOutline = DIMGRAY;
 
 	fillColor = closedColor;
 	outlineColor = closedColorOutline;

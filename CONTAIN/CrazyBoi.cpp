@@ -9,7 +9,8 @@ CrazyBoi::CrazyBoi(DIFFICULTY i_diff, Vector2f i_startPosition, RigidBody i_rb) 
 	sameDirTime = 0.9;
 	timeTillDirSwitch = 0.0f;
 	fillColor = CHARTREUSE;
-	outlineColor = sf::Color::White;
+	origColorOutLine = PEAR;
+	//outlineColor = sf::Color::White;
 	currDir = CreateRandomDir();
 	SetDiffVars(i_diff);
 	//compensating for larger size in speed
@@ -42,6 +43,7 @@ void CrazyBoi::Update(float i_stepSize)
 			float moveDist = speed * i_stepSize;
 			rb.ApplyImpulse(currDir * moveDist, NULL_VECTOR);
 		}
+		UpdateTendrilPosition(i_stepSize);
 	}
 	else {
 		float secsInUpdate = i_stepSize / 1000.0f;

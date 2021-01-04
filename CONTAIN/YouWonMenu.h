@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
+#include <list>
 #include "RESOURCES.h"
 #include "GLOBAL_CONSTANTS.h"
 #include "Button.h"

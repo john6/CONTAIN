@@ -40,6 +40,12 @@ public:
 	bool hasExploded;
 	bool alreadyDead;
 
+	sf::Color origColorFill;
+	sf::Color origColorOutLine;
+	sf::Color deathColorFill;
+	sf::Color deathColorOutLine;
+
+
 	float weaponDelay;
 	float wallDelay;
 	int maxSpecialAmmo;
@@ -80,6 +86,8 @@ public:
 	void TakeDamage(float i_dmg);
 
 	void GenerateDamageEffects(CollisionData i_collisionCopy);
+	
+	void ChangeColorHealth();
 
 	void ReceivePowerUp(UPGRADE_TYPE i_powType);
 

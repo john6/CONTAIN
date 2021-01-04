@@ -65,7 +65,7 @@ Menu::Menu(RESOURCES* i_resources, DIFFICULTY i_defaultDiff) :
 	title.setPosition(sf::Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH / 2.0f, GLBVRS::VRT_MRG * 1.5f));
 
 	instructions1.setFont(font);
-	instructions1.setString("Controls: \n#WASD# to move,\n#Left Click# to shoot a basic basic laser\n#Right Click# to deploy a wall\n#SPACEBAR# to trigger an EMP blast\n");
+	instructions1.setString("Controls: \n#WASD or LEFT STICK# to move\n#LEFT CLICK or RIGHT TRIGGER# to shoot\n#RIGHT CLICK or LEFT TRIGGER# to deploy a wall\n#SPACEBAR or RIGHT STICK CLICK# to create an stun blast\n");
 	instructions1.setCharacterSize(25);
 	instructions1.setFillColor(sf::Color::White);
 	instructions1.setPosition(topLeft + sf::Vector2f(0, bttnOffsetVert * 6));
@@ -86,7 +86,7 @@ void Menu::ResetMenu()
 	//mediumButton.SetState(Button::UP);
 	//hardButton.SetState(Button::UP);
 	//settingsButton.SetState(Button::UP);
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	std::this_thread::sleep_for(std::chrono::milliseconds(350));
 }
 
 bool Menu::PollInput(sf::Vector2f mousePosition, Button* button, bool stickyButton) {
@@ -197,6 +197,7 @@ void Menu::Render(sf::RenderWindow* window) {
 	window->draw(settingsText);
 	window->draw(title);
 	window->draw(instructions1);
+	window->draw(instructions2);
 
 	window->display();
 }

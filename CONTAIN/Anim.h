@@ -26,8 +26,9 @@ private:
 public:
 	Anim(Vector2f direction, std::vector<Vector2f> i_contactPoints, microSec i_lifetime, int i_number, int i_splashOption);
 
-	Anim(Vector2f i_startPosition, microSec i_lifetime, ANIMTYPE i_aType = CANNED_EXPLOSION, Entity* i_entPtr = NULL);
+	Anim(Vector2f i_startPosition, microSec i_lifetime, ANIMTYPE i_aType = CANNED_EXPLOSION, Entity* i_entPtr = NULL, float i_sizeFactor = 1.0f);
 
+	Anim(Vector2f i_startPosition, microSec i_lifetime, float i_sizeFactor);
 
 	~Anim();
 

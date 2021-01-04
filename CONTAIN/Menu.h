@@ -17,6 +17,7 @@ private:
 	sf::Text title;
 	sf::Text difficultyLabel;
 	sf::Text instructions1;
+	sf::Text instructions2;
 	Button playButton;
 	Button playTutorialButton;
 	Button exitButton;

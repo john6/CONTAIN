@@ -202,7 +202,6 @@ GAME_STATE  Game::UpdateLvlEntities(std::list<std::shared_ptr<Entity>>* i_lvlEnt
 			}
 		}
 	});
-
 	std::for_each(std::execution::par, parallelVect.begin(), parallelVect.end(), [&](int index) {
 		for (int j = index + 1; j < parallelVect.size(); ++j) {
 			if (j < entPVect.size()) {
@@ -423,7 +422,7 @@ void Game::InitGame(DIFFICULTY i_diff)
 	GenerateLevels(i_diff);
 	PlayRandomSong();
 	firstPowerUp = true;
-	playState = WON_LEVEL;
+	playState = PLAY_STATE::WON_LEVEL;
 	currUpgradeMenu = std::make_shared<UpgradeMenu>(resources, gameDiff, dynamic_cast<PlayerChar*>(playerChar.get()));
 	//if (i_diff == EASY) {
 	//}

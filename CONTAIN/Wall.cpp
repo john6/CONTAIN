@@ -7,18 +7,68 @@ Wall::Wall(Vector2f i_startPosition, RigidBody i_rb,
 	Entity(i_startPosition, i_rb, WALL_BASIC), breakable{ i_break }
 {
 	lastExplosion = std::chrono::high_resolution_clock::now() - std::chrono::minutes(1);
-	explosionRate = 1.5f;
+	explosionRate = 4.5f;
 	exploding = false;
 	maxHealth = 10;
 	currHealth = maxHealth;
 	fixedPosition = true;
-	origColorFill = i_fillCol;
-	origColorOutLine = i_outCol;
-	deathColorFill = DIMGRAY;
-	deathColorOutLine = PENNYBROWN;
 
-	fillColor = origColorFill;
-	outlineColor = origColorOutLine;
+	if (breakable) {
+		sf::Texture texture;
+		//texture.setRepeated(true);
+
+		if (textRectWidth < textRectHeight) {
+			if (!texture.loadFromFile("Textures/tile146.png", sf::IntRect(0, 0, 32, 64)))
+			{
+				std::cerr << "failed to load Textures/tile111.png";
+			}
+			else {
+				texturePtr = std::make_shared<sf::Texture>(texture);
+			}
+			textStretchWidth = (32.0f / textRectWidth);
+			textStretchHeight = 0.5;
+			//textRectWidth = 64.0f;
+			//textRectHeight = 64.0f;
+		}
+		else {
+			if (!texture.loadFromFile("Textures/tile147.png", sf::IntRect(0, 0, 32, 64)))
+			{
+				std::cerr << "failed to load Textures/tile111.png";
+			}
+			else {
+				texturePtr = std::make_shared<sf::Texture>(texture);
+			}
+			textStretchWidth = 0.5;
+			textStretchHeight = (32.0f / textRectHeight);
+		}
+		origColorFill = sf::Color::White;
+		origColorOutLine = METALLICSILVER;
+		deathColorFill = PENNYBROWN;
+		deathColorOutLine = PENNYBROWN;
+
+		fillColor = origColorFill;
+		outlineColor = origColorOutLine;
+	}
+	else {
+		origColorFill = i_fillCol;
+		origColorOutLine = i_outCol;
+		deathColorFill = DIMGRAY;
+		deathColorOutLine = PENNYBROWN;
+
+		fillColor = origColorFill;
+		outlineColor = origColorOutLine;
+
+		//sf::Texture texture;
+		////texture.setRepeated(true);
+		//if (!texture.loadFromFile("Textures/tile116.png", sf::IntRect(0, 0, 64, 64)))
+		//{
+		//	std::cerr << "failed to load Textures/tile116.png";
+		//}
+		//else {
+		//	texturePtr = std::make_shared<sf::Texture>(texture);
+		//}
+	}
+
 }
 
 void Wall::CollideWithProjectile(CollisionData i_coll)
@@ -106,7 +156,7 @@ void Wall::Update(float i_stepSize)
 
 			for (int i = 0; i < 3; i++) {
 				Vector2f spawnPos = Math::GetRandomCoordInRect(topLeft, bottomRight);
-				std::shared_ptr<Entity> anim = std::make_shared<Anim>(spawnPos, microSec);
+				std::shared_ptr<Entity> anim = std::make_shared<Anim>(spawnPos, microSec, 3.5f);
 				spawnVect.push_back(anim);
 			}
 		}

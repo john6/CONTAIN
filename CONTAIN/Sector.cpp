@@ -17,6 +17,7 @@ Sector::Sector(Level* i_lvlPtr, int i_dim_x, int i_dim_y, RESOURCES* i_resources
 	else {
 		InitializeSector();
 	}
+	//SwitchToPhaseTwo();
 }
 
 Sector::~Sector()
@@ -66,8 +67,21 @@ void Sector::AddEntsFromSpawnQueues()
 		AddEntPtrToSector(spawnable);
 	}
 	for (auto entPtr : lvlEntitiesPhase1) {
+		TypeID type = entPtr->GetTypeID();
 		for (auto spawnable : entPtr->spawnVect) {
-			AddEntPtrToSector(spawnable);
+			//if type if enemy dont let it spawn stuff out of bounds
+			if (auto enemy = dynamic_cast<Enemy*>(entPtr.get())) { //((type == TypeID::ENEMY_SEEK) || (type == TypeID::ENEMY_RAND) || (type = TypeID::ENEMY_RAND_PUSH) || (type == TypeID::ENEMY_SEEK_PUSH) || (type == TypeID::ENEMY_BOSS)) {
+				Vector2f position = spawnable->rb.transform.pos;
+				if ((position[0] < 0.0f) || (position[0] > sectorWidth) || (position[1] < 0.0f) || (position[1] > sectorHeight)) {
+					std::cout << "Not spawning out of bounds" << "\n";
+				}
+				else {
+					AddEntPtrToSector(spawnable);
+				}
+			}
+			else {
+				AddEntPtrToSector(spawnable);
+			}
 		}
 	}
 	
@@ -183,31 +197,31 @@ void Sector::AddWallsToLevel()
 	Material Static = Material(0.0f, 0.4f, 0.4f, 0.2f);
 
 	float wall_thickness = 500.0f;
-
+	sf::Color invisible(0.0f, 0.0f, 0.0f, 0.0f);
 	//Right wall
 	std::shared_ptr<Shape> vertRect1 = std::make_shared<Rectangle>(wall_thickness, sectorHeight * 2.0f);
 	RigidBody rightWallBody = RigidBody(vertRect1, Static);
 	std::shared_ptr<Entity> rightWall = std::make_shared<Wall>(
-		Vector2f((sectorWidth) + (wall_thickness / 2.0f), (sectorHeight / 2.0f)), rightWallBody, colPalA, colPalA);
+		Vector2f((sectorWidth) + (wall_thickness / 2.0f), (sectorHeight / 2.0f)), rightWallBody, invisible, invisible);
 	lvlEntitiesPhase1.push_back(rightWall);
 	//Left wall
 	std::shared_ptr<Shape> vertRect2 = std::make_shared<Rectangle>(wall_thickness, sectorHeight * 2.0f);
 	RigidBody leftWallBody = RigidBody(vertRect2, Static);
 	std::shared_ptr<Entity> leftWall = std::make_shared<Wall>(
-		Vector2f((-wall_thickness * 0.5), (sectorHeight / 2.0f)), leftWallBody, colPalA, colPalA);
+		Vector2f((-wall_thickness * 0.5), (sectorHeight / 2.0f)), leftWallBody, invisible, invisible);
 	AddEntPtrToSector(leftWall);
 	//Top wall
 	std::shared_ptr<Shape> horRect1 = std::make_shared<Rectangle>(sectorWidth, wall_thickness);
 	RigidBody wallBody1 = RigidBody(horRect1, Static);
 	std::shared_ptr<Entity> upperWall = std::make_shared<Wall>(
-		Vector2f((sectorWidth / 2.0f), - (wall_thickness * 0.5f)), wallBody1, colPalA, colPalA);
+		Vector2f((sectorWidth / 2.0f), - (wall_thickness * 0.5f)), wallBody1, invisible, invisible);
 	lvlEntitiesPhase1.push_back(upperWall);
 
 	//Bottom wall
 	std::shared_ptr<Shape> horRect2 = std::make_shared<Rectangle>(sectorWidth, wall_thickness);
 	RigidBody lowerWallBody = RigidBody(horRect2, Static);
 	std::shared_ptr<Entity> lowerWall = std::make_shared<Wall>(
-		Vector2f(Vector2f((sectorWidth / 2.0f), (wall_thickness * 0.5f) + sectorHeight)), lowerWallBody, colPalA, colPalA);
+		Vector2f(Vector2f((sectorWidth / 2.0f), (wall_thickness * 0.5f) + sectorHeight)), lowerWallBody, invisible, invisible);
 	lvlEntitiesPhase1.push_back(lowerWall);
 
 	//Wall Border
@@ -220,16 +234,89 @@ void Sector::AddWallsToLevel()
 	//drawblBorderEnt->intangible = true;
 	//drawblBorderEnt->intangible = true;
 	//lvlEntitiesPhase1.push_back(drawblBorderEnt);
-	std::shared_ptr<sf::Shape> wallDrawPtr = std::make_shared<sf::RectangleShape>(sf::Vector2f(sectorWidth, sectorHeight));
-	wallDrawPtr->setFillColor(sf::Color(0, 0, 0, 0));
-	wallDrawPtr->setOutlineColor(colPalB);
-	wallDrawPtr->setOutlineThickness(GLBVRS::DOOR_HEIGHT);
-	wallDrawPtr->setOrigin(sf::Vector2f(0.0f, 0.0f));
-	std::shared_ptr<Entity> extraWall = std::make_shared<Scenery>(
-		Vector2f(0.0f, 0.0f),
-		wallDrawPtr, 1);
-	lvlEntitiesPhase1.push_back(extraWall);
 
+
+	float BorderThickness = GLBVRS::DOOR_HEIGHT * 2;
+	//colPalB = sf::Color::White;
+	std::shared_ptr<sf::Shape> topWallPtr = std::make_shared<sf::RectangleShape>(sf::Vector2f(sectorWidth, BorderThickness));
+	topWallPtr->setFillColor(sf::Color::White);
+	//topWallPtr->setOutlineColor(sf::Color(0, 0, 0, 0));
+	topWallPtr->setOutlineThickness(0);
+	float topHeightInverse = 1.0f / topWallPtr->getLocalBounds().height;
+	std::shared_ptr<Entity> topWallEnt = std::make_shared<Scenery>(
+		Vector2f(0.0f, -BorderThickness),
+		topWallPtr, 1, RigidBody(std::make_shared<Circle>(1.0f)), "tile136", 0.5f, topHeightInverse * 64);
+	lvlEntitiesPhase1.push_back(topWallEnt);
+
+	std::shared_ptr<sf::Shape> bottompWallPtr = std::make_shared<sf::RectangleShape>(sf::Vector2f(sectorWidth, BorderThickness));
+	bottompWallPtr->setFillColor(sf::Color::White);
+	bottompWallPtr->setOutlineColor(sf::Color(0, 0, 0, 0));
+	bottompWallPtr->setOutlineThickness(BorderThickness);
+	bottompWallPtr->setOrigin(sf::Vector2f(0.0f, 0.0f));
+	float bottomHeightInverse = 1.0f / bottompWallPtr->getLocalBounds().height;
+	std::shared_ptr<Entity> bottomWallEnt = std::make_shared<Scenery>(
+		Vector2f(0.0f, sectorHeight),
+		bottompWallPtr, 1, RigidBody(std::make_shared<Circle>(1.0f)), "tile136", 0.5, bottomHeightInverse * 64);
+	lvlEntitiesPhase1.push_back(bottomWallEnt);
+
+	std::shared_ptr<sf::Shape> rightWallPtr = std::make_shared<sf::RectangleShape>(sf::Vector2f(sectorHeight + (BorderThickness * 2), BorderThickness));
+	rightWallPtr->setFillColor(sf::Color::White);
+	rightWallPtr->setOutlineColor(sf::Color(0, 0, 0, 0));
+	rightWallPtr->setOutlineThickness(BorderThickness);
+	rightWallPtr->setOrigin(sf::Vector2f(0.0f, 0.0f));
+	rightWallPtr->setRotation(90);
+	float rightHeightInverse = 1.0f / rightWallPtr->getLocalBounds().height;
+	std::shared_ptr<Entity> rightWallEnt = std::make_shared<Scenery>(
+		Vector2f(sectorWidth + BorderThickness, -BorderThickness),
+		rightWallPtr, 1, RigidBody(std::make_shared<Circle>(1.0f)), "tile136", 0.5f, rightHeightInverse * 64);
+	lvlEntitiesPhase1.push_back(rightWallEnt);
+
+	std::shared_ptr<sf::Shape> leftWallPtr = std::make_shared<sf::RectangleShape>(sf::Vector2f(sectorHeight + (BorderThickness * 2), BorderThickness));
+	leftWallPtr->setFillColor(sf::Color::White);
+	leftWallPtr->setOutlineColor(sf::Color(0, 0, 0, 0));
+	leftWallPtr->setOutlineThickness(BorderThickness);
+	leftWallPtr->setOrigin(sf::Vector2f(0.0f, 0.0f));
+	leftWallPtr->setRotation(90);
+	float leftHeightInverse = 1.0f / leftWallPtr->getLocalBounds().height;
+	std::shared_ptr<Entity> leftWallEnt = std::make_shared<Scenery>(
+		Vector2f(0.0f, -BorderThickness),
+		leftWallPtr, 1, RigidBody(std::make_shared<Circle>(1.0f)), "tile136", 0.5f, leftHeightInverse * 64);
+	lvlEntitiesPhase1.push_back(leftWallEnt);
+
+	//WALL CORNERS
+	float cornerThicknessInverse = 1.0f / BorderThickness;
+
+	std::shared_ptr<sf::Shape> topLeftWallPtr = std::make_shared<sf::RectangleShape>(sf::Vector2f(BorderThickness, BorderThickness));
+	topLeftWallPtr->setFillColor(sf::Color::White);
+	topLeftWallPtr->setOutlineThickness(0);
+	std::shared_ptr<Entity> topLeftCornerEnt = std::make_shared<Scenery>(
+		Vector2f(-BorderThickness, -BorderThickness),
+		topLeftWallPtr, 1, RigidBody(std::make_shared<Circle>(1.0f)), "tile140", cornerThicknessInverse * 64, cornerThicknessInverse * 64);
+	lvlEntitiesPhase1.push_back(topLeftCornerEnt);
+
+	std::shared_ptr<sf::Shape> topRightWallPtr = std::make_shared<sf::RectangleShape>(sf::Vector2f(BorderThickness, BorderThickness));
+	topRightWallPtr->setFillColor(sf::Color::White);
+	topRightWallPtr->setOutlineThickness(0);
+	std::shared_ptr<Entity> topRightCornerEnt = std::make_shared<Scenery>(
+		Vector2f(sectorWidth, -BorderThickness),
+		topRightWallPtr, 1, RigidBody(std::make_shared<Circle>(1.0f)), "tile140", cornerThicknessInverse * 64, cornerThicknessInverse * 64);
+	lvlEntitiesPhase1.push_back(topRightCornerEnt);
+
+	std::shared_ptr<sf::Shape> bottomRightWallPtr = std::make_shared<sf::RectangleShape>(sf::Vector2f(BorderThickness, BorderThickness));
+	bottomRightWallPtr->setFillColor(sf::Color::White);
+	bottomRightWallPtr->setOutlineThickness(0);
+	std::shared_ptr<Entity> bottomRightCornerEnt = std::make_shared<Scenery>(
+		Vector2f(sectorWidth, sectorHeight),
+		bottomRightWallPtr, 1, RigidBody(std::make_shared<Circle>(1.0f)), "tile140", cornerThicknessInverse * 64, cornerThicknessInverse * 64);
+	lvlEntitiesPhase1.push_back(bottomRightCornerEnt);
+
+	std::shared_ptr<sf::Shape> bottomLeftWallPtr = std::make_shared<sf::RectangleShape>(sf::Vector2f(BorderThickness, BorderThickness));
+	bottomLeftWallPtr->setFillColor(sf::Color::White);
+	bottomLeftWallPtr->setOutlineThickness(0);
+	std::shared_ptr<Entity> bottomLeftCornerEnt = std::make_shared<Scenery>(
+		Vector2f(-BorderThickness, sectorHeight),
+		bottomLeftWallPtr, 1, RigidBody(std::make_shared<Circle>(1.0f)), "tile140", cornerThicknessInverse * 64, cornerThicknessInverse * 64);
+	lvlEntitiesPhase1.push_back(bottomLeftCornerEnt);
 }
 
 void Sector::AddPainWall(int i_index)
@@ -245,7 +332,7 @@ void Sector::AddPainWall(int i_index)
 	float horPWallHght = halfCrtHorWall * 0.8f;
 	float horPWallCornOffset = halfCrtHorWall * 0.1f;
 
-	float pWallWidth = 500;
+	float pWallWidth = GLBVRS::DOOR_HEIGHT * 2;
 
 	std::shared_ptr<Entity> wall;
 
@@ -316,6 +403,15 @@ void Sector::PopulateEntranceRoom()
 	std::shared_ptr<Entity> lowerWall = std::make_shared<EndObject>(
 				Vector2f(Vector2f((sectorWidth / 2.0f), sectorHeight / 2.0)));
 	AddEntPtrToSector(lowerWall);
+
+	//AddPainWall(0);
+	//AddPainWall(1);
+	//AddPainWall(2);
+	//AddPainWall(3);
+	//AddPainWall(4);
+	//AddPainWall(5);
+	//AddPainWall(6);
+	//AddPainWall(7);
 
 	//std::shared_ptr<Entity> smallShipPOW2 = std::make_shared<PowerUp>(
 	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (sectorWidth * (1.0f / 5.0f)), sectorHeight / 2.0)), RATE_OF_FIRE);
@@ -747,6 +843,7 @@ void Sector::SwitchToPhaseTwo()
 	if (sectEndObj) {
 		sectEndObj->Unlock();
 	}
+	AddRedFilter();
 	resources->PlaySound(RESOURCES::WARNING7);
 }
 
@@ -787,18 +884,19 @@ void Sector::GenerateBackGround()
 	float horCenter = sectorWidth * (1.0f / 2.0f);
 	float vertCenter = sectorHeight / 2.0;
 
-	std::shared_ptr<sf::Shape> wallDrawPtr = std::make_shared<sf::RectangleShape>(sf::Vector2f(sectorWidth * 8, sectorHeight * 8));
+	std::shared_ptr<sf::Shape> wallDrawPtr = std::make_shared<sf::RectangleShape>(sf::Vector2f(WORLD_SIZE_WINDOW_WIDTH * 2, WORLD_SIZE_WINDOW_HEIGHT * 2));
+
 	wallDrawPtr->setFillColor(colPalA);
-	wallDrawPtr->setOrigin(sf::Vector2f(sectorWidth * 4, sectorHeight * 4));
-	std::shared_ptr<Entity> extraWall = std::make_shared<Scenery>(
-		Vector2f(Vector2f((sectorWidth * (1.0f / 2.0f)), sectorHeight / 2.0)),
-		wallDrawPtr);
+	wallDrawPtr->setOrigin(sf::Vector2f(WORLD_SIZE_WINDOW_WIDTH * 0.5f, WORLD_SIZE_WINDOW_HEIGHT * 0.5f));
+	std::shared_ptr<Entity> extraWall = std::make_shared<Scenery>(Vector2f(sectorWidth * 0.5f, sectorHeight * 0.5f),
+		wallDrawPtr, 0, RigidBody(std::make_shared<Circle>(1.0f)), "tile094", 0.5f, 0.5f);
 	lvlEntitiesPhase1.push_back(extraWall);
 
-
+	sf::Color floorColor(sf::Color(125, 125, 125));
 	std::shared_ptr<sf::Shape> drawblPtr = std::make_shared<sf::RectangleShape>(sf::Vector2f(sectorWidth, sectorHeight));
-	drawblPtr->setFillColor(OFFBLACK4);
-	std::shared_ptr<Entity> backgroundColor = std::make_shared<Scenery>(Vector2f(sectorWidth * 0.5f, sectorHeight * 0.5f), drawblPtr);
+	drawblPtr->setFillColor(floorColor);
+	std::shared_ptr<Entity> backgroundColor = std::make_shared<Scenery>(Vector2f(0.0f, 0.0f), drawblPtr, 
+		0, RigidBody(std::make_shared<Circle>(1.0f)), "tile117", 0.5f, 0.5f);
 	lvlEntitiesPhase1.push_back(backgroundColor);
 
 	int rightAreaLeftBound = sectorWidth * (8.5f / 10.0f);
@@ -817,58 +915,70 @@ void Sector::GenerateBackGround()
 	std::uniform_int_distribution<> distrib(0, 3);
 	std::uniform_int_distribution<> distribColor(0, randColors.size()-1);
 
-	for (int i = 0; i < 4; i++) {
-		int randLine = distrib(gen1);
-		sf::Color randColor = randColors[distribColor(gen1)];
-		switch (randLine) {
-		case 0: {//left side
-			std::uniform_int_distribution<> distribTemp(leftAreaLeftBound, leftAreaRightBound);
-			float xPos = distribTemp(gen1);
-			std::shared_ptr<sf::Shape> lineDrawbPtr = std::make_shared<sf::RectangleShape>(sf::Vector2f(2.0f, sectorHeight));
-			lineDrawbPtr->setFillColor(randColor);
-			lineDrawbPtr->setOutlineColor(randColor);
-			lineDrawbPtr->setPosition(sf::Vector2f(xPos, 0));
-			std::shared_ptr<Entity> line = std::make_shared<Scenery>(Vector2f(xPos, 0), lineDrawbPtr);
-			lvlEntitiesPhase1.push_back(line);
-			break;
-		}
-		case 1: {//top side
-			std::uniform_int_distribution<> distribTemp(topAreaTopBound, topAreaBottomBound);
-			float yPos = distribTemp(gen1);
-			std::shared_ptr<sf::Shape> lineDrawbPtr = std::make_shared<sf::RectangleShape>(sf::Vector2f(sectorWidth, 2.0f));
-			lineDrawbPtr->setFillColor(randColor);
-			lineDrawbPtr->setOutlineColor(randColor);
-			lineDrawbPtr->setPosition(sf::Vector2f(0, yPos));
-			std::shared_ptr<Entity> line = std::make_shared<Scenery>(Vector2f(0, yPos), lineDrawbPtr);
-			lvlEntitiesPhase1.push_back(line);
-			break;
-		}
-		case 2: {//right side
-			std::uniform_int_distribution<> distribTemp(rightAreaLeftBound, rightAreaRightBound);
-			float xPos = distribTemp(gen1);
-			std::shared_ptr<sf::Shape> lineDrawbPtr = std::make_shared<sf::RectangleShape>(sf::Vector2f(2.0f, sectorHeight));
-			lineDrawbPtr->setFillColor(randColor);
-			lineDrawbPtr->setOutlineColor(randColor);
-			lineDrawbPtr->setPosition(sf::Vector2f(xPos, 0));
-			std::shared_ptr<Entity> line = std::make_shared<Scenery>(Vector2f(xPos, 0), lineDrawbPtr);
-			lvlEntitiesPhase1.push_back(line);
-			break;
-		}
-		case 3: {//bottom side
-			std::uniform_int_distribution<> distribTemp(lowAreaTopBound, lowAreaLowBound);
-			float yPos = distribTemp(gen1);
-			std::shared_ptr<sf::Shape> lineDrawbPtr = std::make_shared<sf::RectangleShape>(sf::Vector2f(sectorWidth, 2.0f));
-			lineDrawbPtr->setFillColor(randColor);
-			lineDrawbPtr->setOutlineColor(randColor);
-			lineDrawbPtr->setPosition(sf::Vector2f(0, yPos));
-			std::shared_ptr<Entity> line = std::make_shared<Scenery>(Vector2f(0, yPos), lineDrawbPtr);
-			lvlEntitiesPhase1.push_back(line);
-			break;
-		}
-		}
-	}
+	//this draws the lines before I had textures
+
+	//for (int i = 0; i < 4; i++) {
+	//	int randLine = distrib(gen1);
+	//	sf::Color randColor = randColors[distribColor(gen1)];
+	//	switch (randLine) {
+	//	case 0: {//left side
+	//		std::uniform_int_distribution<> distribTemp(leftAreaLeftBound, leftAreaRightBound);
+	//		float xPos = distribTemp(gen1);
+	//		std::shared_ptr<sf::Shape> lineDrawbPtr = std::make_shared<sf::RectangleShape>(sf::Vector2f(2.0f, sectorHeight));
+	//		lineDrawbPtr->setFillColor(randColor);
+	//		lineDrawbPtr->setOutlineColor(randColor);
+	//		lineDrawbPtr->setPosition(sf::Vector2f(xPos, 0));
+	//		std::shared_ptr<Entity> line = std::make_shared<Scenery>(Vector2f(xPos, 0), lineDrawbPtr);
+	//		lvlEntitiesPhase1.push_back(line);
+	//		break;
+	//	}
+	//	case 1: {//top side
+	//		std::uniform_int_distribution<> distribTemp(topAreaTopBound, topAreaBottomBound);
+	//		float yPos = distribTemp(gen1);
+	//		std::shared_ptr<sf::Shape> lineDrawbPtr = std::make_shared<sf::RectangleShape>(sf::Vector2f(sectorWidth, 2.0f));
+	//		lineDrawbPtr->setFillColor(randColor);
+	//		lineDrawbPtr->setOutlineColor(randColor);
+	//		lineDrawbPtr->setPosition(sf::Vector2f(0, yPos));
+	//		std::shared_ptr<Entity> line = std::make_shared<Scenery>(Vector2f(0, yPos), lineDrawbPtr);
+	//		lvlEntitiesPhase1.push_back(line);
+	//		break;
+	//	}
+	//	case 2: {//right side
+	//		std::uniform_int_distribution<> distribTemp(rightAreaLeftBound, rightAreaRightBound);
+	//		float xPos = distribTemp(gen1);
+	//		std::shared_ptr<sf::Shape> lineDrawbPtr = std::make_shared<sf::RectangleShape>(sf::Vector2f(2.0f, sectorHeight));
+	//		lineDrawbPtr->setFillColor(randColor);
+	//		lineDrawbPtr->setOutlineColor(randColor);
+	//		lineDrawbPtr->setPosition(sf::Vector2f(xPos, 0));
+	//		std::shared_ptr<Entity> line = std::make_shared<Scenery>(Vector2f(xPos, 0), lineDrawbPtr);
+	//		lvlEntitiesPhase1.push_back(line);
+	//		break;
+	//	}
+	//	case 3: {//bottom side
+	//		std::uniform_int_distribution<> distribTemp(lowAreaTopBound, lowAreaLowBound);
+	//		float yPos = distribTemp(gen1);
+	//		std::shared_ptr<sf::Shape> lineDrawbPtr = std::make_shared<sf::RectangleShape>(sf::Vector2f(sectorWidth, 2.0f));
+	//		lineDrawbPtr->setFillColor(randColor);
+	//		lineDrawbPtr->setOutlineColor(randColor);
+	//		lineDrawbPtr->setPosition(sf::Vector2f(0, yPos));
+	//		std::shared_ptr<Entity> line = std::make_shared<Scenery>(Vector2f(0, yPos), lineDrawbPtr);
+	//		lvlEntitiesPhase1.push_back(line);
+	//		break;
+	//	}
+	//	}
+	//}
 
 
+}
+
+void Sector::AddRedFilter()
+{
+	std::shared_ptr<sf::Shape> redFilter = std::make_shared<sf::RectangleShape>(sf::Vector2f(WORLD_SIZE_WINDOW_WIDTH * 2, WORLD_SIZE_WINDOW_HEIGHT * 2));
+	redFilter->setFillColor(sf::Color(254, 0, 0, 30));
+	redFilter->setOrigin(sf::Vector2f(WORLD_SIZE_WINDOW_WIDTH * 0.5f, WORLD_SIZE_WINDOW_HEIGHT * 0.5f));
+	std::shared_ptr<Entity> redFilterScenery = std::make_shared<Scenery>(Vector2f(sectorWidth * 0.5f, sectorHeight * 0.5f),
+		redFilter, 2, RigidBody(std::make_shared<Circle>(1.0f)), "", 0.5f, 0.5f);
+	lvlEntitiesPhase1.push_back(redFilterScenery);
 }
 
 void Sector::GenerateDeathEffects(Entity * i_entPtr, ANIMTYPE i_animType)

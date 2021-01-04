@@ -165,6 +165,7 @@ const sf::Color SIENNEBROWN = sf::Color(160, 82, 45);
 const sf::Color UMBERBROWN = sf::Color(39, 32, 28);
 const sf::Color PENNYBROWN = sf::Color(173, 111, 105);
 const sf::Color BONE = sf::Color(227, 218, 201);
+const sf::Color FORDDARKCOPPER = sf::Color(93, 45, 36);
 
 //EASY SETTINGS
 //const float SPEED_MULTIPLIER_EASY = 0.40f;

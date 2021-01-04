@@ -1,6 +1,7 @@
 #pragma once
 #include <random>
 #include <map>
+#include <list>
 #include "GLOBAL_CONSTANTS.h"
 #include "RESOURCES.h"
 #include "Math.h"
@@ -39,6 +40,7 @@ class Entity
 protected:
 	bool killMeNextLoop;
 	const TypeID typeID;
+	std::shared_ptr <sf::Texture> texturePtr;
 
 public:
 
@@ -53,6 +55,11 @@ public:
 	float borderThickness;
 	drawablePtrVect drawables;
 	drawablePtrVect visuals;
+
+	float textRectWidth;
+	float textRectHeight;	
+	float textStretchWidth;
+	float textStretchHeight;
 
 	Entity();
 	Entity(Vector2f i_startPosition, RigidBody i_rb, TypeID i_typeID);

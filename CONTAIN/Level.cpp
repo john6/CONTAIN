@@ -21,8 +21,8 @@ Level::Level(int i_lvlNum, DIFFICULTY i_diff) :
 	resources = GLBVRS::RSRCS;
 	charPtr = GLBVRS::PPTR;
 	//settings
-	colPalA = Physics::GenerateRandomColor(5, 128);
-	colPalB = Physics::GenerateRandomColor(5, 128);
+	colPalA = Physics::GenerateRandomColor(40, 128);
+	colPalB = Physics::GenerateRandomColor(40, 128);
 	phaseOne = true;
 	timeToComplete = 29.0f + (i_lvlNum * 5) - (i_diff * 5);
 	enemiesKilled = 0;

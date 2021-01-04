@@ -3,11 +3,10 @@
 #include <iostream>
 #include <algorithm>
 #include <chrono>
-#include <execution>
 #include <random>
+#include <execution>
 #include <concurrent_vector.h>
 #include <SFML/Audio.hpp>
-
 #include "GLOBAL_CONSTANTS.h"
 #include "RESOURCES.h"
 #include "HeadsUpDisplay.h"

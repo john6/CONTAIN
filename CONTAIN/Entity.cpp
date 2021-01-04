@@ -42,6 +42,21 @@ Entity::Entity() :
 	canCollide = true;
 	physicalObject = true;
 	hasVisuals = false;
+	texturePtr = NULL;
+
+	if (rb.shape->GetType() == Shape::ShapeType::RECTANGLE) {
+		std::shared_ptr<Rectangle> rectPtr = std::dynamic_pointer_cast<Rectangle>(rb.shape);
+		textRectWidth = rectPtr->GetWidth();
+		textRectHeight = rectPtr->GetHeight();
+	}
+	else {
+		std::shared_ptr<Rectangle> rectPtr = std::dynamic_pointer_cast<Rectangle>(rb.shape);
+		textRectWidth = rb.shape->GetDistToEdge() * 2;
+		textRectHeight = rb.shape->GetDistToEdge() * 2;
+	}
+
+	textStretchWidth = 1;
+	textStretchHeight = 1;
 }
 
 Entity::Entity(Vector2f i_startPosition, RigidBody i_rb, TypeID i_typeID) :
@@ -58,6 +73,22 @@ Entity::Entity(Vector2f i_startPosition, RigidBody i_rb, TypeID i_typeID) :
 	physicalObject = true;
 	canCollide = true;
 	hasVisuals = false;
+	texturePtr = NULL;
+
+
+	if (rb.shape->GetType() == Shape::ShapeType::RECTANGLE) {
+		std::shared_ptr<Rectangle> rectPtr = std::dynamic_pointer_cast<Rectangle>(rb.shape);
+		textRectWidth = rectPtr->GetWidth();
+		textRectHeight = rectPtr->GetHeight();
+	}
+	else {
+		std::shared_ptr<Rectangle> rectPtr = std::dynamic_pointer_cast<Rectangle>(rb.shape);
+		textRectWidth = rb.shape->GetDistToEdge() * 2;
+		textRectHeight = rb.shape->GetDistToEdge() * 2;
+	}
+
+	textStretchWidth = 1;
+	textStretchHeight = 1;
 }
 
 const bool Entity::MarkedForDeath() {
@@ -170,6 +201,21 @@ std::shared_ptr<sf::Shape> Entity::CreateDrawableRB(float i_lerp_fraction)
 	drawShape->setOrigin(sf::Vector2f(rb.shape->GetSFMLOriginOffset()(0), rb.shape->GetSFMLOriginOffset()(1)));
 	drawShape->setPosition(lerpPos(0), lerpPos(1));
 	drawShape->setRotation((lerpOrient*180.0f) / PI);
+
+	//if (typeID == TypeID::WALL_FIRE) {
+	//	std::cout << "yo";
+	//}
+
+
+	if (texturePtr != NULL) {
+		texturePtr->setRepeated(true);
+		//texturePtr->setSmooth(true);
+		drawShape->setTexture(texturePtr.get());
+		drawShape->setTextureRect(sf::IntRect(0, 0, textRectWidth * textStretchWidth, textRectHeight * textStretchHeight));
+	}
+	else {
+
+	}
 	drawShape->setFillColor(fillColor);
 	drawShape->setOutlineColor(outlineColor);
 	drawShape->setOutlineThickness(borderThickness);

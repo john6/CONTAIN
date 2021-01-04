@@ -194,7 +194,7 @@ void SettingsMenu::ResetMenu()
 	//FullScreen.SetState(Button::UP);
 	//apply.SetState(Button::UP);
 	//exit.SetState(Button::UP);
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	std::this_thread::sleep_for(std::chrono::milliseconds(350));
 }
 
 void SettingsMenu::LoadConfig()

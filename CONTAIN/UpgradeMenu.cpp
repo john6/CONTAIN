@@ -195,7 +195,7 @@ UPGRADE_TYPE UpgradeMenu::Update(float microSeconds, sf::RenderWindow * window, 
 {
 	if (firstOpen) {
 		firstOpen = false;
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		std::this_thread::sleep_for(std::chrono::milliseconds(350));
 	}
 	else {
 		PollButtonTriplet(i_mousePos);

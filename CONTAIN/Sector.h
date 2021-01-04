@@ -98,6 +98,8 @@ public:
 
 	void GenerateBackGround();
 
+	void AddRedFilter();
+
 	void GenerateDeathEffects(Entity* i_entPtr, ANIMTYPE i_animType);
 
 	void GenerateIrregularTerrain(int i_numVerts, int i_maxSize, int i_minSize = 1, Vector2f originCoord = Vector2f(-100.0f, -100.0f));

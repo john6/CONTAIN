@@ -99,6 +99,28 @@ void GameRenderer::Render(sf::RenderWindow* i_window, float i_lerp_fraction,
 		}
 	}
 
+	//Third pass for filter
+	if (i_entityList->size() != 0) {
+		auto entIt = i_entityList->begin();
+		while (entIt != i_entityList->end()) {
+			//i_window->draw(*it._Ptr->_Myval->CreateDrawable(i_lerp_fraction));
+			if ((entIt._Ptr->_Myval->GetTypeID() == SCENERY)) {
+				auto scenery = dynamic_cast<Scenery*>(entIt._Ptr->_Myval.get());
+				if (scenery->renderLvl == 2) {
+					drawablePtrVect drawables = entIt._Ptr->_Myval->CreateDrawables(i_lerp_fraction);
+					if (drawables->size() != 0) {
+						auto drawbIt = drawables->begin();
+						while (drawbIt != drawables->end()) {
+							i_window->draw(*drawbIt._Ptr->get());
+							drawbIt++;
+						}
+					}
+				}
+			}
+			entIt++;
+		}
+	}
+
 	for (int i = 0; i < animationDrawables.size(); i++) {
 		i_window->draw(*animationDrawables[i]);
 	}
@@ -113,9 +135,9 @@ void GameRenderer::Render(sf::RenderWindow* i_window, float i_lerp_fraction,
 	//	i_window->draw(section);
 	//}
 
-
 	//shape->setOutlineColor(sf::Color::Red);
 	//i_window->draw(*shape);
+
 	i_window->display();
 
 	i_window->setView(GameRenderer::worldView);

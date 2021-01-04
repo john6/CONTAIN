@@ -4,8 +4,8 @@
 BossRush::BossRush(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss, RigidBody i_rb) :
 	Enemy(i_diff, i_startPosition, i_rb, ENEMY_BOSS), isMiniBoss{ i_isMiniBoss }
 {
-	origColorFill = MIDNIGHTMOSS;
-	origColorOutLine = METALLICSILVER;
+	origColorFill = CHARTREUSE;
+	origColorOutLine = MIDNIGHTMOSS;
 	fillColor = origColorFill;
 	outlineColor = origColorOutLine;
 	Stun(1.0f);
@@ -50,6 +50,7 @@ void BossRush::Update(float i_stepSize)
 				timeTillSwitch = rushTime;
 			}
 		}
+		UpdateTendrilPosition(i_stepSize);
 	}
 	else {
 		float secsInUpdate = i_stepSize / 1000.0f;
@@ -81,7 +82,7 @@ void BossRush::shootProj()
 
 void BossRush::Stun(float i_stunTime)
 {
-	stunSecs = i_stunTime;
+	stunSecs = i_stunTime * 0.6f;
 }
 
 void BossRush::SetDiffVars(int i_diff)

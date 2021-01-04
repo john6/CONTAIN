@@ -10,9 +10,46 @@ PainWall::PainWall(Vector2f i_startPosition, RigidBody i_rb) :
 	lastColorSwitch = hiResTime::now();
 	colorState = true;
 	fillColor = VIVIDYELLOW;
-	outlineColor = sf::Color::Black;
-	colorA = MYSTICRED;
-	colorB = VIVIDYELLOW;
+	outlineColor = sf::Color(0.0f, 0.0f, 0.0f, 0.0f);
+	//colorA = MYSTICRED;
+	colorA = RED;
+	colorB = MYSTICRED;
+
+	sf::Texture texture;
+	//if (!texture.loadFromFile("Textures/tile089.png", sf::IntRect(0, 0, 64, 64)))
+	//{
+	//	std::cerr << "failed to load Textures/tile091.png";
+	//}
+	//else {
+	//	//texturePtr = std::make_shared<sf::Texture>(texture);
+	//}
+
+
+	if (textRectWidth < textRectHeight) {
+		if (!texture.loadFromFile("Textures/tile139.png", sf::IntRect(0, 0, 64, 64)))
+		{
+			std::cerr << "failed to load Textures/tile091.png";
+		}
+		else {
+			texturePtr = std::make_shared<sf::Texture>(texture);
+		}
+		textStretchWidth = 64.0f / textRectWidth;
+		textStretchHeight = 0.5f;
+		//textRectWidth = 64.0f;
+		//textRectHeight = 64.0f;
+	}
+	else {
+		if (!texture.loadFromFile("Textures/tile138.png", sf::IntRect(0, 0, 64, 64)))
+		{
+			std::cerr << "failed to load Textures/tile091.png";
+		}
+		else {
+			texturePtr = std::make_shared<sf::Texture>(texture);
+		}
+		textStretchWidth = 0.5f;
+		textStretchHeight = 64.0f / textRectHeight;
+	}
+
 }
 
 PainWall::~PainWall()

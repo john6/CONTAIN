@@ -16,11 +16,16 @@ protected:
 	sf::Color origColorOutLine;
 	sf::Color deathColorFill;
 	sf::Color deathColorOutLine;
+	sf::Color zombieColorFill;
+	sf::Color zombieColorOutLine;
 
 	//visuals
 	float tendrilSize;
 	Polygon trianglePoly;
 	float tendrilRotation;
+	Vector2f lastDmgProjDir;
+	Vector2f lastColl_dir;
+	float lastDmgProjStrength;
 
 public:
 	std::shared_ptr<Entity> charPtr;
@@ -38,7 +43,7 @@ public:
 
 	void Destroy() override;
 
-	void GenerateDeathEffects(ANIMTYPE animType);
+	void GenerateDeathEffects(ANIMTYPE animType, CollisionData i_coll = CollisionData());
 
 	void CollideWithPainWall(CollisionData i_coll) override;
 

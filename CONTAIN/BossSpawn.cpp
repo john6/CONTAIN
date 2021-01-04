@@ -99,7 +99,7 @@ void BossSpawn::shootProj()
 
 void BossSpawn::Stun(float i_stunTime)
 {
-	stunSecs = i_stunTime;
+	stunSecs = i_stunTime * 0.6f;
 }
 
 void BossSpawn::SetDiffVars(int i_diff)

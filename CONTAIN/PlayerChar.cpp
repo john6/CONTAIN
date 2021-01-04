@@ -5,13 +5,16 @@
 #include "EndObject.h"
 #include "PowerUp.h"
 #include "Projectile.h"
+#include <math.h>
 
 PlayerChar::PlayerChar(int i_strtHealth, Vector2f i_startPosition, RigidBody i_rb) :
 	Entity(i_startPosition, i_rb, PLAYER), pController{ PlayerController(GLBVRS::GPTR->renderWindow) }
 {
 	numShots = 1;
-	fillColor = GUNMETAL;
-	outlineColor = FORDSILVER;
+	origColorFill = FORDSILVER;
+	origColorOutLine = FORDSILVER;
+	deathColorFill = FORDDARKCOPPER;
+	deathColorOutLine = FORDDARKCOPPER;
 	shipRateOfFire = 0.9f;
 	shipRateOfFireWall = 1.3;
 	wallDelay = shipRateOfFireWall;
@@ -45,16 +48,29 @@ PlayerChar::PlayerChar(int i_strtHealth, Vector2f i_startPosition, RigidBody i_r
 	hasVisuals = true;
 
 
-	if (TESTING) {
-		ReceivePowerUp(RATE_OF_FIRE);
-		ReceivePowerUp(RATE_OF_FIRE);
-		ReceivePowerUp(RATE_OF_FIRE);
-		ReceivePowerUp(SCATTER);
-		ReceivePowerUp(SCATTER);
-		ReceivePowerUp(SCATTER);
-		ReceivePowerUp(BIG_SHIP);
-		ReceivePowerUp(BIG_SHIP);
-		ReceivePowerUp(BIG_SHIP);
+	//if (TESTING) {
+	//	ReceivePowerUp(RATE_OF_FIRE);
+	//	ReceivePowerUp(RATE_OF_FIRE);
+	//	ReceivePowerUp(RATE_OF_FIRE);
+	//	ReceivePowerUp(SCATTER);
+	//	ReceivePowerUp(SCATTER);
+	//	ReceivePowerUp(SCATTER);
+	//	ReceivePowerUp(BIG_SHIP);
+	//	ReceivePowerUp(BIG_SHIP);
+	//	ReceivePowerUp(BIG_SHIP);
+	//}
+
+
+
+	sf::Texture texture;
+	if (!texture.loadFromFile("Textures/tile115.png"))
+	{
+		std::cerr << "failed to load Textures/tile113.png";
+	}
+	else {
+		texturePtr = std::make_shared<sf::Texture>(texture);
+		textStretchHeight = 1;
+		textStretchWidth = 1;
 	}
 }
 
@@ -148,9 +164,9 @@ void PlayerChar::UpdateHealth(float i_stepSize)
 			spawnVect.push_back(frag1);
 		}
 
-		std::shared_ptr<Entity> projectile = std::make_shared<Blast>(rb.transform.pos, 0, 4000, blastStunTime, 300);
-		projectile->fillColor = sf::Color(255, 236, 25, 128);
-		projectile->outlineColor = sf::Color(139, 0, 0, 128);
+		std::shared_ptr<Entity> projectile = std::make_shared<Blast>(rb.transform.pos, 0, 6000, blastStunTime, 300);
+		projectile->fillColor = sf::Color(255, 236, 25, 188);
+		projectile->outlineColor = sf::Color(139, 0, 0, 188);
 		spawnVect.push_back(projectile);
 	}
 }
@@ -158,8 +174,9 @@ void PlayerChar::UpdateHealth(float i_stepSize)
 void PlayerChar::ResetHealth()
 {
 	health = maxHealth;
-	fillColor = GUNMETAL;
-	outlineColor = FORDSILVER;
+	fillColor = origColorFill;
+	//fillColor = sf::Color(142, 152, 157);
+	outlineColor = origColorOutLine;
 }
 
 void PlayerChar::ResetSpecialAmmo()
@@ -248,6 +265,20 @@ void PlayerChar::GenerateDamageEffects(CollisionData i_collisionCopy)
 	Vector2f collisionDir = i_collisionCopy.entA->rb.transform.pos - i_collisionCopy.entB->rb.transform.pos;
 	std::shared_ptr<Entity> anim = std::make_shared<Anim>(i_collisionCopy.norm, i_collisionCopy.contactPoints, ms, 0, 0);
 	spawnVect.push_back(anim);
+	ChangeColorHealth();
+}
+
+void PlayerChar::ChangeColorHealth()
+{
+	float lifeRatio = std::max(((float)health / (float)maxHealth), 0.0f);
+	float fillColorR = std::max(std::min((int)((lifeRatio * origColorFill.r) + ((1.0f - lifeRatio) * deathColorFill.r)), 255), 0);
+	float fillColorG = std::max(std::min((int)((lifeRatio * origColorFill.g) + ((1.0f - lifeRatio) * deathColorFill.g)), 255), 0);
+	float fillColorB = std::max(std::min((int)((lifeRatio * origColorFill.b) + ((1.0f - lifeRatio) * deathColorFill.b)), 255), 0);
+	float outLineColorR = std::max(std::min((int)((lifeRatio * origColorOutLine.r) + ((1.0f - lifeRatio) * deathColorOutLine.r)), 255), 0);
+	float outLineColorG = std::max(std::min((int)((lifeRatio * origColorOutLine.g) + ((1.0f - lifeRatio) * deathColorOutLine.g)), 255), 0);
+	float outLineColorB = std::max(std::min((int)((lifeRatio * origColorOutLine.b) + ((1.0f - lifeRatio) * deathColorOutLine.b)), 255), 0);
+	fillColor = sf::Color(fillColorR, fillColorG, fillColorB);
+	outlineColor = sf::Color(outLineColorR, outLineColorG, outLineColorB);
 }
 
 void PlayerChar::ReceivePowerUp(UPGRADE_TYPE i_powType)
@@ -468,12 +499,8 @@ void PlayerChar::UpdateVisuals(float i_lerpFraction)
 	}
 
 	//Cannon Shaft
-	std::shared_ptr<sf::Shape> drawShapeShaft = std::make_shared<sf::RectangleShape>(sf::Vector2f(poly->GetDistToCorner(), baseDiam));
-	drawShapeShaft->setOrigin(sf::Vector2f(0.0f, baseDiam / 2.0f));
-	drawShapeShaft->setFillColor(fillColor);
-	drawShapeShaft->setOutlineColor(outlineColor);
-	drawShapeShaft->setPosition(sf::Vector2f(lerpPos[0], lerpPos[1]));
-	drawShapeShaft->setOutlineThickness(2.0f);
+	float prevAngleRads;
+	Vector2f prevDirVect;
 	Vector2f mosDir;
 	if (!pController.IsControllerConnected()) {
 		mosDir = pController.GetMousePos() - lerpPos;
@@ -488,9 +515,28 @@ void PlayerChar::UpdateVisuals(float i_lerpFraction)
 			mosDir = lastCannonVect;
 		}
 	}
-	float shootDir = Math::VectToAngle((mosDir).normalized()) * 57.2958;
-	drawShapeShaft->setRotation(shootDir);
-	visuals->emplace_back(drawShapeShaft);
+	float mouseAngleRad = Math::VectToAngle(mosDir);
+	float currAngleRads = mouseAngleRad - (0.0872665 * (numShots - 1));
+	Vector2f currDirVect = Math::AngleToVect(currAngleRads);
+	//drawablePtrVect cannons = drawablePtrVect();
+	for (int i = 0; i < numShots; i++) {
+		float shaftDiam = baseDiam - (numShots * (baseDiam * 0.04));
+		std::shared_ptr<sf::Shape> drawShapeShaft = std::make_shared<sf::RectangleShape>(sf::Vector2f(poly->GetDistToCorner(), shaftDiam));
+		drawShapeShaft->setOrigin(sf::Vector2f(0.0f, baseDiam / 2.0f));
+		drawShapeShaft->setFillColor(DARKSILVER);
+		drawShapeShaft->setOutlineColor(outlineColor);
+		drawShapeShaft->setPosition(sf::Vector2f(lerpPos[0], lerpPos[1]));
+		drawShapeShaft->setOutlineThickness(2.0f);
+		drawShapeShaft->setTexture(texturePtr.get());
+		drawShapeShaft->setRotation(Math::VectToAngle(currDirVect) * 57.2958);
+		visuals->emplace_back(drawShapeShaft);
+
+		prevAngleRads = currAngleRads;
+		prevDirVect = currDirVect;
+		currAngleRads = prevAngleRads + 0.174533 * (pow(-1, i) * (numShots-i));
+		currDirVect = Math::AngleToVect(currAngleRads);
+	}
+
 
 	//Center Circle
 	float radius = baseDiam * (3.0f / 5.0f);
