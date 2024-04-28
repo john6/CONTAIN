@@ -1,0 +1,385 @@
+QUADTREE TESTS:
+
+111111111111111111111111111111
+Settings:
+	quadtree:
+		const static int MAX_OBJECTS = 64;
+		const static int MAX_LEVELS = 10;
+
+	rigidbodies:
+		rectangle borders
+		148 circles
+
+Results:
+	Physics update took 103339 microseconds
+	Physics update took 93209 microseconds
+	Render took 35996 microseconds
+
+	Physics update took 93559 microseconds
+	Physics update took 98444 microseconds
+	Render took 35927 microseconds
+
+	Physics update took 113317 microseconds
+	Physics update took 92216 microseconds
+	Render took 36661 microseconds
+
+	Physics update took 92110 microseconds
+	Physics update took 89391 microseconds
+	Render took 36534 microseconds
+
+
+22222222222222222222222222222222222222222222
+Settings:
+	quadtree:
+		const static int MAX_OBJECTS = 2;
+		const static int MAX_LEVELS = 10;	
+
+	rigidbodies:
+		rectangle borders
+		148 circles
+
+Results:
+	Physics update took 99706 microseconds
+	Physics update took 95384 microseconds
+	Render took 52638 microseconds
+
+	Physics update took 101622 microseconds
+	Physics update took 119991 microseconds
+	Render took 45959 microseconds
+
+	Physics update took 111751 microseconds
+	Physics update took 99700 microseconds
+	Render took 46581 microseconds
+
+	Physics update took 97787 microseconds
+	Physics update took 92147 microseconds
+	Render took 45221 microseconds
+
+3333333333333333333333333333333333333333333333333333
+Settings:
+	quadtree:
+		const static int MAX_OBJECTS = 2;
+		const static int MAX_LEVELS = 10;	
+
+	rigidbodies:
+		rectangle borders
+		148 circles
+
+Results:
+	Physics update took 99706 microseconds
+	Physics update took 95384 microseconds
+	Render took 52638 microseconds
+
+	Physics update took 101622 microseconds
+	Physics update took 119991 microseconds
+	Render took 45959 microseconds
+
+	Physics update took 111751 microseconds
+	Physics update took 99700 microseconds
+	Render took 46581 microseconds
+
+	Physics update took 97787 microseconds
+	Physics update took 92147 microseconds
+	Render took 45221 microseconds
+
+
+
+
+44444444444444444444444444444444444444444444
+Settings:
+	quadtree:
+	const static int MAX_OBJECTS = 8;
+	const static int MAX_LEVELS = 10;
+
+	rigidbodies:
+		rectangle borders
+		148 circles
+
+Results:
+Physics update took 93745 microseconds
+Physics update took 89165 microseconds
+Render took 45331 microseconds
+
+Physics update took 87386 microseconds
+Physics update took 92486 microseconds
+Render took 43877 microseconds
+
+Physics update took 111349 microseconds
+Physics update took 103361 microseconds
+Render took 44346 microseconds
+
+Physics update took 103930 microseconds
+Physics update took 104947 microseconds
+Render took 47108 microseconds
+
+Physics update took 96161 microseconds
+Physics update took 97913 microseconds
+Render took 44207 microseconds
+
+Physics update took 91097 microseconds
+Physics update took 110626 microseconds
+Render took 44774 microseconds
+
+55555555555555555555555555555555555
+Notes:
+	removed all QTree stuff, game is going much faster now with same level example. I was doubling the tree for rendering so I'll try again without that
+
+	QuadTree:
+		No QuadTree
+
+	rigidbodies:
+		rectangle borders
+		148 circles
+
+Physics update took 83173 microseconds
+Physics update took 69402 microseconds
+Render took 35688 microseconds
+
+Physics update took 68193 microseconds
+Physics update took 68726 microseconds
+Render took 35831 microseconds
+
+Physics update took 66615 microseconds
+Physics update took 79289 microseconds
+Render took 35630 microseconds
+
+Physics update took 65736 microseconds
+Physics update took 73806 microseconds
+Render took 37822 microseconds
+
+Physics update took 65725 microseconds
+Physics update took 65033 microseconds
+Render took 36079 microseconds
+
+Physics update took 68637 microseconds
+Physics update took 66806 microseconds
+Render took 35576 microseconds
+
+
+666666666666666666666666666666666666
+I was fixing my clamping wrong, it would always run two phsycis updates after it happened. Also
+my physics isnt going fast enough such that it walways clamps. hmmmmm
+
+fixed clamping everything else same
+
+Physics update took 80719 microseconds
+Render took 34573 microseconds
+
+Physics update took 74823 microseconds
+Render took 36828 microseconds
+
+Physics update took 69384 microseconds
+Render took 37883 microseconds
+
+Physics update took 73250 microseconds
+Render took 35829 microseconds
+
+77777777777777777777777777777777777777777777777777777
+	const microSec UPDATE_INTERVAL(16666);
+
+Render took 36350 microseconds
+
+Physics update took 90475 microseconds
+Render took 37538 microseconds
+
+Physics update took 76822 microseconds
+Render took 35013 microseconds
+
+Physics update took 70855 microseconds
+Render took 35588 microseconds
+
+Physics update between 65-75 ms
+
+888888888888888888888888888888888888888888888888888
+	const microSec UPDATE_INTERVAL(80000);
+
+Visually slows down
+lots of collision misses
+
+99999999999999999999999999999999999999999999
+Returning to QTree stuff, physics updates take around 65-75 ms without it, so Im gonna try to beat that.
+With so many objects I really should be able to do so.
+
+Back on QTREE
+I dont think the update interval really matter right now becuase its always less then the actual amount of time it takes so all it does is allow so many renders between the majority of the time which is updating physics
+~gonna keep it at
+
+
+Physics update took 108356 microseconds
+Physics update took 100189 microseconds
+Render took 38816 microseconds
+
+Physics update took 96495 microseconds
+Physics update took 110420 microseconds
+Render took 38901 microseconds
+
+Physics update took 92914 microseconds
+Physics update took 92236 microseconds
+Render took 36526 microseconds
+
+Physics update took 104469 microseconds
+Physics update took 86001 microseconds
+Render took 35711 microseconds
+
+Physics update took 83275 microseconds
+Physics update took 96779 microseconds
+Render took 36268 microseconds
+
+
+
+0000000000000000000000000000000000
+	const static int MAX_OBJECTS = 6;
+	const static int MAX_LEVELS = 10;
+
+
+
+
+
+
+
+
+
+
+Render took 35634 microseconds
+
+Physics update took 105163 microseconds
+Physics update took 113042 microseconds
+Render took 40021 microseconds
+
+Physics update took 100397 microseconds
+Physics update took 121892 microseconds
+Render took 34946 microseconds
+
+Physics update took 95001 microseconds
+Physics update took 109009 microseconds
+Render took 34641 microseconds
+
+Physics update took 113148 microseconds
+Physics update took 88968 microseconds
+Render took 34860 microseconds
+
+Physics update took 88696 microseconds
+Physics update took 84847 microseconds
+Render took 34776 microseconds
+
+111111111111111111111111111111111111111111
+	const static int MAX_OBJECTS = 4;
+	const static int MAX_LEVELS = 3;
+
+
+Finally a slight difference, I think my max levels was too high, I can limit it and get a performance increase
+
+Render took 38779 microseconds
+
+Physics update took 90284 microseconds
+Physics update took 86259 microseconds
+Render took 38190 microseconds
+
+Physics update took 86445 microseconds
+Physics update took 92322 microseconds
+Render took 35772 microseconds
+
+Physics update took 82140 microseconds
+Physics update took 87037 microseconds
+Render took 36233 microseconds
+
+Physics update took 93269 microseconds
+Physics update took 73754 microseconds
+Render took 35125 microseconds
+
+Physics update took 73176 microseconds
+Physics update took 79128 microseconds
+Render took 35556 microseconds
+
+Physics update took 75880 microseconds
+Physics update took 75460 microseconds
+Render took 40515 microseconds
+
+Physics update took 79229 microseconds
+Physics update took 90428 microseconds
+Render took 34729 microseconds
+
+Physics update took 89412 microseconds
+Physics update took 86598 microseconds
+Render took 34634 microseconds
+
+
+22222222222222222222222222222222222222222222222222222222222
+I JUST REALIZED THAT RUNNING THINGS IN DEBUG MODE SLOWS IT DOWN SHIT
+
+Non debug:
+
+Render took 42247 microseconds
+
+Physics update took 95807 microseconds
+Physics update took 85750 microseconds
+Render took 35742 microseconds
+
+Physics update took 90710 microseconds
+Physics update took 93458 microseconds
+Render took 35804 microseconds
+
+Physics update took 78607 microseconds
+Physics update took 79278 microseconds
+Render took 35803 microseconds
+
+Another significant increase
+
+3333333333333333333333333333333333333333333333333333333333333333
+	const static int MAX_OBJECTS = 8;
+	const static int MAX_LEVELS = 3;
+
+	Everything got worse again
+
+Render took 39881 microseconds
+
+Physics update took 90494 microseconds
+Physics update took 87213 microseconds
+Render took 34065 microseconds
+
+Physics update took 73511 microseconds
+Physics update took 87927 microseconds
+Render took 33928 microseconds
+
+Physics update took 89932 microseconds
+Physics update took 84623 microseconds
+Render took 34552 microseconds
+
+Physics update took 84236 microseconds
+Physics update took 71215 microseconds
+Render took 34370 microseconds
+
+4444444444444444444444444444444444444444444444444
+Four seems to be the best amount of objects per level for this one, going up or down makes things worse
+
+
+const static int MAX_OBJECTS = 2;
+const static int MAX_LEVELS = 3;
+
+
+Render took 38048 microseconds
+
+Physics update took 98301 microseconds
+Physics update took 88464 microseconds
+Render took 34879 microseconds
+
+Physics update took 77939 microseconds
+Physics update took 96481 microseconds
+Render took 35919 microseconds
+
+Physics update took 80563 microseconds
+Physics update took 81371 microseconds
+Render took 35742 microseconds
+
+Physics update took 88640 microseconds
+Physics update took 77959 microseconds
+Render took 34300 microseconds
+
+Physics update took 73398 microseconds
+Physics update took 76262 microseconds
+Render took 36051 microseconds
+
+55555555555555555555555555555555555555555555555555
+
+USING THE SAME QUADTREE SETTINGS FOR WITH 64 RECTS INSTEAD OF 128 Circles (PLUS FOUR WALLS IN BOTH CASES)
+

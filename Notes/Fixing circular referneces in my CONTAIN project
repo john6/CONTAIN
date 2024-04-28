@@ -1,0 +1,162 @@
+Fixing circular referneces in my CONTAIN project
+
+Bigger things can know the implimentations of the objects they havce a bunch of but the smaller ones gotta be dumb or else Ill keep getting these circular references I think
+
+
+
+Entities that call specific stuff in their sector TODO:
+
+DOOR 
+	count the number of enemies in their sector, I can change the doors within the sector thats pretty easy actually
+
+	SOLVED but doors have no functionality to get deleted, not a memory leak because Im using shared pointers but still worrysome
+
+ENDOBJECT 
+	checks the phase of the level every update that can also be set within the Sector EZPZ
+
+
+
+PLAYERCHAR
+	I think I could switch playSound to go straight to resources- right now it goes through the sector which is pointless except for creating less references I guess
+
+	Request travel to sector initiates travel
+
+		I could go constantly check on the sector level to see if the playerChar is colliding with any of the doors, semi redundant I think
+
+			I guess I could say its colliding with a door and switch some sort of ref in the player char then look up the door and switch sectors from the actual sector level
+
+	playerChar creates a shitload of sounds
+
+	Have to be able to create lazers
+		At this point I would have to create a class that just generates stuff withint the sector
+		need to generate walls also
+
+ENEMY
+	Death animation
+		could just set flag to dead and generate death polys from the sector easily
+
+	Drop power up, a lot of these problems are solved by having a class that can generate entities
+
+	
+Stuff I CUT OUT SO I COULD I COMPILE
+
+	SPAWN BOSS SPAWNING
+
+		Actually instead of using the level itself to count the enemies It can just have a reference to all of its literally children. I mean it does spawn them after all
+
+
+
+10/19/2020
+
+Stuff thats still not working
+
+	Doors KIND OF work
+		They have some sort of odd delay before the doors actually turn off in a room where there are enemies
+			I was only checking doors when I killed an enemy woop woop done
+
+		They Boss room is not locked after you enter for some reason
+
+	The EndObject in the sector seems to have not turned on in phase two. I may have never actuall implemented this
+		End Object sector stuff was broken code and I just never noticed bc the object itself was checking
+		Actually a good demonstration as to why I should create code like this in the first palce
+
+	Spawn boss time
+		gottem. Made a list of weak pointers and it worked perf also I need to learn more about iterators they can become invalid sometimes which I think is a sfaety feature so I cant be all dumb and operate on a useless one
+
+
+	Random notes
+		Irregular polys should be a different color to look like debris
+
+		Level terrain walls should have an effect and changed color when they get broken off
+
+
+		Could make treasure rooms where you have a choice for either a short term benefit like a power up or plus time and then maybe long term benefit instead
+
+		4narchyRules();
+
+
+
+
+
+
+
+Because I think I've found a way to not use a linkedlist, but theres a lot of overhead to consider, I dont know how to measure said overhead. 
+
+
+insertion in a sorted dictionary would also take O(n)
+	Actually it could take O(log(n)) I think if I do a sort of bisection sort, 
+	but I'd need to have access to 
+
+
+
+
+
+Required Functaionality:
+
+
+Sorted Insertion:
+	This data structure needs to be able to insert thee middle of the list at a specified index, but the indexes arent garunteed to be sequential. 
+	I could have keys 1, 3, 8, 500, and I need to insert 20 into the list. 
+
+
+Beginning to end traversal:
+	This structure should be able to be iterated through beginning to end, doing an operation on each element
+
+
+Multiple elements mapped to by one key, and ordered by the time of their insertion :
+	Duplicate keys must be allowed. This means I can have elements (5:A), (5:B), (5:C)
+
+
+Deletion from one Element to the front (during the "set" operation):
+	Certain elements, when inserted, make all elements that come before them irrelivant. 
+	I could simply reset the "front" to this node, but that seems like a waste of space. Something to consider though
+
+Clearing Structure:
+	interfaces requires the structure have clearing functionality
+
+
+
+LinkedList:
+https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.linkedlist-1?view=netcore-3.1
+
+	Sorted Insertion:
+		Insertion in a linkedlist takes O(n) time 
+
+	Beginning to end traversal:
+		O(n) time, the the linkedList will be sorted during insertion
+
+	Multiple elements mapped to by one key, and ordered by the time of their insertion
+		LinkedList can simply allow a run of elements with the same "Layer" value, this will cause no issues
+
+	Deletion from one Element to the front (during the "set" operation):
+		O(n) time
+
+	Deleting all elements from Structure:
+		O(n) time
+
+
+
+
+Sorted Dictionary where each key maps to a list as the associated value:
+https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.sorteddictionary-2?view=netcore-3.1#examples
+
+
+	Sorted Insertion:
+		Sorted insertion takes O(log(n)) time
+
+	Beginning to end traversal:
+		Getting an enumerator is a O(log(n)) proceedure (I think it remains valid so long as you dont edit the sortedDictionary but we would never be doing that anyway)
+		In total a traversal would take n + log(n) time AKA O(n). (In this case, n equals the number of elements with *unique* keys)
+
+	Multiple elements mapped to by one key, and ordered by the time of their insertion:
+		Sorted Dictionaries can not have duplicate keyts, so it requires a check that a key already exists O(log(n)), 
+		and the creation of a new list for each unique element, which would bne inneficient for time and space if there aren't many elements with shared keys 
+
+	Deletion from one Element to the front (during the "set" operation):
+		O(log n) per element in deleted. This means deletion from the start would take O(n*log(n)) time, and wouldn't be worth it in almost any scenario. In this case I would accept the enneficiency of space use and just write a pointer to the "New start" of the list whenever the "Set" operation inserted. 
+
+
+	Deleting all elements from Structure:
+		Takes O(1) time
+
+
