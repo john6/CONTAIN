@@ -77,7 +77,7 @@ public:
 
 	void TestCollision(std::shared_ptr<Entity> entA, std::shared_ptr<Entity> entB, std::vector<CollisionData>* collisionList);
 
-	void GenerateLevels(DIFFICULTY i_diff);
+	void GenerateLevels(DIFFICULTY i_diff, int starting_lvl);
 
 	void GenerateTutorialLevels();
 

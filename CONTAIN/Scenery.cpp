@@ -10,8 +10,8 @@ Scenery::Scenery(Vector2f i_startPosition, std::shared_ptr <sf::Shape> i_drawabl
 	hasVisuals = true;
 	drawables = std::make_shared<std::vector<std::shared_ptr<sf::Drawable>>>();
 
-	colorSwitchRate = 3.5f;
-	lastColorSwitch = hiResTime::now();
+	colorSwitchRate = 2.5f;
+	lastColorSwitch = hiResTime::now(); // -std::chrono::seconds(4);
 
 	i_drawable->setPosition(sf::Vector2f(i_startPosition[0], i_startPosition[1]));
 
@@ -78,9 +78,9 @@ void Scenery::Update(float i_stepSize)
 
 		float colorpercent = (colorSwitchCurr / colorSwitchRate) * 2.0f * PI;
 		float clrPhse = cos(colorpercent);
-		float newA = std::min(255.0f, std::max(30.0f, (100 * clrPhse)));
+		float newA = std::min(255.0f, std::max(30.0f, (80 * clrPhse)));
 
-		std::cout << "newA" << newA << "\n";
+		//std::cout << "newA" << newA << "\n";
 		firstDrawb->setFillColor(sf::Color(254, 0, 0, newA));
 
 	}

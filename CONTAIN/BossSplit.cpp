@@ -1,8 +1,8 @@
 #include "BossSplit.h"
 
 
-BossSplit::BossSplit(DIFFICULTY i_diff, int i_splitsLeft, float i_spdFct, bool i_crazy, Vector2f i_startPosition, RigidBody i_rb) :
-	Enemy(i_diff, i_startPosition, i_rb, ENEMY_BOSS), splitsLeft{ i_splitsLeft }, diff{ i_diff }, crazy{ i_crazy }
+BossSplit::BossSplit(DIFFICULTY i_diff, int i_splitsLeft, float i_spdFct, bool i_crazy, Vector2f i_startPosition, int lvl_num, RigidBody i_rb) :
+	Enemy(i_diff, i_startPosition, i_rb, ENEMY_BOSS), splitsLeft{ i_splitsLeft }, diff{ i_diff }, crazy{ i_crazy }, lvlNum{ lvl_num }
 {
 	origColorFill = CHARTREUSE;
 	origColorOutLine = MOSS;
@@ -15,7 +15,7 @@ BossSplit::BossSplit(DIFFICULTY i_diff, int i_splitsLeft, float i_spdFct, bool i
 	lastShotFired = hiResTime::now();
 	shipRateOfFire = 1.0f;
 	currDir = CreateRandomDir();
-	SetDiffVars(i_diff);
+	SetDiffVars(i_diff, lvl_num);
 	hasVisuals = false;
 }
 
@@ -59,8 +59,8 @@ void BossSplit::Destroy()
 		std::shared_ptr<Shape> shape2 = std::make_shared<Circle>(100);
 		RigidBody projBody1 = RigidBody(shape1, LESSBOUNCYBALL);
 		RigidBody projBody2 = RigidBody(shape2, LESSBOUNCYBALL);
-		std::shared_ptr<Entity> split1 = std::make_shared<BossSplit>(diff, splitsLeft - 1, 4, true, rb.transform.pos, projBody1);
-		std::shared_ptr<Entity> split2 = std::make_shared<BossSplit>(diff, splitsLeft - 1, 4, false, rb.transform.pos, projBody2);
+		std::shared_ptr<Entity> split1 = std::make_shared<BossSplit>(diff, splitsLeft - 1, 4, true, rb.transform.pos, lvlNum, projBody1);
+		std::shared_ptr<Entity> split2 = std::make_shared<BossSplit>(diff, splitsLeft - 1, 4, false, rb.transform.pos, lvlNum, projBody2);
 		spawnVect.push_back(split1);
 		spawnVect.push_back(split2);
 		killMeNextLoop = true;
@@ -72,8 +72,8 @@ void BossSplit::Destroy()
 		std::shared_ptr<Shape> shape2 = std::make_shared<Circle>(75);
 		RigidBody projBody1 = RigidBody(shape1, LESSBOUNCYBALL);
 		RigidBody projBody2 = RigidBody(shape2, LESSBOUNCYBALL);
-		std::shared_ptr<Entity> split1 = std::make_shared<BossSplit>(diff, splitsLeft - 1, 2.5f, true, rb.transform.pos, projBody1);
-		std::shared_ptr<Entity> split2 = std::make_shared<BossSplit>(diff, splitsLeft - 1, 2.5f, false, rb.transform.pos, projBody2);
+		std::shared_ptr<Entity> split1 = std::make_shared<BossSplit>(diff, splitsLeft - 1, 2.5f, true, rb.transform.pos, lvlNum, projBody1);
+		std::shared_ptr<Entity> split2 = std::make_shared<BossSplit>(diff, splitsLeft - 1, 2.5f, false, rb.transform.pos, lvlNum, projBody2);
 		spawnVect.push_back(split1);
 		spawnVect.push_back(split2);
 		killMeNextLoop = true;
@@ -85,8 +85,8 @@ void BossSplit::Destroy()
 		std::shared_ptr<Shape> shape2 = std::make_shared<Circle>(50);
 		RigidBody projBody1 = RigidBody(shape1, LESSBOUNCYBALL);
 		RigidBody projBody2 = RigidBody(shape2, LESSBOUNCYBALL);
-		std::shared_ptr<Entity> split1 = std::make_shared<BossSplit>(diff, splitsLeft - 1, 1.4f, true, rb.transform.pos, projBody1);
-		std::shared_ptr<Entity> split2 = std::make_shared<BossSplit>(diff, splitsLeft - 1, 1.4f, false, rb.transform.pos, projBody2);
+		std::shared_ptr<Entity> split1 = std::make_shared<BossSplit>(diff, splitsLeft - 1, 1.4f, true, rb.transform.pos, lvlNum, projBody1);
+		std::shared_ptr<Entity> split2 = std::make_shared<BossSplit>(diff, splitsLeft - 1, 1.4f, false, rb.transform.pos, lvlNum, projBody2);
 		spawnVect.push_back(split1);
 		spawnVect.push_back(split2);
 		killMeNextLoop = true;
@@ -98,8 +98,8 @@ void BossSplit::Destroy()
 		std::shared_ptr<Shape> shape2 = std::make_shared<Circle>(30);
 		RigidBody projBody1 = RigidBody(shape1, BOUNCYBALL);
 		RigidBody projBody2 = RigidBody(shape2, BOUNCYBALL);
-		std::shared_ptr<Entity> split1 = std::make_shared<BossSplit>(diff, splitsLeft - 1, true, 0.75f, rb.transform.pos, projBody1);
-		std::shared_ptr<Entity> split2 = std::make_shared<BossSplit>(diff, splitsLeft - 1, false, 0.60f, rb.transform.pos, projBody2);
+		std::shared_ptr<Entity> split1 = std::make_shared<BossSplit>(diff, splitsLeft - 1, true, 0.75f, rb.transform.pos, lvlNum, projBody1);
+		std::shared_ptr<Entity> split2 = std::make_shared<BossSplit>(diff, splitsLeft - 1, false, 0.60f, rb.transform.pos, lvlNum, projBody2);
 		spawnVect.push_back(split1);
 		spawnVect.push_back(split2);
 		killMeNextLoop = true;
@@ -128,28 +128,28 @@ void BossSplit::Stun(float i_stunTime)
 	stunSecs = i_stunTime * 0.6f;
 }
 
-void BossSplit::SetDiffVars(int i_diff)
+void BossSplit::SetDiffVars(int i_diff, int lvl_num)
 {
 	if (splitsLeft == 4) {
 		switch (i_diff) {
 		case EASY: {
 			speed *= GLBVRS::ENEMYSPEEDEASY;
 			numShots = 6;
-			maxHealth = 3;
+			maxHealth = 3 + ((lvl_num / 5) * 3);
 			health = maxHealth;
 			break;
 		}
 		case MEDIUM: {
 			speed *= GLBVRS::ENEMYSPEEDMED;
 			numShots = 7;
-			maxHealth = 4;
+			maxHealth = 4 + ((lvl_num / 5) * 5);
 			health = maxHealth;
 			break;
 		}
 		case HARD: {
 			speed *= GLBVRS::ENEMYSPEEDHARD;
 			numShots = 8;
-			maxHealth = 5;
+			maxHealth = 5 + ((lvl_num / 5) * 7);
 			health = maxHealth;
 			break;
 
@@ -161,21 +161,21 @@ void BossSplit::SetDiffVars(int i_diff)
 		case EASY: {
 			speed *= GLBVRS::ENEMYSPEEDEASY;
 			numShots = 6;
-			maxHealth = 3;
+			maxHealth = 3 + ((lvl_num / 5) * 2);
 			health = maxHealth;
 			break;
 		}
 		case MEDIUM: {
 			speed *= GLBVRS::ENEMYSPEEDMED;
 			numShots = 7;
-			maxHealth = 4;
+			maxHealth = 4 + ((lvl_num / 5) * 3);
 			health = maxHealth;
 			break;
 		}
 		case HARD: {
 			speed *= GLBVRS::ENEMYSPEEDHARD;
 			numShots = 8;
-			maxHealth = 5;
+			maxHealth = 5 + ((lvl_num / 5) * 4);
 			health = maxHealth;
 			break;
 		}
@@ -186,21 +186,21 @@ void BossSplit::SetDiffVars(int i_diff)
 		case EASY: {
 			speed *= GLBVRS::ENEMYSPEEDEASY;
 			numShots = 6;
-			maxHealth = 2;
+			maxHealth = 2 + ((lvl_num / 5) * 1);
 			health = maxHealth;
 			break;
 		}
 		case MEDIUM: {
 			speed *= GLBVRS::ENEMYSPEEDMED;
 			numShots = 7;
-			maxHealth = 3;
+			maxHealth = 3 + ((lvl_num / 5) * 2);
 			health = maxHealth;
 			break;
 		}
 		case HARD: {
 			speed *= GLBVRS::ENEMYSPEEDHARD;
 			numShots = 8;
-			maxHealth = 4;
+			maxHealth = 4 + ((lvl_num / 5) * 3);
 			health = maxHealth;
 			break;
 		}
@@ -219,14 +219,14 @@ void BossSplit::SetDiffVars(int i_diff)
 		case MEDIUM: {
 			speed *= GLBVRS::ENEMYSPEEDMED;
 			numShots = 7;
-			maxHealth = 1;
+			maxHealth = 1 + ((lvl_num / 5) * 1);
 			health = maxHealth;
 			break;
 		}
 		case HARD: {
 			speed *= GLBVRS::ENEMYSPEEDHARD;
 			numShots = 8;
-			maxHealth = 1;
+			maxHealth = 1 + ((lvl_num / 5) * 2);
 			health = maxHealth;
 			break;
 		}
@@ -244,14 +244,14 @@ void BossSplit::SetDiffVars(int i_diff)
 		case MEDIUM: {
 			speed *= GLBVRS::ENEMYSPEEDMED;
 			numShots = 7;
-			maxHealth = 1;
+			maxHealth = 1 + ((lvl_num / 10) * 2);
 			health = maxHealth;
 			break;
 		}
 		case HARD: {
 			speed *= GLBVRS::ENEMYSPEEDHARD;
 			numShots = 8;
-			maxHealth = 1;
+			maxHealth = 1 + ((lvl_num / 5) * 1);
 			health = maxHealth;
 			break;
 		}

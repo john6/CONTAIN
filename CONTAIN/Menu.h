@@ -25,11 +25,20 @@ private:
 	Button mediumButton;
 	Button hardButton;
 	Button settingsButton;
+	Button godModeButton;
+	Button endlessModeButton;
 
 	bool PollInput(sf::Vector2f mousePosition, Button* button, bool stickyButton = false);
 
 	void  PollButtonTriplet(sf::Vector2f mousePosition);
 	void  UpdateButtonTriplet(DIFFICULTY i_difficultySelected);
+	bool PollInputToggle(sf::Vector2f mousePosition, Button* button);
+
+
+	hiRes_time_point lastButtonPressed;
+	float timeSinceButtonClick;
+	float buttonClickDelay;
+	bool somethingWasClicked;
 
 public:
 	sf::View menuView;

@@ -163,6 +163,7 @@ hiRes_time_point GLBVRS::lastMenuSwitch = hiResTime::now();
 float GLBVRS::buttonDelay = 0.3f;
 bool GLBVRS::canPressButtonsAgain = true;
 bool GLBVRS::godMode = false;
+bool GLBVRS::endlessMode = false;
 
 GLBVRS::~GLBVRS()
 {

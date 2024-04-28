@@ -1,7 +1,7 @@
 #include "BossSpawn.h"
 #include "CrazyBoi.h"
 
-BossSpawn::BossSpawn(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss, RigidBody i_rb) :
+BossSpawn::BossSpawn(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss, int lvl_num, RigidBody i_rb) :
 	Enemy(i_diff, i_startPosition, i_rb, ENEMY_BOSS), diff{ i_diff }, isMiniBoss{ i_isMiniBoss }
 {
 	origColorFill = EMERALD;
@@ -21,7 +21,7 @@ BossSpawn::BossSpawn(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniB
 	lastShotFired = hiResTime::now();
 	shipRateOfFire = 1.0f;
 	currDir = CreateRandomDir();
-	SetDiffVars(i_diff);
+	SetDiffVars(i_diff, lvl_num);
 	hasVisuals = false;
 
 }
@@ -102,29 +102,29 @@ void BossSpawn::Stun(float i_stunTime)
 	stunSecs = i_stunTime * 0.6f;
 }
 
-void BossSpawn::SetDiffVars(int i_diff)
+void BossSpawn::SetDiffVars(int i_diff, int lvl_num)
 {
 	if (isMiniBoss) {
 		switch (i_diff) {
 		case EASY: {
-			numShots = 3;
-			maxHealth = 4;
+			numShots = 3 + ((lvl_num / 5) * 1);
+			maxHealth = 4 + ((lvl_num / 5) * 2);
 			sameDirTime = 16.0;
 			timeTillDirSwitch = 0.0f;
 			health = maxHealth;
 			break;
 		}
 		case MEDIUM: {
-			numShots = 4;
-			maxHealth = 5;
+			numShots = 4 + ((lvl_num / 5) * 2);
+			maxHealth = 5 + ((lvl_num / 5) * 3);
 			sameDirTime = 12.0;
 			timeTillDirSwitch = 0.0f;
 			health = maxHealth;
 			break;
 		}
 		case HARD: {
-			numShots = 5;
-			maxHealth = 6;
+			numShots = 5 + ((lvl_num / 5) * 3);
+			maxHealth = 6 + ((lvl_num / 5) * 4);
 			sameDirTime = 10.0;
 			timeTillDirSwitch = 0.0f;
 			health = maxHealth;
@@ -135,24 +135,24 @@ void BossSpawn::SetDiffVars(int i_diff)
 	else {
 		switch (i_diff) {
 		case EASY: {
-			numShots = 4;
-			maxHealth = 26;
-			sameDirTime = 14.0;
+			numShots = 4 + ((lvl_num / 5) * 3);
+			maxHealth = 26 + ((lvl_num / 5) * 5);
+			sameDirTime = 20.0;
 			timeTillDirSwitch = 0.0f;
 			health = maxHealth;
 			break;
 		}
 		case MEDIUM: {
-			numShots = 5;
-			maxHealth = 28;
+			numShots = 5 + ((lvl_num / 5) * 4);
+			maxHealth = 30 + ((lvl_num / 5) * 7);
 			sameDirTime = 10.0;
 			timeTillDirSwitch = 0.0f;
 			health = maxHealth;
 			break;
 		}
 		case HARD: {
-			numShots = 6;
-			maxHealth = 30;
+			numShots = 6 + ((lvl_num / 5) * 5);
+			maxHealth = 30 + ((lvl_num / 5) * 10);
 			sameDirTime = 8.0;
 			timeTillDirSwitch = 0.0f;
 			health = maxHealth;

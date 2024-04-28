@@ -16,7 +16,7 @@ private:
 	bool isMiniBoss;
 
 public:
-	BossRush(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss = false,
+	BossRush(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss = false, int lvl_num = 0,
 		RigidBody i_rb = RigidBody(std::make_shared<Circle>(75), HEAVYBOUNCE));
 
 	void Update(float i_stepSize) override;
@@ -29,7 +29,7 @@ public:
 
 	void Stun(float i_stunTime) override;
 
-	void SetDiffVars(int i_diff);
+	void SetDiffVars(int i_diff, int lvl_num);
 
 	void CollideWithPainWall(CollisionData i_coll) override;
 

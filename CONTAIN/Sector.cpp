@@ -73,7 +73,7 @@ void Sector::AddEntsFromSpawnQueues()
 			if (auto enemy = dynamic_cast<Enemy*>(entPtr.get())) { //((type == TypeID::ENEMY_SEEK) || (type == TypeID::ENEMY_RAND) || (type = TypeID::ENEMY_RAND_PUSH) || (type == TypeID::ENEMY_SEEK_PUSH) || (type == TypeID::ENEMY_BOSS)) {
 				Vector2f position = spawnable->rb.transform.pos;
 				if ((position[0] < 0.0f) || (position[0] > sectorWidth) || (position[1] < 0.0f) || (position[1] > sectorHeight)) {
-					std::cout << "Not spawning out of bounds" << "\n";
+					//std::cout << "Not spawning out of bounds" << "\n";
 				}
 				else {
 					AddEntPtrToSector(spawnable);
@@ -484,26 +484,26 @@ void Sector::PopulateEntranceRoom()
 	////auto ent = std::make_shared<BossBurst>(EASY, Vector2f(100, 100));
 	//lvlEntitiesPhase1.push_back(ent);
 
-	if (TESTING) {
-		std::shared_ptr<Entity> smallShipPOW2 = std::make_shared<PowerUp>(
-			Vector2f(Vector2f(GLBVRS::HR_MRG + (sectorWidth * (1.0f / 5.0f)), sectorHeight / 2.0)), TEMP_HEALTH);
-		lvlEntitiesPhase1.push_back(smallShipPOW2);
+	//if (TESTING) {
+	//	std::shared_ptr<Entity> smallShipPOW2 = std::make_shared<PowerUp>(
+	//		Vector2f(Vector2f(GLBVRS::HR_MRG + (sectorWidth * (1.0f / 5.0f)), sectorHeight / 2.0)), TEMP_HEALTH);
+	//	lvlEntitiesPhase1.push_back(smallShipPOW2);
 
 
-		//auto ent = std::make_shared<BossSpawn>(MEDIUM, Vector2f(100, 100));
-		//auto ent = std::make_shared<BossSplit>(MEDIUM, 4, 6, false, Vector2f(100, 100));
+	//	//auto ent = std::make_shared<BossSpawn>(MEDIUM, Vector2f(100, 100));
+	//	//auto ent = std::make_shared<BossSplit>(MEDIUM, 4, 6, false, Vector2f(100, 100));
 
 
-		//auto ent = std::make_shared<BossSplit>(MEDIUM, Vector2f(100, 100));
-		auto ent = std::make_shared<BossBurst>(EASY, Vector2f(100, 100));
-		lvlEntitiesPhase1.push_back(ent);
+	//	//auto ent = std::make_shared<BossSplit>(MEDIUM, Vector2f(100, 100));
+	//	auto ent = std::make_shared<BossBurst>(EASY, Vector2f(100, 100));
+	//	lvlEntitiesPhase1.push_back(ent);
 
 
-		//std::shared_ptr<Entity> smallShipPOW3 = std::make_shared<PowerUp>(this,
-		//	Vector2f(Vector2f(GLBVRS::HR_MRG + (sectorWidth * (2.0f / 5.0f)), sectorHeight / 2.0)), SMALL_SHIP);
-		//lvlEntitiesPhase1.push_back(smallShipPOW3);
+	//	//std::shared_ptr<Entity> smallShipPOW3 = std::make_shared<PowerUp>(this,
+	//	//	Vector2f(Vector2f(GLBVRS::HR_MRG + (sectorWidth * (2.0f / 5.0f)), sectorHeight / 2.0)), SMALL_SHIP);
+	//	//lvlEntitiesPhase1.push_back(smallShipPOW3);
 
-	}
+	//}
 
 }
 
@@ -527,19 +527,20 @@ void Sector::PopulateBossRoom(int i_lvlNum, DIFFICULTY i_diff, bool i_isMiniBoss
 	Vector2f spawnPos(randXcordInBounds, randYcordInBounds);
 	std::shared_ptr<Entity> ent;
 	//i_lvlNum = 2;
-	switch (i_lvlNum) {
+	int bossChoice = i_lvlNum % 5;
+	switch (bossChoice) {
 	case 0: {
 		if (!i_isMiniBoss) {
-			ent = std::make_shared<BossBurst>(i_diff, spawnPos);
+			ent = std::make_shared<BossBurst>(i_diff, spawnPos, false, i_lvlNum);
 		}
 		else {
-			ent = std::make_shared<BossBurst>(i_diff, spawnPos, true);
+			ent = std::make_shared<BossBurst>(i_diff, spawnPos, true, i_lvlNum);
 		}
 		break;
 	}
 	case 1: {
 		if (!i_isMiniBoss) {
-			ent = std::make_shared<BossRush>(i_diff, spawnPos);
+			ent = std::make_shared<BossRush>(i_diff, spawnPos, false, i_lvlNum);
 			AddPainWall(0);
 			AddPainWall(1);
 			AddPainWall(2);
@@ -550,25 +551,23 @@ void Sector::PopulateBossRoom(int i_lvlNum, DIFFICULTY i_diff, bool i_isMiniBoss
 			AddPainWall(7);
 		}
 		else {
-			ent = std::make_shared<BossRush>(i_diff, spawnPos, true);
+			ent = std::make_shared<BossRush>(i_diff, spawnPos, true, i_lvlNum);
 			//AddRandomPainWall()
 		}
 		break;
 	}
 	case 2: {
 		if (!i_isMiniBoss) {
-			ent = std::make_shared<BossStream>(i_diff, spawnPos);
+			ent = std::make_shared<BossStream>(i_diff, spawnPos, false, i_lvlNum);
 		}
 		else {
-			ent = std::make_shared<BossStream>(i_diff, spawnPos, true);
+			ent = std::make_shared<BossStream>(i_diff, spawnPos, true, i_lvlNum);
 		}
 		break;
 	}
 	case 3: {
 		if (!i_isMiniBoss) {
-			//std::shared_ptr<Shape> shape1 = std::make_shared<Circle>(100);
-			//RigidBody projBody1 = RigidBody(shape1, ROCK);
-ent = std::make_shared<BossSplit>(i_diff, 4, 6, false, spawnPos);
+			ent = std::make_shared<BossSplit>(i_diff, 4, 6, false, spawnPos, i_lvlNum);
 		}
 		else {
 		//std::shared_ptr<Shape> shape1 = std::make_shared<Circle>(30);
@@ -577,23 +576,23 @@ ent = std::make_shared<BossSplit>(i_diff, 4, 6, false, spawnPos);
 		std::shared_ptr<Shape> shape1 = std::make_shared<Circle>(50);
 		RigidBody projBody1 = RigidBody(shape1, LESSBOUNCYBALL);
 
-		ent = std::make_shared<BossSplit>(i_diff, 1, 6, false, spawnPos, projBody1);
+		ent = std::make_shared<BossSplit>(i_diff, 1, 6, false, spawnPos, i_lvlNum, projBody1);
 		}
 		break;
 	}
 	case 4: {
 		if (!i_isMiniBoss) {
-			ent = std::make_shared<BossSpawn>(i_diff, spawnPos);
+			ent = std::make_shared<BossSpawn>(i_diff, spawnPos, false, i_lvlNum);
 			AddTerrain(0, 1);
 			AddTerrain(1, 0);
 			AddTerrain(2, 1);
 			AddTerrain(3, 0);
 		}
 		else {
-			//remove all terrain from level TODO
-			ent = std::make_shared<BossSpawn>(i_diff, spawnPos, true);
-			AddTerrain(1, 0);
-			AddTerrain(3, 0);
+			//remove all terrain from level TODO, then add exactly two
+			ent = std::make_shared<BossSpawn>(i_diff, spawnPos, true, i_lvlNum);
+			//AddTerrain(1, 0);
+			//AddTerrain(3, 0);
 		}
 		break;
 	}

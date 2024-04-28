@@ -13,8 +13,18 @@ PlayerChar::PlayerChar(int i_strtHealth, Vector2f i_startPosition, RigidBody i_r
 	numShots = 1;
 	origColorFill = FORDSILVER;
 	origColorOutLine = FORDSILVER;
+	origColorInnerHex = METALLICSILVER;
+	origColorInnerHexOutline = METALLICSILVER;
+	origColorShaft = DARKSILVER;
+	currColorInnerHex = origColorInnerHex;
+	currColorInnerHexOutline = origColorInnerHexOutline;
+	currColorShaft = origColorShaft;
+
+
 	deathColorFill = FORDDARKCOPPER;
 	deathColorOutLine = FORDDARKCOPPER;
+
+
 	shipRateOfFire = 0.9f;
 	shipRateOfFireWall = 1.3;
 	wallDelay = shipRateOfFireWall;
@@ -279,6 +289,16 @@ void PlayerChar::ChangeColorHealth()
 	float outLineColorB = std::max(std::min((int)((lifeRatio * origColorOutLine.b) + ((1.0f - lifeRatio) * deathColorOutLine.b)), 255), 0);
 	fillColor = sf::Color(fillColorR, fillColorG, fillColorB);
 	outlineColor = sf::Color(outLineColorR, outLineColorG, outLineColorB);
+
+	float innerHexColorR = std::max(std::min((int)((lifeRatio * origColorInnerHex.r) + ((1.0f - lifeRatio) * deathColorFill.r)), 255), 0);
+	float innerHexColorG = std::max(std::min((int)((lifeRatio * origColorInnerHex.g) + ((1.0f - lifeRatio) * deathColorFill.g)), 255), 0);
+	float innerHexColorB = std::max(std::min((int)((lifeRatio * origColorInnerHex.b) + ((1.0f - lifeRatio) * deathColorFill.b)), 255), 0);
+	currColorInnerHex= sf::Color(innerHexColorR, innerHexColorG, innerHexColorB);
+
+	float shaftColorR = std::max(std::min((int)((lifeRatio * origColorShaft.r) + ((1.0f - lifeRatio) * deathColorFill.r)), 255), 0);
+	float shaftColorG = std::max(std::min((int)((lifeRatio * origColorShaft.g) + ((1.0f - lifeRatio) * deathColorFill.g)), 255), 0);
+	float shaftColorB = std::max(std::min((int)((lifeRatio * origColorShaft.b) + ((1.0f - lifeRatio) * deathColorFill.b)), 255), 0);
+	currColorShaft = sf::Color(shaftColorR, shaftColorG, shaftColorB);
 }
 
 void PlayerChar::ReceivePowerUp(UPGRADE_TYPE i_powType)
@@ -348,9 +368,7 @@ void PlayerChar::ReceivePowerUp(UPGRADE_TYPE i_powType)
 		break;
 	}
 	case (TEMP_HEALTH): { //number of shots
-		if (shipLvl.at(WALL_BIG) < GLBVRS::GetUpgradeMax(WALL_BIG)) {
-			AddHealth(3);
-		}
+		AddHealth(3);
 		break;
 	}
 	case (WALL_BIG): { //number of shots
@@ -523,7 +541,7 @@ void PlayerChar::UpdateVisuals(float i_lerpFraction)
 		float shaftDiam = baseDiam - (numShots * (baseDiam * 0.04));
 		std::shared_ptr<sf::Shape> drawShapeShaft = std::make_shared<sf::RectangleShape>(sf::Vector2f(poly->GetDistToCorner(), shaftDiam));
 		drawShapeShaft->setOrigin(sf::Vector2f(0.0f, baseDiam / 2.0f));
-		drawShapeShaft->setFillColor(DARKSILVER);
+		drawShapeShaft->setFillColor(currColorShaft);
 		drawShapeShaft->setOutlineColor(outlineColor);
 		drawShapeShaft->setPosition(sf::Vector2f(lerpPos[0], lerpPos[1]));
 		drawShapeShaft->setOutlineThickness(2.0f);
@@ -535,6 +553,24 @@ void PlayerChar::UpdateVisuals(float i_lerpFraction)
 		prevDirVect = currDirVect;
 		currAngleRads = prevAngleRads + 0.174533 * (pow(-1, i) * (numShots-i));
 		currDirVect = Math::AngleToVect(currAngleRads);
+	}
+
+	//extra cannon cover
+	if (numShots > 1) {
+		float cornerDist = poly->GetDistToCorner();
+		auto sharedPtrPolyShape = Physics::CreateRegularPolygon(6, cornerDist * 0.65);
+		auto sfmlPolyShapeBase = sharedPtrPolyShape->GetSFMLRepr();
+		//sfmlPolyShapeBase->setOrigin(sf::Vector2f(radius, radius));
+		//Burst Charge indicator
+		sfmlPolyShapeBase->setTexture(texturePtr.get());
+		sfmlPolyShapeBase->setFillColor(currColorInnerHex);
+		sfmlPolyShapeBase->setOutlineColor(currColorInnerHex);
+		sfmlPolyShapeBase->setPosition(sf::Vector2f(lerpPos[0], lerpPos[1]));
+		sfmlPolyShapeBase->setOutlineThickness(2.0f);
+		
+		float angleInDegrees = ((rb.GetLerpOrient(i_lerpFraction)*180.0f) / PI);
+		sfmlPolyShapeBase->setRotation(angleInDegrees);
+		visuals->emplace_back(sfmlPolyShapeBase);
 	}
 
 

@@ -42,6 +42,14 @@ public:
 
 	sf::Color origColorFill;
 	sf::Color origColorOutLine;
+	sf::Color origColorInnerHex;
+	sf::Color origColorInnerHexOutline;
+	sf::Color origColorShaft;
+	sf::Color currColorInnerHex;
+	sf::Color currColorInnerHexOutline;
+	sf::Color currColorShaft;
+
+
 	sf::Color deathColorFill;
 	sf::Color deathColorOutLine;
 

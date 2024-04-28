@@ -262,6 +262,7 @@ public:
 	static float buttonDelay;
 	static bool canPressButtonsAgain;
 	static bool godMode;
+	static bool endlessMode;
 
 public:
 	static void SetGlobalConstants(unsigned int i_screenWidth, unsigned int i_screenHeight, RESOURCES* i_resourcesPtr,

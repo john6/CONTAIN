@@ -1,7 +1,7 @@
 #include "BossStream.h"
 #include "Projectile.h"
 
-BossStream::BossStream(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss, RigidBody i_rb) :
+BossStream::BossStream(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss, int lvl_num, RigidBody i_rb) :
 	Enemy(i_diff, i_startPosition, i_rb, ENEMY_BOSS), isMiniBoss{ i_isMiniBoss }
 {
 	if (!i_isMiniBoss) {
@@ -16,7 +16,7 @@ BossStream::BossStream(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMin
 	timeTillDirSwitch = 0.0f;
 	lastShotFired = hiResTime::now();
 	currDir = CreateRandomDir();
-	SetDiffVars(i_diff);
+	SetDiffVars(i_diff, lvl_num);
 	if (isMiniBoss) {
 		isBoss = false;
 	}
@@ -90,7 +90,7 @@ void BossStream::Stun(float i_stunTime)
 	stunSecs = i_stunTime * 0.6f;
 }
 
-void BossStream::SetDiffVars(int i_diff)
+void BossStream::SetDiffVars(int i_diff, int lvl_num)
 {
 	if (isMiniBoss) {
 		rb = RigidBody(std::make_shared<Circle>(60), WOOD);
@@ -99,7 +99,7 @@ void BossStream::SetDiffVars(int i_diff)
 			speed = GLBVRS::ENEMYSPEEDEASY;
 			projSpeed = 2800.0f;
 			numShots = 6;
-			maxHealth = 2;
+			maxHealth = 2 + ((lvl_num / 5) * 1);
 			shipRateOfFire = 0.40f;
 			health = maxHealth;
 			break;
@@ -108,7 +108,7 @@ void BossStream::SetDiffVars(int i_diff)
 			speed = GLBVRS::ENEMYSPEEDMED;
 			projSpeed = 3000.0f;
 			numShots = 7;
-			maxHealth = 3;
+			maxHealth = 3 + ((lvl_num / 5) * 2);
 			shipRateOfFire = 0.25f;
 			health = maxHealth;
 			break;
@@ -117,7 +117,7 @@ void BossStream::SetDiffVars(int i_diff)
 			speed = GLBVRS::ENEMYSPEEDHARD;
 			projSpeed = 3200.0f;
 			numShots = 8;
-			maxHealth = 4;
+			maxHealth = 4 + ((lvl_num / 5) * 3);
 			shipRateOfFire = 0.15f;
 			health = maxHealth;
 			break;
@@ -131,7 +131,7 @@ void BossStream::SetDiffVars(int i_diff)
 			speed = GLBVRS::ENEMYSPEEDEASY;
 			projSpeed = 2900.0f;
 			numShots = 6;
-			maxHealth = 13;
+			maxHealth = 25 + ((lvl_num / 5) * 4);
 			shipRateOfFire = 0.10f;
 			health = maxHealth;
 			break;
@@ -140,7 +140,7 @@ void BossStream::SetDiffVars(int i_diff)
 			speed = GLBVRS::ENEMYSPEEDMED;
 			projSpeed = 3100.0f;
 			numShots = 7;
-			maxHealth = 15;
+			maxHealth = 30 + ((lvl_num / 5) * 6);
 			shipRateOfFire = 0.05f;
 			health = maxHealth;
 			break;
@@ -149,7 +149,7 @@ void BossStream::SetDiffVars(int i_diff)
 			speed = GLBVRS::ENEMYSPEEDHARD;
 			projSpeed = 3300.0f;
 			numShots = 8;
-			maxHealth = 17;
+			maxHealth = 36 + ((lvl_num / 5) * 8);
 			shipRateOfFire = 0.04f;
 			health = maxHealth;
 			break;

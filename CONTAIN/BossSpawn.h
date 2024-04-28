@@ -19,7 +19,7 @@ private:
 public:
 	bool invulnerable;
 
-	BossSpawn(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss = false,
+	BossSpawn(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss = false, int lvl_num = 0,
 		RigidBody i_rb = RigidBody(std::make_shared<Rectangle>(100.0f, 100.0f), STATIC));
 
 	void Update(float i_stepSize) override;
@@ -33,7 +33,7 @@ public:
 
 	void Stun(float i_stunTime) override;
 
-	void SetDiffVars(int i_diff);
+	void SetDiffVars(int i_diff, int lvl_num);
 
 	void SpawnEnemies(int i_numEnems, TypeID enemyType, int i_sizeMod);
 

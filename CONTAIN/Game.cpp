@@ -274,9 +274,11 @@ void Game::TestCollision(std::shared_ptr<Entity> entA, std::shared_ptr<Entity> e
 	if (collided) { collisionList->push_back(collisionData); }
 }
 
-void Game::GenerateLevels(DIFFICULTY i_diff) {
-	DeleteLevels();
-	for (int i = 0; i < numLvls; ++i) {
+void Game::GenerateLevels(DIFFICULTY i_diff, int starting_lvl) {
+	if (starting_lvl == 0) {
+		DeleteLevels();
+	}
+	for (int i = starting_lvl; i < numLvls; ++i) {
 		Level* lvl = new Level(i, i_diff);
 		levels.push_back(lvl);
 	}
@@ -399,9 +401,23 @@ void Game::RequestGoToNextLvl()
 		pChar->ResetHealth();
 	}
 	else if (currLvl == numLvls - 1) {
-		GLBVRS::RSRCS->PlayExplosionSound(false);
-		GLBVRS::RSRCS->playEngineSound(false);
-		playerWon = true;
+		if (GLBVRS::endlessMode) {
+			numLvls += 1;
+			GenerateLevels(gameDiff, currLvl + 1);
+			resources->PlaySound(RESOURCES::SOUNDS::MENUACCEPT3);
+			playState = WON_LEVEL;
+			currUpgradeMenu = std::make_shared<UpgradeMenu>(resources, gameDiff, dynamic_cast<PlayerChar*>(playerChar.get()));
+			GLBVRS::RSRCS->PlayExplosionSound(false);
+			GLBVRS::RSRCS->playEngineSound(false);
+			playerDied = false;
+			auto pChar = dynamic_cast<PlayerChar*>(playerChar.get());
+			pChar->ResetHealth();
+		}
+		else {
+			GLBVRS::RSRCS->PlayExplosionSound(false);
+			GLBVRS::RSRCS->playEngineSound(false);
+			playerWon = true;
+		}
 	}
 
 }
@@ -413,13 +429,14 @@ void Game::InitGame(DIFFICULTY i_diff)
 	beginTime = std::chrono::high_resolution_clock::now();
 	numLvls = 5;
 	currLvl = 0;
+	//RequestGoToNextLvl();
 	currRunScore = 5;
 	timeToComplete = 999999999.0f;
 	const microSec UPDATE_INTERVAL(16666);
 	playerWon = false;
 	playerDied = false;
 	CreatePlayerChar();
-	GenerateLevels(i_diff);
+	GenerateLevels(gameDiff, 0);
 	PlayRandomSong();
 	firstPowerUp = true;
 	playState = PLAY_STATE::WON_LEVEL;

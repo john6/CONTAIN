@@ -21,53 +21,86 @@ SplashScreen::SplashScreen(RESOURCES* i_resources) :
 
 	mainCreditLabel = sf::Text();
 	mainCreditLabel.setFont(font);
-	mainCreditLabel.setString("Programming / Design / Etc");
-	mainCreditLabel.setCharacterSize(30);
+	mainCreditLabel.setString("Programming/Design/Etc");
+	mainCreditLabel.setCharacterSize(23);
 	mainCreditLabel.setFillColor(sf::Color::Magenta);
 	GLBVRS::SetTextOriginCenter(&mainCreditLabel);
-	mainCreditLabel.setPosition(sf::Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH / 5.0f, GLBVRS::VRT_MRG * 6.5f));
+	mainCreditLabel.setPosition(sf::Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH * (5 / 10.0f), GLBVRS::VRT_MRG * 7.5f));
 
 	mainCreditName = sf::Text();
 	mainCreditName.setFont(font);
 	mainCreditName.setString("John Russell");
-	mainCreditName.setCharacterSize(25);
+	mainCreditName.setCharacterSize(23);
 	mainCreditName.setFillColor(sf::Color::White);
 	GLBVRS::SetTextOriginCenter(&mainCreditName);
-	mainCreditName.setPosition(sf::Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH / 5.0f, GLBVRS::VRT_MRG * 8.5f));
+	mainCreditName.setPosition(sf::Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH * (5 / 10.0f), GLBVRS::VRT_MRG * 8.5f));
+
+	portingLabel = sf::Text();
+	portingLabel.setFont(font);
+	portingLabel.setString("Linux Port");
+	portingLabel.setCharacterSize(23);
+	portingLabel.setFillColor(sf::Color::Cyan);
+	GLBVRS::SetTextOriginCenter(&portingLabel);
+	portingLabel.setPosition(sf::Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH * (2 / 10.0f), GLBVRS::VRT_MRG * 10.5f));
+
+	portingList = sf::Text();
+	portingList.setFont(font);
+	portingList.setString("!MrZeus");
+	portingList.setCharacterSize(23);
+	portingList.setLineSpacing(1.5);
+	portingList.setFillColor(sf::Color::White);
+	GLBVRS::SetTextOriginCenter(&portingList);
+	portingList.setPosition(sf::Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH * (2 / 10.0f), GLBVRS::VRT_MRG * 11.5f));
 
 	MusicLabel = sf::Text();
 	MusicLabel.setFont(font);
-	MusicLabel.setString("Music / Sound Effects");
-	MusicLabel.setCharacterSize(30);
+	MusicLabel.setString("Sound");
+	MusicLabel.setCharacterSize(23);
 	MusicLabel.setFillColor(sf::Color::Cyan);
 	GLBVRS::SetTextOriginCenter(&MusicLabel);
-	MusicLabel.setPosition(sf::Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH * ( 4.0f / 5.0f), GLBVRS::VRT_MRG * 6.5f));
+	MusicLabel.setPosition(sf::Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH * (5 / 10.0f), GLBVRS::VRT_MRG * 10.5f));
 
 	musicList = sf::Text();
 	musicList.setFont(font);
-	musicList.setString("Dafydd Harvey - DHSFX@itch.io\n      Yal - yaru@itch.io");
-	musicList.setCharacterSize(25);
+	musicList.setString("DHSFX@itch.io\nyaru@itch.io");
+	musicList.setCharacterSize(23);
 	musicList.setLineSpacing(1.5);
 	musicList.setFillColor(sf::Color::White);
 	GLBVRS::SetTextOriginCenter(&musicList);
-	musicList.setPosition(sf::Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH * (4.0f / 5.0f), GLBVRS::VRT_MRG * 8.5f));
+	musicList.setPosition(sf::Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH * (5 / 10.0f), GLBVRS::VRT_MRG * 11.5f));
+
+	texturesLabel = sf::Text();
+	texturesLabel.setFont(font);
+	texturesLabel.setString("Textures");
+	texturesLabel.setCharacterSize(23);
+	texturesLabel.setFillColor(sf::Color::Cyan);
+	GLBVRS::SetTextOriginCenter(&texturesLabel);
+	texturesLabel.setPosition(sf::Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH * (8 / 10.0f), GLBVRS::VRT_MRG * 10.5f));
+
+	texturesList = sf::Text();
+	texturesList.setFont(font);
+	texturesList.setString("mutantLeg@itch.io");
+	texturesList.setCharacterSize(23);
+	texturesList.setFillColor(sf::Color::White);
+	GLBVRS::SetTextOriginCenter(&texturesList);
+	texturesList.setPosition(sf::Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH * (8 / 10.0f), GLBVRS::VRT_MRG * 11.5f));
 
 	playtestersLabel = sf::Text();
 	playtestersLabel.setFont(font);
 	playtestersLabel.setString("Playtesting / Design");
-	playtestersLabel.setCharacterSize(30);
+	playtestersLabel.setCharacterSize(23);
 	playtestersLabel.setFillColor(sf::Color::Yellow);
 	GLBVRS::SetTextOriginCenter(&playtestersLabel);
-	playtestersLabel.setPosition(sf::Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH / 2.0f, GLBVRS::VRT_MRG * 13.5f));
+	playtestersLabel.setPosition(sf::Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH / 2.0f, GLBVRS::VRT_MRG * 14.5f));
 
 	playtestersList = sf::Text();
 	playtestersList.setFont(font);
-	playtestersList.setString("Sam Russell, Vincent Marocco, Tyler Matthews, Chris Brown\nRay Marocco, Trevor Larson, Leisa Russell, Brian Russell,\n                   Gabby Peters, Jantzen Carl");
-	playtestersList.setCharacterSize(25);
+	playtestersList.setString("Sam Russell, Vincent Marocco, Tyler Matthews, Chris Brown\nRay Marocco, Trevor Larson, Leisa Russell, Brian Russell,\n        Gabby Peters, Jantzen Carl, Michael Lane");
+	playtestersList.setCharacterSize(23);
 	playtestersList.setLineSpacing(1.5);
 	playtestersList.setFillColor(sf::Color::White);
 	GLBVRS::SetTextOriginCenter(&playtestersList);
-	playtestersList.setPosition(sf::Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH / 2.0f, GLBVRS::VRT_MRG * 15.5f));
+	playtestersList.setPosition(sf::Vector2f(GLBVRS::HR_MRG + GLBVRS::CRT_WDTH / 2.0f, GLBVRS::VRT_MRG * 16.5f));
 }
 
 
@@ -84,6 +117,10 @@ void SplashScreen::Render(sf::RenderWindow * window)
 	window->draw(title);
 	window->draw(mainCreditLabel);
 	window->draw(mainCreditName);
+	window->draw(portingLabel);
+	window->draw(portingList);
+	window->draw(texturesLabel);
+	window->draw(texturesList);
 	window->draw(MusicLabel);
 	window->draw(musicList);
 	window->draw(playtestersLabel);

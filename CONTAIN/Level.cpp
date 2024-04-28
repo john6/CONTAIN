@@ -501,15 +501,15 @@ void Level::PopulateMapRooms(int i_levelNum, DIFFICULTY i_diff)
 	int numMiniBosses;
 	switch (i_diff) {
 	case EASY: {
-		numMiniBosses = 1;
+		numMiniBosses = 1 + (i_levelNum / 5) * 1;
 		break;
 	}
 	case MEDIUM: {
-		numMiniBosses = 2;
+		numMiniBosses = 2 + (i_levelNum / 5) * 2;
 		break;
 	}
 	case HARD: {
-		numMiniBosses = 3;
+		numMiniBosses = 3 + (i_levelNum / 5) * 3;
 		break;
 	}
 	}
@@ -529,7 +529,7 @@ void Level::PopulateMapRooms(int i_levelNum, DIFFICULTY i_diff)
 		}
 	}
 	//Level "four" aka 3 with zero indexing, mini bosses dont drop health so Ima just put health drops in the level
-	if (m_lvl_num == 3) {
+	if ((m_lvl_num % 5) == 3) {
 		std::shared_ptr<Entity> smallShipPOW3 = std::make_shared<PowerUp>(
 			Vector2f(Vector2f(GLBVRS::HR_MRG + (GLBVRS::CRT_WDTH * (2.0f / 5.0f)), GLBVRS::CRT_HGHT * (3.0f / 4.0f))), TEMP_HEALTH);
 		sectorVect[sectorVect.size() - 2]->AddEntPtrToSector(smallShipPOW3);

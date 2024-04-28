@@ -18,6 +18,12 @@ private:
 	sf::Text mainCreditLabel;
 	sf::Text mainCreditName;
 
+	sf::Text portingLabel;
+	sf::Text portingList;
+
+	sf::Text texturesLabel;
+	sf::Text texturesList;
+
 	sf::Text MusicLabel;
 	sf::Text musicList;
 

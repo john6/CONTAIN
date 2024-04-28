@@ -1,7 +1,7 @@
 #include "BossRush.h"
 #include "PlayerChar.h"
 
-BossRush::BossRush(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss, RigidBody i_rb) :
+BossRush::BossRush(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss, int lvl_num, RigidBody i_rb) :
 	Enemy(i_diff, i_startPosition, i_rb, ENEMY_BOSS), isMiniBoss{ i_isMiniBoss }
 {
 	origColorFill = CHARTREUSE;
@@ -16,13 +16,13 @@ BossRush::BossRush(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBos
 	lastShotFired = hiResTime::now();
 	shipRateOfFire = 1.0f;
 	currDir = CreateRandomDir();
-	SetDiffVars(i_diff);	
 	if (isMiniBoss) {
-	isBoss = false;
+		isBoss = false;
 	}
 	else {
-	isBoss = true;
+		isBoss = true;
 	}
+	SetDiffVars(i_diff, lvl_num);	
 }
 
 void BossRush::Update(float i_stepSize)
@@ -85,7 +85,7 @@ void BossRush::Stun(float i_stunTime)
 	stunSecs = i_stunTime * 0.6f;
 }
 
-void BossRush::SetDiffVars(int i_diff)
+void BossRush::SetDiffVars(int i_diff, int lvl_num)
 {
 	if (isMiniBoss) {
 		rb = RigidBody(std::make_shared<Circle>(60), HEAVYBOUNCE);
@@ -93,21 +93,21 @@ void BossRush::SetDiffVars(int i_diff)
 		case EASY: {
 			speed = GLBVRS::ENEMYSPEEDEASY;
 			numShots = 6;
-			maxHealth = 2;
+			maxHealth = 2 + ((lvl_num / 5) * 1);
 			health = maxHealth;
 			break;
 		}
 		case MEDIUM: {
 			speed = GLBVRS::ENEMYSPEEDMED;
 			numShots = 7;
-			maxHealth = 3;
+			maxHealth = 3 + ((lvl_num / 5) * 2);
 			health = maxHealth;
 			break;
 		}
 		case HARD: {
 			speed = GLBVRS::ENEMYSPEEDHARD;
 			numShots = 8;
-			maxHealth = 4;
+			maxHealth = 4 + ((lvl_num / 5) * 3);
 			health = maxHealth;
 			break;
 		}
@@ -119,21 +119,21 @@ void BossRush::SetDiffVars(int i_diff)
 		case EASY: {
 			speed = GLBVRS::ENEMYSPEEDEASY;
 			numShots = 6;
-			maxHealth = 10;
+			maxHealth = 16 + ((lvl_num / 5) * 3);
 			health = maxHealth;
 			break;
 		}
 		case MEDIUM: {
 			speed = GLBVRS::ENEMYSPEEDMED;
 			numShots = 7;
-			maxHealth = 12;
+			maxHealth = 20 + ((lvl_num / 5) * 6);
 			health = maxHealth;
 			break;
 		}
 		case HARD: {
 			speed = GLBVRS::ENEMYSPEEDHARD;
 			numShots = 8;
-			maxHealth = 14;
+			maxHealth = 26 + ((lvl_num / 5) * 8);
 			health = maxHealth;
 			break;
 		}

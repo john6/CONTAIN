@@ -15,7 +15,7 @@ private:
 	bool isMiniBoss;
 
 public:
-	BossStream(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss = false,
+	BossStream(DIFFICULTY i_diff, Vector2f i_startPosition, bool i_isMiniBoss = false, int lvl_num = 0,
 		RigidBody i_rb = RigidBody(std::make_shared<Circle>(70), METAL));
 
 	void Update(float i_stepSize) override;
@@ -28,5 +28,5 @@ public:
 
 	void Stun(float i_stunTime) override;
 
-	void SetDiffVars(int i_diff);
+	void SetDiffVars(int i_diff, int lvl_num);
 };

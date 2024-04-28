@@ -58,7 +58,7 @@ public:
 
 
 public:
-	bool godMode;
+	//bool godMode;
 
 	SaveData* saveDatePtr;
 
